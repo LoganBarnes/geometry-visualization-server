@@ -1,0 +1,15 @@
+// ///////////////////////////////////////////////////////////////////////////////////////
+//  Copyright (c) 2018 Logan Barnes - All Rights Reserved
+//  Geometry Visualisation Server
+// ///////////////////////////////////////////////////////////////////////////////////////
+syntax = "proto3";
+
+package gvs.test.proto;
+
+service Test {
+    rpc echo (TestMessage) returns (TestMessage);
+}
+
+message TestMessage {
+    string msg = 1;
+}

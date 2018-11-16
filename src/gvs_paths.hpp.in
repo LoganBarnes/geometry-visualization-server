@@ -1,0 +1,35 @@
+// ///////////////////////////////////////////////////////////////////////////////////////
+//  Copyright (c) 2018 Logan Barnes - All Rights Reserved
+//  Geometry Visualisation Server
+// ///////////////////////////////////////////////////////////////////////////////////////
+
+// ///////////////////////////////////////////////////////////////////////////////////////
+// @AUTO_GENERATION_MESSAGE@
+// ///////////////////////////////////////////////////////////////////////////////////////
+#pragma once
+
+#include <string>
+
+namespace gvs {
+
+inline std::string root_path() {
+    return "@PROJECT_SOURCE_DIR@/";
+}
+
+inline std::string res_path() {
+    return root_path() + "res/";
+}
+
+inline std::string shader_path() {
+    return root_path() + "src/shaders/";
+}
+
+inline std::string frag_shader_file() {
+#ifdef __APPLE__
+    return gvs::shader_path() + "shader_mac.frag";
+#else
+    return gvs::shader_path() + "shader.frag";
+#endif
+}
+
+} // namespace gvs
