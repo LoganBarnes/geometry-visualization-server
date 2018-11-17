@@ -21,7 +21,7 @@ TestServer::~TestServer() {
     run_thread_.join();
 }
 
-std::shared_ptr<grpc::Channel> TestServer::local_channel() {
+std::shared_ptr<grpc::Channel> TestServer::inprocess_channel() {
     grpc::ChannelArguments channel_arguments;
     return server_->server()->InProcessChannel(channel_arguments);
 }

@@ -19,7 +19,7 @@ public:
     explicit TestServer(std::string server_address = "");
     ~TestServer();
 
-    std::shared_ptr<grpc::Channel> local_channel();
+    std::shared_ptr<grpc::Channel> inprocess_channel();
 
 private:
     std::unique_ptr<gvs::util::GrpcServer> server_;

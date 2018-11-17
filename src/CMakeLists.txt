@@ -78,7 +78,7 @@ if (${GVS_BUILD_TESTS})
 
     if (LCOV_EXE AND CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "Debug")
         include(CodeCoverage)
-        setup_target_for_coverage(proto_scene_coverage all_proto_scene_tests coverage)
+        setup_target_for_coverage(gvs_coverage all_proto_scene_tests coverage)
         set(PROFILE_FLAGS --coverage -fprofile-arcs -ftest-coverage -fno-inline)
 
         target_compile_options(gvs_common PUBLIC ${PROFILE_FLAGS})
