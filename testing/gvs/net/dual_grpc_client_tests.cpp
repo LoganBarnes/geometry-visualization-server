@@ -3,7 +3,7 @@
 //  Geometry Visualisation Server
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "test-util/test_service.hpp"
-#include "test-util/test_server.hpp"
+#include "test-util/scene_server.hpp"
 
 #include "gvs/common/dual_grpc_client.hpp"
 #include "gvs/common/grpc_server.hpp"

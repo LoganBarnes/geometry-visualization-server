@@ -5,7 +5,7 @@
 #pragma once
 
 namespace gvs {
-namespace util {
+namespace net {
 
 class GrpcClient;
 
@@ -14,7 +14,7 @@ class DualGrpcClient;
 
 class GrpcServer;
 
-} // namespace util
+} // namespace net
 
 namespace host {
 

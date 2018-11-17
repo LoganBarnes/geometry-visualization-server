@@ -2,7 +2,7 @@
 //  Copyright (c) 2018 Logan Barnes - All Rights Reserved
 //  Proto Scene Project
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/common/atomic_data.hpp"
+#include "gvs/util/atomic_data.hpp"
 #include <gmock/gmock.h>
 #include <thread>
 

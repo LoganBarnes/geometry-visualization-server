@@ -5,8 +5,8 @@
 #include "gvs/vis-client/vis_client.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
 #include "gvs/server/scene_service.hpp"
-#include "gvs/common/grpc_server.hpp"
-#include "gvs/common/dual_grpc_client.hpp"
+#include "gvs/net/grpc_server.hpp"
+#include "gvs/net/dual_grpc_client.hpp"
 
 #include <Magnum/GL/Context.h>
 #include <imgui.h>
@@ -19,25 +19,25 @@ namespace vis {
 
 namespace {
 
-std::string to_pretty_string(const util::GrpcClientState& state, int connection_attempt) {
+std::string to_pretty_string(const net::GrpcClientState& state, int connection_attempt) {
     switch (state) {
-    case util::GrpcClientState::not_connected:
+    case net::GrpcClientState::not_connected:
         return "Not Connected";
-    case util::GrpcClientState::attempting_to_connect:
+    case net::GrpcClientState::attempting_to_connect:
         return "Connecting... (Attempt " + std::to_string(connection_attempt) + ")";
-    case util::GrpcClientState::connected:
+    case net::GrpcClientState::connected:
         return "Connected";
     }
     return "Unknown Enum value";
 }
 
-ImVec4 to_pretty_color(const util::GrpcClientState& state) {
+ImVec4 to_pretty_color(const net::GrpcClientState& state) {
     switch (state) {
-    case util::GrpcClientState::not_connected:
+    case net::GrpcClientState::not_connected:
         return {1.f, 0.f, 0.f, 1.f}; // Red
-    case util::GrpcClientState::attempting_to_connect:
+    case net::GrpcClientState::attempting_to_connect:
         return {1.f, 1.f, 0.f, 1.f}; // Yellow
-    case util::GrpcClientState::connected:
+    case net::GrpcClientState::connected:
         return {0.f, 1.f, 0.f, 1.f}; // Green
     }
     return {1.f, 1.f, 1.f, 1.f};
@@ -53,7 +53,7 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
                                  .setWindowFlags(Configuration::WindowFlag::Resizable))
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
-    , grpc_client_(std::make_unique<util::DualGrpcClient<gvs::proto::Scene>>(&VisClient::redraw, this))
+    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>(&VisClient::redraw, this))
     , has_inprocess_server_(false) {
 
     grpc_client_->set_external_server(initial_host_address);
@@ -68,7 +68,7 @@ VisClient::VisClient(std::unique_ptr<grpc::Server>& inprocess_server, const Argu
                                  .setWindowFlags(Configuration::WindowFlag::Resizable))
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
-    , grpc_client_(std::make_unique<util::DualGrpcClient<gvs::proto::Scene>>(&VisClient::redraw, this))
+    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>(&VisClient::redraw, this))
     , has_inprocess_server_(true) {
 
     grpc_client_->set_inprocess_server(inprocess_server);
@@ -119,12 +119,21 @@ void VisClient::configure_gui() {
         bool value_changed = ImGui::InputText("Change Server", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
         server_address_input_ = buf;
 
+        {
+            imgui::Disable::Guard disable(server_address_input_ == grpc_client_->server_address()
+                                          and state != net::GrpcClientState::not_connected);
+            value_changed |= (ImGui::Button("Connect"));
+        }
+
         if (value_changed) {
             grpc_client_->set_external_server(server_address_input_);
         }
 
-        if (state == util::GrpcClientState::attempting_to_connect and ImGui::Button("Stop Connecting")) {
-            grpc_client_->stop_connection_attempts();
+        if (state == net::GrpcClientState::attempting_to_connect) {
+            ImGui::SameLine();
+            if (ImGui::Button("Stop Connecting")) {
+                grpc_client_->stop_connection_attempts();
+            }
         }
 
         {

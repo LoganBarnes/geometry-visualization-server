@@ -28,7 +28,7 @@ private:
     std::string gl_version_str_;
     std::string gl_renderer_str_;
 
-    std::unique_ptr<util::DualGrpcClient<gvs::proto::Scene>> grpc_client_;
+    std::unique_ptr<net::DualGrpcClient<gvs::proto::Scene>> grpc_client_;
 
     bool has_inprocess_server_ = false;
     std::string server_address_input_ = "address:port";

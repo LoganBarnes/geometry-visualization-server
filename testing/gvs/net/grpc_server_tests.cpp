@@ -2,7 +2,7 @@
 //  Copyright (c) 2018 Logan Barnes - All Rights Reserved
 //  Proto Scene Project
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "test-util/test_server.hpp"
+#include "test-util/scene_server.hpp"
 #include <testing/testing.grpc.pb.h>
 #include <grpcpp/create_channel.h>
 #include <gmock/gmock.h>

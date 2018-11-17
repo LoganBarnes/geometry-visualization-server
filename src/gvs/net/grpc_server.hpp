@@ -9,12 +9,11 @@
 #include <grpcpp/server.h>
 
 namespace gvs {
-namespace util {
+namespace net {
 
 class GrpcServer {
 public:
-    explicit GrpcServer(const std::string& server_address, std::shared_ptr<grpc::Service> service);
-    explicit GrpcServer(std::shared_ptr<grpc::Service> service);
+    explicit GrpcServer(std::shared_ptr<grpc::Service> service, const std::string& server_address = "");
 
     /**
      * @brief Blocks until server is shutdown and all rpc calls terminate
@@ -41,5 +40,5 @@ void GrpcServer::shutdown(const TimePoint& deadline) {
     server_->Shutdown(deadline);
 }
 
-} // namespace util
+} // namespace net
 } // namespace gvs

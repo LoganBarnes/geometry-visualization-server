@@ -4,7 +4,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/common/apply.hpp"
+#include "gvs/util/apply.hpp"
 #include <memory>
 
 namespace gvs {

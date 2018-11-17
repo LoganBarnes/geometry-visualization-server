@@ -2,27 +2,24 @@
 //  Copyright (c) 2018 Logan Barnes - All Rights Reserved
 //  Geometry Visualisation Server
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/common/grpc_server.hpp"
+#include "gvs/net/grpc_server.hpp"
 
 #include <grpcpp/server_builder.h>
 
 #include <utility>
 
 namespace gvs {
-namespace util {
+namespace net {
 
-GrpcServer::GrpcServer(const std::string& server_address, std::shared_ptr<grpc::Service> service)
+GrpcServer::GrpcServer(std::shared_ptr<grpc::Service> service, const std::string& server_address)
     : service_(std::move(service)) {
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(service_.get());
 
-    server_ = builder.BuildAndStart();
-}
-
-GrpcServer::GrpcServer(std::shared_ptr<grpc::Service> service) : service_(std::move(service)) {
     grpc::ServerBuilder builder;
     builder.RegisterService(service_.get());
+
+    if (not server_address.empty()) {
+        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+    }
 
     server_ = builder.BuildAndStart();
 }
@@ -51,5 +48,5 @@ const std::unique_ptr<grpc::Server>& GrpcServer::server() const {
     return server_;
 }
 
-} // namespace util
+} // namespace net
 } // namespace gvs

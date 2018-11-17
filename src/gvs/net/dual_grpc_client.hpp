@@ -4,15 +4,15 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/common/grpc_client.hpp"
-#include "gvs/common/blocking_queue.hpp"
-#include "gvs/common/callback_handler.hpp"
+#include "gvs/net/grpc_client.hpp"
+#include "gvs/util/blocking_queue.hpp"
+#include "gvs/util/callback_handler.hpp"
 
 #include <grpcpp/create_channel.h>
 #include <grpcpp/server.h>
 
 namespace gvs {
-namespace util {
+namespace net {
 
 template <typename Service>
 class DualGrpcClient {
@@ -48,7 +48,7 @@ private:
 
         explicit StateAndAttempt(GrpcClientState s, int attempt = -1) : state(s), connection_attempt(attempt) {}
     };
-    BlockingQueue<StateAndAttempt> current_state_;
+    util::BlockingQueue<StateAndAttempt> current_state_;
 
     GrpcClient external_client_;
 
@@ -63,7 +63,7 @@ private:
 
     int connection_attempt_ = 0; ///< only used in external_state_change_callback (which is called from another thread)
 
-    std::unique_ptr<CallbackInterface<void>> update_callback_;
+    std::unique_ptr<util::CallbackInterface<void>> update_callback_;
 
     void external_state_change_callback(const GrpcClientState& state);
 };
@@ -76,7 +76,7 @@ DualGrpcClient<Service>::DualGrpcClient() {
 template <typename Service>
 template <typename UpdateCallback, typename... Args>
 DualGrpcClient<Service>::DualGrpcClient(UpdateCallback update_callback, Args&&... args) : DualGrpcClient<Service>() {
-    update_callback_ = make_callback<void>(update_callback, std::forward<Args>(args)...);
+    update_callback_ = util::make_callback<void>(update_callback, std::forward<Args>(args)...);
 }
 
 template <typename Service>
@@ -195,5 +195,5 @@ void DualGrpcClient<Service>::external_state_change_callback(const GrpcClientSta
     }
 }
 
-} // namespace util
+} // namespace net
 } // namespace gvs

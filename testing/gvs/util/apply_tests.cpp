@@ -2,7 +2,7 @@
 //  Copyright (c) 2018 Logan Barnes - All Rights Reserved
 //  Geometry Visualisation Server
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/common/apply.hpp"
+#include "gvs/util/apply.hpp"
 
 #include <gmock/gmock.h>
 

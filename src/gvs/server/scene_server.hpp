@@ -4,7 +4,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/common/grpc_server.hpp"
+#include "gvs/net/grpc_server.hpp"
 
 #include <grpcpp/channel.h>
 
@@ -12,19 +12,19 @@
 #include <thread>
 
 namespace gvs {
-namespace test {
+namespace host {
 
-class TestServer {
+class SceneServer {
 public:
-    explicit TestServer(std::string server_address = "");
-    ~TestServer();
+    explicit SceneServer(std::string server_address = "");
+    ~SceneServer();
 
     std::shared_ptr<grpc::Channel> inprocess_channel();
 
 private:
-    std::unique_ptr<gvs::util::GrpcServer> server_;
+    std::unique_ptr<gvs::net::GrpcServer> server_;
     std::thread run_thread_;
 };
 
-} // namespace test
+} // namespace host
 } // namespace gvs

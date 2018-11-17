@@ -4,8 +4,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/common/apply.hpp"
-#include "gvs/common/atomic_data.hpp"
+#include "gvs/util/apply.hpp"
+#include "gvs/util/atomic_data.hpp"
 
 #include <grpcpp/channel.h>
 #include <grpcpp/completion_queue.h>
@@ -46,7 +46,7 @@ inline ::std::ostream& operator<<(::std::ostream& os, grpc_connectivity_state st
 }
 
 namespace gvs {
-namespace util {
+namespace net {
 
 enum class GrpcClientState {
     not_connected,
@@ -85,7 +85,7 @@ public:
 private:
     std::shared_ptr<grpc::Channel> channel_ = nullptr;
 
-    AtomicData<GrpcClientState> state_;
+    util::AtomicData<GrpcClientState> state_;
     std::unique_ptr<grpc::CompletionQueue> connection_queue_ = nullptr;
 
     std::thread update_thread_;
@@ -109,7 +109,7 @@ void GrpcClient::change_server(std::shared_ptr<grpc::Channel> channel,
         update_thread_ = std::thread([=] { update(state_change_callback, callback_args...); });
     } else {
         state_.unsafe_data() = GrpcClientState::connected;
-        apply(state_change_callback, std::make_tuple(std::forward<Args>(callback_args)...), state_.unsafe_data());
+        util::apply(state_change_callback, std::make_tuple(std::forward<Args>(callback_args)...), state_.unsafe_data());
     }
 }
 
@@ -132,7 +132,7 @@ void GrpcClient::update(Callback state_change_callback, Args&&... callback_args)
                     state = GrpcClientState::connected;
                 }
 
-                apply(state_change_callback, args, state);
+                util::apply(state_change_callback, args, state);
 
                 if (state == GrpcClientState::attempting_to_connect) {
                     // never wait more than 5 seconds
@@ -149,5 +149,5 @@ void GrpcClient::update(Callback state_change_callback, Args&&... callback_args)
     } while (connection_queue_->Next(&got_tag, &queue_ok));
 }
 
-} // namespace util
+} // namespace net
 } // namespace gvs

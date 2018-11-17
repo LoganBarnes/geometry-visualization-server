@@ -13,7 +13,7 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/gvs_paths.hpp.in ${CMAKE_BINARY_DIR}/gv
 file(GLOB_RECURSE GVS_COMMON_SOURCE_FILES
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
-        ${CMAKE_CURRENT_LIST_DIR}/gvs/common/*
+        ${CMAKE_CURRENT_LIST_DIR}/gvs/net/*
         )
 
 add_library(gvs_common ${GVS_COMMON_SOURCE_FILES})

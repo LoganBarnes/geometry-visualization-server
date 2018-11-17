@@ -2,10 +2,10 @@
 //  Copyright (c) 2018 Logan Barnes - All Rights Reserved
 //  Geometry Visualisation Server
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/common/grpc_client.hpp"
+#include "gvs/net/grpc_client.hpp"
 
 namespace gvs {
-namespace util {
+namespace net {
 
 GrpcClient::GrpcClient() : state_(GrpcClientState::not_connected) {}
 
@@ -34,5 +34,5 @@ GrpcClientState GrpcClient::get_state() {
     return state_copy;
 }
 
-} // namespace util
+} // namespace net
 } // namespace gvs

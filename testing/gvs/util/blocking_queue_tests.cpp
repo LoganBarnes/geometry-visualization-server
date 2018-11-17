@@ -2,7 +2,7 @@
 //  Copyright (c) 2018 Logan Barnes - All Rights Reserved
 //  Geometry Visualisation Server
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/common/blocking_queue.hpp"
+#include "gvs/util/blocking_queue.hpp"
 
 #include <gmock/gmock.h>
 
