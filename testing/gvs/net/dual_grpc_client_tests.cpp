@@ -14,6 +14,9 @@
 
 #include <gmock/gmock.h>
 
+// Code coverage: Instantiate template class to generate code for all methods.
+template class gvs::net::DualGrpcClient<gvs::test::proto::Test>;
+
 #if 0
 
 namespace {

@@ -8,8 +8,8 @@
 
 #include <thread>
 
-// Instantiate template class to generate code for all methods allowing code coverage to work.
-template class gvs::util::BlockingQueue<int>;
+// Code coverage: Instantiate template class to generate code for all methods.
+template class gvs::util::BlockingQueue<char>;
 
 namespace {
 

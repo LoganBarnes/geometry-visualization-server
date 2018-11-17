@@ -6,6 +6,9 @@
 #include <gmock/gmock.h>
 #include <thread>
 
+// Code coverage: Instantiate template class to generate code for all methods.
+template class gvs::util::AtomicData<char>;
+
 namespace {
 
 TEST(AtomicDataTests, atomic_data_wait_timeout) {
