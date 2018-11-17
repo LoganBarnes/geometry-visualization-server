@@ -5,10 +5,10 @@
 #include "test-util/test_service.hpp"
 #include "test-util/scene_server.hpp"
 
-#include "gvs/common/dual_grpc_client.hpp"
-#include "gvs/common/grpc_server.hpp"
-#include "gvs/common/atomic_data.hpp"
-#include "gvs/common/blocking_queue.hpp"
+#include "gvs/net/dual_grpc_client.hpp"
+#include "gvs/net/grpc_server.hpp"
+#include "gvs/util/atomic_data.hpp"
+#include "gvs/util/blocking_queue.hpp"
 
 #include <grpcpp/create_channel.h>
 

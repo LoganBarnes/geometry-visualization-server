@@ -13,7 +13,7 @@ file(GLOB_RECURSE TEST_UTIL_SOURCE_FILES
         )
 
 add_library(test_util ${TEST_UTIL_SOURCE_FILES})
-target_link_libraries(test_util PUBLIC gvs_common testing_protos)
+target_link_libraries(test_util PUBLIC gvs_net testing_protos)
 target_include_directories(test_util PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 set_target_properties(test_util PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 target_compile_options(test_util PUBLIC ${GVS_COMPILE_FLAGS})
@@ -48,6 +48,7 @@ function(add_test_executable target_to_test test_directory)
     target_link_libraries(all_proto_scene_tests PUBLIC ${target_to_test})
 endfunction()
 
-add_test_executable(gvs_common ${CMAKE_CURRENT_LIST_DIR}/gvs/util)
+add_test_executable(gvs_net ${CMAKE_CURRENT_LIST_DIR}/gvs/net)
 add_test_executable(gvs_server ${CMAKE_CURRENT_LIST_DIR}/gvs/server)
+add_test_executable(gvs_util ${CMAKE_CURRENT_LIST_DIR}/gvs/util)
 add_test_executable(vis_client ${CMAKE_CURRENT_LIST_DIR}/gvs/vis-client)
