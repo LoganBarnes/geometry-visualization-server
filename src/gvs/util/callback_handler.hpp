@@ -28,41 +28,77 @@
 namespace gvs {
 namespace util {
 
-template <typename ReturnType>
+/**
+ * @brief This interface makes declarations of CallbackHandler more practical
+ *
+ * Instead of defining:
+ *
+ *     CallbackHandler<MyReturnType, decltype(&MyClass::my_function), MyClass*, Arg1Type, etc...> callback;
+ *
+ * we can define:
+ *
+ *     std::unique_ptr<CallbackInterface<MyReturnType>> callback;
+ *
+ * The callback can then be created and used in a more readable fashion:
+ *
+ *     callback = make_callback<MyReturnType>(&MyClass::my_function, my_instance, arg1, etc...); // create
+ *     callback->invoke(); // use
+ */
+template <typename ReturnType, typename... Args>
 class CallbackInterface {
 public:
     virtual ~CallbackInterface() = 0;
-    virtual ReturnType invoke() = 0;
+
+    /**
+     * The function that invokes the callback with optional extra data
+     */
+    virtual ReturnType invoke(Args&&... additional_arguments) = 0;
 };
 
-template <typename ReturnType>
-CallbackInterface<ReturnType>::~CallbackInterface() = default;
+template <typename ReturnType, typename... Args>
+CallbackInterface<ReturnType, Args...>::~CallbackInterface() = default;
 
-template <typename ReturnType, typename Callback, typename... Args>
-class CallbackHandler : public CallbackInterface<ReturnType> {
+/**
+ * @brief The typed callback class containing the callback function and expected arguments
+ *
+ * NOTE: All callbacks will require a void* as the last argument. This can be avoided with a bit of
+ * template magic but for the sake of keeping this class relatively simple that hasn't been added.
+ */
+template <typename ReturnType, typename Callback, typename Tuple, typename... Args>
+class CallbackHandler : public CallbackInterface<ReturnType, Args...> {
 public:
-    explicit CallbackHandler(Callback callback, Args&&... args);
+    template <typename... StaticArgs>
+    explicit CallbackHandler(Callback callback, StaticArgs&&... args);
     ~CallbackHandler() override = default;
 
-    ReturnType invoke() override;
+    ReturnType invoke(Args&&... additional_arguments) override;
 
 private:
     Callback callback_;
-    std::tuple<typename std::decay<Args>::type...> args_;
+    Tuple args_;
 };
 
-template <typename ReturnType, typename Callback, typename... Args>
-CallbackHandler<ReturnType, Callback, Args...>::CallbackHandler(Callback callback, Args&&... args)
-    : callback_(callback), args_(std::make_tuple(std::forward<Args>(args)...)) {}
+template <typename ReturnType, typename Callback, typename Tuple, typename... Args>
+template <typename... StaticArgs>
+CallbackHandler<ReturnType, Callback, Tuple, Args...>::CallbackHandler(Callback callback, StaticArgs&&... args)
+    : callback_(std::move(callback)), args_(std::make_tuple(std::forward<StaticArgs>(args)...)) {}
 
-template <typename ReturnType, typename Callback, typename... Args>
-ReturnType CallbackHandler<ReturnType, Callback, Args...>::invoke() {
-    return apply(callback_, args_);
+template <typename ReturnType, typename Callback, typename Tuple, typename... Args>
+ReturnType CallbackHandler<ReturnType, Callback, Tuple, Args...>::invoke(Args&&... additional_arguments) {
+    return apply(callback_, args_, std::forward<Args>(additional_arguments)...); // all the magic happens here
 }
 
-template <typename ReturnType, typename Callback, typename... Args>
-std::unique_ptr<CallbackHandler<ReturnType, Callback, Args...>> make_callback(Callback callback, Args&&... args) {
-    return std::make_unique<CallbackHandler<ReturnType, Callback, Args...>>(callback, std::forward<Args>(args)...);
+/**
+ * @brief Used to create callbacks without having to define all the template arguments:
+ *
+ *     auto callback = make_callback<MyReturnType>(&MyClass::my_function, my_instance, arg1, etc...);
+ */
+template <typename ReturnType, typename... Args, typename Callback, typename... StaticArgs>
+std::unique_ptr<CallbackHandler<ReturnType, Callback, std::tuple<typename std::decay<StaticArgs>::type...>, Args...>>
+make_callback(Callback callback, StaticArgs&&... args) {
+    return std::make_unique<
+        CallbackHandler<ReturnType, Callback, std::tuple<typename std::decay<StaticArgs>::type...>, Args...>>(
+        std::move(callback), std::forward<StaticArgs>(args)...);
 }
 
 } // namespace util
