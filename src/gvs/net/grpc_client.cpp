@@ -52,5 +52,39 @@ GrpcClientState GrpcClient::get_state() {
     return state_copy;
 }
 
+void GrpcClient::update(std::unique_ptr<util::CallbackInterface<void, GrpcClientState&>> callback) {
+
+    bool queue_ok = true;
+    void* got_tag;
+
+    do {
+        state_.use_safely([&](auto& state) {
+            DEBUG_PRINT("queue ok: " + std::to_string(queue_ok));
+
+            if (queue_ok and channel_) {
+                auto channel_state = channel_->GetState(true);
+                DEBUG_PRINT("channel_state: " + std::to_string(channel_state));
+
+                if (state == GrpcClientState::attempting_to_connect and channel_state == GRPC_CHANNEL_READY) {
+                    state = GrpcClientState::connected;
+                }
+
+                callback->invoke(state);
+
+                if (state == GrpcClientState::attempting_to_connect) {
+                    // never wait more than 5 seconds
+                    auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(15);
+                    int tag = 1;
+                    channel_->NotifyOnStateChange(channel_state,
+                                                  deadline,
+                                                  connection_queue_.get(),
+                                                  reinterpret_cast<void*>(tag));
+                }
+            }
+        });
+
+    } while (connection_queue_->Next(&got_tag, &queue_ok));
+}
+
 } // namespace net
 } // namespace gvs
