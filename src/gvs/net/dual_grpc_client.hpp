@@ -81,7 +81,7 @@ private:
 
     int connection_attempt_ = 0; ///< only used in external_state_change_callback (which is called from another thread)
 
-    std::unique_ptr<util::CallbackInterface<void>> update_callback_;
+    std::unique_ptr<util::CallbackInterface<void, const GrpcClientState&>> update_callback_;
 
     void external_state_change_callback(const GrpcClientState& state);
 };
@@ -94,7 +94,7 @@ DualGrpcClient<Service>::DualGrpcClient() {
 template <typename Service>
 template <typename UpdateCallback, typename... Args>
 DualGrpcClient<Service>::DualGrpcClient(UpdateCallback update_callback, Args&&... args) : DualGrpcClient<Service>() {
-    update_callback_ = util::make_callback<void>(update_callback, std::forward<Args>(args)...);
+    update_callback_ = util::make_callback<void, const GrpcClientState&>(update_callback, std::forward<Args>(args)...);
 }
 
 template <typename Service>
@@ -143,7 +143,7 @@ void DualGrpcClient<Service>::set_using_inprocess_channel(bool use_inprocess_cha
 
         current_state_.emplace_back(GrpcClientState::connected);
 
-        update_callback_->invoke();
+        update_callback_->invoke(current_state_.pop_all_but_most_recent().state);
 
     } else {
         server_address_ = external_address_;
@@ -209,7 +209,7 @@ void DualGrpcClient<Service>::external_state_change_callback(const GrpcClientSta
     current_state_.emplace_back(state, ++connection_attempt_);
 
     if (update_callback_) {
-        update_callback_->invoke();
+        update_callback_->invoke(state);
     }
 }
 

@@ -109,7 +109,7 @@ private:
     std::thread update_thread_;
 
     // function used by update_thread_
-    void update(std::unique_ptr<util::CallbackInterface<void, GrpcClientState&>> callback);
+    void update(std::unique_ptr<util::CallbackInterface<void, const GrpcClientState&>> callback);
 };
 
 template <typename Callback, typename... Args>
@@ -124,8 +124,9 @@ void GrpcClient::change_server(std::shared_ptr<grpc::Channel> channel,
     if (channel_->GetState(false) != GRPC_CHANNEL_READY) {
         state_.unsafe_data() = GrpcClientState::attempting_to_connect;
 
-        update_thread_ = std::thread(
-            [=] { update(util::make_callback<void, GrpcClientState&>(state_change_callback, callback_args...)); });
+        update_thread_ = std::thread([=] {
+            update(util::make_callback<void, const GrpcClientState&>(state_change_callback, callback_args...));
+        });
     } else {
         state_.unsafe_data() = GrpcClientState::connected;
         util::apply(state_change_callback, std::make_tuple(std::forward<Args>(callback_args)...), state_.unsafe_data());

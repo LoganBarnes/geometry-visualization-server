@@ -52,7 +52,7 @@ GrpcClientState GrpcClient::get_state() {
     return state_copy;
 }
 
-void GrpcClient::update(std::unique_ptr<util::CallbackInterface<void, GrpcClientState&>> callback) {
+void GrpcClient::update(std::unique_ptr<util::CallbackInterface<void, const GrpcClientState&>> callback) {
 
     bool queue_ok = true;
     void* got_tag;

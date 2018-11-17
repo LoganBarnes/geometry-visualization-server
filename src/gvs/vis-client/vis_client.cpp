@@ -71,9 +71,8 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
                                  .setWindowFlags(Configuration::WindowFlag::Resizable))
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
-    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>(&VisClient::redraw, this))
+    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>([this](const auto&) { this->redraw(); }))
     , has_inprocess_server_(false) {
-
     grpc_client_->set_external_server(initial_host_address);
     server_address_input_ = grpc_client_->server_address();
 }
@@ -86,9 +85,8 @@ VisClient::VisClient(std::unique_ptr<grpc::Server>& inprocess_server, const Argu
                                  .setWindowFlags(Configuration::WindowFlag::Resizable))
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
-    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>(&VisClient::redraw, this))
+    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>([this](const auto&) { this->redraw(); }))
     , has_inprocess_server_(true) {
-
     grpc_client_->set_inprocess_server(inprocess_server);
 }
 
