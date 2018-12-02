@@ -21,22 +21,12 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/vis_client.hpp"
-#include "gvs/server/scene_service.hpp"
-#include "gvs/net/grpc_server.hpp"
+#include "gvs/server/scene_server.hpp"
 #include <thread>
 
 int main(int argc, char** argv) {
-
-    gvs::net::GrpcServer server(std::make_shared<gvs::host::SceneService>());
-
-    std::thread run_thread([&] { server.run(); });
-
-    gvs::vis::VisClient app(server.server(), {argc, argv});
-
-    int exit_code = app.exec();
-
-    server.shutdown();
-    run_thread.join();
-
-    return exit_code;
+    std::string server_address = "0.0.0.0:50055";
+    gvs::host::SceneServer server(server_address);
+    gvs::vis::VisClient app(server_address, {argc, argv});
+    return app.exec();
 }

@@ -22,25 +22,22 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/forward_declarations.hpp"
-
-#include <gvs/scene.grpc.pb.h>
+#include <google/protobuf/message.h>
+#include <google/protobuf/util/message_differencer.h>
 
 namespace gvs {
-namespace host {
+namespace proto {
 
-class SceneService : public gvs::proto::Scene::Service {
-public:
-    ~SceneService() override;
+template <typename Proto, typename = std::enable_if_t<std::is_base_of<google::protobuf::Message, Proto>::value>>
+::std::ostream& operator<<(::std::ostream& os, const Proto& proto) {
+    return os << proto.DebugString();
+}
 
-    grpc::Status add_item(grpc::ServerContext* context,
-                          const gvs::proto::SceneItemInfo* request,
-                          gvs::proto::SceneResponse* response) override;
+//template <typename Proto, typename = std::enable_if_t<std::is_base_of<google::protobuf::Message, Proto>::value>>
+template <typename Proto>
+bool operator==(const Proto& lhs, const Proto& rhs) {
+    return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
+}
 
-    grpc::Status scene_updates(grpc::ServerContext* context,
-                               const google::protobuf::Empty* request,
-                               grpc::ServerWriter<gvs::proto::SceneUpdate>* writer) override;
-};
-
-} // namespace host
+} // namespace proto
 } // namespace gvs

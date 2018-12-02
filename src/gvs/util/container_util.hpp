@@ -20,24 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/server/scene_service.hpp"
+#pragma once
+
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <vector>
 
 namespace gvs {
-namespace host {
+namespace util {
 
-SceneService::~SceneService() = default;
-
-grpc::Status host::SceneService::add_item(grpc::ServerContext* /*context*/,
-                                          const gvs::proto::SceneItemInfo* /*request*/,
-                                          gvs::proto::SceneResponse* /*response*/) {
-    return grpc::Status::OK;
+template <typename Map, typename T>
+bool has_key(const Map& map, const T& key) {
+    return map.find(key) != map.end();
 }
 
-grpc::Status host::SceneService::scene_updates(grpc::ServerContext* /*context*/,
-                                               const google::protobuf::Empty* /*request*/,
-                                               grpc::ServerWriter<gvs::proto::SceneUpdate>* /*writer*/) {
-    return grpc::Status::OK;
-}
-
-} // namespace host
+} // namespace util
 } // namespace gvs

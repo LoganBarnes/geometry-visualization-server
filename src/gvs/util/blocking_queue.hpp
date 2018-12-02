@@ -51,6 +51,29 @@ public:
         condition_.notify_one();
     }
 
+    void clear_all_and_push_back(T value) {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            while (not queue_.empty()) {
+                queue_.pop();
+            }
+            queue_.push(std::move(value)); // push_back
+        }
+        condition_.notify_one();
+    }
+
+    template <typename... Args>
+    void clear_all_and_emplace_back(Args&&... args) {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            while (not queue_.empty()) {
+                queue_.pop();
+            }
+            queue_.emplace(std::forward<Args>(args)...); // emplace_back
+        }
+        condition_.notify_one();
+    }
+
     T pop_front() {
         std::unique_lock<std::mutex> lock(mutex_);
         condition_.wait(lock, [=] { return !queue_.empty(); });

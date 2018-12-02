@@ -23,11 +23,17 @@
 #pragma once
 
 #include "gvs/vis-client/imgui_magnum_application.hpp"
+#include "gvs/net/grpc_client_state.hpp"
+#include "gvs/util/atomic_data.hpp"
+#include "gvs/util/blocking_queue.hpp"
 #include "gvs/forward_declarations.hpp"
 
 #include <gvs/scene.grpc.pb.h>
 
 #include <grpcpp/channel.h>
+#include <grpcpp/completion_queue.h>
+
+#include <thread>
 
 namespace gvs {
 namespace vis {
@@ -35,7 +41,6 @@ namespace vis {
 class VisClient : public ImGuiMagnumApplication {
 public:
     explicit VisClient(const std::string& initial_host_address, const Arguments& arguments);
-    explicit VisClient(std::unique_ptr<grpc::Server>& inprocess_server, const Arguments& arguments);
     ~VisClient() override;
 
 private:
@@ -43,13 +48,20 @@ private:
     void render() const override;
     void configure_gui() override;
 
+    void process_message_update(const proto::Message& message);
+
     std::string gl_version_str_;
     std::string gl_renderer_str_;
 
-    std::unique_ptr<net::DualGrpcClient<gvs::proto::Scene>> grpc_client_;
-
-    bool has_inprocess_server_ = false;
     std::string server_address_input_ = "address:port";
+    std::string error_message_;
+
+    std::unique_ptr<net::GrpcClient<gvs::proto::Scene>> grpc_client_;
+    bool wrap_text_ = false;
+    util::AtomicData<std::string> messages_;
+
+    std::string message_id_input_;
+    std::string message_content_input_;
 };
 
 } // namespace vis

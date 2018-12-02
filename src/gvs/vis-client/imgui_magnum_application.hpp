@@ -43,6 +43,10 @@ public:
 protected:
     std::unique_ptr<detail::Theme> theme_;
 
+    // Ensures the application renders at least 5 more times after all events are
+    // finished to give ImGui a chance to update and render correctly
+    void reset_draw_counter();
+
 private:
     virtual void update() = 0;
     virtual void render() const = 0;
@@ -60,10 +64,6 @@ private:
     void mouseReleaseEvent(MouseEvent& event) override;
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void mouseScrollEvent(MouseScrollEvent& event) override;
-
-    // Ensures the application renders at least 5 more times after all events are
-    // finished to give ImGui a chance to update and render correctly
-    void reset_draw_counter();
 
     std::shared_ptr<ImGuiContext> imgui_;
     std::shared_ptr<bool> imgui_gl_;

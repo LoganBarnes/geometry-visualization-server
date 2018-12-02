@@ -22,6 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <string>
+
 namespace imgui {
 
 struct Disable {
@@ -37,5 +39,7 @@ struct Disable {
     static void disable_push();
     static void disable_pop();
 };
+
+bool configure_gui(const std::string& label, std::string* data);
 
 } // namespace imgui

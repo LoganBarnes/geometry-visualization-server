@@ -20,35 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "gvs/server/scene_server.hpp"
 
-namespace gvs {
-namespace net {
+int main(int argc, const char* argv[]) {
+    std::string server_address = "0.0.0.0:50055";
 
-enum class GrpcClientState;
+    if (argc > 1) {
+        server_address = argv[1];
+    }
 
-template <typename Service>
-class GrpcClient;
+    gvs::host::SceneServer server(server_address);
 
-class GrpcServer;
+    std::cout << "Press enter to exit" << std::endl;
+    std::cin.ignore();
 
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-class VisClient;
-
-} // namespace vis
-} // namespace gvs
+    std::cout << "Exiting" << std::endl;
+    return 0;
+}

@@ -20,35 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "gvs/server/scene_server.hpp"
+#include <gmock/gmock.h>
 
-namespace gvs {
-namespace net {
+namespace {
 
-enum class GrpcClientState;
+class EmptyServerTest : public ::testing::Test {};
 
-template <typename Service>
-class GrpcClient;
+TEST_F(EmptyServerTest, empty_test) {
+    // TODO
+}
 
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-class VisClient;
-
-} // namespace vis
-} // namespace gvs
+} // namespace

@@ -20,13 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/server/scene_service.hpp"
-#include <gmock/gmock.h>
+#pragma once
 
-namespace {
+#include <google/protobuf/message.h>
+#include <google/protobuf/util/message_differencer.h>
 
-class EmptyServerTest : public ::testing::Test {};
+namespace gvs {
+namespace test {
+namespace proto {
 
-TEST_F(EmptyServerTest, empty_test) {}
+template <typename Proto, typename = std::enable_if_t<std::is_base_of<google::protobuf::Message, Proto>::value>>
+::std::ostream& operator<<(::std::ostream& os, const Proto& proto) {
+    return os << proto.DebugString();
+}
 
-} // namespace
+template <typename Proto, typename = std::enable_if_t<std::is_base_of<google::protobuf::Message, Proto>::value>>
+bool operator==(const Proto& lhs, const Proto& rhs) {
+    return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
+}
+
+} // namespace proto
+} // namespace test
+} // namespace gvs

@@ -28,9 +28,11 @@ import "google/protobuf/empty.proto";
 import "gvs/types.proto";
 
 service Scene {
-    rpc add_item (SceneItemInfo) returns (SceneResponse);
-
+    rpc update_scene (SceneUpdate) returns (SceneResponse);
     rpc scene_updates (google.protobuf.Empty) returns (stream SceneUpdate);
+
+    rpc send_message (Message) returns (SceneResponse);
+    rpc message_updates (google.protobuf.Empty) returns (stream Message);
 }
 
 message SceneResponse {
@@ -39,8 +41,8 @@ message SceneResponse {
 
 message SceneUpdate {
     oneof update_type {
-        SceneItemInfo added_item = 1;
-        // SceneItemInfo updated_item = 2;
-        // SceneItemInfo removed_item = 3;
+        SceneItemInfo add_item = 1;
+        // SceneItemInfo update_item = 2;
+        // SceneItemInfo remove_item = 3;
     }
 }

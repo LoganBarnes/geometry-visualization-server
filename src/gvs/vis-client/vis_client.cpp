@@ -22,29 +22,33 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/vis_client.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
-#include "gvs/server/scene_service.hpp"
+#include "gvs/server/scene_server.hpp"
 #include "gvs/net/grpc_server.hpp"
-#include "gvs/net/dual_grpc_client.hpp"
+#include "gvs/net/grpc_client.hpp"
+#include "vis_client.hpp"
 
 #include <Magnum/GL/Context.h>
 #include <imgui.h>
 
 #include <limits>
 #include <sstream>
+#include <chrono>
 
 namespace gvs {
 namespace vis {
 
 namespace {
 
-std::string to_pretty_string(const net::GrpcClientState& state, int connection_attempt) {
+std::string to_pretty_string(const net::GrpcClientState& state) {
     switch (state) {
     case net::GrpcClientState::not_connected:
         return "Not Connected";
-    case net::GrpcClientState::attempting_to_connect:
-        return "Connecting... (Attempt " + std::to_string(connection_attempt) + ")";
+
     case net::GrpcClientState::connected:
         return "Connected";
+
+    case net::GrpcClientState::attempting_to_connect:
+        return "Connecting...";
     }
     return "Unknown Enum value";
 }
@@ -53,12 +57,14 @@ ImVec4 to_pretty_color(const net::GrpcClientState& state) {
     switch (state) {
     case net::GrpcClientState::not_connected:
         return {1.f, 0.f, 0.f, 1.f}; // Red
-    case net::GrpcClientState::attempting_to_connect:
-        return {1.f, 1.f, 0.f, 1.f}; // Yellow
+
     case net::GrpcClientState::connected:
         return {0.f, 1.f, 0.f, 1.f}; // Green
+
+    case net::GrpcClientState::attempting_to_connect:
+        return {1.f, 1.f, 0.f, 1.f}; // Yellow
     }
-    return {1.f, 1.f, 1.f, 1.f};
+    return {1.f, 1.f, 1.f, 1.f}; // White
 }
 
 } // namespace
@@ -71,99 +77,167 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
                                  .setWindowFlags(Configuration::WindowFlag::Resizable))
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
-    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>([this](const auto&) { this->redraw(); }))
-    , has_inprocess_server_(false) {
-    grpc_client_->set_external_server(initial_host_address);
-    server_address_input_ = grpc_client_->server_address();
+    , server_address_input_(initial_host_address)
+    , grpc_client_(std::make_unique<net::GrpcClient<gvs::proto::Scene>>()) {
+
+    grpc_client_->change_server(server_address_input_, [this](const net::GrpcClientState&) { reset_draw_counter(); });
+
+    grpc_client_->register_stream<proto::Message>(
+        [](std::unique_ptr<proto::Scene::Stub>& stub, grpc::ClientContext* context) {
+            google::protobuf::Empty empty;
+            return stub->message_updates(context, empty);
+        },
+        [this](const proto::Message& msg) { this->process_message_update(msg); });
 }
 
-VisClient::VisClient(std::unique_ptr<grpc::Server>& inprocess_server, const Arguments& arguments)
-    : ImGuiMagnumApplication(arguments,
-                             Configuration{}
-                                 .setTitle("Debug Visualiser Client")
-                                 .setSize({1280, 720})
-                                 .setWindowFlags(Configuration::WindowFlag::Resizable))
-    , gl_version_str_(Magnum::GL::Context::current().versionString())
-    , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
-    , grpc_client_(std::make_unique<net::DualGrpcClient<gvs::proto::Scene>>([this](const auto&) { this->redraw(); }))
-    , has_inprocess_server_(true) {
-    grpc_client_->set_inprocess_server(inprocess_server);
-}
+vis::VisClient::~VisClient() = default;
 
-VisClient::~VisClient() = default;
+void vis::VisClient::update() {}
 
-void VisClient::update() {}
+void vis::VisClient::render() const {}
 
-void VisClient::render() const {}
-
-void VisClient::configure_gui() {
+void vis::VisClient::configure_gui() {
     int h = this->windowSize().y();
-    ImGui::SetNextWindowPos(ImVec2(0.f, 0.f));
+    ImGui::SetNextWindowPos({0.f, 0.f});
     ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, h), ImVec2(std::numeric_limits<float>::infinity(), h));
-    ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Settings", nullptr, ImVec2(200.f, h));
 
     ImGui::Text("GL Version:   ");
     ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.f), "%s\t", gl_version_str_.c_str());
+    ImGui::TextColored({0.5f, 0.5f, 0.5f, 1.f}, "%s\t", gl_version_str_.c_str());
 
     ImGui::Text("GL Renderer:  ");
     ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.f), "%s\t", gl_renderer_str_.c_str());
+    ImGui::TextColored({0.5f, 0.5f, 0.5f, 1.f}, "%s\t", gl_renderer_str_.c_str());
 
+    ImGui::Spacing();
     ImGui::Separator();
+    ImGui::Separator();
+    ImGui::Separator();
+    ImGui::Spacing();
 
     ImGui::Text("Host Address: ");
     ImGui::SameLine();
-    ImGui::TextColored(ImVec4(7.f, 0.3f, 0.05f, 1.f), "%s\t", grpc_client_->server_address().c_str());
+    ImGui::TextColored({7.f, 0.3f, 0.05f, 1.f}, "%s\t", grpc_client_->get_server_address().c_str());
 
     ImGui::Text("Server State: ");
     ImGui::SameLine();
 
-    int connection_attempt;
-    auto state = grpc_client_->connection_state(&connection_attempt);
-    std::string state_text = to_pretty_string(state, connection_attempt);
+    auto state = grpc_client_->get_state();
+    std::string state_text = to_pretty_string(state);
     ImVec4 state_color = to_pretty_color(state);
 
     ImGui::TextColored(state_color, "%s\t", state_text.c_str());
 
     if (ImGui::TreeNode("Server Settings")) {
 
-        char buf[1024];
-        server_address_input_.copy(buf, server_address_input_.size());
-        buf[server_address_input_.size()] = '\0';
-
-        bool value_changed = ImGui::InputText("Change Server", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
-        server_address_input_ = buf;
-
+        bool value_changed = imgui::configure_gui("Change Server", &server_address_input_);
         {
-            imgui::Disable::Guard disable(server_address_input_ == grpc_client_->server_address()
-                                          and state != net::GrpcClientState::not_connected);
+            imgui::Disable::Guard disable(server_address_input_ == grpc_client_->get_server_address()
+                                          and state != net::GrpcClientState::connected);
             value_changed |= (ImGui::Button("Connect"));
         }
 
         if (value_changed) {
-            grpc_client_->set_external_server(server_address_input_);
+            grpc_client_->change_server(server_address_input_,
+                                        [this](const net::GrpcClientState&) { reset_draw_counter(); });
         }
 
         if (state == net::GrpcClientState::attempting_to_connect) {
             ImGui::SameLine();
             if (ImGui::Button("Stop Connecting")) {
-                grpc_client_->stop_connection_attempts();
-            }
-        }
-
-        {
-            imgui::Disable::Guard disable(grpc_client_->using_inprocess_channel());
-
-            if (has_inprocess_server_ and ImGui::Button("Use In-Process Server")) {
-                grpc_client_->set_using_inprocess_channel(true);
+                grpc_client_->kill_streams_and_channel();
             }
         }
 
         ImGui::TreePop();
     }
 
+    float message_input_start_height = h - 100.f;
+    float max_message_window_height = message_input_start_height - ImGui::GetCursorPos().y;
+
+    messages_.use_safely([&](const std::string& data) {
+        ImVec2 msgs_size = ImGui::CalcTextSize(data.c_str());
+        msgs_size.x = ImGui::GetWindowSize().x;
+        msgs_size.y = std::min(msgs_size.y, max_message_window_height);
+
+        ImGui::SetCursorPos({0.f, message_input_start_height - msgs_size.y});
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Separator();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        ImGui::BeginChild("Messages", msgs_size);
+        if (wrap_text_) {
+            ImGui::TextWrapped("%s", data.c_str());
+        } else {
+            ImGui::Text("%s", data.c_str());
+        }
+        ImGui::SetScrollY(ImGui::GetScrollMaxY());
+        ImGui::EndChild();
+
+        ImGui::Separator();
+        ImGui::Separator();
+        ImGui::Separator();
+    });
+
+    bool send_message = false;
+
+    send_message |= imgui::configure_gui("Name", &message_id_input_);
+    send_message |= imgui::configure_gui("Contents", &message_content_input_);
+
+    send_message |= ImGui::Button("Send");
+
+    ImGui::SameLine();
+    ImGui::Checkbox("Wrap Text", &wrap_text_);
+
+    if (send_message) {
+        ImGui::SetKeyboardFocusHere(-1);
+        gvs::proto::Message message;
+        message.set_identifier(message_id_input_);
+        message.set_contents(message_content_input_);
+
+        if (grpc_client_->use_stub([&](auto& stub) {
+                grpc::ClientContext context;
+                gvs::proto::SceneResponse response;
+                grpc::Status status = stub->send_message(&context, message, &response);
+
+                if (not status.ok()) {
+                    error_message_ = status.error_message();
+
+                } else if (not response.error_msg().empty()) {
+                    error_message_ = response.error_msg();
+                }
+            })) {
+            message_content_input_ = "";
+
+        } else {
+            error_message_ = "Not connected";
+        }
+    }
+
     ImGui::End();
+
+    if (not error_message_.empty()) {
+        int w = this->windowSize().x();
+        ImGui::SetNextWindowPos({w * 0.5f, 0.f}, 0, {0.5f, 0.f});
+
+        bool open = true;
+        ImGui::Begin("Errors", &open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
+        ImGui::TextColored({1.f, 0.f, 0.f, 1.f}, "%s", error_message_.c_str());
+        ImGui::End();
+
+        if (not open) {
+            error_message_ = "";
+        }
+    }
+}
+
+void VisClient::process_message_update(const proto::Message& message) {
+    messages_.use_safely([&](std::string& data) { data += message.identifier() + ": " + message.contents() + "\n"; });
+    reset_draw_counter();
 }
 
 } // namespace vis

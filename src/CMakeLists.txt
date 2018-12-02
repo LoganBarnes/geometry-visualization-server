@@ -90,7 +90,17 @@ set_target_properties(vis_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 ###################
 add_executable(vis_client_and_server exec/visualiser_client_and_server.cpp)
 target_link_libraries(vis_client_and_server vis_client gvs_server)
-set_target_properties(vis_client_and_server PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+
+add_executable(scene_server exec/scene_server.cpp)
+target_link_libraries(scene_server gvs_server)
+
+add_executable(visualiser_client exec/visualiser_client.cpp)
+target_link_libraries(visualiser_client vis_client)
+
+set_target_properties(vis_client_and_server scene_server visualiser_client PROPERTIES
+        CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        )
 
 ###############
 ### Testing ###

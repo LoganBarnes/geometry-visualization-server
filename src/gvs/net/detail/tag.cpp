@@ -20,35 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "tag.hpp"
+#include <cassert>
 
 namespace gvs {
 namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
 namespace detail {
 
-class Theme;
+Tag::Tag(void* d, TagLabel l) : data(d), label(l) {}
+
+::std::ostream& operator<<(::std::ostream& os, const Tag& tag) {
+    os << '{' << tag.data << ", ";
+
+    switch (tag.label) {
+
+    case TagLabel::done:
+        os << "done";
+        break;
+
+    case TagLabel::writing:
+        os << "writing";
+        break;
+    }
+    return os << '}';
+}
+
+void* make_tag(void* data, TagLabel label, std::unordered_map<void*, std::unique_ptr<Tag>>* tags) {
+    auto&& tag = std::make_unique<Tag>(data, label);
+    void* result = tag.get();
+    tags->emplace(result, std::forward<decltype(tag)>(tag));
+    return result;
+}
+
+Tag get_tag(void* key, std::unordered_map<void*, std::unique_ptr<Tag>>* tags) {
+    assert(tags->find(key) != tags->end());
+    Tag tag_copy = *tags->at(key);
+    tags->erase(key);
+    return tag_copy;
+}
 
 } // namespace detail
-
-class VisClient;
-
-} // namespace vis
+} // namespace net
 } // namespace gvs

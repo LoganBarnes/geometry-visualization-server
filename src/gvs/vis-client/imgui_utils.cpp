@@ -49,4 +49,16 @@ void Disable::disable_pop() {
     ImGui::PopItemFlag();
 }
 
+bool configure_gui(const std::string& label, std::string* data) {
+    char buf[1024];
+    std::size_t max_size = std::min(sizeof(buf) - 1u, data->size());
+    data->copy(buf, max_size);
+    buf[max_size] = '\0';
+
+    bool value_changed = ImGui::InputText(label.c_str(), buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue);
+    *data = buf;
+
+    return value_changed;
+}
+
 } // namespace imgui

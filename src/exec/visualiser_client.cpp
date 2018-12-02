@@ -20,35 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "gvs/vis-client/vis_client.hpp"
 
-namespace gvs {
-namespace net {
+int main(int argc, char* argv[]) {
+    std::string server_address = "0.0.0.0:50055";
 
-enum class GrpcClientState;
+    if (argc > 1) {
+        server_address = argv[1];
+    }
 
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-class VisClient;
-
-} // namespace vis
-} // namespace gvs
+    gvs::vis::VisClient app(server_address, {argc, argv});
+    return app.exec();
+}

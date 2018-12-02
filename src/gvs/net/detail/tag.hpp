@@ -22,33 +22,31 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <ostream>
+#include <unordered_map>
+#include <memory>
+
 namespace gvs {
 namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
 namespace detail {
 
-class Theme;
+enum class TagLabel {
+    writing,
+    done,
+};
+
+struct Tag {
+    void* data;
+    TagLabel label;
+
+    Tag(void* d, TagLabel l);
+};
+
+::std::ostream& operator<<(::std::ostream& os, const Tag& tag);
+
+void* make_tag(void* data, TagLabel label, std::unordered_map<void*, std::unique_ptr<Tag>>* tags);
+Tag get_tag(void* key, std::unordered_map<void*, std::unique_ptr<Tag>>* tags);
 
 } // namespace detail
-
-class VisClient;
-
-} // namespace vis
+} // namespace net
 } // namespace gvs

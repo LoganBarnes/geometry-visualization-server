@@ -56,7 +56,7 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Magnum::Platform::GlfwAppli
         return new bool(success);
     };
 
-    imgui_gl_ = std::shared_ptr<bool>(init_imgui_gl(), [](auto* p) {
+    imgui_gl_ = std::shared_ptr<bool>(init_imgui_gl(), [](const bool* p) {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         delete p;
@@ -82,6 +82,11 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments)
                                  .setWindowFlags(Configuration::WindowFlag::Resizable)) {}
 
 ImGuiMagnumApplication::~ImGuiMagnumApplication() = default;
+
+void ImGuiMagnumApplication::reset_draw_counter() {
+    draw_counter_ = 5;
+    redraw();
+}
 
 void ImGuiMagnumApplication::drawEvent() {
     update();
@@ -177,11 +182,6 @@ void ImGuiMagnumApplication::mouseScrollEvent(Magnum::Platform::GlfwApplication:
     ImGui_ImplGlfw_ScrollCallback(this->window(), event.offset().x(), event.offset().y());
     event.setAccepted(true);
     reset_draw_counter();
-}
-
-void ImGuiMagnumApplication::reset_draw_counter() {
-    draw_counter_ = 5;
-    redraw();
 }
 
 } // namespace vis

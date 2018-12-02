@@ -27,7 +27,6 @@
 
 namespace gvs {
 namespace util {
-namespace detail {
 
 template <typename F, typename T1, typename... Args>
 auto invoke(F&& f, T1&& arg1, Args&&... args) -> decltype((arg1->*std::forward<F>(f))(args...)) {
@@ -38,6 +37,8 @@ template <typename F, typename... Args>
 auto invoke(F&& f, Args&&... args) -> decltype(std::forward<F>(f)(args...)) {
     return std::forward<F>(f)(args...);
 }
+
+namespace detail {
 
 template <typename F, typename Tuple, std::size_t... I, typename... Args>
 auto apply_impl(F&& f, Tuple&& t, std::index_sequence<I...>, Args&&... more_args) {

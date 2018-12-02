@@ -21,24 +21,30 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/server/scene_server.hpp"
-#include "gvs/server/scene_service.hpp"
+#include "scene_server.hpp"
+
+#include <grpcpp/server_builder.h>
+#include <grpcpp/security/server_credentials.h>
 
 namespace gvs {
 namespace host {
 
 SceneServer::SceneServer(std::string server_address)
-    : server_(std::make_unique<gvs::net::GrpcServer>(std::make_shared<gvs::host::SceneService>(),
-                                                     std::move(server_address)))
-    , run_thread_([&] { server_->run(); }) {}
+    : server_(std::make_shared<gvs::proto::Scene::AsyncService>(), server_address) {
 
-SceneServer::~SceneServer() {
-    server_->shutdown();
-    run_thread_.join();
+    gvs::net::StreamInterface<gvs::proto::Message>* message_stream
+        = server_.register_async_stream(&Service::Requestmessage_updates,
+                                        [](const google::protobuf::Empty& /*ignored*/) {});
+
+    server_.register_async(&Service::Requestsend_message,
+                           [message_stream](const gvs::proto::Message& message, gvs::proto::SceneResponse*) {
+                               message_stream->write(message);
+                               return grpc::Status::OK;
+                           });
 }
 
-std::shared_ptr<grpc::Channel> SceneServer::inprocess_channel() {
-    grpc::ChannelArguments channel_arguments;
-    return server_->server()->InProcessChannel(channel_arguments);
+grpc::Server& SceneServer::server() {
+    return server_.server();
 }
 
 } // namespace host

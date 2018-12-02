@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ##########################################################################################
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 
@@ -43,7 +45,12 @@ function(create_proto_library target_name proto_dir)
     grpc_generate_cpp(GRPC_SRCS GRPC_HDRS ${PROTO_SRC_DIR} ${PROTO_DST_DIR} ${GVS_PROTO_FILES})
 
     add_library(${target_name} ${GRPC_HDRS} ${GRPC_SRCS})
-    target_link_libraries(${target_name} PUBLIC gRPC::grpc++ protobuf::libprotobuf)
+    target_link_libraries(${target_name}
+            PUBLIC Threads::Threads
+            PUBLIC protobuf::libprotobuf
+            PUBLIC gRPC::grpc++
+            PUBLIC ${CMAKE_DL_LIBS}
+            )
     target_include_directories(${target_name} SYSTEM PUBLIC ${PROTO_DST_DIR})
 endfunction()
 

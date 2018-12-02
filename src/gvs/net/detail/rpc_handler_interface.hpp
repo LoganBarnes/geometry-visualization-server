@@ -22,33 +22,43 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/util/blocking_queue.hpp"
+
+#include <grpcpp/server_context.h>
+#include <grpcpp/completion_queue.h>
+
+#include <experimental/optional>
+
 namespace gvs {
 namespace net {
 
-enum class GrpcClientState;
+template <typename Data>
+using UpdateQueue = util::BlockingQueue<std::experimental::optional<Data>>;
 
-template <typename Service>
-class GrpcClient;
+template <typename Service, typename Request, typename Response>
+using AysncFunc = void (Service::*)(grpc::ServerContext*,
+                                    Request*,
+                                    grpc::ServerAsyncResponseWriter<Response>*,
+                                    grpc::CompletionQueue*,
+                                    grpc::ServerCompletionQueue*,
+                                    void*);
 
-class GrpcServer;
+template <typename Service, typename Request, typename Response>
+using AysncServerStreamFunc = void (Service::*)(grpc::ServerContext* context,
+                                                Request*,
+                                                grpc::ServerAsyncWriter<Response>*,
+                                                grpc::CompletionQueue*,
+                                                grpc::ServerCompletionQueue*,
+                                                void*);
 
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
 namespace detail {
 
-class Theme;
+class RpcHandlerInterface {
+public:
+    virtual ~RpcHandlerInterface() = default;
+    virtual void activate_next() = 0;
+};
 
 } // namespace detail
-
-class VisClient;
-
-} // namespace vis
+} // namespace net
 } // namespace gvs

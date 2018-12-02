@@ -26,6 +26,7 @@ package gvs.test.proto;
 
 service Test {
     rpc echo (TestMessage) returns (TestMessage);
+    rpc endless_echo_stream (TestMessage) returns (stream TestMessage);
 }
 
 message TestMessage {

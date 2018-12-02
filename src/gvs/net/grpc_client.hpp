@@ -24,14 +24,15 @@
 
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/callback_handler.hpp"
+#include "gvs/net/grpc_client_state.hpp"
+#include "gvs/net/grpc_client_stream.hpp"
 
 #include <grpcpp/channel.h>
+#include <grpcpp/create_channel.h>
 #include <grpcpp/completion_queue.h>
 
 #include <thread>
-
-//#define DEBUG_PRINT(msg) std::cout << (msg) << std::endl;
-#define DEBUG_PRINT(msg)
+#include <unordered_map>
 
 inline ::std::string to_string(grpc_connectivity_state state) {
     switch (state) {
@@ -66,70 +67,233 @@ inline ::std::ostream& operator<<(::std::ostream& os, grpc_connectivity_state st
 namespace gvs {
 namespace net {
 
-enum class GrpcClientState {
-    not_connected,
-    attempting_to_connect,
-    connected,
-};
-
-inline std::string to_string(const GrpcClientState& state) {
+inline GrpcClientState to_typed_state(grpc_connectivity_state state) {
     switch (state) {
-    case GrpcClientState::not_connected:
-        return "not_connected";
-    case GrpcClientState::attempting_to_connect:
-        return "attempting_to_connect";
-    case GrpcClientState::connected:
-        return "connected";
+    case GRPC_CHANNEL_SHUTDOWN:
+    case GRPC_CHANNEL_IDLE:
+        return GrpcClientState::not_connected;
+
+    case GRPC_CHANNEL_CONNECTING:
+    case GRPC_CHANNEL_TRANSIENT_FAILURE:
+        return GrpcClientState::attempting_to_connect;
+
+    case GRPC_CHANNEL_READY:
+        return GrpcClientState::connected;
     }
-    return "Unknown Enum value";
+
+    throw std::invalid_argument("Invalid grpc_connectivity_state");
 }
 
-inline ::std::ostream& operator<<(::std::ostream& os, const GrpcClientState& state) {
-    return os << to_string(state);
-}
-
+template <typename Service>
 class GrpcClient {
 public:
-    explicit GrpcClient();
+    explicit GrpcClient() = default;
     ~GrpcClient();
 
-    template <typename Callback, typename... Args>
-    void change_server(std::shared_ptr<grpc::Channel> channel, Callback state_change_callback, Args&&... callback_args);
+    template <typename ConnectionCallback, typename... Args>
+    void change_server(std::string address, ConnectionCallback connection_change_callback, Args&&... callback_args);
 
-    void stop_connection_attempts();
+    template <typename Return, typename InitFunc, typename Callback>
+    void* register_stream(InitFunc init_func, Callback callback);
 
+    void kill_streams_and_channel();
+
+    const std::string& get_server_address() const;
     GrpcClientState get_state();
 
+    /**
+     * @brief Safely use the service stub to make RPC calls.
+     *
+     * If the client is not connected this function will return false and 'usage_func' will not be invoked
+     */
+    template <typename UsageFunc>
+    bool use_stub(const UsageFunc& usage_func);
+
 private:
-    std::shared_ptr<grpc::Channel> channel_ = nullptr;
+    struct SharedData {
+        grpc_connectivity_state connection_state = GRPC_CHANNEL_IDLE;
+        std::shared_ptr<grpc::Channel> channel = nullptr;
+        std::unique_ptr<typename Service::Stub> stub = nullptr;
+        std::unordered_map<void*, std::unique_ptr<GrpcClientStreamInterface<Service>>> streams;
+    };
 
-    util::AtomicData<GrpcClientState> state_;
-    std::unique_ptr<grpc::CompletionQueue> connection_queue_ = nullptr;
+    std::string server_address_;
+    util::AtomicData<SharedData> shared_data_;
 
-    std::thread update_thread_;
+    void* state_change_tag = reinterpret_cast<void*>(0x1);
 
-    // function used by update_thread_
-    void update(std::unique_ptr<util::CallbackInterface<void, const GrpcClientState&>> callback);
+    // These are resused after calling 'Shutdown' and 'join' respectively.
+    std::unique_ptr<grpc::CompletionQueue> queue_;
+    std::unique_ptr<std::thread> run_thread_;
+
+    void run(std::unique_ptr<util::CallbackInterface<void, const GrpcClientState&>> connection_change_callback);
 };
 
-template <typename Callback, typename... Args>
-void GrpcClient::change_server(std::shared_ptr<grpc::Channel> channel,
-                               Callback state_change_callback,
-                               Args&&... callback_args) {
-    stop_connection_attempts();
+template <typename Service>
+GrpcClient<Service>::~GrpcClient() {
+    kill_streams_and_channel();
+}
 
-    channel_ = std::move(channel);
-    connection_queue_ = std::make_unique<grpc::CompletionQueue>();
+template <typename Service>
+template <typename ConnectionCallback, typename... Args>
+void GrpcClient<Service>::change_server(std::string address,
+                                        ConnectionCallback connection_change_callback,
+                                        Args&&... callback_args) {
+    kill_streams_and_channel();
 
-    if (channel_->GetState(false) != GRPC_CHANNEL_READY) {
-        state_.unsafe_data() = GrpcClientState::attempting_to_connect;
+    server_address_ = std::move(address);
+    queue_ = std::make_unique<grpc::CompletionQueue>();
 
-        update_thread_ = std::thread([=] {
-            update(util::make_callback<void, const GrpcClientState&>(state_change_callback, callback_args...));
+    bool state_changed = false;
+    GrpcClientState typed_state;
+
+    shared_data_.use_safely([&](SharedData& data) {
+        data.channel = grpc::CreateChannel(server_address_, grpc::InsecureChannelCredentials());
+        data.stub = Service::NewStub(data.channel);
+
+        // Get the current state and check if it has changed
+        auto new_state = data.channel->GetState(true);
+
+        typed_state = to_typed_state(new_state);
+        state_changed = (typed_state != to_typed_state(data.connection_state));
+
+        data.connection_state = new_state;
+
+        auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(15);
+        data.channel->NotifyOnStateChange(data.connection_state, deadline, queue_.get(), state_change_tag);
+    });
+
+    if (state_changed) {
+        util::invoke(connection_change_callback, std::forward<Args>(callback_args)..., typed_state);
+    }
+
+    run_thread_
+        = std::make_unique<std::thread>(&GrpcClient<Service>::run,
+                                        this,
+                                        util::make_callback<void, const GrpcClientState&>(connection_change_callback,
+                                                                                          std::forward<Args>(
+                                                                                              callback_args)...));
+}
+
+template <typename Service>
+template <typename Return, typename InitFunc, typename Callback>
+void* GrpcClient<Service>::register_stream(InitFunc init_func, Callback callback) {
+    void* key;
+
+    shared_data_.use_safely([=, &key](SharedData& data) {
+        auto stream = std::make_unique<GrpcClientStream<Service, Return, InitFunc, Callback>>(init_func, callback);
+
+        // Start the stream if the channel is already connected
+        if (data.channel and data.connection_state == GRPC_CHANNEL_READY) {
+            stream->start_stream(data.stub);
+        }
+
+        key = stream.get();
+        data.streams.emplace(key, std::move(stream));
+    });
+
+    return key;
+}
+
+template <typename Service>
+void GrpcClient<Service>::kill_streams_and_channel() {
+    shared_data_.use_safely([](SharedData& data) {
+        for (auto& stream_pair : data.streams) {
+            stream_pair.second->stop_stream();
+        }
+
+        data.stub = nullptr;
+        data.channel = nullptr;
+    });
+
+    if (queue_) {
+        queue_->Shutdown();
+    }
+
+    if (run_thread_ and run_thread_->joinable()) {
+        run_thread_->join();
+    }
+}
+
+template <typename Service>
+const std::string& GrpcClient<Service>::get_server_address() const {
+    return server_address_;
+}
+
+template <typename Service>
+GrpcClientState GrpcClient<Service>::get_state() {
+    grpc_connectivity_state state_copy;
+    shared_data_.use_safely([&](const SharedData& data) { state_copy = data.connection_state; });
+    return to_typed_state(state_copy);
+}
+
+template <typename Service>
+template <typename UsageFunc>
+bool GrpcClient<Service>::use_stub(const UsageFunc& usage_func) {
+    bool stub_valid = false;
+
+    shared_data_.use_safely([&](const SharedData& data) {
+        if (data.connection_state == GRPC_CHANNEL_READY) {
+            stub_valid = true;
+            usage_func(data.stub);
+        }
+    });
+
+    return stub_valid;
+}
+
+template <typename Service>
+void GrpcClient<Service>::run(
+    std::unique_ptr<util::CallbackInterface<void, const GrpcClientState&>> connection_change_callback) {
+
+    GrpcClientState typed_state;
+    grpc::Status status;
+
+    void* current_tag;
+    bool result_ok;
+
+    while (queue_->Next(&current_tag, &result_ok)) {
+        assert(current_tag == state_change_tag);
+
+        bool state_changed = false;
+
+        shared_data_.use_safely([&](SharedData& data) {
+            if (data.channel) { // not shutdown yet
+
+                if (result_ok) {
+                    auto old_state = to_typed_state(data.connection_state);
+                    data.connection_state = data.channel->GetState(true);
+                    typed_state = to_typed_state(data.connection_state);
+
+                    state_changed = (typed_state != old_state);
+
+                    if (state_changed) {
+                        if (data.connection_state == GRPC_CHANNEL_READY) {
+                            for (auto& stream_pair : data.streams) {
+                                stream_pair.second->start_stream(data.stub);
+                            }
+                        } else {
+                            for (auto& stream_pair : data.streams) {
+                                stream_pair.second->stop_stream();
+                            }
+                        }
+                    }
+                }
+
+                auto deadline = std::chrono::high_resolution_clock::now() + std::chrono::seconds(60);
+                data.channel->NotifyOnStateChange(data.connection_state, deadline, queue_.get(), state_change_tag);
+
+            } else if (to_typed_state(data.connection_state) != GrpcClientState::not_connected) {
+                data.connection_state = GRPC_CHANNEL_SHUTDOWN;
+                typed_state = to_typed_state(data.connection_state);
+                state_changed = true;
+            }
         });
-    } else {
-        state_.unsafe_data() = GrpcClientState::connected;
-        util::apply(state_change_callback, std::make_tuple(std::forward<Args>(callback_args)...), state_.unsafe_data());
+
+        // Do the callback outside the locked code to prevent the user from deadlocking the program.
+        if (state_changed) {
+            connection_change_callback->invoke(typed_state);
+        }
     }
 }
 

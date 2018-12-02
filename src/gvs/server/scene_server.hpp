@@ -22,26 +22,26 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/net/grpc_server.hpp"
+#include "gvs/net/grpc_async_server.hpp"
 
-#include <grpcpp/channel.h>
+#include <gvs/scene.grpc.pb.h>
 
-#include <memory>
 #include <thread>
 
 namespace gvs {
 namespace host {
 
+class SceneService;
+
 class SceneServer {
 public:
     explicit SceneServer(std::string server_address = "");
-    ~SceneServer();
 
-    std::shared_ptr<grpc::Channel> inprocess_channel();
+    grpc::Server& server();
 
 private:
-    std::unique_ptr<gvs::net::GrpcServer> server_;
-    std::thread run_thread_;
+    using Service = gvs::proto::Scene::AsyncService;
+    net::GrpcAsyncServer<Service> server_;
 };
 
 } // namespace host
