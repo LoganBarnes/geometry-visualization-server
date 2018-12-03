@@ -21,8 +21,11 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "test-util/scene_server.hpp"
+
 #include <testing/testing.grpc.pb.h>
+
 #include <grpcpp/create_channel.h>
+
 #include <gmock/gmock.h>
 
 namespace {

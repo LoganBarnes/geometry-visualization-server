@@ -22,8 +22,9 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <grpcpp/server_context.h>
 #include <grpcpp/completion_queue.h>
+#include <grpcpp/server_context.h>
+
 #include <thread>
 
 namespace gvs {

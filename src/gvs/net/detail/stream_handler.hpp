@@ -22,16 +22,16 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/net/detail/rpc_handler_interface.hpp"
+#include "gvs/net/detail/tag.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/container_util.hpp"
-#include "gvs/net/detail/tag.hpp"
-#include "gvs/net/detail/rpc_handler_interface.hpp"
 
-#include <thread>
+#include <atomic>
 #include <experimental/optional>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <atomic>
 
 namespace gvs {
 namespace net {

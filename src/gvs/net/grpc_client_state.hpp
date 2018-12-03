@@ -22,8 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace gvs {
 namespace net {

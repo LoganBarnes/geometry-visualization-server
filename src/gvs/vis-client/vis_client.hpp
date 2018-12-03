@@ -22,11 +22,11 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/vis-client/imgui_magnum_application.hpp"
+#include "gvs/forward_declarations.hpp"
 #include "gvs/net/grpc_client_state.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
-#include "gvs/forward_declarations.hpp"
+#include "gvs/vis-client/imgui_magnum_application.hpp"
 
 #include <gvs/scene.grpc.pb.h>
 

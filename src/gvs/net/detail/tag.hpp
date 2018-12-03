@@ -22,9 +22,9 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <memory>
 #include <ostream>
 #include <unordered_map>
-#include <memory>
 
 namespace gvs {
 namespace net {

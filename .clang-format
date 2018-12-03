@@ -22,6 +22,6 @@ NamespaceIndentation: None
 PenaltyBreakBeforeFirstCallParameter: '1000'
 PointerAlignment: Left
 ReflowComments: 'false'
-SortIncludes: 'false'
+SortIncludes: 'true'
 Standard: Cpp11
 ...

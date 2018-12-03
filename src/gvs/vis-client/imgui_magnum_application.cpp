@@ -22,16 +22,14 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/imgui_magnum_application.hpp"
 #include "gvs/vis-client/imgui_theme.hpp"
-#include "imgui_magnum_application.hpp"
 
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
+#include <Corrade/Utility/Unicode.h>
 #include <Magnum/GL/Context.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Version.h>
 #include <Magnum/Math/Color.h>
-#include <Corrade/Utility/Unicode.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 namespace gvs {
 namespace vis {

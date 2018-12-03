@@ -22,7 +22,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "test-util/scene_server.hpp"
 #include "test-util/test_service.hpp"
-#include "scene_server.hpp"
 
 namespace gvs {
 namespace test {

@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "test-util/test_service.hpp"
 #include "test-util/scene_server.hpp"
+#include "test-util/test_service.hpp"
 
 #include "gvs/net/grpc_client.hpp"
 #include "gvs/net/grpc_server.hpp"

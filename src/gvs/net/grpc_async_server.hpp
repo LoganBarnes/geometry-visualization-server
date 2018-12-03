@@ -22,12 +22,12 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/net/detail/stream_handler.hpp"
 #include "gvs/net/detail/async_handler.hpp"
+#include "gvs/net/detail/stream_handler.hpp"
 
+#include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server.h>
 #include <grpcpp/server_builder.h>
-#include <grpcpp/security/server_credentials.h>
 
 namespace gvs {
 namespace net {

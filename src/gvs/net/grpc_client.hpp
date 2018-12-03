@@ -22,14 +22,14 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/util/atomic_data.hpp"
-#include "gvs/util/callback_handler.hpp"
 #include "gvs/net/grpc_client_state.hpp"
 #include "gvs/net/grpc_client_stream.hpp"
+#include "gvs/util/atomic_data.hpp"
+#include "gvs/util/callback_handler.hpp"
 
 #include <grpcpp/channel.h>
-#include <grpcpp/create_channel.h>
 #include <grpcpp/completion_queue.h>
+#include <grpcpp/create_channel.h>
 
 #include <thread>
 #include <unordered_map>

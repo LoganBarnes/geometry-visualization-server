@@ -21,18 +21,18 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/vis_client.hpp"
-#include "gvs/vis-client/imgui_utils.hpp"
-#include "gvs/server/scene_server.hpp"
-#include "gvs/net/grpc_server.hpp"
+
 #include "gvs/net/grpc_client.hpp"
-#include "vis_client.hpp"
+#include "gvs/net/grpc_server.hpp"
+#include "gvs/server/scene_server.hpp"
+#include "gvs/vis-client/imgui_utils.hpp"
 
 #include <Magnum/GL/Context.h>
 #include <imgui.h>
 
+#include <chrono>
 #include <limits>
 #include <sstream>
-#include <chrono>
 
 namespace gvs {
 namespace vis {

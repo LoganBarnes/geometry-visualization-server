@@ -22,13 +22,13 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/util/atomic_data.hpp"
-#include "gvs/net/detail/tag.hpp"
 #include "gvs/net/detail/rpc_handler_interface.hpp"
-#include "stream_handler.hpp"
+#include "gvs/net/detail/stream_handler.hpp"
+#include "gvs/net/detail/tag.hpp"
+#include "gvs/util/atomic_data.hpp"
 
-#include <thread>
 #include <experimental/optional>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 

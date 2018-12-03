@@ -21,6 +21,7 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/vis_client.hpp"
+
 #include "gvs/server/scene_server.hpp"
 #include <thread>
 

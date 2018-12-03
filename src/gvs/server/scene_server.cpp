@@ -21,10 +21,9 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/server/scene_server.hpp"
-#include "scene_server.hpp"
 
-#include <grpcpp/server_builder.h>
 #include <grpcpp/security/server_credentials.h>
+#include <grpcpp/server_builder.h>
 
 namespace gvs {
 namespace host {
