@@ -86,6 +86,19 @@ target_link_libraries(vis_client
         )
 set_target_properties(vis_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 
+##################
+### Log Client ###
+##################
+file(GLOB_RECURSE LOG_CLIENT_SOURCE_FILES
+        LIST_DIRECTORIES false
+        CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_LIST_DIR}/gvs/log/*
+        )
+
+add_library(log_client ${LOG_CLIENT_SOURCE_FILES})
+target_link_libraries(log_client PUBLIC gvs_net)
+set_target_properties(log_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+
 ###################
 ### Executables ###
 ###################
@@ -97,6 +110,9 @@ target_link_libraries(scene_server gvs_server)
 
 add_executable(visualiser_client exec/visualiser_client.cpp)
 target_link_libraries(visualiser_client vis_client)
+
+add_executable(message_client exec/message_client.cpp)
+target_link_libraries(message_client log_client)
 
 set_target_properties(vis_client_and_server scene_server visualiser_client PROPERTIES
         CXX_CLANG_TIDY "${DO_CLANG_TIDY}"

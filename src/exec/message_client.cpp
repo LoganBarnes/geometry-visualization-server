@@ -20,42 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include <gvs/log/message_stream.hpp>
 
-namespace gvs {
-namespace log {
+int main(int argc, char* argv[]) {
+    std::string server_address = "0.0.0.0:50055";
+    std::string client_name = "Client";
 
-class MessageStream;
+    if (argc > 1) {
+        server_address = argv[1];
+    }
 
-} // namespace log
+    if (argc > 2) {
+        client_name = argv[2];
+    }
 
-namespace net {
+    using namespace std::chrono_literals;
 
-enum class GrpcClientState;
+    gvs::log::MessageStream msgs(server_address, 3s, client_name);
 
-template <typename Service>
-class GrpcClient;
+    if (not msgs.connected()) {
+        return 0;
+    }
 
-class GrpcServer;
+    std::string input;
 
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-class VisClient;
-class Scene;
-
-} // namespace vis
-} // namespace gvs
+    do {
+        std::cout << client_name << ": " << std::flush;
+        std::cin >> input;
+        msgs << input << gvs::send;
+    } while (std::cin.good());
+}

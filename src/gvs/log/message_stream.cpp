@@ -20,42 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "message_stream.hpp"
+#include <grpcpp/client_context.h>
 
 namespace gvs {
 namespace log {
 
-class MessageStream;
+bool MessageStream::connected() const {
+    return stub_ != nullptr;
+}
+
+void MessageStream::send() {
+    if (stub_) {
+        message_.set_contents(content_stream_.str());
+        content_stream_.str("");
+
+        grpc::ClientContext context;
+        gvs::proto::Errors errors;
+        grpc::Status status = stub_->SendMessage(&context, message_, &errors);
+
+        if (not status.ok()) {
+            std::cerr << "Error sending message: " << status.error_message() << std::endl;
+
+        } else if (not errors.error_msg().empty()) {
+            std::cerr << "Error sending message: " << errors.error_msg() << std::endl;
+        }
+    }
+}
+
+MessageStream& MessageStream::operator<<(MessageStream& (*func)(MessageStream&)) {
+    if (stub_) {
+        return func(*this);
+    }
+    return *this;
+}
 
 } // namespace log
-
-namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-class VisClient;
-class Scene;
-
-} // namespace vis
 } // namespace gvs

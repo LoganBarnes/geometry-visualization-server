@@ -22,40 +22,10 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <gvs/forward_declarations.hpp>
+
 namespace gvs {
-namespace log {
 
-class MessageStream;
+log::MessageStream& send(log::MessageStream& ms);
 
-} // namespace log
-
-namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-class VisClient;
-class Scene;
-
-} // namespace vis
 } // namespace gvs
