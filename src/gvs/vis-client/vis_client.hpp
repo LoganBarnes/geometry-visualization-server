@@ -50,6 +50,8 @@ private:
 
     void process_message_update(const proto::Message& message);
 
+    void on_state_change();
+
     std::string gl_version_str_;
     std::string gl_renderer_str_;
 

@@ -80,22 +80,8 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , server_address_input_(initial_host_address)
     , grpc_client_(std::make_unique<net::GrpcClient<gvs::proto::Scene>>()) {
 
-    grpc_client_->change_server(server_address_input_, [this](const net::GrpcClientState&) {
-        gvs::proto::Messages messages;
-
-        // Load all the messages when the client first connects.
-        if (grpc_client_->use_stub([&](const auto& stub) {
-                // This lambda is only used if the client is connected
-                grpc::ClientContext context;
-                google::protobuf::Empty empty;
-                stub->GetAllMessages(&context, empty, &messages);
-            })) {
-
-            // This is only called if the client is connected
-            messages_.use_safely([&](gvs::proto::Messages& msgs) { msgs = messages; });
-        }
-        reset_draw_counter();
-    });
+    grpc_client_->change_server(server_address_input_,
+                                [this](const net::GrpcClientState&) { this->on_state_change(); });
 
     // Connect to the stream that delivers message updates
     grpc_client_->register_stream<proto::Message>(
@@ -156,7 +142,7 @@ void vis::VisClient::configure_gui() {
 
         if (value_changed) {
             grpc_client_->change_server(server_address_input_,
-                                        [this](const net::GrpcClientState&) { reset_draw_counter(); });
+                                        [this](const net::GrpcClientState&) { this->on_state_change(); });
         }
 
         if (state == net::GrpcClientState::attempting_to_connect) {
@@ -214,14 +200,14 @@ void vis::VisClient::configure_gui() {
 
         if (grpc_client_->use_stub([&](auto& stub) {
                 grpc::ClientContext context;
-                gvs::proto::SceneResponse response;
-                grpc::Status status = stub->SendMessage(&context, message, &response);
+                gvs::proto::Errors errors;
+                grpc::Status status = stub->SendMessage(&context, message, &errors);
 
                 if (not status.ok()) {
                     error_message_ = status.error_message();
 
-                } else if (not response.error_msg().empty()) {
-                    error_message_ = response.error_msg();
+                } else if (not errors.error_msg().empty()) {
+                    error_message_ = errors.error_msg();
                 }
             })) {
             message_content_input_ = "";
@@ -250,6 +236,23 @@ void vis::VisClient::configure_gui() {
 
 void VisClient::process_message_update(const proto::Message& message) {
     messages_.use_safely([&](gvs::proto::Messages& messages) { messages.add_messages()->CopyFrom(message); });
+    reset_draw_counter();
+}
+
+void VisClient::on_state_change() {
+    gvs::proto::Messages messages;
+
+    // Load all the messages when the client first connects.
+    if (grpc_client_->use_stub([&](const auto& stub) {
+            // This lambda is only used if the client is connected
+            grpc::ClientContext context;
+            google::protobuf::Empty empty;
+            stub->GetAllMessages(&context, empty, &messages);
+        })) {
+
+        // This is only called if the client is connected
+        messages_.use_safely([&](gvs::proto::Messages& msgs) { msgs.CopyFrom(messages); });
+    }
     reset_draw_counter();
 }
 
