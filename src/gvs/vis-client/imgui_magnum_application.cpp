@@ -97,7 +97,7 @@ void ImGuiMagnumApplication::drawEvent() {
     configure_gui();
     ImGui::PopFont();
 
-    Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color);
+    Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color | Magnum::GL::FramebufferClear::Depth);
 
     render();
 

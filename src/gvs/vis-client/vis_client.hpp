@@ -52,18 +52,23 @@ private:
 
     void on_state_change();
 
+    // General Info
     std::string gl_version_str_;
     std::string gl_renderer_str_;
-
-    std::string server_address_input_ = "address:port";
     std::string error_message_;
 
+    // Networking
+    std::string server_address_input_ = "address:port";
     std::unique_ptr<net::GrpcClient<gvs::proto::Scene>> grpc_client_;
+
+    // Messages
     bool wrap_text_ = false;
     util::AtomicData<gvs::proto::Messages> messages_;
-
     std::string message_id_input_;
     std::string message_content_input_;
+
+    // Scene
+    std::unique_ptr<Scene> scene_; // forward declaration
 };
 
 } // namespace vis

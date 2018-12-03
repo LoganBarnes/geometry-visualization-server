@@ -49,6 +49,7 @@ class Theme;
 } // namespace detail
 
 class VisClient;
+class Scene;
 
 } // namespace vis
 } // namespace gvs

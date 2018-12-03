@@ -26,6 +26,7 @@
 #include "gvs/net/grpc_server.hpp"
 #include "gvs/server/scene_server.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
+#include "gvs/vis-client/scene.hpp"
 
 #include <Magnum/GL/Context.h>
 #include <imgui.h>
@@ -78,7 +79,8 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
-    , grpc_client_(std::make_unique<net::GrpcClient<gvs::proto::Scene>>()) {
+    , grpc_client_(std::make_unique<net::GrpcClient<gvs::proto::Scene>>())
+    , scene_(std::make_unique<Scene>()) {
 
     grpc_client_->change_server(server_address_input_,
                                 [this](const net::GrpcClientState&) { this->on_state_change(); });
@@ -96,13 +98,15 @@ vis::VisClient::~VisClient() = default;
 
 void vis::VisClient::update() {}
 
-void vis::VisClient::render() const {}
+void vis::VisClient::render() const {
+    scene_->render(this->windowSize());
+}
 
 void vis::VisClient::configure_gui() {
     int h = this->windowSize().y();
     ImGui::SetNextWindowPos({0.f, 0.f});
     ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, h), ImVec2(std::numeric_limits<float>::infinity(), h));
-    ImGui::Begin("Settings", nullptr, ImVec2(200.f, h));
+    ImGui::Begin("Settings", nullptr, ImVec2(350.f, h));
 
     ImGui::Text("GL Version:   ");
     ImGui::SameLine();
