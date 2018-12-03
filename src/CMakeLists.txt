@@ -48,6 +48,7 @@ add_library(gvs_net ${GVS_COMMON_SOURCE_FILES})
 target_link_libraries(gvs_net
         PUBLIC gvs_protos
         PUBLIC gvs_util
+        PUBLIC crossguid
         )
 
 set_target_properties(gvs_net PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")

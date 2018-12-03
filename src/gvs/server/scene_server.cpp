@@ -33,12 +33,38 @@ SceneServer::SceneServer(std::string server_address)
     : server_(std::make_shared<gvs::proto::Scene::AsyncService>(), server_address) {
 
     gvs::net::StreamInterface<gvs::proto::Message>* message_stream
-        = server_.register_async_stream(&Service::Requestmessage_updates,
+        = server_.register_async_stream(&Service::RequestMessageUpdates,
                                         [](const google::protobuf::Empty& /*ignored*/) {});
 
-    server_.register_async(&Service::Requestsend_message,
-                           [message_stream](const gvs::proto::Message& message, gvs::proto::SceneResponse*) {
+    gvs::net::StreamInterface<gvs::proto::SceneUpdate>* scene_stream
+        = server_.register_async_stream(&Service::RequestSceneUpdates,
+                                        [](const google::protobuf::Empty& /*ignored*/) {});
+
+    server_.register_async(&Service::RequestSendMessage,
+                           [this, message_stream](const gvs::proto::Message& message, gvs::proto::SceneResponse*) {
+                               messages_.add_messages()->CopyFrom(message);
                                message_stream->write(message);
+                               return grpc::Status::OK;
+                           });
+
+    server_.register_async(&Service::RequestGetAllMessages,
+                           [this](const google::protobuf::Empty& /*empty*/, gvs::proto::Messages* messages) {
+                               messages->CopyFrom(messages_);
+                               return grpc::Status::OK;
+                           });
+
+    server_.register_async(&Service::RequestUpdateScene,
+                           [scene_stream](const gvs::proto::SceneUpdate& update, gvs::proto::SceneResponse* response) {
+                               switch (update.update_type_case()) {
+
+                               case proto::SceneUpdate::kAddItem:
+                                   scene_stream->write(update);
+                                   break;
+
+                               case proto::SceneUpdate::UPDATE_TYPE_NOT_SET:
+                                   response->set_error_msg("No update set");
+                                   break;
+                               }
                                return grpc::Status::OK;
                            });
 }

@@ -140,6 +140,36 @@ if (NOT imgui_dl_POPULATED)
     target_link_libraries(gvs_gui_thirdparty INTERFACE imgui)
 endif ()
 
+###############
+### stduuid ###
+###############
+#FetchContent_Declare(stduuid_dl
+#        GIT_REPOSITORY https://github.com/mariusbancila/stduuid.git
+#        GIT_TAG v1.0
+#        )
+#
+#FetchContent_GetProperties(stduuid_dl)
+#if (NOT stduuid_dl_POPULATED)
+#    FetchContent_Populate(stduuid_dl)
+#    add_library(stduuid INTERFACE)
+#    target_include_directories(stduuid SYSTEM INTERFACE ${stduuid_dl_SOURCE_DIR}/include)
+#endif()
+
+#################
+### crossguid ###
+#################
+FetchContent_Declare(crossguid_dl
+        GIT_REPOSITORY https://github.com/graeme-hill/crossguid.git
+        GIT_TAG master
+        )
+
+FetchContent_GetProperties(crossguid_dl)
+if (NOT crossguid_dl_POPULATED)
+    FetchContent_Populate(crossguid_dl)
+    add_subdirectory(${crossguid_dl_SOURCE_DIR} ${crossguid_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+    target_compile_options(crossguid PRIVATE -w)
+endif ()
+
 ##################
 ### GoogleTest ###
 ##################

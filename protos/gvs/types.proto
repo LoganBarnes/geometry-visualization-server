@@ -31,6 +31,10 @@ message Message {
     string contents = 2;
 }
 
+message Messages {
+    repeated Message messages = 1;
+}
+
 message UUID {
     bytes value = 1;
 }
@@ -97,4 +101,8 @@ message SceneItemInfo {
     // DisplayInfo display_info = 3;
     // UUID parent = 4;
     // repeated UUID children = 5;
+}
+
+message SceneItems {
+    repeated SceneItemInfo items = 1;
 }

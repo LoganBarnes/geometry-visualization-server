@@ -28,11 +28,14 @@ import "google/protobuf/empty.proto";
 import "gvs/types.proto";
 
 service Scene {
-    rpc update_scene (SceneUpdate) returns (SceneResponse);
-    rpc scene_updates (google.protobuf.Empty) returns (stream SceneUpdate);
+    rpc UpdateScene (SceneUpdate) returns (SceneResponse);
+    rpc GetAllItems (google.protobuf.Empty) returns (SceneItems);
+    rpc SetAllItems (google.protobuf.Empty) returns (SceneItems);
+    rpc SceneUpdates (google.protobuf.Empty) returns (stream SceneUpdate);
 
-    rpc send_message (Message) returns (SceneResponse);
-    rpc message_updates (google.protobuf.Empty) returns (stream Message);
+    rpc SendMessage (Message) returns (SceneResponse);
+    rpc GetAllMessages (google.protobuf.Empty) returns (Messages);
+    rpc MessageUpdates (google.protobuf.Empty) returns (stream Message);
 }
 
 message SceneResponse {

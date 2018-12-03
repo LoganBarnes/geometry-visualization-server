@@ -58,7 +58,7 @@ private:
 
     std::unique_ptr<net::GrpcClient<gvs::proto::Scene>> grpc_client_;
     bool wrap_text_ = false;
-    util::AtomicData<std::string> messages_;
+    util::AtomicData<gvs::proto::Messages> messages_;
 
     std::string message_id_input_;
     std::string message_content_input_;

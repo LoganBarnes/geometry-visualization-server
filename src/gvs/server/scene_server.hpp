@@ -23,6 +23,7 @@
 #pragma once
 
 #include "gvs/net/grpc_async_server.hpp"
+#include <crossguid/guid.hpp>
 
 #include <gvs/scene.grpc.pb.h>
 
@@ -42,6 +43,10 @@ public:
 private:
     using Service = gvs::proto::Scene::AsyncService;
     net::GrpcAsyncServer<Service> server_;
+
+    gvs::proto::SceneItems items_;
+    std::unordered_map<xg::Guid, int> item_uids_;
+    gvs::proto::Messages messages_;
 };
 
 } // namespace host

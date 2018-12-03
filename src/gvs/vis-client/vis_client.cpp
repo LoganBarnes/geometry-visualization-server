@@ -80,12 +80,28 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , server_address_input_(initial_host_address)
     , grpc_client_(std::make_unique<net::GrpcClient<gvs::proto::Scene>>()) {
 
-    grpc_client_->change_server(server_address_input_, [this](const net::GrpcClientState&) { reset_draw_counter(); });
+    grpc_client_->change_server(server_address_input_, [this](const net::GrpcClientState&) {
+        gvs::proto::Messages messages;
 
+        // Load all the messages when the client first connects.
+        if (grpc_client_->use_stub([&](const auto& stub) {
+                // This lambda is only used if the client is connected
+                grpc::ClientContext context;
+                google::protobuf::Empty empty;
+                stub->GetAllMessages(&context, empty, &messages);
+            })) {
+
+            // This is only called if the client is connected
+            messages_.use_safely([&](gvs::proto::Messages& msgs) { msgs = messages; });
+        }
+        reset_draw_counter();
+    });
+
+    // Connect to the stream that delivers message updates
     grpc_client_->register_stream<proto::Message>(
         [](std::unique_ptr<proto::Scene::Stub>& stub, grpc::ClientContext* context) {
             google::protobuf::Empty empty;
-            return stub->message_updates(context, empty);
+            return stub->MessageUpdates(context, empty);
         },
         [this](const proto::Message& msg) { this->process_message_update(msg); });
 }
@@ -153,15 +169,9 @@ void vis::VisClient::configure_gui() {
         ImGui::TreePop();
     }
 
-    float message_input_start_height = h - 100.f;
-    float max_message_window_height = message_input_start_height - ImGui::GetCursorPos().y;
-
-    messages_.use_safely([&](const std::string& data) {
-        ImVec2 msgs_size = ImGui::CalcTextSize(data.c_str());
-        msgs_size.x = ImGui::GetWindowSize().x;
-        msgs_size.y = std::min(msgs_size.y, max_message_window_height);
-
-        ImGui::SetCursorPos({0.f, message_input_start_height - msgs_size.y});
+    messages_.use_safely([&](const gvs::proto::Messages& messages) {
+        float message_input_start_height = h - 100.f;
+        float max_message_window_height = message_input_start_height - ImGui::GetCursorPos().y;
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -169,11 +179,14 @@ void vis::VisClient::configure_gui() {
         ImGui::Separator();
         ImGui::Spacing();
 
-        ImGui::BeginChild("Messages", msgs_size);
-        if (wrap_text_) {
-            ImGui::TextWrapped("%s", data.c_str());
-        } else {
-            ImGui::Text("%s", data.c_str());
+        ImGui::BeginChild("Messages", {ImGui::GetWindowSize().x, max_message_window_height});
+
+        auto text_func = (wrap_text_ ? &ImGui::TextWrapped : &ImGui::Text);
+
+        for (const auto& message : messages.messages()) {
+            ImGui::TextColored({0.7f, 0.7f, 0.7f, 1.f}, "%s: ", message.identifier().c_str());
+            ImGui::SameLine();
+            text_func("%s", message.contents().c_str());
         }
         ImGui::SetScrollY(ImGui::GetScrollMaxY());
         ImGui::EndChild();
@@ -202,7 +215,7 @@ void vis::VisClient::configure_gui() {
         if (grpc_client_->use_stub([&](auto& stub) {
                 grpc::ClientContext context;
                 gvs::proto::SceneResponse response;
-                grpc::Status status = stub->send_message(&context, message, &response);
+                grpc::Status status = stub->SendMessage(&context, message, &response);
 
                 if (not status.ok()) {
                     error_message_ = status.error_message();
@@ -236,7 +249,7 @@ void vis::VisClient::configure_gui() {
 }
 
 void VisClient::process_message_update(const proto::Message& message) {
-    messages_.use_safely([&](std::string& data) { data += message.identifier() + ": " + message.contents() + "\n"; });
+    messages_.use_safely([&](gvs::proto::Messages& messages) { messages.add_messages()->CopyFrom(message); });
     reset_draw_counter();
 }
 
