@@ -29,48 +29,93 @@
 
 namespace gvs {
 
-enum class ParamType : uint32_t {
-    positions_3d,
-    normals_3d,
-    tex_coords_3d,
-    vertex_colors,
-    indices,
-};
-
-template <ParamType PT, typename Func>
-struct Param {
-    Func move_func;
-};
-
-//template <ParamType PT, typename Data, void (*data_func_)(const Data& data, gvs::proto::SceneItemInfo*)>
-//struct Param {
-//    Data data_;
+//enum class ParamType : uint32_t {
+//    positions_3d,
+//    normals_3d,
+//    tex_coords_3d,
+//    vertex_colors,
+//    indices,
+//};
 //
-//    void move_func(gvs::proto::SceneItemInfo* info) { data_func_(data_, info); }
+//template <ParamType PT, typename Data, gvs::proto::GeometryFormat format = gvs::proto::GeometryFormat::DEFAULT>
+//class Param {
+//public:
+//    explicit Param(Data data) : data_(std::move(data)) {}
+//    std::string move_func(gvs::proto::SceneItemInfo* info);
+//
+//private:
+//    Data data_;
 //};
 
-template <ParamType PT, typename Func>
-Param<PT, Func> make_param(Func&& func) {
-    return Param<PT, Func>{std::forward<Func>(func)};
-}
-
-namespace detail {
-
-inline void positions_3d(const std::vector<float>& data, gvs::proto::SceneItemInfo* info) {
-    *(info->mutable_geometry_info()->mutable_positions()) = {data.begin(), data.end()};
-}
-
-} // namespace detail
+//using Positions3D = Param<ParamType::positions_3d, std::vector<float>>;
+//template <>
+//void Positions3D::move_func(gvs::proto::SceneItemInfo* info) {
+//    *(info->mutable_geometry_info()->mutable_positions()) = {data_.begin(), data_.end()};
+//}
+//
+//using Points3D = Param<ParamType::positions_3d, std::vector<float>, gvs::proto::GeometryFormat::POINTS>;
+//template <>
+//void Points3D::move_func(gvs::proto::SceneItemInfo* info) {
+//    info->mutable_display_info()->mutable_geometry_format()->set_value(gvs::proto::GeometryFormat::POINTS);
+//    *(info->mutable_geometry_info()->mutable_positions()) = {data_.begin(), data_.end()};
+//}
 
 inline auto positions_3d(std::vector<float> data) {
-    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info, ParamType* type) {
-        *type = ParamType::positions_3d;
-        *(info->mutable_geometry_info()->mutable_positions()) = {data.begin(), data.end()};
+    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+        if (info->mutable_geometry_info()->has_positions()) {
+            return "positions_3d";
+        }
+        *(info->mutable_geometry_info()->mutable_positions()->mutable_value()) = {data.begin(), data.end()};
+        return "";
     };
 }
 
-//using Positions3D = Param<ParamType::positions_3d, std::vector<float>, &detail::positions_3d>;
-//using Normals3D
-//    = Param<ParamType::positions_3d, std::vector<float>, [](const std::vector<float>&, gvs::proto::SceneItemInfo*) {}>;
+inline auto normals_3d(std::vector<float> data) {
+    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+        if (info->mutable_geometry_info()->has_normals()) {
+            return "normals_3d";
+        }
+        *(info->mutable_geometry_info()->mutable_normals()->mutable_value()) = {data.begin(), data.end()};
+        return "";
+    };
+}
+
+inline auto tex_coords_3d(std::vector<float> data) {
+    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+        if (info->mutable_geometry_info()->has_tex_coords()) {
+            return "tex_coords_3d";
+        }
+        *(info->mutable_geometry_info()->mutable_tex_coords()->mutable_value()) = {data.begin(), data.end()};
+        return "";
+    };
+}
+
+inline auto vertex_colors_3d(std::vector<float> data) {
+    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+        if (info->mutable_geometry_info()->has_vertex_colors()) {
+            return "vertex_colors_3d";
+        }
+        *(info->mutable_geometry_info()->mutable_vertex_colors()->mutable_value()) = {data.begin(), data.end()};
+        return "";
+    };
+}
+
+template <gvs::proto::GeometryFormat format>
+inline auto indices(std::vector<float> data) {
+    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+        if (info->mutable_geometry_info()->has_indices()) {
+            return "indices";
+        }
+        *(info->mutable_geometry_info()->mutable_indices()->mutable_value()) = {data.begin(), data.end()};
+        return "";
+    };
+}
+
+auto points = indices<gvs::proto::GeometryFormat::POINTS>;
+auto lines = indices<gvs::proto::GeometryFormat::LINES>;
+auto line_strip = indices<gvs::proto::GeometryFormat::LINE_STRIP>;
+auto triangles = indices<gvs::proto::GeometryFormat::TRIANGLES>;
+auto triangle_strip = indices<gvs::proto::GeometryFormat::TRIANGLE_STRIP>;
+auto triangle_fan = indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>;
 
 } // namespace gvs

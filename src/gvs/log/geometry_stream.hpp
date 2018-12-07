@@ -51,14 +51,14 @@ public:
 
     GeometryStream& operator<<(GeometryStream& (*func)(GeometryStream&));
 
-    template <ParamType PT, typename Func>
-    GeometryStream& operator<<(Param<PT, Func>&& param);
+    //    template <ParamType PT, typename Func>
+    //    GeometryStream& operator<<(Param<PT, Func>&& param);
 
 private:
     std::shared_ptr<grpc::Channel> channel_;
     std::unique_ptr<gvs::proto::Scene::Stub> stub_;
     gvs::proto::SceneUpdate update_;
-    gvs::proto::SceneItemInfo* info_;
+    //    gvs::proto::SceneItemInfo* info_;
 };
 
 template <typename Rep, typename Period>
@@ -74,13 +74,13 @@ GeometryStream::GeometryStream(const std::string& server_address,
     }
 }
 
-template <ParamType PT, typename Func>
-GeometryStream& GeometryStream::operator<<(Param<PT, Func>&& param) {
-    if (stub_) {
-        param.move_func(&info_);
-    }
-    return *this;
-}
+//template <ParamType PT, typename Func>
+//GeometryStream& GeometryStream::operator<<(Param<PT, Func>&& param) {
+//    if (stub_) {
+//        param.move_func(&info_);
+//    }
+//    return *this;
+//}
 
 } // namespace log
 } // namespace gvs

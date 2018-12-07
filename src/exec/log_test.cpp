@@ -44,7 +44,7 @@ public:
     SceneItem() { info_.mutable_id()->set_value(xg::newGuid().str()); }
 
     SceneItem& operator<<(const std::vector<float>& positions) {
-        *(info_.mutable_geometry_info()->mutable_positions()) = {positions.begin(), positions.end()};
+        *(info_.mutable_geometry_info()->mutable_positions()->mutable_value()) = {positions.begin(), positions.end()};
         return *this;
     }
 
@@ -63,13 +63,13 @@ enum class SendType {
     append,
 };
 
-struct SceneSender {
+struct ItemStream {
 
-    explicit SceneSender(std::string id, gvs::proto::Scene::Stub* stub) : id_(std::move(id)), stub_(stub) {
+    explicit ItemStream(std::string id, gvs::proto::Scene::Stub* stub) : id_(std::move(id)), stub_(stub) {
         info_.mutable_id()->set_value(id_);
     }
 
-    ~SceneSender() = default;
+    ~ItemStream() = default;
 
     void send(SendType type) {
         if (stub_) {
@@ -113,15 +113,15 @@ struct SceneSender {
     const std::string& error_message() const { return error_message_; }
 
     template <typename Functor>
-    SceneSender& operator<<(Functor&& functor) {
-        if (stub_) {
-            ParamType type;
-            functor(&info_, &type);
+    ItemStream& operator<<(Functor&& functor) {
+        std::string error_name = functor(&info_);
+        if (not error_name.empty()) {
+            throw std::invalid_argument(error_name + " is already set");
         }
         return *this;
     }
 
-    SceneSender& operator<<(SceneSender& (*send_func)(SceneSender&)) { return send_func(*this); }
+    ItemStream& operator<<(ItemStream& (*send_func)(ItemStream&)) { return send_func(*this); }
 
     const std::string id_;
     std::string error_message_ = "";
@@ -130,44 +130,52 @@ struct SceneSender {
     gvs::proto::Scene::Stub* stub_;
 };
 
-SceneSender& send(SceneSender& sender);
-SceneSender& replace(SceneSender& sender);
-SceneSender& append(SceneSender& sender);
+ItemStream& send(ItemStream& sender);
+ItemStream& replace(ItemStream& sender);
+ItemStream& append(ItemStream& sender);
 
-SceneSender& send(SceneSender& sender) {
+ItemStream& send(ItemStream& sender) {
     sender.send(SendType::safe);
     return sender;
 }
 
-SceneSender& replace(SceneSender& sender) {
+ItemStream& replace(ItemStream& sender) {
     sender.send(SendType::replace);
     return sender;
 }
 
-SceneSender& append(SceneSender& sender) {
+ItemStream& append(ItemStream& sender) {
     sender.send(SendType::append);
     return sender;
 }
 
 class Scene {
 public:
-    template <typename Rep, typename Period>
-    Scene(const std::string& server_address, const std::chrono::duration<Rep, Period>& max_connection_wait_duration)
-        : channel_(grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials())) {
+    explicit Scene(const std::string& server_address) : Scene(server_address, std::chrono::seconds(3)) {}
 
-        if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
-            stub_ = gvs::proto::Scene::NewStub(channel_);
+    template <typename Rep, typename Period>
+    Scene(const std::string& server_address, const std::chrono::duration<Rep, Period>& max_connection_wait_duration) {
+
+        if (server_address.empty()) {
+            std::cout << "No server address provided. Ignoring stream requests." << std::endl;
 
         } else {
-            std::cerr << "Failed to connect to " << server_address << ". No messages will be sent." << std::endl;
+            channel_ = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+
+            if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
+                stub_ = gvs::proto::Scene::NewStub(channel_);
+
+            } else {
+                std::cerr << "Failed to connect to " << server_address << ". No messages will be sent." << std::endl;
+            }
         }
     }
 
-    SceneSender stream(const std::string& id = "") {
+    ItemStream stream(const std::string& id = "") {
         if (id.empty()) {
-            return SceneSender(generate_uuid(), stub_.get());
+            return ItemStream(generate_uuid(), stub_.get());
         }
-        return SceneSender(id, stub_.get());
+        return ItemStream(id, stub_.get());
     }
 
     std::string generate_uuid() {
@@ -193,7 +201,15 @@ int main(int argc, char* argv[]) {
 
     using namespace std::chrono_literals;
 
-    gvs::log::Scene scene(server_address, 3s);
+    //    gvs::log::Scene scene(server_address, 3s);
+    gvs::log::Scene scene("");
 
-    gvs::log::SceneSender sender = scene.stream() << gvs::positions_3d({}) << gvs::log::send;
+    gvs::log::ItemStream stream = scene.stream() << gvs::positions_3d({}) << gvs::log::send;
+    //    gvs::log::ItemStream stream = scene.stream() << gvs::positions_3d({});
+
+    stream << gvs::positions_3d({}) << gvs::normals_3d({}) << gvs::tex_coords_3d({}) << gvs::vertex_colors_3d({});
+    //    stream << gvs::points({}) << gvs::line_strip({});
+    stream << gvs::indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>({});
+
+    std::cout << stream.id_ << std::endl;
 }
