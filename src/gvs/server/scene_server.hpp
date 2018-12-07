@@ -45,7 +45,7 @@ private:
     net::GrpcAsyncServer<Service> server_;
 
     gvs::proto::SceneItems items_;
-    std::unordered_map<xg::Guid, int> item_uuids_;
+    std::unordered_map<std::string, int> item_ids_;
     gvs::proto::Messages messages_;
 };
 

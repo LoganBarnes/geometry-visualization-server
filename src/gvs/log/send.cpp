@@ -22,19 +22,29 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/log/send.hpp"
 
-#include "gvs/log/geometry_stream.hpp"
+#include "gvs/log/geometry_item_stream.hpp"
 #include "gvs/log/message_stream.hpp"
 
 namespace gvs {
 
-log::MessageStream& send(log::MessageStream& ms) {
-    ms.send();
-    return ms;
+log::MessageStream& send(log::MessageStream& stream) {
+    stream.send();
+    return stream;
 }
 
-log::GeometryStream& send(log::GeometryStream& gs) {
-    gs.send();
-    return gs;
+log::GeometryItemStream& send(log::GeometryItemStream& stream) {
+    stream.send(log::SendType::safe);
+    return stream;
+}
+
+log::GeometryItemStream& replace(log::GeometryItemStream& stream) {
+    stream.send(log::SendType::replace);
+    return stream;
+}
+
+log::GeometryItemStream& append(log::GeometryItemStream& stream) {
+    stream.send(log::SendType::append);
+    return stream;
 }
 
 } // namespace gvs

@@ -26,7 +26,8 @@ namespace gvs {
 namespace log {
 
 class MessageStream;
-class GeometryStream;
+class GeometryLogger;
+class GeometryItemStream;
 
 } // namespace log
 

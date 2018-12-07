@@ -20,38 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "geometry_stream.hpp"
+#include "geometry_logger.hpp"
 
 #include <grpcpp/client_context.h>
 
 namespace gvs {
 namespace log {
 
-bool GeometryStream::connected() const {
+GeometryLogger::GeometryLogger(const std::string& server_address)
+    : GeometryLogger(server_address, std::chrono::seconds(3)) {}
+
+bool GeometryLogger::connected() const {
     return stub_ != nullptr;
 }
 
-void GeometryStream::send() {
-    if (stub_) {
-
-        grpc::ClientContext context;
-        gvs::proto::Errors errors;
-        grpc::Status status = stub_->UpdateScene(&context, update_, &errors);
-
-        if (not status.ok()) {
-            std::cerr << "Error sending message: " << status.error_message() << std::endl;
-
-        } else if (not errors.error_msg().empty()) {
-            std::cerr << "Error sending message: " << errors.error_msg() << std::endl;
-        }
-    }
+std::string GeometryLogger::generate_uuid() const {
+    return xg::newGuid().str();
 }
 
-GeometryStream& GeometryStream::operator<<(GeometryStream& (*func)(GeometryStream&)) {
-    if (stub_) {
-        return func(*this);
+GeometryItemStream GeometryLogger::item_stream(const std::string& id) {
+    if (id.empty()) {
+        return GeometryItemStream(generate_uuid(), stub_.get());
     }
-    return *this;
+    return GeometryItemStream(id, stub_.get());
 }
 
 } // namespace log

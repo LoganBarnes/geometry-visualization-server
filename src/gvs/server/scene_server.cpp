@@ -79,24 +79,29 @@ SceneServer::SceneServer(std::string server_address)
 
     server_.register_async(&Service::RequestUpdateScene,
                            [scene_stream, this](const gvs::proto::SceneUpdate& update, gvs::proto::Errors* errors) {
-                               switch (update.update_type_case()) {
+                               switch (update.update_case()) {
 
-                               case proto::SceneUpdate::kAddItem: {
-                                   xg::Guid uuid(update.add_item().uuid().value());
+                               case proto::SceneUpdate::kSafeSetItem: {
+                                   std::string id = update.safe_set_item().id().value();
 
-                                   if (util::has_key(item_uuids_, uuid)) {
-                                       errors->set_error_msg("Item with UUID already exists");
+                                   if (util::has_key(item_ids_, id)) {
+                                       errors->set_error_msg("Item with ID already exists");
                                        return grpc::Status::OK;
                                    }
 
-                                   item_uuids_.emplace(uuid, items_.items_size());
-                                   items_.add_items()->CopyFrom(update.add_item());
+                                   item_ids_.emplace(id, items_.items_size());
+                                   items_.add_items()->CopyFrom(update.safe_set_item());
                                    // TODO: Handle parent and children updates
 
                                    scene_stream->write(update);
                                } break;
 
-                               case proto::SceneUpdate::UPDATE_TYPE_NOT_SET:
+                               case proto::SceneUpdate::kReplaceItem:
+                                   break;
+                               case proto::SceneUpdate::kAppendToItem:
+                                   break;
+
+                               case proto::SceneUpdate::UPDATE_NOT_SET:
                                    errors->set_error_msg("No update set");
                                    break;
                                }

@@ -23,64 +23,58 @@
 #pragma once
 
 // project
-#include "gvs/log/log_params.hpp"
-#include "gvs/log/send.hpp"
-
-// generated
-#include <gvs/scene.grpc.pb.h>
+#include "gvs/log/geometry_item_stream.hpp"
 
 // third party
+#include <crossguid/guid.hpp>
 #include <grpcpp/create_channel.h>
-
-// standard
-#include <sstream>
 
 namespace gvs {
 namespace log {
 
-class GeometryStream {
+class GeometryLogger {
 public:
+    /**
+     * If 'server_address' is an empty string, no connection attempt will be made.
+     *
+     * Defaults to a maximum 3 second wait time when attempting to connect.
+     */
+    explicit GeometryLogger(const std::string& server_address);
+
     template <typename Rep, typename Period>
-    explicit GeometryStream(const std::string& server_address,
-                            const std::chrono::duration<Rep, Period>& max_connection_wait_duration
-                            /*, seed argument?*/);
+    explicit GeometryLogger(const std::string& server_address,
+                            const std::chrono::duration<Rep, Period>& max_connection_wait_duration);
 
     bool connected() const;
 
-    void send();
+    std::string generate_uuid() const;
 
-    GeometryStream& operator<<(GeometryStream& (*func)(GeometryStream&));
-
-    //    template <ParamType PT, typename Func>
-    //    GeometryStream& operator<<(Param<PT, Func>&& param);
+    GeometryItemStream item_stream(const std::string& id = "");
 
 private:
     std::shared_ptr<grpc::Channel> channel_;
     std::unique_ptr<gvs::proto::Scene::Stub> stub_;
-    gvs::proto::SceneUpdate update_;
-    //    gvs::proto::SceneItemInfo* info_;
 };
 
 template <typename Rep, typename Period>
-GeometryStream::GeometryStream(const std::string& server_address,
-                               const std::chrono::duration<Rep, Period>& max_connection_wait_duration)
-    : channel_(grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials())) {
+GeometryLogger::GeometryLogger(const std::string& server_address,
+                               const std::chrono::duration<Rep, Period>& max_connection_wait_duration) {
 
-    if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
-        stub_ = gvs::proto::Scene::NewStub(channel_);
+    if (server_address.empty()) {
+        std::cout << "No server address provided. Ignoring stream requests." << std::endl;
 
     } else {
-        std::cerr << "Failed to connect to " << server_address << ". No messages will be sent." << std::endl;
+        channel_ = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+
+        if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
+            stub_ = gvs::proto::Scene::NewStub(channel_);
+
+        } else {
+            channel_ = nullptr;
+            std::cerr << "Failed to connect to " << server_address << ". No messages will be sent." << std::endl;
+        }
     }
 }
-
-//template <ParamType PT, typename Func>
-//GeometryStream& GeometryStream::operator<<(Param<PT, Func>&& param) {
-//    if (stub_) {
-//        param.move_func(&info_);
-//    }
-//    return *this;
-//}
 
 } // namespace log
 } // namespace gvs

@@ -101,7 +101,7 @@ inline auto vertex_colors_3d(std::vector<float> data) {
 }
 
 template <gvs::proto::GeometryFormat format>
-inline auto indices(std::vector<float> data) {
+auto indices(std::vector<float> data) {
     return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_indices()) {
             return "indices";
@@ -111,11 +111,11 @@ inline auto indices(std::vector<float> data) {
     };
 }
 
-auto points = indices<gvs::proto::GeometryFormat::POINTS>;
-auto lines = indices<gvs::proto::GeometryFormat::LINES>;
-auto line_strip = indices<gvs::proto::GeometryFormat::LINE_STRIP>;
-auto triangles = indices<gvs::proto::GeometryFormat::TRIANGLES>;
-auto triangle_strip = indices<gvs::proto::GeometryFormat::TRIANGLE_STRIP>;
-auto triangle_fan = indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>;
+constexpr auto points = indices<gvs::proto::GeometryFormat::POINTS>;
+constexpr auto lines = indices<gvs::proto::GeometryFormat::LINES>;
+constexpr auto line_strip = indices<gvs::proto::GeometryFormat::LINE_STRIP>;
+constexpr auto triangles = indices<gvs::proto::GeometryFormat::TRIANGLES>;
+constexpr auto triangle_strip = indices<gvs::proto::GeometryFormat::TRIANGLE_STRIP>;
+constexpr auto triangle_fan = indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>;
 
 } // namespace gvs
