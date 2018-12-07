@@ -27,5 +27,6 @@
 namespace gvs {
 
 log::MessageStream& send(log::MessageStream& ms);
+log::GeometryStream& send(log::GeometryStream& gs);
 
 } // namespace gvs

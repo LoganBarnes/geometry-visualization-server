@@ -114,6 +114,9 @@ target_link_libraries(visualiser_client vis_client)
 add_executable(message_client exec/message_client.cpp)
 target_link_libraries(message_client log_client)
 
+add_executable(log_test exec/log_test.cpp)
+target_link_libraries(log_test log_client)
+
 set_target_properties(vis_client_and_server scene_server visualiser_client PROPERTIES
         CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"

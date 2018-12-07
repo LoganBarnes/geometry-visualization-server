@@ -20,43 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "gvs/log/log_params.hpp"
 
 namespace gvs {
-namespace log {
 
-class MessageStream;
-class GeometryStream;
+//auto positions_3d(std::vector<float> positions_3d) {
+//    return make_param<ParamType::positions_3d>(
+//        [positions_3d = std::move(positions_3d)](gvs::proto::SceneItemInfo* info) {
+//            *(info->mutable_geometry_info()->mutable_positions()) = {positions_3d.begin(), positions_3d.end()};
+//        });
+//}
 
-} // namespace log
-
-namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-class VisClient;
-class Scene;
-
-} // namespace vis
 } // namespace gvs

@@ -35,8 +35,8 @@ message Messages {
     repeated Message messages = 1;
 }
 
-message UUID {
-    bytes value = 1;
+message ID {
+    string value = 1;
 }
 
 //message Vec3 {
@@ -96,11 +96,11 @@ message GeometryInfo3D {
 //}
 
 message SceneItemInfo {
-    UUID uuid = 1;
+    ID id = 1;
     GeometryInfo3D geometry_info = 2;
     // DisplayInfo display_info = 3;
-    // UUID parent = 4;
-    // repeated UUID children = 5;
+    // ID parent = 4;
+    // repeated ID children = 5;
 }
 
 message SceneItems {

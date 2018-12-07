@@ -22,41 +22,55 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <gvs/types.pb.h>
+
+#include <cstdint>
+#include <vector>
+
 namespace gvs {
-namespace log {
 
-class MessageStream;
-class GeometryStream;
+enum class ParamType : uint32_t {
+    positions_3d,
+    normals_3d,
+    tex_coords_3d,
+    vertex_colors,
+    indices,
+};
 
-} // namespace log
+template <ParamType PT, typename Func>
+struct Param {
+    Func move_func;
+};
 
-namespace net {
+//template <ParamType PT, typename Data, void (*data_func_)(const Data& data, gvs::proto::SceneItemInfo*)>
+//struct Param {
+//    Data data_;
+//
+//    void move_func(gvs::proto::SceneItemInfo* info) { data_func_(data_, info); }
+//};
 
-enum class GrpcClientState;
+template <ParamType PT, typename Func>
+Param<PT, Func> make_param(Func&& func) {
+    return Param<PT, Func>{std::forward<Func>(func)};
+}
 
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
 namespace detail {
 
-class Theme;
+inline void positions_3d(const std::vector<float>& data, gvs::proto::SceneItemInfo* info) {
+    *(info->mutable_geometry_info()->mutable_positions()) = {data.begin(), data.end()};
+}
 
 } // namespace detail
 
-class VisClient;
-class Scene;
+inline auto positions_3d(std::vector<float> data) {
+    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info, ParamType* type) {
+        *type = ParamType::positions_3d;
+        *(info->mutable_geometry_info()->mutable_positions()) = {data.begin(), data.end()};
+    };
+}
 
-} // namespace vis
+//using Positions3D = Param<ParamType::positions_3d, std::vector<float>, &detail::positions_3d>;
+//using Normals3D
+//    = Param<ParamType::positions_3d, std::vector<float>, [](const std::vector<float>&, gvs::proto::SceneItemInfo*) {}>;
+
 } // namespace gvs

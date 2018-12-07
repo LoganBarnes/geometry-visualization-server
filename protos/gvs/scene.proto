@@ -43,8 +43,10 @@ message Errors {
 }
 
 message SceneUpdate {
-    oneof update_type {
-        SceneItemInfo add_item = 1;
+    oneof update {
+        SceneItemInfo safe_set_item = 1;
+        SceneItemInfo replace_item = 2;
+        SceneItemInfo append_to_item = 3;
         // SceneItemInfo update_item = 2;
         // SceneItemInfo remove_item = 3;
     }

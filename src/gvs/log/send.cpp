@@ -21,6 +21,8 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/log/send.hpp"
+
+#include "gvs/log/geometry_stream.hpp"
 #include "gvs/log/message_stream.hpp"
 
 namespace gvs {
@@ -28,6 +30,11 @@ namespace gvs {
 log::MessageStream& send(log::MessageStream& ms) {
     ms.send();
     return ms;
+}
+
+log::GeometryStream& send(log::GeometryStream& gs) {
+    gs.send();
+    return gs;
 }
 
 } // namespace gvs
