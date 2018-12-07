@@ -49,6 +49,7 @@ private:
     void configure_gui() override;
 
     void process_message_update(const proto::Message& message);
+    void process_scene_update(const proto::SceneUpdate& message);
 
     void on_state_change();
 
@@ -59,16 +60,17 @@ private:
 
     // Networking
     std::string server_address_input_ = "address:port";
-    std::unique_ptr<net::GrpcClient<gvs::proto::Scene>> grpc_client_;
+    std::unique_ptr<net::GrpcClient<proto::Scene>> grpc_client_;
 
     // Messages
     bool wrap_text_ = false;
-    util::AtomicData<gvs::proto::Messages> messages_;
+    util::AtomicData<proto::Messages> messages_;
     std::string message_id_input_;
     std::string message_content_input_;
 
     // Scene
     std::unique_ptr<Scene> scene_; // forward declaration
+    util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
 };
 
 } // namespace vis

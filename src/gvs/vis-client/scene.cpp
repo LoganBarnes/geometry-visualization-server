@@ -46,24 +46,11 @@ Scene::Scene() {
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
     colored_shader_.setAmbientColor(0x111111_rgbf).setSpecularColor(0xffffff_rgbf).setShininess(80.0f);
 
-    // Temp cube mesh stuff
-    const Trade::MeshData3D cube = Primitives::cubeSolid();
-
-    vertex_buffer_.setData(MeshTools::interleave(cube.positions(0), cube.normals(0)));
-
-    Containers::Array<char> index_data;
-    MeshIndexType index_type;
-    UnsignedInt index_start, index_end;
-    std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(cube.indices());
-    index_buffer_.setData(index_data);
-
-    mesh_.setPrimitive(cube.primitive())
-        .setCount(static_cast<int>(cube.indices().size()))
-        .addVertexBuffer(vertex_buffer_, 0, Shaders::Phong::Position{}, Shaders::Phong::Normal{})
-        .setIndexBuffer(index_buffer_, 0, index_type, index_start, index_end);
+    // TMP
+    mesh_.setCount(0);
 }
 
-void Scene::render(const Magnum::Vector2i& viewport) {
+void Scene::update(const Magnum::Vector2i& viewport) {
 
     auto transformation = Matrix4::rotationX(30.0_degf) * Matrix4::rotationY(40.0_degf);
     auto projection = Matrix4::perspectiveProjection(35.0_degf, Vector2{viewport}.aspectRatio(), 0.01f, 100.0f)
@@ -77,11 +64,40 @@ void Scene::render(const Magnum::Vector2i& viewport) {
         .setTransformationMatrix(transformation)
         .setNormalMatrix(transformation.rotationScaling())
         .setProjectionMatrix(projection);
+}
 
+void Scene::render(const Magnum::Vector2i& /*viewport*/) {
     mesh_.draw(shader_);
 }
 
 void Scene::configure_gui(const Magnum::Vector2i& /*viewport*/) {}
+
+void Scene::reset(const proto::SceneItems& items) {
+    for (const auto& item : items.items()) {
+        add_item(item.second);
+        break; // only one for now while implementing
+    }
+}
+
+void Scene::add_item(const proto::SceneItemInfo& /*info*/) {
+    const Trade::MeshData3D cube = Primitives::cubeSolid();
+
+    std::vector<float> buffer_data;
+
+    buffer_data = {-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0};
+
+    vertex_buffer_.setData(buffer_data);
+
+    //    Containers::Array<char> index_data;
+    //    MeshIndexType index_type;
+    //    UnsignedInt index_start, index_end;
+    //    std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(cube.indices());
+    //    index_buffer_.setData(index_data);
+
+    mesh_.setCount(4)
+        .addVertexBuffer(vertex_buffer_, 0, Shaders::Phong::Position{})
+        .setPrimitive(Magnum::MeshPrimitive::TriangleStrip);
+}
 
 } // namespace vis
 } // namespace gvs

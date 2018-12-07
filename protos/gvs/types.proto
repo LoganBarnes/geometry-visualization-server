@@ -112,5 +112,5 @@ message SceneItemInfo {
 }
 
 message SceneItems {
-    repeated SceneItemInfo items = 1;
+    map<string, SceneItemInfo> items = 1;
 }

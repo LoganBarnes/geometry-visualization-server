@@ -28,7 +28,7 @@ import "google/protobuf/empty.proto";
 import "gvs/types.proto";
 
 service Scene {
-    rpc UpdateScene (SceneUpdate) returns (Errors);
+    rpc UpdateScene (SceneUpdateRequest) returns (Errors);
     rpc SetAllItems (SceneItems) returns (Errors);
     rpc GetAllItems (google.protobuf.Empty) returns (SceneItems);
     rpc SceneUpdates (google.protobuf.Empty) returns (stream SceneUpdate);
@@ -42,12 +42,21 @@ message Errors {
     string error_msg = 1; // empty if rpc was successful
 }
 
-message SceneUpdate {
+message SceneUpdateRequest {
     oneof update {
         SceneItemInfo safe_set_item = 1;
         SceneItemInfo replace_item = 2;
         SceneItemInfo append_to_item = 3;
         // SceneItemInfo update_item = 2;
         // SceneItemInfo remove_item = 3;
+    }
+}
+
+message SceneUpdate {
+    oneof update {
+        SceneItemInfo add_item = 1;
+        // SceneItemInfo update_item = 2;
+        // SceneItemInfo remove_item = 3;
+        SceneItems reset_all_items = 4;
     }
 }

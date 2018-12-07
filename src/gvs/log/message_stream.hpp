@@ -55,8 +55,8 @@ public:
 
 private:
     std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<gvs::proto::Scene::Stub> stub_;
-    gvs::proto::Message message_;
+    std::unique_ptr<proto::Scene::Stub> stub_;
+    proto::Message message_;
     std::stringstream content_stream_;
 };
 
@@ -69,7 +69,7 @@ MessageStream::MessageStream(const std::string& server_address,
     message_.set_identifier(identifier);
 
     if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
-        stub_ = gvs::proto::Scene::NewStub(channel_);
+        stub_ = proto::Scene::NewStub(channel_);
 
     } else {
         std::cerr << "Failed to connect to " << server_address << ". No messages will be sent." << std::endl;

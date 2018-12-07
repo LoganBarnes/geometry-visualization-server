@@ -29,16 +29,16 @@ namespace gvs {
 namespace host {
 
 SceneServer::SceneServer(std::string server_address)
-    : server_(std::make_shared<gvs::proto::Scene::AsyncService>(), server_address) {
+    : server_(std::make_shared<proto::Scene::AsyncService>(), server_address) {
 
     /*
      * Streaming calls
      */
-    gvs::net::StreamInterface<gvs::proto::Message>* message_stream
+    gvs::net::StreamInterface<proto::Message>* message_stream
         = server_.register_async_stream(&Service::RequestMessageUpdates,
                                         [](const google::protobuf::Empty& /*ignored*/) {});
 
-    gvs::net::StreamInterface<gvs::proto::SceneUpdate>* scene_stream
+    gvs::net::StreamInterface<proto::SceneUpdate>* scene_stream
         = server_.register_async_stream(&Service::RequestSceneUpdates,
                                         [](const google::protobuf::Empty& /*ignored*/) {});
 
@@ -46,14 +46,14 @@ SceneServer::SceneServer(std::string server_address)
      * Getters for current state
      */
     server_.register_async(&Service::RequestGetAllMessages,
-                           [this](const google::protobuf::Empty& /*empty*/, gvs::proto::Messages* messages) {
+                           [this](const google::protobuf::Empty& /*empty*/, proto::Messages* messages) {
                                messages->CopyFrom(messages_);
                                return grpc::Status::OK;
                            });
 
     server_.register_async(&Service::RequestGetAllItems,
-                           [this](const google::protobuf::Empty& /*empty*/, gvs::proto::SceneItems* items) {
-                               items->CopyFrom(items_);
+                           [this](const google::protobuf::Empty& /*empty*/, proto::SceneItems* scene) {
+                               scene->CopyFrom(scene_);
                                return grpc::Status::OK;
                            });
 
@@ -61,9 +61,9 @@ SceneServer::SceneServer(std::string server_address)
      * Setters for current state
      */
     server_.register_async(&Service::RequestSetAllItems,
-                           [this](const gvs::proto::SceneItems& items, gvs::proto::Errors* /*errors*/) {
+                           [this](const proto::SceneItems& scene, proto::Errors* /*errors*/) {
                                // TODO: Error check and set errors if necessary
-                               items_.CopyFrom(items);
+                               scene_.CopyFrom(scene);
                                return grpc::Status::OK;
                            });
 
@@ -71,37 +71,40 @@ SceneServer::SceneServer(std::string server_address)
      * Update requests
      */
     server_.register_async(&Service::RequestSendMessage,
-                           [this, message_stream](const gvs::proto::Message& message, gvs::proto::Errors* /*errors*/) {
+                           [this, message_stream](const proto::Message& message, proto::Errors* /*errors*/) {
                                messages_.add_messages()->CopyFrom(message);
                                message_stream->write(message);
                                return grpc::Status::OK;
                            });
 
     server_.register_async(&Service::RequestUpdateScene,
-                           [scene_stream, this](const gvs::proto::SceneUpdate& update, gvs::proto::Errors* errors) {
-                               switch (update.update_case()) {
+                           [scene_stream, this](const proto::SceneUpdateRequest& update_request,
+                                                proto::Errors* errors) {
+                               switch (update_request.update_case()) {
 
-                               case proto::SceneUpdate::kSafeSetItem: {
-                                   std::string id = update.safe_set_item().id().value();
+                               case proto::SceneUpdateRequest::kSafeSetItem: {
+                                   std::string id = update_request.safe_set_item().id().value();
 
-                                   if (util::has_key(item_ids_, id)) {
+                                   if (util::has_key(scene_.items(), id)) {
                                        errors->set_error_msg("Item with ID already exists");
                                        return grpc::Status::OK;
                                    }
 
-                                   item_ids_.emplace(id, items_.items_size());
-                                   items_.add_items()->CopyFrom(update.safe_set_item());
+                                   scene_.mutable_items()->insert({id, update_request.safe_set_item()});
                                    // TODO: Handle parent and children updates
+
+                                   proto::SceneUpdate update;
+                                   update.mutable_add_item()->CopyFrom(update_request.safe_set_item());
 
                                    scene_stream->write(update);
                                } break;
 
-                               case proto::SceneUpdate::kReplaceItem:
+                               case proto::SceneUpdateRequest::kReplaceItem:
                                    break;
-                               case proto::SceneUpdate::kAppendToItem:
+                               case proto::SceneUpdateRequest::kAppendToItem:
                                    break;
 
-                               case proto::SceneUpdate::UPDATE_NOT_SET:
+                               case proto::SceneUpdateRequest::UPDATE_NOT_SET:
                                    errors->set_error_msg("No update set");
                                    break;
                                }

@@ -36,7 +36,7 @@ void MessageStream::send() {
         content_stream_.str("");
 
         grpc::ClientContext context;
-        gvs::proto::Errors errors;
+        proto::Errors errors;
         grpc::Status status = stub_->SendMessage(&context, message_, &errors);
 
         if (not status.ok()) {

@@ -25,14 +25,13 @@
 namespace gvs {
 namespace log {
 
-GeometryItemStream::GeometryItemStream(std::string id, gvs::proto::Scene::Stub* stub)
-    : id_(std::move(id)), stub_(stub) {
+GeometryItemStream::GeometryItemStream(std::string id, proto::Scene::Stub* stub) : id_(std::move(id)), stub_(stub) {
     info_.mutable_id()->set_value(id_);
 }
 
 void GeometryItemStream::send(SendType type) {
     if (stub_) {
-        gvs::proto::SceneUpdate update;
+        proto::SceneUpdateRequest update;
 
         switch (type) {
         case SendType::safe:
@@ -49,7 +48,7 @@ void GeometryItemStream::send(SendType type) {
         }
 
         grpc::ClientContext context;
-        gvs::proto::Errors errors;
+        proto::Errors errors;
 
         grpc::Status status = stub_->UpdateScene(&context, update, &errors);
 

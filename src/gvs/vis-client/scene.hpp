@@ -16,6 +16,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "../../../cmake-build-release-clang/protos/protos/gvs/types.pb.h"
 #include <Corrade/Containers/Optional.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Vector3.h>
@@ -34,8 +35,13 @@ class Scene {
 public:
     Scene();
 
+    void update(const Magnum::Vector2i& viewport);
     void render(const Magnum::Vector2i& viewport);
     void configure_gui(const Magnum::Vector2i& viewport);
+
+    void reset(const proto::SceneItems& items);
+
+    void add_item(const proto::SceneItemInfo& info);
 
 private:
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;

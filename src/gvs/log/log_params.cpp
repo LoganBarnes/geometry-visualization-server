@@ -26,7 +26,7 @@ namespace gvs {
 
 //auto positions_3d(std::vector<float> positions_3d) {
 //    return make_param<ParamType::positions_3d>(
-//        [positions_3d = std::move(positions_3d)](gvs::proto::SceneItemInfo* info) {
+//        [positions_3d = std::move(positions_3d)](proto::SceneItemInfo* info) {
 //            *(info->mutable_geometry_info()->mutable_positions()) = {positions_3d.begin(), positions_3d.end()};
 //        });
 //}

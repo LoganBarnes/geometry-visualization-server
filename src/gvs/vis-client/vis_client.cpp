@@ -27,12 +27,14 @@
 #include "gvs/server/scene_server.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
 #include "gvs/vis-client/scene.hpp"
+#include "vis_client.hpp"
 
 #include <Magnum/GL/Context.h>
 #include <imgui.h>
 
 #include <chrono>
 #include <limits>
+#include <protos/protos/gvs/scene.pb.h>
 #include <sstream>
 
 namespace gvs {
@@ -79,7 +81,7 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
-    , grpc_client_(std::make_unique<net::GrpcClient<gvs::proto::Scene>>())
+    , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>())
     , scene_(std::make_unique<Scene>()) {
 
     grpc_client_->change_server(server_address_input_,
@@ -92,11 +94,40 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
             return stub->MessageUpdates(context, empty);
         },
         [this](const proto::Message& msg) { this->process_message_update(msg); });
+
+    // Connect to the stream that delivers scene updates
+    grpc_client_->register_stream<proto::SceneUpdate>(
+        [](std::unique_ptr<proto::Scene::Stub>& stub, grpc::ClientContext* context) {
+            google::protobuf::Empty empty;
+            return stub->SceneUpdates(context, empty);
+        },
+        [this](const proto::SceneUpdate& update) { this->process_scene_update(update); });
 }
 
 vis::VisClient::~VisClient() = default;
 
-void vis::VisClient::update() {}
+void vis::VisClient::update() {
+    scene_updates_.use_safely([this](std::vector<proto::SceneUpdate>& updates) {
+        for (const proto::SceneUpdate& update : updates) {
+
+            switch (update.update_case()) {
+            case proto::SceneUpdate::kAddItem:
+                scene_->add_item(update.add_item());
+                break;
+
+            case proto::SceneUpdate::kResetAllItems:
+                scene_->reset(update.reset_all_items());
+                break;
+
+            case proto::SceneUpdate::UPDATE_NOT_SET:
+                break;
+            }
+        }
+        updates.clear();
+    });
+
+    scene_->update(this->windowSize());
+}
 
 void vis::VisClient::render() const {
     scene_->render(this->windowSize());
@@ -159,7 +190,7 @@ void vis::VisClient::configure_gui() {
         ImGui::TreePop();
     }
 
-    messages_.use_safely([&](const gvs::proto::Messages& messages) {
+    messages_.use_safely([&](const proto::Messages& messages) {
         float message_input_start_height = h - 100.f;
         float max_message_window_height = message_input_start_height - ImGui::GetCursorPos().y;
 
@@ -198,13 +229,13 @@ void vis::VisClient::configure_gui() {
 
     if (send_message) {
         ImGui::SetKeyboardFocusHere(-1);
-        gvs::proto::Message message;
+        proto::Message message;
         message.set_identifier(message_id_input_);
         message.set_contents(message_content_input_);
 
         if (grpc_client_->use_stub([&](auto& stub) {
                 grpc::ClientContext context;
-                gvs::proto::Errors errors;
+                proto::Errors errors;
                 grpc::Status status = stub->SendMessage(&context, message, &errors);
 
                 if (not status.ok()) {
@@ -239,14 +270,20 @@ void vis::VisClient::configure_gui() {
 }
 
 void VisClient::process_message_update(const proto::Message& message) {
-    messages_.use_safely([&](gvs::proto::Messages& messages) { messages.add_messages()->CopyFrom(message); });
+    messages_.use_safely([&](proto::Messages& messages) { messages.add_messages()->CopyFrom(message); });
+    reset_draw_counter();
+}
+
+void VisClient::process_scene_update(const proto::SceneUpdate& update) {
+    scene_updates_.use_safely([&](std::vector<proto::SceneUpdate>& updates) { updates.emplace_back(update); });
     reset_draw_counter();
 }
 
 void VisClient::on_state_change() {
-    gvs::proto::Messages messages;
 
     // Load all the messages when the client first connects.
+    proto::Messages messages;
+
     if (grpc_client_->use_stub([&](const auto& stub) {
             // This lambda is only used if the client is connected
             grpc::ClientContext context;
@@ -255,7 +292,24 @@ void VisClient::on_state_change() {
         })) {
 
         // This is only called if the client is connected
-        messages_.use_safely([&](gvs::proto::Messages& msgs) { msgs.CopyFrom(messages); });
+        messages_.use_safely([&](proto::Messages& msgs) { msgs.CopyFrom(messages); });
+    }
+
+    // Load the current scene when the client first connects.
+    proto::SceneItems scene;
+
+    if (grpc_client_->use_stub([&](const auto& stub) {
+            // This lambda is only used if the client is connected
+            grpc::ClientContext context;
+            google::protobuf::Empty empty;
+            stub->GetAllItems(&context, empty, &scene);
+        })) {
+
+        // This is only called if the client is connected
+        scene_updates_.use_safely([&](std::vector<proto::SceneUpdate>& updates) {
+            updates.emplace_back();
+            updates.back().mutable_reset_all_items()->CopyFrom(scene);
+        });
     }
     reset_draw_counter();
 }

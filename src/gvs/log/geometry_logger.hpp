@@ -34,11 +34,12 @@ namespace log {
 
 class GeometryLogger {
 public:
-    /**
-     * If 'server_address' is an empty string, no connection attempt will be made.
-     *
-     * Defaults to a maximum 3 second wait time when attempting to connect.
-     */
+    /// \brief Handles the server connection for geometry streams
+    ///
+    ///        If 'server_address' is an empty string, no connection attempt will be made.
+    ///        Defaults to a maximum 3 second wait time when attempting to connect.
+    ///
+    /// \param server_address
     explicit GeometryLogger(const std::string& server_address);
 
     template <typename Rep, typename Period>
@@ -53,7 +54,7 @@ public:
 
 private:
     std::shared_ptr<grpc::Channel> channel_;
-    std::unique_ptr<gvs::proto::Scene::Stub> stub_;
+    std::unique_ptr<proto::Scene::Stub> stub_;
 };
 
 template <typename Rep, typename Period>
@@ -67,7 +68,7 @@ GeometryLogger::GeometryLogger(const std::string& server_address,
         channel_ = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
 
         if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
-            stub_ = gvs::proto::Scene::NewStub(channel_);
+            stub_ = proto::Scene::NewStub(channel_);
 
         } else {
             channel_ = nullptr;

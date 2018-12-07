@@ -41,12 +41,12 @@ public:
     grpc::Server& server();
 
 private:
-    using Service = gvs::proto::Scene::AsyncService;
+    using Service = proto::Scene::AsyncService;
     net::GrpcAsyncServer<Service> server_;
 
-    gvs::proto::SceneItems items_;
-    std::unordered_map<std::string, int> item_ids_;
-    gvs::proto::Messages messages_;
+    // atomicize these
+    proto::SceneItems scene_;
+    proto::Messages messages_;
 };
 
 } // namespace host

@@ -50,7 +50,7 @@ enum class SendType {
 
 class GeometryItemStream {
 public:
-    explicit GeometryItemStream(std::string id, gvs::proto::Scene::Stub* stub);
+    explicit GeometryItemStream(std::string id, proto::Scene::Stub* stub);
 
     void send(SendType type);
 
@@ -65,8 +65,8 @@ public:
 
 private:
     const std::string id_;
-    gvs::proto::Scene::Stub* stub_;
-    gvs::proto::SceneItemInfo info_;
+    proto::Scene::Stub* stub_;
+    proto::SceneItemInfo info_;
 
     std::string error_message_ = "";
 };

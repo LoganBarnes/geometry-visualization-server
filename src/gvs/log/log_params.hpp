@@ -37,11 +37,11 @@ namespace gvs {
 //    indices,
 //};
 //
-//template <ParamType PT, typename Data, gvs::proto::GeometryFormat format = gvs::proto::GeometryFormat::DEFAULT>
+//template <ParamType PT, typename Data, proto::GeometryFormat format = proto::GeometryFormat::DEFAULT>
 //class Param {
 //public:
 //    explicit Param(Data data) : data_(std::move(data)) {}
-//    std::string move_func(gvs::proto::SceneItemInfo* info);
+//    std::string move_func(proto::SceneItemInfo* info);
 //
 //private:
 //    Data data_;
@@ -49,19 +49,19 @@ namespace gvs {
 
 //using Positions3D = Param<ParamType::positions_3d, std::vector<float>>;
 //template <>
-//void Positions3D::move_func(gvs::proto::SceneItemInfo* info) {
+//void Positions3D::move_func(proto::SceneItemInfo* info) {
 //    *(info->mutable_geometry_info()->mutable_positions()) = {data_.begin(), data_.end()};
 //}
 //
-//using Points3D = Param<ParamType::positions_3d, std::vector<float>, gvs::proto::GeometryFormat::POINTS>;
+//using Points3D = Param<ParamType::positions_3d, std::vector<float>, proto::GeometryFormat::POINTS>;
 //template <>
-//void Points3D::move_func(gvs::proto::SceneItemInfo* info) {
-//    info->mutable_display_info()->mutable_geometry_format()->set_value(gvs::proto::GeometryFormat::POINTS);
+//void Points3D::move_func(proto::SceneItemInfo* info) {
+//    info->mutable_display_info()->mutable_geometry_format()->set_value(proto::GeometryFormat::POINTS);
 //    *(info->mutable_geometry_info()->mutable_positions()) = {data_.begin(), data_.end()};
 //}
 
 inline auto positions_3d(std::vector<float> data) {
-    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+    return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_positions()) {
             return "positions_3d";
         }
@@ -71,7 +71,7 @@ inline auto positions_3d(std::vector<float> data) {
 }
 
 inline auto normals_3d(std::vector<float> data) {
-    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+    return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_normals()) {
             return "normals_3d";
         }
@@ -81,7 +81,7 @@ inline auto normals_3d(std::vector<float> data) {
 }
 
 inline auto tex_coords_3d(std::vector<float> data) {
-    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+    return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_tex_coords()) {
             return "tex_coords_3d";
         }
@@ -91,7 +91,7 @@ inline auto tex_coords_3d(std::vector<float> data) {
 }
 
 inline auto vertex_colors_3d(std::vector<float> data) {
-    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+    return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_vertex_colors()) {
             return "vertex_colors_3d";
         }
@@ -100,9 +100,9 @@ inline auto vertex_colors_3d(std::vector<float> data) {
     };
 }
 
-template <gvs::proto::GeometryFormat format>
+template <proto::GeometryFormat format>
 auto indices(std::vector<float> data) {
-    return [data{std::move(data)}](gvs::proto::SceneItemInfo* info) {
+    return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_indices()) {
             return "indices";
         }
@@ -111,11 +111,11 @@ auto indices(std::vector<float> data) {
     };
 }
 
-constexpr auto points = indices<gvs::proto::GeometryFormat::POINTS>;
-constexpr auto lines = indices<gvs::proto::GeometryFormat::LINES>;
-constexpr auto line_strip = indices<gvs::proto::GeometryFormat::LINE_STRIP>;
-constexpr auto triangles = indices<gvs::proto::GeometryFormat::TRIANGLES>;
-constexpr auto triangle_strip = indices<gvs::proto::GeometryFormat::TRIANGLE_STRIP>;
-constexpr auto triangle_fan = indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>;
+constexpr auto points = indices<proto::GeometryFormat::POINTS>;
+constexpr auto lines = indices<proto::GeometryFormat::LINES>;
+constexpr auto line_strip = indices<proto::GeometryFormat::LINE_STRIP>;
+constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
+constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
+constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
 
 } // namespace gvs
