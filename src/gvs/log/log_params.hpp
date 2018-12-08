@@ -107,6 +107,7 @@ auto indices(std::vector<float> data) {
             return "indices";
         }
         *(info->mutable_geometry_info()->mutable_indices()->mutable_value()) = {data.begin(), data.end()};
+        info->mutable_display_info()->mutable_geometry_format()->set_value(format);
         return "";
     };
 }

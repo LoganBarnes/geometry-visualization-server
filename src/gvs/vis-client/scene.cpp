@@ -28,6 +28,34 @@
 namespace gvs {
 namespace vis {
 
+namespace {
+
+Magnum::MeshPrimitive from_proto(gvs::proto::GeometryFormat format) {
+    switch (format) {
+    case proto::POINTS:
+        return Magnum::MeshPrimitive::Points;
+    case proto::LINES:
+        return Magnum::MeshPrimitive::Lines;
+    case proto::LINE_STRIP:
+        return Magnum::MeshPrimitive::LineStrip;
+    case proto::TRIANGLES:
+        return Magnum::MeshPrimitive::Triangles;
+    case proto::TRIANGLE_STRIP:
+        return Magnum::MeshPrimitive::TriangleStrip;
+    case proto::TRIANGLE_FAN:
+        return Magnum::MeshPrimitive::TriangleFan;
+
+    /* Safe to ignore */
+    case proto::GeometryFormat_INT_MIN_SENTINEL_DO_NOT_USE_:
+        break;
+    case proto::GeometryFormat_INT_MAX_SENTINEL_DO_NOT_USE_:
+        break;
+    }
+    throw std::invalid_argument("Invalid GeometryFormat enum provided");
+}
+
+} // namespace
+
 using namespace Magnum;
 using namespace Math::Literals;
 
@@ -48,9 +76,10 @@ Scene::Scene() {
 
     // TMP
     mesh_.setCount(0);
+    mesh_.setPrimitive(MeshPrimitive::Points);
 }
 
-void Scene::update(const Magnum::Vector2i& viewport) {
+void Scene::update(const Vector2i& viewport) {
 
     auto transformation = Matrix4::rotationX(30.0_degf) * Matrix4::rotationY(40.0_degf);
     auto projection = Matrix4::perspectiveProjection(35.0_degf, Vector2{viewport}.aspectRatio(), 0.01f, 100.0f)
@@ -66,11 +95,11 @@ void Scene::update(const Magnum::Vector2i& viewport) {
         .setProjectionMatrix(projection);
 }
 
-void Scene::render(const Magnum::Vector2i& /*viewport*/) {
+void Scene::render(const Vector2i& /*viewport*/) {
     mesh_.draw(shader_);
 }
 
-void Scene::configure_gui(const Magnum::Vector2i& /*viewport*/) {}
+void Scene::configure_gui(const Vector2i& /*viewport*/) {}
 
 void Scene::reset(const proto::SceneItems& items) {
     for (const auto& item : items.items()) {
@@ -79,24 +108,45 @@ void Scene::reset(const proto::SceneItems& items) {
     }
 }
 
-void Scene::add_item(const proto::SceneItemInfo& /*info*/) {
+void Scene::add_item(const proto::SceneItemInfo& info) {
     const Trade::MeshData3D cube = Primitives::cubeSolid();
+
+    assert(info.has_geometry_info());
+    const proto::GeometryInfo3D& geometry = info.geometry_info();
 
     std::vector<float> buffer_data;
 
-    buffer_data = {-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0};
+    if (geometry.has_positions()) {
+        const proto::FloatList& positions = geometry.positions();
+        buffer_data.insert(buffer_data.begin(), positions.value().begin(), positions.value().end());
+        mesh_.setCount(positions.value_size() / 3);
+    }
 
     vertex_buffer_.setData(buffer_data);
 
-    //    Containers::Array<char> index_data;
-    //    MeshIndexType index_type;
-    //    UnsignedInt index_start, index_end;
-    //    std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(cube.indices());
-    //    index_buffer_.setData(index_data);
+    mesh_.addVertexBuffer(vertex_buffer_, 0, Shaders::Phong::Position{});
 
-    mesh_.setCount(4)
-        .addVertexBuffer(vertex_buffer_, 0, Shaders::Phong::Position{})
-        .setPrimitive(Magnum::MeshPrimitive::TriangleStrip);
+    if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
+        std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
+                                      info.geometry_info().indices().value().end()};
+
+        Containers::Array<char> index_data;
+        MeshIndexType index_type;
+        UnsignedInt index_start, index_end;
+        std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
+        index_buffer_.setData(index_data);
+
+        mesh_.setCount(static_cast<int>(indices.size()))
+            .setIndexBuffer(index_buffer_, 0, index_type, index_start, index_end);
+    }
+
+    if (info.has_display_info()) {
+        const proto::DisplayInfo& display = info.display_info();
+
+        if (display.has_geometry_format()) {
+            mesh_.setPrimitive(from_proto(display.geometry_format().value()));
+        }
+    }
 }
 
 } // namespace vis

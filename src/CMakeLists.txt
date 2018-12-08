@@ -117,7 +117,7 @@ target_link_libraries(message_client log_client)
 add_executable(log_test exec/log_test.cpp)
 target_link_libraries(log_test log_client)
 
-set_target_properties(vis_client_and_server scene_server visualiser_client PROPERTIES
+set_target_properties(vis_client_and_server scene_server visualiser_client log_test PROPERTIES
         CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
         )
@@ -140,9 +140,11 @@ if (${GVS_BUILD_TESTS})
         target_compile_options(gvs_net PUBLIC ${PROFILE_FLAGS})
         target_compile_options(gvs_server PUBLIC ${PROFILE_FLAGS})
         target_compile_options(vis_client PUBLIC ${PROFILE_FLAGS})
+        target_compile_options(log_client PUBLIC ${PROFILE_FLAGS})
 
         target_link_libraries(gvs_net PUBLIC gcov)
         target_link_libraries(gvs_server PUBLIC gcov)
         target_link_libraries(vis_client PUBLIC gcov)
+        target_link_libraries(log_client PUBLIC gcov)
     endif ()
 endif ()
