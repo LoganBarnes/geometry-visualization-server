@@ -21,7 +21,7 @@
 # SOFTWARE.
 ##########################################################################################
 cmake_minimum_required(VERSION 3.12)
-project(GeometryVisualizationServer)
+project(GeometryVisualizationServer LANGUAGES CXX CUDA)
 
 option(GVS_BUILD_TESTS "Build unit tests" OFF)
 option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
@@ -76,6 +76,15 @@ endif ()
 #############################
 ### THIRD PARTY LIBRARIES ###
 #############################
+# Add Cuda if available
+include(CheckLanguage)
+check_language(CUDA)
+if (CMAKE_CUDA_COMPILER)
+    enable_language(CUDA)
+else ()
+    message(STATUS "-- No CUDA support")
+endif ()
+
 add_subdirectory(third-party)
 
 ###########################

@@ -20,6 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
+#include <optix.h>
+#include <optixu/optixu_math_namespace.h>
+
+struct PerRayData {
+    float3 result;
+    float depth;
+};
 
 rtDeclareVariable(float3, eye, , );
 rtDeclareVariable(float3, U, , );
@@ -42,7 +49,7 @@ rtDeclareVariable(float, miss_depth, , );
 RT_PROGRAM void pinhole_camera() {
     auto d = make_float2(launch_index) / make_float2(launch_dim) * 2.f - 1.f;
     float3 ray_origin = eye;
-    float3 ray_direction = normalize(d.x * U + d.y * V + W);
+    float3 ray_direction = optix::normalize(d.x * U + d.y * V + W);
 
     optix::Ray ray = optix::make_Ray(ray_origin, ray_direction, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX);
 

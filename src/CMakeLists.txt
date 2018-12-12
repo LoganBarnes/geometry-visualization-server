@@ -90,7 +90,7 @@ set_target_properties(vis_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 ### Optional OptiX ###
 ######################
 if (${Optix_FOUND})
-
+    ### OptiX PTX ###
     file(GLOB_RECURSE OPTIX_PTX_SOURCE_FILES
             LIST_DIRECTORIES false
             CONFIGURE_DEPENDS
@@ -99,8 +99,25 @@ if (${Optix_FOUND})
 
     add_library(gvs_ptx OBJECT ${OPTIX_PTX_SOURCE_FILES})
     set_property(TARGET gvs_ptx PROPERTY CUDA_PTX_COMPILATION ON)
+    target_link_libraries(gvs_ptx PUBLIC gvs_optix_thirdparty)
+    target_compile_options(gvs_ptx PRIVATE -Wcpp)
 
-    target_link_libraries(vis_client PUBLIC gvs_ptx gvs_optix_thirdparty)
+    install(TARGETS gvs_ptx
+            OBJECTS DESTINATION bin/ptx
+            )
+
+    ### OptiX Scene ###
+    file(GLOB_RECURSE OPTIX_SCENE_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/gvs/optix/scene/*
+            )
+
+    add_library(gvs_optix_scene ${OPTIX_SCENE_SOURCE_FILES} $<TARGET_OBJECTS:gvs_ptx>)
+    target_link_libraries(gvs_optix_scene PUBLIC gvs_ptx)
+
+    # link to vis_client
+    target_link_libraries(vis_client PUBLIC gvs_optix_scene)
 endif ()
 
 ##################

@@ -177,17 +177,19 @@ endif ()
 #############
 ### OptiX ###
 #############
-find_package(OptiX REQUIRED)
+if (CMAKE_CUDA_COMPILER)
+    find_package(OptiX REQUIRED)
 
-if (NOT ${optix_LIBRARY} AND NOT ${OptiX_INCLUDE})
-    message("-- OptiX found: ${optix_LIBRARY}")
-    set(Optix_FOUND TRUE PARENT_SCOPE)
+    if (NOT ${optix_LIBRARY} AND NOT ${OptiX_INCLUDE})
+        message("-- OptiX found: ${optix_LIBRARY}")
+        set(Optix_FOUND TRUE PARENT_SCOPE)
 
-    add_library(gvs_optix_thirdparty INTERFACE)
+        add_library(gvs_optix_thirdparty INTERFACE)
 
-    target_link_libraries(gvs_optix_thirdparty INTERFACE ${optix_LIBRARY})
-    target_include_directories(gvs_optix_thirdparty SYSTEM INTERFACE ${optix_INCLUDE})
+        target_link_libraries(gvs_optix_thirdparty INTERFACE ${optix_LIBRARY} ${optixu_LIBRARY})
+        target_include_directories(gvs_optix_thirdparty SYSTEM INTERFACE ${OptiX_INCLUDE})
 
+    endif ()
 endif ()
 
 ##################
