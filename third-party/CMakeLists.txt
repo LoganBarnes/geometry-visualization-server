@@ -174,6 +174,22 @@ if (NOT crossguid_dl_POPULATED)
     target_compile_options(crossguid PRIVATE -w)
 endif ()
 
+#############
+### OptiX ###
+#############
+find_package(OptiX REQUIRED)
+
+if (NOT ${optix_LIBRARY} AND NOT ${OptiX_INCLUDE})
+    message("-- OptiX found: ${optix_LIBRARY}")
+    set(Optix_FOUND TRUE PARENT_SCOPE)
+
+    add_library(gvs_optix_thirdparty INTERFACE)
+
+    target_link_libraries(gvs_optix_thirdparty INTERFACE ${optix_LIBRARY})
+    target_include_directories(gvs_optix_thirdparty SYSTEM INTERFACE ${optix_INCLUDE})
+
+endif ()
+
 ##################
 ### GoogleTest ###
 ##################

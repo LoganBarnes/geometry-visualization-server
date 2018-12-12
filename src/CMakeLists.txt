@@ -86,6 +86,23 @@ target_link_libraries(vis_client
         )
 set_target_properties(vis_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 
+######################
+### Optional OptiX ###
+######################
+if (${Optix_FOUND})
+
+    file(GLOB_RECURSE OPTIX_PTX_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/gvs/optix/ptx/*
+            )
+
+    add_library(gvs_ptx OBJECT ${OPTIX_PTX_SOURCE_FILES})
+    set_property(TARGET gvs_ptx PROPERTY CUDA_PTX_COMPILATION ON)
+
+    target_link_libraries(vis_client PUBLIC gvs_ptx gvs_optix_thirdparty)
+endif ()
+
 ##################
 ### Log Client ###
 ##################

@@ -16,7 +16,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "../../../cmake-build-release-clang/protos/protos/gvs/types.pb.h"
+#include <gvs/types.pb.h>
+
 #include <Corrade/Containers/Optional.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Vector3.h>
