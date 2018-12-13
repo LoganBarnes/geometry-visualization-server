@@ -20,57 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "optix_backend.hpp"
+#include <optix.h>
+#include <optixu/optixu_math_namespace.h>
 
-#include <gvs/optix/ptx_files.hpp>
+struct PerRayData {
+    float3 result;
+    float depth;
+};
 
-#include <iostream>
-#include <sstream>
+rtDeclareVariable(float3, eye, , );
+rtDeclareVariable(float, scene_epsilon, , );
+//rtDeclareVariable(rtObject, top_shadower, , );
+//rtDeclareVariable(unsigned int, shadow_ray_type, , );
 
-namespace gvs {
-namespace vis {
+rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
+rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 
-namespace {
+rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 
-std::unordered_map<std::string, std::string> build_ptx_file_map() {
-    std::unordered_map<std::string, std::string> ptx_files;
+rtDeclareVariable(PerRayData, prd_current, rtPayload, );
+//rtDeclareVariable(PerRayData_shadow, prd_shadow, rtPayload, );
 
-    std::istringstream path_stream(ptx::ptx_files);
-    std::string path;
-    while (std::getline(path_stream, path, ';')) {
-        auto path_end = path.rfind('/');
-        ptx_files.emplace(path.substr(path_end + 1), path);
-    }
+rtDeclareVariable(float, t_hit, rtIntersectionDistance, );
 
-    return ptx_files;
+rtBuffer<float4> lights;
+
+// Material variables
+rtDeclareVariable(float3, albedo, , );
+
+RT_PROGRAM
+void closest_hit_normal() {
+    float3 world_geom_normal = optix::normalize(rtTransformNormal(RT_OBJECT_TO_WORLD, geometric_normal));
+    float3 world_shading_normal = optix::normalize(rtTransformNormal(RT_OBJECT_TO_WORLD, shading_normal));
+    float3 ffnormal = optix::faceforward(world_shading_normal, -ray.direction, world_geom_normal);
+
+    prd_current.result = ffnormal * 0.5f + 0.5f;
 }
-
-} // namespace
-
-OptiXBackend::OptiXBackend()
-    : context_(new optix::Context(optix::Context::create()),
-               [](auto* p) {
-                   static_assert(std::is_same<decltype(p), optix::Context*>::value, "");
-                   (*p)->destroy();
-                   delete p;
-               })
-    , ptx_files_(build_ptx_file_map()) {
-
-    for (const auto& file_pair : ptx_files_) {
-        std::cout << file_pair.first << ": " << file_pair.second << std::endl;
-    }
-
-    optix::Context& ctx = *context_;
-
-    // Set up context
-    ctx->setRayTypeCount(2);
-    ctx->setEntryPointCount(1);
-
-    ctx["radiance_ray_type"]->setUint(0u);
-    ctx["shadow_ray_type"]->setUint(1u);
-    ctx["scene_epsilon"]->setFloat(1.e-2f);
-}
-
-} // namespace vis
-
-} // namespace gvs

@@ -33,8 +33,8 @@
 #include <imgui.h>
 
 #include <chrono>
+#include <gvs/scene.pb.h>
 #include <limits>
-#include <protos/protos/gvs/scene.pb.h>
 #include <sstream>
 
 namespace gvs {

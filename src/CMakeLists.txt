@@ -23,7 +23,7 @@
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 set(AUTO_GENERATION_MESSAGE "***This file is auto generated. If you modify it the changes will be overwritten.***")
-configure_file(${CMAKE_CURRENT_LIST_DIR}/gvs_paths.hpp.in ${CMAKE_BINARY_DIR}/gvs/gvs_paths.hpp)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/gvs_paths.hpp.in ${CMAKE_BINARY_DIR}/generated/gvs/gvs_paths.hpp)
 
 ############
 ### Util ###
@@ -31,7 +31,7 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/gvs_paths.hpp.in ${CMAKE_BINARY_DIR}/gv
 add_library(gvs_util INTERFACE)
 target_include_directories(gvs_util
         INTERFACE ${CMAKE_CURRENT_LIST_DIR}
-        INTERFACE ${CMAKE_BINARY_DIR}
+        INTERFACE ${CMAKE_BINARY_DIR}/generated
         )
 
 ##############
@@ -89,7 +89,10 @@ set_target_properties(vis_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 ######################
 ### Optional OptiX ###
 ######################
-if (${Optix_FOUND})
+if (${OptiX_FOUND})
+    set(CMAKE_CUDA_STANDARD 14)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
     ### OptiX PTX ###
     file(GLOB_RECURSE OPTIX_PTX_SOURCE_FILES
             LIST_DIRECTORIES false
@@ -100,10 +103,21 @@ if (${Optix_FOUND})
     add_library(gvs_ptx OBJECT ${OPTIX_PTX_SOURCE_FILES})
     set_property(TARGET gvs_ptx PROPERTY CUDA_PTX_COMPILATION ON)
     target_link_libraries(gvs_ptx PUBLIC gvs_optix_thirdparty)
-    target_compile_options(gvs_ptx PRIVATE -Wcpp)
 
-    install(TARGETS gvs_ptx
-            OBJECTS DESTINATION bin/ptx
+    file(GENERATE
+            OUTPUT ${CMAKE_BINARY_DIR}/generated/gvs/optix/ptx_files.hpp
+            CONTENT [[
+#pragma once
+
+namespace gvs {
+namespace ptx {
+
+constexpr const char* ptx_files = "$<TARGET_OBJECTS:gvs_ptx>";
+
+} // namespace ptx
+} // namespace gvs
+
+]]
             )
 
     ### OptiX Scene ###
@@ -113,8 +127,24 @@ if (${Optix_FOUND})
             ${CMAKE_CURRENT_LIST_DIR}/gvs/optix/scene/*
             )
 
-    add_library(gvs_optix_scene ${OPTIX_SCENE_SOURCE_FILES} $<TARGET_OBJECTS:gvs_ptx>)
-    target_link_libraries(gvs_optix_scene PUBLIC gvs_ptx)
+    add_library(gvs_optix_scene ${OPTIX_SCENE_SOURCE_FILES})
+    add_dependencies(gvs_optix_scene gvs_ptx)
+    target_link_libraries(gvs_optix_scene
+            PUBLIC gvs_gui_thirdparty
+            PUBLIC gvs_net
+            PUBLIC gvs_optix_thirdparty
+            )
+
+    set_target_properties(gvs_optix_scene PROPERTIES CUDA_SEPERABLE_COMPILATION ON)
+
+    cuda_convert_flags(gvs_ptx)
+    cuda_convert_flags(gvs_optix_scene)
+
+    # OBJECT_OUTPUT_DIRECTORY is wrong but figure it out.
+    set_target_properties(gvs_ptx gvs_optix_scene PROPERTIES
+            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/ptx"
+            )
 
     # link to vis_client
     target_link_libraries(vis_client PUBLIC gvs_optix_scene)

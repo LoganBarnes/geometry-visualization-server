@@ -15,7 +15,12 @@
 //
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/scene.hpp"
-#include "scene.hpp"
+
+#include <gvs/gvs_paths.hpp>
+
+#ifdef OptiX_FOUND
+#include "gvs/optix/scene/optix_backend.hpp"
+#endif
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
@@ -77,6 +82,11 @@ Scene::Scene() {
     // TMP
     mesh_.setCount(0);
     mesh_.setPrimitive(MeshPrimitive::Points);
+
+#ifdef OptiX_FOUND
+    OptiXBackend backend;
+    (void)backend;
+#endif
 }
 
 void Scene::update(const Vector2i& viewport) {

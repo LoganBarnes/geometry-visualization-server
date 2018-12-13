@@ -22,12 +22,23 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <optix.h>
+#include <optixu/optixpp_namespace.h>
+
+#include <memory>
+#include <unordered_map>
+
 namespace gvs {
-namespace cam {
+namespace vis {
 
-class OptixBackend {
+class OptiXBackend {
+public:
+    OptiXBackend();
 
+private:
+    std::shared_ptr<optix::Context> context_;
+    std::unordered_map<std::string, std::string> ptx_files_;
 };
 
-} // namespace cam
+} // namespace vis
 } // namespace gvs

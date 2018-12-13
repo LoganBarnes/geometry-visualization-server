@@ -30,7 +30,7 @@ set(PROTOBUF_IMPORT_DIRS ${CMAKE_CURRENT_LIST_DIR})
 
 # make an output directory
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(PROTO_DST_DIR ${CMAKE_CURRENT_BINARY_DIR}/protos)
+set(PROTO_DST_DIR ${CMAKE_BINARY_DIR}/protos)
 file(MAKE_DIRECTORY ${PROTO_DST_DIR})
 
 function(create_proto_library target_name proto_dir)

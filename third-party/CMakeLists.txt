@@ -178,17 +178,29 @@ endif ()
 ### OptiX ###
 #############
 if (CMAKE_CUDA_COMPILER)
-    find_package(OptiX REQUIRED)
+    find_package(OptiX)
 
-    if (NOT ${optix_LIBRARY} AND NOT ${OptiX_INCLUDE})
+    if (optix_LIBRARY AND OptiX_INCLUDE)
         message("-- OptiX found: ${optix_LIBRARY}")
-        set(Optix_FOUND TRUE PARENT_SCOPE)
+        set(OptiX_FOUND TRUE PARENT_SCOPE)
 
         add_library(gvs_optix_thirdparty INTERFACE)
 
-        target_link_libraries(gvs_optix_thirdparty INTERFACE ${optix_LIBRARY} ${optixu_LIBRARY})
-        target_include_directories(gvs_optix_thirdparty SYSTEM INTERFACE ${OptiX_INCLUDE})
+        target_link_libraries(gvs_optix_thirdparty INTERFACE optix optixu)
+        target_include_directories(gvs_optix_thirdparty SYSTEM
+                INTERFACE ${OptiX_INCLUDE}
+                INTERFACE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
+                )
 
+        function(cuda_convert_flags EXISTING_TARGET)
+            get_property(old_flags TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS)
+            if(NOT "${old_flags}" STREQUAL "")
+                string(REPLACE ";" "," CUDA_flags "${old_flags}")
+                set_property(TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS
+                        "$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${old_flags}>$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${CUDA_flags}>"
+                        )
+            endif()
+        endfunction()
     endif ()
 endif ()
 
