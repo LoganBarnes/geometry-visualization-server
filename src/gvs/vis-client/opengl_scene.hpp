@@ -16,6 +16,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/vis-client/scene_interface.hpp"
+
 #include <gvs/types.pb.h>
 
 #include <Corrade/Containers/Optional.h>
@@ -32,17 +34,18 @@
 namespace gvs {
 namespace vis {
 
-class Scene {
+class OpenGLScene : public SceneInterface {
 public:
-    Scene();
+    OpenGLScene();
+    ~OpenGLScene() override = default;
 
-    void update(const Magnum::Vector2i& viewport);
-    void render(const Magnum::Vector2i& viewport);
-    void configure_gui(const Magnum::Vector2i& viewport);
+    void update(const Magnum::Vector2i& viewport) override;
+    void render(const Magnum::Vector2i& viewport) override;
+    void configure_gui(const Magnum::Vector2i& viewport) override;
 
-    void reset(const proto::SceneItems& items);
+    void reset(const proto::SceneItems& items) override;
 
-    void add_item(const proto::SceneItemInfo& info);
+    void add_item(const proto::SceneItemInfo& info) override;
 
 private:
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;

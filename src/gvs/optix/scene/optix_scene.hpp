@@ -20,57 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "optix_backend.hpp"
+#pragma once
 
-#include <gvs/optix/ptx_files.hpp>
+#include "gvs/vis-client/scene_interface.hpp"
 
-#include <iostream>
-#include <sstream>
+#include <Magnum/OpenGL.h>
+#include <optix.h>
+#include <optixu/optixpp_namespace.h>
+
+#include <memory>
+#include <unordered_map>
 
 namespace gvs {
 namespace vis {
 
-namespace {
+class OptiXScene : public SceneInterface {
+public:
+    OptiXScene();
+    ~OptiXScene() override;
 
-std::unordered_map<std::string, std::string> build_ptx_file_map() {
-    std::unordered_map<std::string, std::string> ptx_files;
+    void update(const Magnum::Vector2i& viewport) override;
+    void render(const Magnum::Vector2i& viewport) override;
+    void configure_gui(const Magnum::Vector2i& viewport) override;
 
-    std::istringstream path_stream(ptx::ptx_files);
-    std::string path;
-    while (std::getline(path_stream, path, ';')) {
-        auto path_end = path.rfind('/');
-        ptx_files.emplace(path.substr(path_end + 1), path);
-    }
+    void reset(const proto::SceneItems& items) override;
+    void add_item(const proto::SceneItemInfo& info) override;
 
-    return ptx_files;
-}
+private:
+    std::shared_ptr<optix::Context> context_;
 
-} // namespace
+    std::shared_ptr<GLuint> pbo_id_;
+    std::unique_ptr<Magnum::GL::Texture2D> display_texture_;
 
-OptiXBackend::OptiXBackend()
-    : context_(new optix::Context(optix::Context::create()),
-               [](auto* p) {
-                   static_assert(std::is_same<decltype(p), optix::Context*>::value, "");
-                   (*p)->destroy();
-                   delete p;
-               })
-    , ptx_files_(build_ptx_file_map()) {
+    std::unordered_map<std::string, std::string> ptx_files_;
 
-    for (const auto& file_pair : ptx_files_) {
-        std::cout << file_pair.first << ": " << file_pair.second << std::endl;
-    }
-
-    optix::Context& ctx = *context_;
-
-    // Set up context
-    ctx->setRayTypeCount(2);
-    ctx->setEntryPointCount(1);
-
-    ctx["radiance_ray_type"]->setUint(0u);
-    ctx["shadow_ray_type"]->setUint(1u);
-    ctx["scene_epsilon"]->setFloat(1.e-2f);
-}
+    optix::Context& context();
+};
 
 } // namespace vis
-
 } // namespace gvs

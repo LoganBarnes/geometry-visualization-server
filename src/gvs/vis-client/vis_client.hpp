@@ -69,7 +69,7 @@ private:
     std::string message_content_input_;
 
     // Scene
-    std::unique_ptr<Scene> scene_; // forward declaration
+    std::unique_ptr<SceneInterface> scene_; // forward declaration
     util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
 };
 

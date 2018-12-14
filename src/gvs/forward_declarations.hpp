@@ -57,7 +57,7 @@ class Theme;
 } // namespace detail
 
 class VisClient;
-class Scene;
+class SceneInterface;
 
 } // namespace vis
 } // namespace gvs

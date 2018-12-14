@@ -14,13 +14,9 @@
 //   \___/ ________/    \______/ |__/ \______/  \______/  \_______/|__/  \__/ \______/
 //
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/vis-client/scene.hpp"
+#include "gvs/vis-client/opengl_scene.hpp"
 
 #include <gvs/gvs_paths.hpp>
-
-#ifdef OptiX_FOUND
-#include "gvs/optix/scene/optix_backend.hpp"
-#endif
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
@@ -64,7 +60,7 @@ Magnum::MeshPrimitive from_proto(gvs::proto::GeometryFormat format) {
 using namespace Magnum;
 using namespace Math::Literals;
 
-Scene::Scene() {
+OpenGLScene::OpenGLScene() {
     camera_object_.setParent(&scene_).translate(Vector3::zAxis(5.0f));
 
     (*(camera_ = new SceneGraph::Camera3D{camera_object_})) // Memory control is handled elsewhere
@@ -82,14 +78,9 @@ Scene::Scene() {
     // TMP
     mesh_.setCount(0);
     mesh_.setPrimitive(MeshPrimitive::Points);
-
-#ifdef OptiX_FOUND
-    OptiXBackend backend;
-    (void)backend;
-#endif
 }
 
-void Scene::update(const Vector2i& viewport) {
+void OpenGLScene::update(const Vector2i& viewport) {
 
     auto transformation = Matrix4::rotationX(30.0_degf) * Matrix4::rotationY(40.0_degf);
     auto projection = Matrix4::perspectiveProjection(35.0_degf, Vector2{viewport}.aspectRatio(), 0.01f, 100.0f)
@@ -105,20 +96,20 @@ void Scene::update(const Vector2i& viewport) {
         .setProjectionMatrix(projection);
 }
 
-void Scene::render(const Vector2i& /*viewport*/) {
+void OpenGLScene::render(const Vector2i& /*viewport*/) {
     mesh_.draw(shader_);
 }
 
-void Scene::configure_gui(const Vector2i& /*viewport*/) {}
+void OpenGLScene::configure_gui(const Vector2i& /*viewport*/) {}
 
-void Scene::reset(const proto::SceneItems& items) {
+void OpenGLScene::reset(const proto::SceneItems& items) {
     for (const auto& item : items.items()) {
         add_item(item.second);
         break; // only one for now while implementing
     }
 }
 
-void Scene::add_item(const proto::SceneItemInfo& info) {
+void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
     const Trade::MeshData3D cube = Primitives::cubeSolid();
 
     assert(info.has_geometry_info());

@@ -26,8 +26,13 @@
 #include "gvs/net/grpc_server.hpp"
 #include "gvs/server/scene_server.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
-#include "gvs/vis-client/scene.hpp"
-#include "vis_client.hpp"
+#include "gvs/vis-client/opengl_scene.hpp"
+
+#include <gvs/gvs_paths.hpp>
+
+#ifdef OptiX_FOUND
+#include "gvs/optix/scene/optix_scene.hpp"
+#endif
 
 #include <Magnum/GL/Context.h>
 #include <imgui.h>
@@ -39,6 +44,12 @@
 
 namespace gvs {
 namespace vis {
+
+#ifdef OptiX_FOUND
+using SceneType = OptiXScene;
+#else
+using SceneType = gvs::vis::OpenGLScene;
+#endif
 
 namespace {
 
@@ -82,7 +93,7 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
     , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>())
-    , scene_(std::make_unique<Scene>()) {
+    , scene_(std::make_unique<SceneType>()) {
 
     grpc_client_->change_server(server_address_input_,
                                 [this](const net::GrpcClientState&) { this->on_state_change(); });
