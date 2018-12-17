@@ -16,10 +16,11 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/vis-client/scene_interface.hpp"
+#include "gvs/vis-client/scene/scene_interface.hpp"
 
 #include <gvs/types.pb.h>
 
+#include <Corrade/Containers/Array.h>
 #include <Corrade/Containers/Optional.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Vector3.h>

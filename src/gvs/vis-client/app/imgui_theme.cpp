@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/vis-client/imgui_theme.hpp"
+#include "imgui_theme.hpp"
 #include "gvs/gvs_paths.hpp"
 #include <stdexcept>
 

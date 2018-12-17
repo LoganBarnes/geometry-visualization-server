@@ -26,7 +26,7 @@
 #include "gvs/net/grpc_client_state.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
-#include "gvs/vis-client/imgui_magnum_application.hpp"
+#include "gvs/vis-client/app/imgui_magnum_application.hpp"
 
 #include <gvs/scene.grpc.pb.h>
 
@@ -52,6 +52,8 @@ private:
     void process_scene_update(const proto::SceneUpdate& message);
 
     void on_state_change();
+    void get_message_state(bool redraw = true);
+    void get_scene_state(bool redraw = true);
 
     // General Info
     std::string gl_version_str_;

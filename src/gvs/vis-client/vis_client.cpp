@@ -26,7 +26,7 @@
 #include "gvs/net/grpc_server.hpp"
 #include "gvs/server/scene_server.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
-#include "gvs/vis-client/opengl_scene.hpp"
+#include "gvs/vis-client/scene/opengl_scene.hpp"
 
 #include <gvs/gvs_paths.hpp>
 
@@ -46,9 +46,9 @@ namespace gvs {
 namespace vis {
 
 #ifdef OptiX_FOUND
-using SceneType = OptiXScene;
+using DefaultSceneType = OptiXScene;
 #else
-using SceneType = gvs::vis::OpenGLScene;
+using DefaultSceneType = OpenGLScene;
 #endif
 
 namespace {
@@ -86,14 +86,14 @@ ImVec4 to_pretty_color(const net::GrpcClientState& state) {
 VisClient::VisClient(const std::string& initial_host_address, const Arguments& arguments)
     : ImGuiMagnumApplication(arguments,
                              Configuration{}
-                                 .setTitle("Debug Visualiser Client")
+                                 .setTitle("Geometry Visualisation Client")
                                  .setSize({1280, 720})
                                  .setWindowFlags(Configuration::WindowFlag::Resizable))
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
     , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>())
-    , scene_(std::make_unique<SceneType>()) {
+    , scene_(std::make_unique<DefaultSceneType>()) {
 
     grpc_client_->change_server(server_address_input_,
                                 [this](const net::GrpcClientState&) { this->on_state_change(); });
@@ -201,6 +201,29 @@ void vis::VisClient::configure_gui() {
         ImGui::TreePop();
     }
 
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Separator();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+#ifdef OptiX_FOUND
+    // Quick hack for now to switch between OptiX and OpenGL rendering
+    bool using_optix = (dynamic_cast<OptiXScene*>(scene_.get()) != nullptr);
+    if (ImGui::Checkbox("Use OptiX for rendering", &using_optix)) {
+        if (using_optix) {
+            scene_ = std::make_unique<OptiXScene>();
+
+        } else {
+            scene_ = std::make_unique<OpenGLScene>();
+        }
+
+        on_state_change(); // Get state if client is connected
+    }
+#endif
+
+    scene_->configure_gui(this->windowSize());
+
     messages_.use_safely([&](const proto::Messages& messages) {
         float message_input_start_height = h - 100.f;
         float max_message_window_height = message_input_start_height - ImGui::GetCursorPos().y;
@@ -293,6 +316,15 @@ void VisClient::process_scene_update(const proto::SceneUpdate& update) {
 void VisClient::on_state_change() {
 
     // Load all the messages when the client first connects.
+    get_message_state(false);
+
+    // Load the current scene when the client first connects.
+    get_scene_state(false);
+
+    reset_draw_counter();
+}
+
+void VisClient::get_message_state(bool redraw) {
     proto::Messages messages;
 
     if (grpc_client_->use_stub([&](const auto& stub) {
@@ -306,7 +338,12 @@ void VisClient::on_state_change() {
         messages_.use_safely([&](proto::Messages& msgs) { msgs.CopyFrom(messages); });
     }
 
-    // Load the current scene when the client first connects.
+    if (redraw) {
+        reset_draw_counter();
+    }
+}
+
+void VisClient::get_scene_state(bool redraw) {
     proto::SceneItems scene;
 
     if (grpc_client_->use_stub([&](const auto& stub) {
@@ -322,7 +359,10 @@ void VisClient::on_state_change() {
             updates.back().mutable_reset_all_items()->CopyFrom(scene);
         });
     }
-    reset_draw_counter();
+
+    if (redraw) {
+        reset_draw_counter();
+    }
 }
 
 } // namespace vis

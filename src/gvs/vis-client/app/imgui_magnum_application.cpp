@@ -20,8 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/vis-client/imgui_magnum_application.hpp"
-#include "gvs/vis-client/imgui_theme.hpp"
+#include "imgui_magnum_application.hpp"
+
+#include "gvs/vis-client/app/imgui_theme.hpp"
 
 #include <Corrade/Utility/Unicode.h>
 #include <Magnum/GL/Context.h>
@@ -34,8 +35,7 @@
 namespace gvs {
 namespace vis {
 
-ImGuiMagnumApplication::ImGuiMagnumApplication(const Magnum::Platform::GlfwApplication::Arguments& arguments,
-                                               const Magnum::Platform::GlfwApplication::Configuration& configuration)
+ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
     : GlfwApplication(arguments, configuration) {
 
     this->startTextInput(); // allow for text input callbacks
@@ -111,7 +111,11 @@ void ImGuiMagnumApplication::drawEvent() {
     }
 }
 
-void ImGuiMagnumApplication::keyPressEvent(Magnum::Platform::GlfwApplication::KeyEvent& event) {
+void ImGuiMagnumApplication::viewportEvent(ViewportEvent& /*event*/) {
+    reset_draw_counter();
+}
+
+void ImGuiMagnumApplication::keyPressEvent(KeyEvent& event) {
     if (not event.isRepeated()) {
         ImGui_ImplGlfw_KeyCallback(this->window(),
                                    static_cast<int>(event.key()),
@@ -123,14 +127,14 @@ void ImGuiMagnumApplication::keyPressEvent(Magnum::Platform::GlfwApplication::Ke
     reset_draw_counter();
 }
 
-void ImGuiMagnumApplication::keyReleaseEvent(Magnum::Platform::GlfwApplication::KeyEvent& event) {
+void ImGuiMagnumApplication::keyReleaseEvent(KeyEvent& event) {
     ImGui_ImplGlfw_KeyCallback(this->window(),
                                static_cast<int>(event.key()),
                                -1,
                                GLFW_RELEASE,
                                static_cast<int>(event.modifiers()));
 
-    using KE = Magnum::Platform::GlfwApplication::KeyEvent;
+    using KE = KeyEvent;
 
     // Ctrl + Shift + Q == Exit
     if (event.modifiers() & KE::Modifier::Ctrl and event.modifiers() & KE::Modifier::Shift
@@ -143,7 +147,7 @@ void ImGuiMagnumApplication::keyReleaseEvent(Magnum::Platform::GlfwApplication::
     reset_draw_counter();
 }
 
-void ImGuiMagnumApplication::textInputEvent(Magnum::Platform::GlfwApplication::TextInputEvent& event) {
+void ImGuiMagnumApplication::textInputEvent(TextInputEvent& event) {
     char32_t codepoint;
     std::tie(codepoint, std::ignore) = Magnum::Utility::Unicode::nextChar(event.text(), 0);
 
@@ -176,11 +180,15 @@ void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
     reset_draw_counter();
 }
 
-void ImGuiMagnumApplication::mouseScrollEvent(Magnum::Platform::GlfwApplication::MouseScrollEvent& event) {
+void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
     ImGui_ImplGlfw_ScrollCallback(this->window(), event.offset().x(), event.offset().y());
     event.setAccepted(true);
     reset_draw_counter();
 }
+
+//void ImGuiMagnumApplication::viewportEvent(Magnum::Platform::GlfwApplication::ViewportEvent& /*event*/) {
+//    reset_draw_counter();
+//}
 
 } // namespace vis
 } // namespace gvs

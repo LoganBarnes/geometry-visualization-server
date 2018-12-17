@@ -80,6 +80,8 @@ if (NOT magnum_dl_POPULATED)
     FetchContent_Populate(magnum_dl)
 
     set(WITH_GLFWAPPLICATION ON CACHE BOOL "" FORCE)
+    set(BUILD_DEPRECATED OFF CACHE BOOL "" FORCE)
+
     add_subdirectory(${magnum_dl_SOURCE_DIR} ${magnum_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
     target_compile_options(MagnumGlfwApplication PRIVATE -w) # ignore thirdparty compilation warnings
 

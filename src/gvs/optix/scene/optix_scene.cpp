@@ -29,9 +29,11 @@
 #include <Magnum/Array.h>
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/BufferImage.h>
+#include <Magnum/GL/PixelFormat.h>
 #include <Magnum/GL/Texture.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/PixelStorage.h>
+#include <imgui.h>
 
 #include <iostream>
 #include <sstream>
@@ -128,7 +130,9 @@ void OptiXScene::update(const Magnum::Vector2i& viewport) {
 
 void OptiXScene::render(const Magnum::Vector2i& /*viewport*/) {}
 
-void OptiXScene::configure_gui(const Magnum::Vector2i& /*viewport*/) {}
+void OptiXScene::configure_gui(const Magnum::Vector2i& /*viewport*/) {
+    ImGui::TextColored({1.f, 1.f, 0.f, 1.f}, "TODO: Display Scene Items");
+}
 
 void OptiXScene::reset(const proto::SceneItems& /*items*/) {}
 

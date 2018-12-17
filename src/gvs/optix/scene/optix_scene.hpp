@@ -22,9 +22,10 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/vis-client/scene_interface.hpp"
+#include "gvs/vis-client/scene/scene_interface.hpp"
 
-#include <Magnum/OpenGL.h>
+#include <Magnum/GL/OpenGL.h>
+#include <Magnum/GL/Texture.h>
 #include <optix.h>
 #include <optixu/optixpp_namespace.h>
 
@@ -49,7 +50,7 @@ public:
 private:
     std::shared_ptr<optix::Context> context_;
 
-    std::shared_ptr<GLuint> pbo_id_;
+    std::shared_ptr<uint> pbo_id_;
     std::unique_ptr<Magnum::GL::Texture2D> display_texture_;
 
     std::unordered_map<std::string, std::string> ptx_files_;

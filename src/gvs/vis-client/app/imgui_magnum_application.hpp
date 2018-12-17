@@ -53,6 +53,7 @@ private:
     virtual void configure_gui() = 0;
 
     void drawEvent() override;
+    void viewportEvent(ViewportEvent& event) override;
 
     // keyboard
     void keyPressEvent(KeyEvent& event) override;
@@ -64,6 +65,9 @@ private:
     void mouseReleaseEvent(MouseEvent& event) override;
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void mouseScrollEvent(MouseScrollEvent& event) override;
+
+    //    void viewportEvent(const Magnum::Vector2i& viewport) override;
+    //    void viewportEvent(Magnum::Platform::GlfwApplication::ViewportEvent& event) override;
 
     std::shared_ptr<ImGuiContext> imgui_;
     std::shared_ptr<bool> imgui_gl_;

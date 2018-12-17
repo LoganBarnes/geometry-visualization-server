@@ -14,7 +14,7 @@
 //   \___/ ________/    \______/ |__/ \______/  \______/  \_______/|__/  \__/ \______/
 //
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/vis-client/opengl_scene.hpp"
+#include "opengl_scene.hpp"
 
 #include <gvs/gvs_paths.hpp>
 
@@ -25,6 +25,7 @@
 #include <Magnum/Primitives/Cube.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/Trade/MeshData3D.h>
+#include <imgui.h>
 
 namespace gvs {
 namespace vis {
@@ -100,7 +101,9 @@ void OpenGLScene::render(const Vector2i& /*viewport*/) {
     mesh_.draw(shader_);
 }
 
-void OpenGLScene::configure_gui(const Vector2i& /*viewport*/) {}
+void OpenGLScene::configure_gui(const Vector2i& /*viewport*/) {
+    ImGui::TextColored({1.f, 1.f, 0.f, 1.f}, "TODO: Display Scene Items");
+}
 
 void OpenGLScene::reset(const proto::SceneItems& items) {
     for (const auto& item : items.items()) {
