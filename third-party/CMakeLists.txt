@@ -146,21 +146,6 @@ if (NOT imgui_dl_POPULATED)
     target_link_libraries(gvs_gui_thirdparty INTERFACE imgui)
 endif ()
 
-###############
-### stduuid ###
-###############
-#FetchContent_Declare(stduuid_dl
-#        GIT_REPOSITORY https://github.com/mariusbancila/stduuid.git
-#        GIT_TAG v1.0
-#        )
-#
-#FetchContent_GetProperties(stduuid_dl)
-#if (NOT stduuid_dl_POPULATED)
-#    FetchContent_Populate(stduuid_dl)
-#    add_library(stduuid INTERFACE)
-#    target_include_directories(stduuid SYSTEM INTERFACE ${stduuid_dl_SOURCE_DIR}/include)
-#endif()
-
 #################
 ### crossguid ###
 #################
@@ -196,12 +181,12 @@ if (CMAKE_CUDA_COMPILER)
 
         function(cuda_convert_flags EXISTING_TARGET)
             get_property(old_flags TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS)
-            if(NOT "${old_flags}" STREQUAL "")
+            if (NOT "${old_flags}" STREQUAL "")
                 string(REPLACE ";" "," CUDA_flags "${old_flags}")
                 set_property(TARGET ${EXISTING_TARGET} PROPERTY INTERFACE_COMPILE_OPTIONS
                         "$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${old_flags}>$<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${CUDA_flags}>"
                         )
-            endif()
+            endif ()
         endfunction()
     endif ()
 endif ()

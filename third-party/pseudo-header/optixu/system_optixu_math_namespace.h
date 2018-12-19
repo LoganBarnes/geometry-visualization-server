@@ -22,45 +22,5 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/vis-client/scene/scene_interface.hpp"
-
-#include <Magnum/GL/BufferImage.h>
-#include <Magnum/GL/Mesh.h>
-#include <Magnum/GL/OpenGL.h>
-#include <Magnum/GL/Texture.h>
-#include <Magnum/Shaders/Flat.h>
-#include <optix.h>
-#include <optixu/optixpp_namespace.h>
-
-#include <memory>
-#include <unordered_map>
-
-namespace gvs {
-namespace vis {
-
-class OptiXScene : public SceneInterface {
-public:
-    OptiXScene();
-    ~OptiXScene() override;
-
-    void update(const Magnum::Vector2i& viewport) override;
-    void render(const Magnum::Vector2i& viewport) override;
-    void configure_gui(const Magnum::Vector2i& viewport) override;
-
-    void reset(const proto::SceneItems& items) override;
-    void add_item(const proto::SceneItemInfo& info) override;
-
-private:
-    std::shared_ptr<optix::Context> context_;
-
-    Magnum::GL::Texture2D display_texture_;
-    Magnum::Shaders::Flat2D screenspace_shader_;
-    Magnum::GL::Mesh fullscreen_quad_;
-
-    std::unordered_map<std::string, std::string> ptx_files_;
-
-    optix::Context& context();
-};
-
-} // namespace vis
-} // namespace gvs
+#pragma GCC system_header
+#include <optixu/optixu_math_namespace.h>

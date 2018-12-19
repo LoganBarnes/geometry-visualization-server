@@ -49,7 +49,7 @@ if (GVS_USE_DEV_FLAGS)
     if (NOT MSVC)
         set(GVS_COMPILE_FLAGS -Wall -Wextra -Werror -Wpedantic -Winit-self
                 -Wold-style-cast -Woverloaded-virtual -Wsign-conversion
-                -Wmissing-declarations -Wmissing-include-dirs -Wshadow)
+                -Wmissing-declarations -Wmissing-include-dirs -Wshadow -Wno-unknown-pragmas)
     else ()
         set(GVS_COMPILE_FLAGS /WX)
     endif ()

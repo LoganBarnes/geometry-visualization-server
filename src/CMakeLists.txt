@@ -130,9 +130,9 @@ constexpr const char* ptx_files = "$<TARGET_OBJECTS:gvs_ptx>";
     add_library(gvs_optix_scene ${OPTIX_SCENE_SOURCE_FILES})
     add_dependencies(gvs_optix_scene gvs_ptx)
     target_link_libraries(gvs_optix_scene
-            PUBLIC gvs_gui_thirdparty
-            PUBLIC gvs_net
-            PUBLIC gvs_optix_thirdparty
+            gvs_gui_thirdparty
+            gvs_net
+            gvs_optix_thirdparty
             )
 
     set_target_properties(gvs_optix_scene PROPERTIES CUDA_SEPERABLE_COMPILATION ON)
