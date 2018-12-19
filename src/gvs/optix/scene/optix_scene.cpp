@@ -90,61 +90,6 @@ GL::Mesh set_up_fullscreen_quad() {
     return quad_mesh;
 }
 
-class TexturedQuadShader : public GL::AbstractShaderProgram {
-public:
-    typedef GL::Attribute<0, Vector2> Position;
-    typedef GL::Attribute<1, Vector2> TextureCoordinates;
-
-    explicit TexturedQuadShader() {
-        //        MAGNUM_ASSERT_GL_VERSION_SUPPORTED(GL::Version::GL330);
-
-        GL::Shader vert{GL::Version::GL450, GL::Shader::Type::Vertex};
-        GL::Shader frag{GL::Version::GL450, GL::Shader::Type::Fragment};
-
-        vert.addSource(R"(
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec2 textureCoordinates;
-
-out vec2 interpolatedTextureCoordinates;
-
-void main() {
-    interpolatedTextureCoordinates = textureCoordinates;
-
-    gl_Position = position;
-}
-)");
-        frag.addSource(R"(
-uniform sampler2D texture_data;
-
-in vec2 interpolatedTextureCoordinates;
-
-out vec4 fragment_color;
-
-void main() {
-    fragment_color.rgb = texture(texture_data, interpolatedTextureCoordinates).rgb;
-    fragment_color.rg = interpolatedTextureCoordinates;
-    fragment_color.a = 1.f;
-}
-)");
-
-        CORRADE_INTERNAL_ASSERT_OUTPUT(GL::Shader::compile({vert, frag}));
-
-        attachShaders({vert, frag});
-
-        CORRADE_INTERNAL_ASSERT_OUTPUT(link());
-
-        setUniform(uniformLocation("texture_data"), TextureLayer);
-    }
-
-    TexturedQuadShader& bind_texture(GL::Texture2D& texture) {
-        texture.bind(TextureLayer);
-        return *this;
-    }
-
-private:
-    enum : Int { TextureLayer = 0 };
-};
-
 } // namespace
 
 OptiXScene::OptiXScene()
@@ -154,7 +99,6 @@ OptiXScene::OptiXScene()
                    (*p)->destroy();
                    delete p;
                })
-    //    , buffer_image_(GL::PixelFormat::RGBA, GL::PixelType::Float, {0, 0}, GL::Buffer{}, 0u)
     , screenspace_shader_(Shaders::Flat2D::Flag::Textured)
     , fullscreen_quad_(set_up_fullscreen_quad())
     , ptx_files_(build_ptx_file_map()) {

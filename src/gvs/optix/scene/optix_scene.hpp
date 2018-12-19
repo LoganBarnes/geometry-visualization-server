@@ -24,7 +24,6 @@
 
 #include "gvs/vis-client/scene/scene_interface.hpp"
 
-#include <Magnum/GL/BufferImage.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/OpenGL.h>
 #include <Magnum/GL/Texture.h>
