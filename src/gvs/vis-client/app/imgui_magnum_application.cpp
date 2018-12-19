@@ -111,7 +111,8 @@ void ImGuiMagnumApplication::drawEvent() {
     }
 }
 
-void ImGuiMagnumApplication::viewportEvent(ViewportEvent& /*event*/) {
+void ImGuiMagnumApplication::viewportEvent(ViewportEvent& event) {
+    Magnum::GL::defaultFramebuffer.setViewport({{}, event.windowSize()});
     reset_draw_counter();
 }
 
@@ -185,10 +186,6 @@ void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
     event.setAccepted(true);
     reset_draw_counter();
 }
-
-//void ImGuiMagnumApplication::viewportEvent(Magnum::Platform::GlfwApplication::ViewportEvent& /*event*/) {
-//    reset_draw_counter();
-//}
 
 } // namespace vis
 } // namespace gvs

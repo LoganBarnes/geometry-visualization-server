@@ -24,6 +24,7 @@
 
 #include "gvs/vis-client/scene/scene_interface.hpp"
 
+#include <Magnum/GL/BufferImage.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/OpenGL.h>
 #include <Magnum/GL/Texture.h>
@@ -52,6 +53,7 @@ public:
 private:
     std::shared_ptr<optix::Context> context_;
 
+    Magnum::GL::BufferImage2D buffer_image_;
     Magnum::GL::Texture2D display_texture_;
     Magnum::Shaders::Flat2D screenspace_shader_;
     Magnum::GL::Mesh fullscreen_quad_;

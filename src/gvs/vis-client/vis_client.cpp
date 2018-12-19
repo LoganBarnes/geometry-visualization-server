@@ -145,6 +145,15 @@ void vis::VisClient::render() const {
 }
 
 void vis::VisClient::configure_gui() {
+
+    auto add_three_line_separator = [] {
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Separator();
+        ImGui::Separator();
+        ImGui::Spacing();
+    };
+
     int h = this->windowSize().y();
     ImGui::SetNextWindowPos({0.f, 0.f});
     ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, h), ImVec2(std::numeric_limits<float>::infinity(), h));
@@ -158,11 +167,7 @@ void vis::VisClient::configure_gui() {
     ImGui::SameLine();
     ImGui::TextColored({0.5f, 0.5f, 0.5f, 1.f}, "%s\t", gl_renderer_str_.c_str());
 
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Spacing();
+    add_three_line_separator();
 
     ImGui::Text("Host Address: ");
     ImGui::SameLine();
@@ -201,11 +206,16 @@ void vis::VisClient::configure_gui() {
         ImGui::TreePop();
     }
 
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Spacing();
+    add_three_line_separator();
+
+    ImGui::Checkbox("Run app as fast as possible", &run_as_fast_as_possible_);
+
+    if (run_as_fast_as_possible_) {
+        ImGui::TextColored({0.f, 1.f, 0.f, 1.f}, "FPS: %.3f", ImGui::GetIO().Framerate);
+        reset_draw_counter();
+    }
+
+    add_three_line_separator();
 
 #ifdef OptiX_FOUND
     // Quick hack for now to switch between OptiX and OpenGL rendering
@@ -228,11 +238,7 @@ void vis::VisClient::configure_gui() {
         float message_input_start_height = h - 100.f;
         float max_message_window_height = message_input_start_height - ImGui::GetCursorPos().y;
 
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Separator();
-        ImGui::Separator();
-        ImGui::Spacing();
+        add_three_line_separator();
 
         ImGui::BeginChild("Messages", {ImGui::GetWindowSize().x, max_message_window_height});
 
@@ -246,9 +252,7 @@ void vis::VisClient::configure_gui() {
         ImGui::SetScrollY(ImGui::GetScrollMaxY());
         ImGui::EndChild();
 
-        ImGui::Separator();
-        ImGui::Separator();
-        ImGui::Separator();
+        add_three_line_separator();
     });
 
     bool send_message = false;

@@ -66,9 +66,6 @@ private:
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void mouseScrollEvent(MouseScrollEvent& event) override;
 
-    //    void viewportEvent(const Magnum::Vector2i& viewport) override;
-    //    void viewportEvent(Magnum::Platform::GlfwApplication::ViewportEvent& event) override;
-
     std::shared_ptr<ImGuiContext> imgui_;
     std::shared_ptr<bool> imgui_gl_;
     int draw_counter_; // continue drawing until this counter is zero

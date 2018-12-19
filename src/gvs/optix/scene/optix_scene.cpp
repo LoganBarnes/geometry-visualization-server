@@ -99,6 +99,7 @@ OptiXScene::OptiXScene()
                    (*p)->destroy();
                    delete p;
                })
+    , buffer_image_(GL::PixelFormat::RGBA, GL::PixelType::Float)
     , screenspace_shader_(Shaders::Flat2D::Flag::Textured)
     , fullscreen_quad_(set_up_fullscreen_quad())
     , ptx_files_(build_ptx_file_map()) {
@@ -116,8 +117,12 @@ OptiXScene::OptiXScene()
     ctx->setEntryPointCount(1);
 
     ctx["radiance_ray_type"]->setUint(0u);
-    ctx["shadow_ray_type"]->setUint(1u);
+    //    ctx["shadow_ray_type"]->setUint(1u);
     ctx["scene_epsilon"]->setFloat(1.e-2f);
+
+    // Starting program to generate rays
+    std::string ptx_file = ptx_files_.at("default_programs.ptx");
+    ctx->setRayGenerationProgram(0, ctx->createProgramFromPTXFile(ptx_file, "debug_test"));
 
     set_up_fullscreen_quad();
 }
@@ -145,33 +150,47 @@ void OptiXScene::update(const Vector2i& viewport) {
             GL::Buffer buffer;
             buffer.setData(buffer_data);
 
-            GL::BufferImage2D buffer_image(GL::PixelFormat::RGBA,
-                                           GL::PixelType::Float,
-                                           viewport,
-                                           std::move(buffer),
-                                           total_size * sizeof(optix::float4));
+            buffer_image_ = GL::BufferImage2D(GL::PixelFormat::RGBA,
+                                              GL::PixelType::Float,
+                                              viewport,
+                                              std::move(buffer),
+                                              total_size * sizeof(optix::float4));
 
             display_texture_.setWrapping(GL::SamplerWrapping::ClampToEdge)
                 .setMagnificationFilter(GL::SamplerFilter::Linear)
                 .setMinificationFilter(GL::SamplerFilter::Linear)
-                .setStorage(1, GL::TextureFormat::RGBA32F, viewport)
-                .setSubImage(0, {}, buffer_image);
+                .setStorage(1, GL::TextureFormat::RGBA32F, viewport);
 
-            optix::Buffer output_buffer(context()->createBufferFromGLBO(RT_BUFFER_OUTPUT, buffer_image.buffer().id()));
+            optix::Buffer output_buffer(context()->createBufferFromGLBO(RT_BUFFER_OUTPUT, buffer_image_.buffer().id()));
 
             output_buffer->setFormat(RT_FORMAT_FLOAT4);
             output_buffer->setSize(static_cast<unsigned>(viewport.x()), static_cast<unsigned>(viewport.y()));
 
             context()["output_buffer"]->set(output_buffer);
+
+            context()->validate();
         }
 
-        std::cout << "Buffer size: " << display_texture_.imageSize(0).x() << ", " << display_texture_.imageSize(0).y()
+        std::cout << "Resize: " << display_texture_.imageSize(0).x() << ", " << display_texture_.imageSize(0).y()
                   << std::endl;
     }
 }
 
 void OptiXScene::render(const Vector2i& /*viewport*/) {
-    screenspace_shader_.bindTexture(display_texture_);
+    // Get buffer size for ray tracing call
+    optix::Buffer buffer = context()["output_buffer"]->getBuffer();
+    RTsize buffer_width, buffer_height;
+    buffer->getSize(buffer_width, buffer_height);
+
+    // Ray trace the scene
+    context()->launch(0, buffer_width, buffer_height);
+
+    // Bind ray traced buffer to texture for displaying
+    display_texture_.setSubImage(0, {}, buffer_image_);
+
+    // Display the texture
+    Matrix3 identity(Math::IdentityInit);
+    screenspace_shader_.setTransformationProjectionMatrix(identity).bindTexture(display_texture_);
     fullscreen_quad_.draw(screenspace_shader_);
 }
 

@@ -64,6 +64,9 @@ private:
     std::string server_address_input_ = "address:port";
     std::unique_ptr<net::GrpcClient<proto::Scene>> grpc_client_;
 
+    // Debugging
+    bool run_as_fast_as_possible_ = false;
+
     // Messages
     bool wrap_text_ = false;
     util::AtomicData<proto::Messages> messages_;

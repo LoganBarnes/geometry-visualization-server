@@ -63,6 +63,10 @@ RT_PROGRAM void pinhole_camera() {
     output_buffer[launch_index] = make_float4(prd.result, prd.depth);
 }
 
+RT_PROGRAM void debug_test() {
+    output_buffer[launch_index] = make_float4(0.6f, 0.5f, 0.4f, 1.f);
+}
+
 RT_PROGRAM void miss() {
     prd_current.result = background_color;
 }
