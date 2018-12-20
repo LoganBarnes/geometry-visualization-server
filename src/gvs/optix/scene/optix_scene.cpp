@@ -92,7 +92,7 @@ GL::Mesh set_up_fullscreen_quad() {
 
 } // namespace
 
-OptiXScene::OptiXScene()
+OptiXScene::OptiXScene(const Vector2i& viewport)
     : context_(new optix::Context(optix::Context::create()),
                [](auto* p) {
                    static_assert(std::is_same<decltype(p), optix::Context*>::value, "");
@@ -103,8 +103,6 @@ OptiXScene::OptiXScene()
     , screenspace_shader_(Shaders::Flat2D::Flag::Textured)
     , fullscreen_quad_(set_up_fullscreen_quad())
     , ptx_files_(build_ptx_file_map()) {
-
-    display_texture_.setStorage(0, GL::TextureFormat::RGBA32F, {0, 0});
 
     for (const auto& file_pair : ptx_files_) {
         std::cout << file_pair.first << ": " << file_pair.second << std::endl;
@@ -125,56 +123,19 @@ OptiXScene::OptiXScene()
     ctx->setRayGenerationProgram(0, ctx->createProgramFromPTXFile(ptx_file, "debug_test"));
 
     set_up_fullscreen_quad();
+
+    // Set up output buffer
+    optix::Buffer output_buffer(context()->createBufferFromGLBO(RT_BUFFER_OUTPUT, pixel_buffer_.id()));
+    output_buffer->setFormat(RT_FORMAT_FLOAT4);
+
+    context()["output_buffer"]->set(output_buffer);
+
+    resize(viewport); // must be positive
 }
 
 OptiXScene::~OptiXScene() = default;
 
-void OptiXScene::update(const Vector2i& viewport) {
-    if (viewport != display_texture_.imageSize(0)) {
-
-        display_texture_ = GL::Texture2D();
-
-        {
-            auto total_size = static_cast<std::size_t>(viewport.x()) * static_cast<std::size_t>(viewport.y());
-
-            std::vector<optix::float4> buffer_data(total_size);
-
-            for (int yi = 0; yi < viewport.y(); ++yi) {
-                for (int xi = 0; xi < viewport.x(); ++xi) {
-                    buffer_data[static_cast<std::size_t>(yi) * static_cast<std::size_t>(viewport.x())
-                                + static_cast<std::size_t>(xi)]
-                        = optix::make_float4(xi * 1.f / viewport.x(), yi * 1.f / viewport.y(), 1.f, 1.f);
-                }
-            }
-
-            GL::Buffer buffer;
-            buffer.setData(buffer_data);
-
-            buffer_image_ = GL::BufferImage2D(GL::PixelFormat::RGBA,
-                                              GL::PixelType::Float,
-                                              viewport,
-                                              std::move(buffer),
-                                              total_size * sizeof(optix::float4));
-
-            display_texture_.setWrapping(GL::SamplerWrapping::ClampToEdge)
-                .setMagnificationFilter(GL::SamplerFilter::Linear)
-                .setMinificationFilter(GL::SamplerFilter::Linear)
-                .setStorage(1, GL::TextureFormat::RGBA32F, viewport);
-
-            optix::Buffer output_buffer(context()->createBufferFromGLBO(RT_BUFFER_OUTPUT, buffer_image_.buffer().id()));
-
-            output_buffer->setFormat(RT_FORMAT_FLOAT4);
-            output_buffer->setSize(static_cast<unsigned>(viewport.x()), static_cast<unsigned>(viewport.y()));
-
-            context()["output_buffer"]->set(output_buffer);
-
-            context()->validate();
-        }
-
-        std::cout << "Resize: " << display_texture_.imageSize(0).x() << ", " << display_texture_.imageSize(0).y()
-                  << std::endl;
-    }
-}
+void OptiXScene::update(const Vector2i& /*viewport*/) {}
 
 void OptiXScene::render(const Vector2i& /*viewport*/) {
     // Get buffer size for ray tracing call
@@ -201,8 +162,47 @@ void OptiXScene::configure_gui(const Vector2i& /*viewport*/) {
 void OptiXScene::reset(const proto::SceneItems& /*items*/) {}
 
 void OptiXScene::add_item(const proto::SceneItemInfo& /*info*/) {}
+
 optix::Context& OptiXScene::context() {
     return *context_;
+}
+
+void OptiXScene::resize(const Vector2i& viewport) {
+
+    optix::Buffer optix_output_buffer = context()["output_buffer"]->getBuffer();
+    optix_output_buffer->setSize(static_cast<unsigned>(viewport.x()), static_cast<unsigned>(viewport.y()));
+
+    optix_output_buffer->unregisterGLBuffer();
+
+    auto total_size = static_cast<std::size_t>(viewport.x()) * static_cast<std::size_t>(viewport.y());
+
+    std::vector<optix::float4> buffer_data(total_size);
+
+    for (int yi = 0; yi < viewport.y(); ++yi) {
+        for (int xi = 0; xi < viewport.x(); ++xi) {
+            buffer_data[static_cast<std::size_t>(yi) * static_cast<std::size_t>(viewport.x())
+                        + static_cast<std::size_t>(xi)]
+                = optix::make_float4(xi * 1.f / viewport.x(), yi * 1.f / viewport.y(), 1.f, 1.f);
+        }
+    }
+
+    pixel_buffer_.setData(buffer_data);
+
+    buffer_image_ = GL::BufferImage2D(GL::PixelFormat::RGBA,
+                                      GL::PixelType::Float,
+                                      viewport,
+                                      GL::Buffer::wrap(pixel_buffer_.id()),
+                                      total_size * sizeof(optix::float4));
+
+    // texture is immutable after 'setStorage' call so we have to make a new one every time
+    display_texture_ = GL::Texture2D();
+    display_texture_.setWrapping(GL::SamplerWrapping::ClampToEdge)
+        .setMagnificationFilter(GL::SamplerFilter::Linear)
+        .setMinificationFilter(GL::SamplerFilter::Linear)
+        .setStorage(1, GL::TextureFormat::RGBA32F, viewport);
+
+    optix_output_buffer->registerGLBuffer();
+    context()->validate();
 }
 
 } // namespace vis

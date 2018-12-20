@@ -37,16 +37,17 @@ namespace vis {
 
 class OpenGLScene : public SceneInterface {
 public:
-    OpenGLScene();
+    explicit OpenGLScene(const Magnum::Vector2i& viewport);
     ~OpenGLScene() override = default;
 
     void update(const Magnum::Vector2i& viewport) override;
     void render(const Magnum::Vector2i& viewport) override;
     void configure_gui(const Magnum::Vector2i& viewport) override;
 
+    void add_item(const proto::SceneItemInfo& info) override;
     void reset(const proto::SceneItems& items) override;
 
-    void add_item(const proto::SceneItemInfo& info) override;
+    void resize(const Magnum::Vector2i& viewport) override;
 
 private:
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;

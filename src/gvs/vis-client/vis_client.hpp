@@ -48,6 +48,8 @@ private:
     void render() const override;
     void configure_gui() override;
 
+    void resize(const Magnum::Vector2i& viewport) override;
+
     void process_message_update(const proto::Message& message);
     void process_scene_update(const proto::SceneUpdate& message);
 

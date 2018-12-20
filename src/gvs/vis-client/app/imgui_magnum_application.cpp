@@ -113,6 +113,7 @@ void ImGuiMagnumApplication::drawEvent() {
 
 void ImGuiMagnumApplication::viewportEvent(ViewportEvent& event) {
     Magnum::GL::defaultFramebuffer.setViewport({{}, event.windowSize()});
+    resize(event.windowSize());
     reset_draw_counter();
 }
 

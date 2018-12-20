@@ -52,6 +52,8 @@ private:
     virtual void render() const = 0;
     virtual void configure_gui() = 0;
 
+    virtual void resize(const Magnum::Vector2i& viewport) = 0;
+
     void drawEvent() override;
     void viewportEvent(ViewportEvent& event) override;
 

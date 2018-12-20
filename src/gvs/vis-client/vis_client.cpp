@@ -93,7 +93,7 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
     , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>())
-    , scene_(std::make_unique<DefaultSceneType>()) {
+    , scene_(std::make_unique<DefaultSceneType>(this->windowSize())) {
 
     grpc_client_->change_server(server_address_input_,
                                 [this](const net::GrpcClientState&) { this->on_state_change(); });
@@ -222,10 +222,10 @@ void vis::VisClient::configure_gui() {
     bool using_optix = (dynamic_cast<OptiXScene*>(scene_.get()) != nullptr);
     if (ImGui::Checkbox("Use OptiX for rendering", &using_optix)) {
         if (using_optix) {
-            scene_ = std::make_unique<OptiXScene>();
+            scene_ = std::make_unique<OptiXScene>(this->windowSize());
 
         } else {
-            scene_ = std::make_unique<OpenGLScene>();
+            scene_ = std::make_unique<OpenGLScene>(this->windowSize());
         }
 
         on_state_change(); // Get state if client is connected
@@ -305,6 +305,10 @@ void vis::VisClient::configure_gui() {
             error_message_ = "";
         }
     }
+}
+
+void VisClient::resize(const Magnum::Vector2i& viewport) {
+    scene_->resize(viewport);
 }
 
 void VisClient::process_message_update(const proto::Message& message) {

@@ -61,7 +61,7 @@ Magnum::MeshPrimitive from_proto(gvs::proto::GeometryFormat format) {
 using namespace Magnum;
 using namespace Math::Literals;
 
-OpenGLScene::OpenGLScene() {
+OpenGLScene::OpenGLScene(const Vector2i& /*viewport*/) {
     camera_object_.setParent(&scene_).translate(Vector3::zAxis(5.0f));
 
     (*(camera_ = new SceneGraph::Camera3D{camera_object_})) // Memory control is handled elsewhere
@@ -79,6 +79,8 @@ OpenGLScene::OpenGLScene() {
     // TMP
     mesh_.setCount(0);
     mesh_.setPrimitive(MeshPrimitive::Points);
+
+    // TODO: Set camera
 }
 
 void OpenGLScene::update(const Vector2i& viewport) {
@@ -151,6 +153,10 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
             mesh_.setPrimitive(from_proto(display.geometry_format().value()));
         }
     }
+}
+
+void OpenGLScene::resize(const Vector2i& /*viewport*/) {
+    // TODO: Reset camera
 }
 
 } // namespace vis

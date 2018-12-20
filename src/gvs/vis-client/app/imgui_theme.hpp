@@ -33,9 +33,6 @@ class Theme {
 public:
     Theme();
 
-    // utility functions
-    static ImColor parse_color(int rgb_hex);
-
     // set ImGui::Style colors
     void set_style();
 

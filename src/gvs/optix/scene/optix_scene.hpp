@@ -24,6 +24,7 @@
 
 #include "gvs/vis-client/scene/scene_interface.hpp"
 
+#include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/BufferImage.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/OpenGL.h>
@@ -40,7 +41,7 @@ namespace vis {
 
 class OptiXScene : public SceneInterface {
 public:
-    OptiXScene();
+    explicit OptiXScene(const Magnum::Vector2i& viewport);
     ~OptiXScene() override;
 
     void update(const Magnum::Vector2i& viewport) override;
@@ -50,9 +51,12 @@ public:
     void reset(const proto::SceneItems& items) override;
     void add_item(const proto::SceneItemInfo& info) override;
 
+    void resize(const Magnum::Vector2i& viewport) override;
+
 private:
     std::shared_ptr<optix::Context> context_;
 
+    Magnum::GL::Buffer pixel_buffer_;
     Magnum::GL::BufferImage2D buffer_image_;
     Magnum::GL::Texture2D display_texture_;
     Magnum::Shaders::Flat2D screenspace_shader_;
