@@ -102,6 +102,7 @@ if (${OptiX_FOUND})
 
     add_library(gvs_ptx OBJECT ${OPTIX_PTX_SOURCE_FILES})
     set_property(TARGET gvs_ptx PROPERTY CUDA_PTX_COMPILATION ON)
+    target_include_directories(gvs_ptx PRIVATE .)
     target_link_libraries(gvs_ptx PUBLIC gvs_optix_thirdparty)
 
     file(GENERATE

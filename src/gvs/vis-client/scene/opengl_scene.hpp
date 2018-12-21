@@ -37,7 +37,7 @@ namespace vis {
 
 class OpenGLScene : public SceneInterface {
 public:
-    explicit OpenGLScene(const Magnum::Vector2i& viewport);
+    explicit OpenGLScene(const SceneInitializationInfo& initialization_info);
     ~OpenGLScene() override = default;
 
     void update(const Magnum::Vector2i& viewport) override;

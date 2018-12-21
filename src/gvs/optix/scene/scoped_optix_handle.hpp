@@ -22,54 +22,25 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/optix/scene/scoped_optix_handle.hpp"
-#include "gvs/vis-client/scene/scene_interface.hpp"
-
-#include <Magnum/GL/Buffer.h>
-#include <Magnum/GL/BufferImage.h>
-#include <Magnum/GL/Mesh.h>
-#include <Magnum/GL/OpenGL.h>
-#include <Magnum/GL/Texture.h>
-#include <Magnum/Shaders/Flat.h>
-
-#include <memory>
-#include <unordered_map>
+#include <optixu/optixpp_namespace.h>
 
 namespace gvs {
 namespace vis {
 
-class OptiXScene : public SceneInterface {
+template <typename Object, Object (optix::ContextObj::*create)()>
+class ScopedOptiXHandle {
 public:
-    explicit OptiXScene(const SceneInitializationInfo& initialization_info);
-    ~OptiXScene() override;
+    explicit ScopedOptiXHandle(optix::Context& context) : object_((context.get()->*create)()) {}
 
-    void update(const Magnum::Vector2i& viewport) override;
-    void render(const Magnum::Vector2i& viewport) override;
-    void configure_gui(const Magnum::Vector2i& viewport) override;
+    ~ScopedOptiXHandle() { object_->destroy(); }
 
-    void reset(const proto::SceneItems& items) override;
-    void add_item(const proto::SceneItemInfo& info) override;
-
-    void resize(const Magnum::Vector2i& viewport) override;
+    Object& operator()() { return object_; }
 
 private:
-    std::shared_ptr<optix::Context> context_;
-
-    // To display the OptiX output:
-    Magnum::GL::Buffer pixel_buffer_;
-    Magnum::GL::BufferImage2D buffer_image_;
-    Magnum::GL::Texture2D display_texture_;
-    Magnum::Shaders::Flat2D screenspace_shader_;
-    Magnum::GL::Mesh fullscreen_quad_;
-
-    // The parent of of all OptiX items
-    ScopedGroup root_group_;
-    //    std::shared_ptr<optix::Group> root_group_;
-
-    std::unordered_map<std::string, std::string> ptx_files_;
-
-    optix::Context& context();
+    Object object_;
 };
+
+using ScopedGroup = ScopedOptiXHandle<optix::Group, &optix::ContextObj::createGroup>;
 
 } // namespace vis
 } // namespace gvs

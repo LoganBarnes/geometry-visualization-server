@@ -20,15 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-// This define shouldn't be here. TODO: Figure out how to include the header properly
-#define __CUDA_INCLUDE_COMPILER_INTERNAL_HEADERS__
-#include <optix.h>
-#include <optixu/optixu_math_namespace.h>
 
-struct PerRayData {
-    float3 result;
-    float depth;
-};
+#include "gvs/optix/ptx/ray_types.hpp"
 
 rtDeclareVariable(float3, eye, , );
 rtDeclareVariable(float3, U, , );
@@ -41,13 +34,16 @@ rtDeclareVariable(unsigned int, radiance_ray_type, , );
 rtDeclareVariable(uint2, launch_index, rtLaunchIndex, );
 rtDeclareVariable(uint2, launch_dim, rtLaunchDim, );
 
-rtDeclareVariable(PerRayData, prd_current, rtPayload, );
+rtDeclareVariable(gvs::PerRayData, prd_current, rtPayload, );
 rtBuffer<float4, 2> output_buffer;
 
 rtDeclareVariable(float3, background_color, , );
 rtDeclareVariable(float3, error_color, , );
 rtDeclareVariable(float, miss_depth, , );
 
+/**
+ * @brief The starting point for ray generation
+ */
 RT_PROGRAM void pinhole_camera() {
     auto d = make_float2(launch_index) / make_float2(launch_dim) * 2.f - 1.f;
     float3 ray_origin = eye;
@@ -55,7 +51,7 @@ RT_PROGRAM void pinhole_camera() {
 
     optix::Ray ray = optix::make_Ray(ray_origin, ray_direction, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX);
 
-    PerRayData prd;
+    gvs::PerRayData prd;
     prd.depth = miss_depth;
 
     rtTrace(top_object, ray, prd);
@@ -63,16 +59,18 @@ RT_PROGRAM void pinhole_camera() {
     output_buffer[launch_index] = make_float4(prd.result, prd.depth);
 }
 
-RT_PROGRAM void debug_test() {
-    output_buffer[launch_index] = make_float4(0.6f, 0.5f, 0.4f, 1.f);
-}
-
+/**
+ * @brief Sets the ray data if no intersections are found.
+ */
 RT_PROGRAM void miss() {
     prd_current.result = background_color;
 }
 
+/**
+ * @brief Sets the buffer output if an error occurs.
+ */
 RT_PROGRAM void exception() {
     const unsigned int code = rtGetExceptionCode();
     rtPrintf("Caught exception 0x%X at launch index (%d,%d)\n", code, launch_index.x, launch_index.y);
-    output_buffer[launch_index] = make_float4(error_color, 1.0);
+    output_buffer[launch_index] = make_float4(error_color, 1.f);
 }

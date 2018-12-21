@@ -61,7 +61,7 @@ Magnum::MeshPrimitive from_proto(gvs::proto::GeometryFormat format) {
 using namespace Magnum;
 using namespace Math::Literals;
 
-OpenGLScene::OpenGLScene(const Vector2i& /*viewport*/) {
+OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/) {
     camera_object_.setParent(&scene_).translate(Vector3::zAxis(5.0f));
 
     (*(camera_ = new SceneGraph::Camera3D{camera_object_})) // Memory control is handled elsewhere

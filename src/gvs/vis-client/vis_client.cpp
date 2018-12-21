@@ -25,6 +25,7 @@
 #include "gvs/net/grpc_client.hpp"
 #include "gvs/net/grpc_server.hpp"
 #include "gvs/server/scene_server.hpp"
+#include "gvs/vis-client/app/imgui_theme.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
 #include "gvs/vis-client/scene/opengl_scene.hpp"
 
@@ -81,6 +82,10 @@ ImVec4 to_pretty_color(const net::GrpcClientState& state) {
     return {1.f, 1.f, 1.f, 1.f}; // White
 }
 
+SceneInitializationInfo scene_init_info(const ImColor& background_color, const Magnum::Vector2i& viewport) {
+    return {{background_color.Value.x, background_color.Value.y, background_color.Value.z}, viewport};
+}
+
 } // namespace
 
 VisClient::VisClient(const std::string& initial_host_address, const Arguments& arguments)
@@ -93,7 +98,7 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
     , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>())
-    , scene_(std::make_unique<DefaultSceneType>(this->windowSize())) {
+    , scene_(std::make_unique<DefaultSceneType>(scene_init_info(theme_->background, this->windowSize()))) {
 
     grpc_client_->change_server(server_address_input_,
                                 [this](const net::GrpcClientState&) { this->on_state_change(); });
@@ -222,10 +227,10 @@ void vis::VisClient::configure_gui() {
     bool using_optix = (dynamic_cast<OptiXScene*>(scene_.get()) != nullptr);
     if (ImGui::Checkbox("Use OptiX for rendering", &using_optix)) {
         if (using_optix) {
-            scene_ = std::make_unique<OptiXScene>(this->windowSize());
+            scene_ = std::make_unique<OptiXScene>(scene_init_info(theme_->background, this->windowSize()));
 
         } else {
-            scene_ = std::make_unique<OpenGLScene>(this->windowSize());
+            scene_ = std::make_unique<OpenGLScene>(scene_init_info(theme_->background, this->windowSize()));
         }
 
         on_state_change(); // Get state if client is connected

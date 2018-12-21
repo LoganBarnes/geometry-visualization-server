@@ -45,12 +45,15 @@
 #include <optixu/optixu_math_namespace.h>
 
 #include <iostream>
+#include <limits>
 #include <sstream>
 
 using namespace Magnum;
 
 namespace gvs {
 namespace vis {
+
+constexpr optix::float3 error_color = {1.f, 0.f, 1.f};
 
 namespace {
 
@@ -92,7 +95,7 @@ GL::Mesh set_up_fullscreen_quad() {
 
 } // namespace
 
-OptiXScene::OptiXScene(const Vector2i& viewport)
+OptiXScene::OptiXScene(const SceneInitializationInfo& initialization_info)
     : context_(new optix::Context(optix::Context::create()),
                [](auto* p) {
                    static_assert(std::is_same<decltype(p), optix::Context*>::value, "");
@@ -102,6 +105,7 @@ OptiXScene::OptiXScene(const Vector2i& viewport)
     , buffer_image_(GL::PixelFormat::RGBA, GL::PixelType::Float)
     , screenspace_shader_(Shaders::Flat2D::Flag::Textured)
     , fullscreen_quad_(set_up_fullscreen_quad())
+    , root_group_(context())
     , ptx_files_(build_ptx_file_map()) {
 
     for (const auto& file_pair : ptx_files_) {
@@ -120,9 +124,25 @@ OptiXScene::OptiXScene(const Vector2i& viewport)
 
     // Starting program to generate rays
     std::string ptx_file = ptx_files_.at("default_programs.ptx");
-    ctx->setRayGenerationProgram(0, ctx->createProgramFromPTXFile(ptx_file, "debug_test"));
+    ctx->setRayGenerationProgram(0, ctx->createProgramFromPTXFile(ptx_file, "pinhole_camera"));
+
+    // What to do when something messes up
+    ctx->setExceptionProgram(0, ctx->createProgramFromPTXFile(ptx_file, "exception"));
+    ctx["error_color"]->setFloat(error_color);
+
+    // What to do when rays don't intersect with anything
+    ctx->setMissProgram(0, ctx->createProgramFromPTXFile(ptx_file, "miss"));
+    ctx["background_color"]->setFloat(initialization_info.background_color.r(),
+                                      initialization_info.background_color.g(),
+                                      initialization_info.background_color.b());
+    ctx["miss_depth"]->setFloat(std::numeric_limits<float>::infinity());
 
     set_up_fullscreen_quad();
+
+    // Root object
+    root_group_()->setAcceleration(ctx->createAcceleration("Bvh"));
+
+    ctx["top_object"]->set(root_group_());
 
     // Set up output buffer
     optix::Buffer output_buffer(context()->createBufferFromGLBO(RT_BUFFER_OUTPUT, pixel_buffer_.id()));
@@ -130,7 +150,7 @@ OptiXScene::OptiXScene(const Vector2i& viewport)
 
     context()["output_buffer"]->set(output_buffer);
 
-    resize(viewport); // must be positive
+    resize(initialization_info.viewport_size);
 }
 
 OptiXScene::~OptiXScene() = default;

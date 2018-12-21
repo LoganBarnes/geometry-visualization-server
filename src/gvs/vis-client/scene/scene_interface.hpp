@@ -19,9 +19,15 @@
 #include <gvs/types.pb.h>
 
 #include <Magnum/Magnum.h>
+#include <Magnum/Math/Vector3.h>
 
 namespace gvs {
 namespace vis {
+
+struct SceneInitializationInfo {
+    Magnum::Vector3 background_color;
+    Magnum::Vector2i viewport_size;
+};
 
 class SceneInterface {
 public:
