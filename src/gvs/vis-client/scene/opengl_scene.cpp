@@ -62,12 +62,8 @@ using namespace Magnum;
 using namespace Math::Literals;
 
 OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/) {
-    camera_object_.setParent(&scene_).translate(Vector3::zAxis(5.0f));
-
-    (*(camera_ = new SceneGraph::Camera3D{camera_object_})) // Memory control is handled elsewhere
-        .setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix4::perspectiveProjection(35.0_degf, 1.0f, 0.01f, 1000.0f))
-        .setViewport(GL::defaultFramebuffer.viewport().size());
+    camera_object_.setParent(&scene_);
+    camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
 
     root_object_.setParent(&scene_);
 
@@ -79,15 +75,11 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
     // TMP
     mesh_.setCount(0);
     mesh_.setPrimitive(MeshPrimitive::Points);
-
-    // TODO: Set camera
 }
 
-void OpenGLScene::update(const Vector2i& viewport) {
+void OpenGLScene::update(const Vector2i& /*viewport*/) {
 
-    auto transformation = Matrix4::rotationX(30.0_degf) * Matrix4::rotationY(40.0_degf);
-    auto projection = Matrix4::perspectiveProjection(35.0_degf, Vector2{viewport}.aspectRatio(), 0.01f, 100.0f)
-        * Matrix4::translation(Vector3::zAxis(-10.0f));
+    auto transformation = camera_object_.transformationMatrix();
     auto color = Color3::fromHsv(35.0_degf, 1.0f, 1.0f);
 
     shader_.setLightPosition({7.0f, 5.0f, 2.5f})
@@ -95,11 +87,11 @@ void OpenGLScene::update(const Vector2i& viewport) {
         .setDiffuseColor(color)
         .setAmbientColor(Color3::fromHsv(color.hue(), 1.0f, 0.3f))
         .setTransformationMatrix(transformation)
-        .setNormalMatrix(transformation.rotationScaling())
-        .setProjectionMatrix(projection);
+        .setNormalMatrix(transformation.rotationScaling());
 }
 
-void OpenGLScene::render(const Vector2i& /*viewport*/) {
+void OpenGLScene::render() {
+    shader_.setProjectionMatrix(camera_->projectionMatrix());
     mesh_.draw(shader_);
 }
 
@@ -155,8 +147,18 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
     }
 }
 
-void OpenGLScene::resize(const Vector2i& /*viewport*/) {
-    // TODO: Reset camera
+void OpenGLScene::resize(const Vector2i& /*viewport*/) {}
+
+//SceneGraph::Object<SceneGraph::MatrixTransformation3D>& OpenGLScene::scene_root() {
+//    return scene_;
+//}
+
+SceneGraph::Object<SceneGraph::MatrixTransformation3D>& OpenGLScene::camera_object() {
+    return camera_object_;
+}
+
+SceneGraph::Camera3D& OpenGLScene::camera() {
+    return *camera_;
 }
 
 } // namespace vis

@@ -20,6 +20,9 @@
 
 #include <Magnum/Magnum.h>
 #include <Magnum/Math/Vector3.h>
+#include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/SceneGraph/Object.h>
+#include <imgui.h>
 
 namespace gvs {
 namespace vis {
@@ -34,16 +37,22 @@ public:
     virtual ~SceneInterface() = 0;
 
     virtual void update(const Magnum::Vector2i& viewport) = 0;
-    virtual void render(const Magnum::Vector2i& viewport) = 0;
+    virtual void render() = 0;
     virtual void configure_gui(const Magnum::Vector2i& viewport) = 0;
 
     virtual void add_item(const proto::SceneItemInfo& info) = 0;
     virtual void reset(const proto::SceneItems& items) = 0;
 
     virtual void resize(const Magnum::Vector2i& viewport) = 0;
+
+    //    virtual Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& scene_root() = 0;
+    virtual Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& camera_object() = 0;
+    virtual Magnum::SceneGraph::Camera3D& camera() = 0;
 };
 
 inline SceneInterface::~SceneInterface() = default;
+
+SceneInitializationInfo make_scene_init_info(const ImColor& background_color, const Magnum::Vector2i& viewport);
 
 } // namespace vis
 } // namespace gvs

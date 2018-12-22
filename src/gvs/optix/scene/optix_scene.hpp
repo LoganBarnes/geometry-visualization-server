@@ -30,6 +30,8 @@
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/OpenGL.h>
 #include <Magnum/GL/Texture.h>
+#include <Magnum/SceneGraph/MatrixTransformation3D.h>
+#include <Magnum/SceneGraph/Object.h>
 #include <Magnum/Shaders/Flat.h>
 
 #include <memory>
@@ -44,7 +46,7 @@ public:
     ~OptiXScene() override;
 
     void update(const Magnum::Vector2i& viewport) override;
-    void render(const Magnum::Vector2i& viewport) override;
+    void render() override;
     void configure_gui(const Magnum::Vector2i& viewport) override;
 
     void reset(const proto::SceneItems& items) override;
@@ -52,8 +54,15 @@ public:
 
     void resize(const Magnum::Vector2i& viewport) override;
 
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& camera_object() override;
+    Magnum::SceneGraph::Camera3D& camera() override;
+
 private:
     std::shared_ptr<optix::Context> context_;
+
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> scene_;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> camera_object_;
+    Magnum::SceneGraph::Camera3D* camera_;
 
     // To display the OptiX output:
     Magnum::GL::Buffer pixel_buffer_;

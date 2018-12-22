@@ -22,7 +22,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/forward_declarations.hpp"
 #include "gvs/net/grpc_client_state.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
@@ -76,7 +75,6 @@ private:
     std::string message_content_input_;
 
     // Scene
-    std::unique_ptr<SceneInterface> scene_; // forward declaration
     util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
 };
 

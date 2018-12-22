@@ -23,17 +23,22 @@
 #include "imgui_magnum_application.hpp"
 
 #include "gvs/vis-client/app/imgui_theme.hpp"
+#include "gvs/vis-client/scene/opengl_scene.hpp"
 
 #include <Corrade/Utility/Unicode.h>
 #include <Magnum/GL/Context.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Version.h>
+#include <Magnum/Math/Angle.h>
 #include <Magnum/Math/Color.h>
+#include <Magnum/SceneGraph/Camera.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
 namespace gvs {
 namespace vis {
+
+using namespace Magnum::Math::Literals;
 
 ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
     : GlfwApplication(arguments, configuration) {
@@ -69,6 +74,15 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
                                          theme_->background.Value.y,
                                          theme_->background.Value.z,
                                          theme_->background.Value.w});
+
+    scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
+
+    scene_->camera_object().translate(Magnum::Vector3::zAxis(-5.0f));
+
+    scene_->camera()
+        .setAspectRatioPolicy(Magnum::SceneGraph::AspectRatioPolicy::Extend)
+        .setProjectionMatrix(Magnum::Matrix4::perspectiveProjection(35.0_degf, 1.0f, 0.01f, 1000.0f))
+        .setViewport(Magnum::GL::defaultFramebuffer.viewport().size());
 
     reset_draw_counter();
 }
@@ -187,6 +201,58 @@ void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
     event.setAccepted(true);
     reset_draw_counter();
 }
+
+//void ViewerExample::viewportEvent(ViewportEvent& event) {
+//    GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
+//    _camera->setViewport(event.windowSize());
+//}
+//
+//void ViewerExample::mousePressEvent(MouseEvent& event) {
+//    if (event.button() == MouseEvent::Button::Left)
+//        _previousPosition = positionOnSphere(event.position());
+//}
+//
+//void ViewerExample::mouseReleaseEvent(MouseEvent& event) {
+//    if (event.button() == MouseEvent::Button::Left)
+//        _previousPosition = Vector3();
+//}
+//
+//void ViewerExample::mouseScrollEvent(MouseScrollEvent& event) {
+//    if (!event.offset().y())
+//        return;
+//
+//    /* Distance to origin */
+//    const Float distance = _cameraObject.transformation().translation().z();
+//
+//    /* Move 15% of the distance back or forward */
+//    _cameraObject.translate(Vector3::zAxis(distance * (1.0f - (event.offset().y() > 0 ? 1 / 0.85f : 0.85f))));
+//
+//    redraw();
+//}
+//
+//Magnum::Vector3 ViewerExample::positionOnSphere(const Magnum::Vector2i& position) const {
+//    const Vector2 positionNormalized = Vector2{position} / Vector2{_camera->viewport()} - Vector2{0.5f};
+//    const Float length = positionNormalized.length();
+//    const Vector3 result(length > 1.0f ? Vector3(positionNormalized, 0.0f)
+//                                       : Vector3(positionNormalized, 1.0f - length));
+//    return (result * Vector3::yScale(-1.0f)).normalized();
+//}
+//
+//void ViewerExample::mouseMoveEvent(MouseMoveEvent& event) {
+//    if (!(event.buttons() & MouseMoveEvent::Button::Left))
+//        return;
+//
+//    const Vector3 currentPosition = positionOnSphere(event.position());
+//    const Vector3 axis = Math::cross(_previousPosition, currentPosition);
+//
+//    if (_previousPosition.length() < 0.001f || axis.length() < 0.001f)
+//        return;
+//
+//    _manipulator.rotate(Math::angle(_previousPosition, currentPosition), axis.normalized());
+//    _previousPosition = currentPosition;
+//
+//    redraw();
+//}
 
 } // namespace vis
 } // namespace gvs

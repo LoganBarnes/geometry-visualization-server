@@ -46,12 +46,6 @@
 namespace gvs {
 namespace vis {
 
-#ifdef OptiX_FOUND
-using DefaultSceneType = OptiXScene;
-#else
-using DefaultSceneType = OpenGLScene;
-#endif
-
 namespace {
 
 std::string to_pretty_string(const net::GrpcClientState& state) {
@@ -82,10 +76,6 @@ ImVec4 to_pretty_color(const net::GrpcClientState& state) {
     return {1.f, 1.f, 1.f, 1.f}; // White
 }
 
-SceneInitializationInfo scene_init_info(const ImColor& background_color, const Magnum::Vector2i& viewport) {
-    return {{background_color.Value.x, background_color.Value.y, background_color.Value.z}, viewport};
-}
-
 } // namespace
 
 VisClient::VisClient(const std::string& initial_host_address, const Arguments& arguments)
@@ -97,8 +87,7 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
     , gl_version_str_(Magnum::GL::Context::current().versionString())
     , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
-    , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>())
-    , scene_(std::make_unique<DefaultSceneType>(scene_init_info(theme_->background, this->windowSize()))) {
+    , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>()) {
 
     grpc_client_->change_server(server_address_input_,
                                 [this](const net::GrpcClientState&) { this->on_state_change(); });
@@ -146,7 +135,7 @@ void vis::VisClient::update() {
 }
 
 void vis::VisClient::render() const {
-    scene_->render(this->windowSize());
+    scene_->render();
 }
 
 void vis::VisClient::configure_gui() {
@@ -227,12 +216,13 @@ void vis::VisClient::configure_gui() {
     bool using_optix = (dynamic_cast<OptiXScene*>(scene_.get()) != nullptr);
     if (ImGui::Checkbox("Use OptiX for rendering", &using_optix)) {
         if (using_optix) {
-            scene_ = std::make_unique<OptiXScene>(scene_init_info(theme_->background, this->windowSize()));
+            scene_ = std::make_unique<OptiXScene>(make_scene_init_info(theme_->background, this->windowSize()));
 
         } else {
-            scene_ = std::make_unique<OpenGLScene>(scene_init_info(theme_->background, this->windowSize()));
+            scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
         }
 
+        resize(this->windowSize());
         on_state_change(); // Get state if client is connected
     }
 #endif
@@ -314,6 +304,7 @@ void vis::VisClient::configure_gui() {
 
 void VisClient::resize(const Magnum::Vector2i& viewport) {
     scene_->resize(viewport);
+    scene_->camera().setViewport(viewport);
 }
 
 void VisClient::process_message_update(const proto::Message& message) {

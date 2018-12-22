@@ -41,7 +41,9 @@ public:
     virtual ~ImGuiMagnumApplication();
 
 protected:
+    // forward declaration
     std::unique_ptr<detail::Theme> theme_;
+    std::unique_ptr<SceneInterface> scene_;
 
     // Ensures the application renders at least 5 more times after all events are
     // finished to give ImGui a chance to update and render correctly
