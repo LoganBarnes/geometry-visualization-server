@@ -16,6 +16,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/vis-client/scene/general_shader_3d.hpp"
 #include "gvs/vis-client/scene/scene_interface.hpp"
 
 #include <gvs/types.pb.h>
@@ -30,7 +31,6 @@
 #include <Magnum/SceneGraph/Object.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/SceneGraph.h>
-#include <Magnum/Shaders/Phong.h>
 
 namespace gvs {
 namespace vis {
@@ -56,8 +56,7 @@ private:
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
     using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
 
-    Magnum::Shaders::Phong colored_shader_;
-    Magnum::Shaders::Phong shader_;
+    GeneralShader3D shader_;
     Corrade::Containers::Array<Corrade::Containers::Optional<Magnum::GL::Mesh>> meshes_;
 
     // initial test_mesh

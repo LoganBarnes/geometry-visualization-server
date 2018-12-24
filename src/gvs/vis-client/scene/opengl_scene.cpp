@@ -70,7 +70,6 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
     /* Setup renderer and shader defaults */
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
-    colored_shader_.setAmbientColor(0x111111_rgbf).setSpecularColor(0xffffff_rgbf).setShininess(80.0f);
 
     // TMP
     mesh_.setCount(0);
@@ -79,19 +78,15 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
 
 void OpenGLScene::update(const Vector2i& /*viewport*/) {
 
-    auto transformation = camera_object_.transformationMatrix();
-    auto color = Color3::fromHsv(35.0_degf, 1.0f, 1.0f);
+    auto transformation = Matrix4(Math::IdentityInit);
 
-    shader_.setLightPosition({7.0f, 5.0f, 2.5f})
-        .setLightColor(Color3{1.0f})
-        .setDiffuseColor(color)
-        .setAmbientColor(Color3::fromHsv(color.hue(), 1.0f, 0.3f))
-        .setTransformationMatrix(transformation)
-        .setNormalMatrix(transformation.rotationScaling());
+    shader_.set_global_color({1.f, 0.5f, 0.1f})
+        .set_model_matrix(transformation)
+        .set_normal_matrix(transformation.rotationScaling());
 }
 
 void OpenGLScene::render() {
-    shader_.setProjectionMatrix(camera_->projectionMatrix());
+    shader_.set_projection_view_matrix(camera_->projectionMatrix() * camera_object_.transformationMatrix());
     mesh_.draw(shader_);
 }
 
@@ -122,7 +117,7 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
 
     vertex_buffer_.setData(buffer_data);
 
-    mesh_.addVertexBuffer(vertex_buffer_, 0, Shaders::Phong::Position{});
+    mesh_.addVertexBuffer(vertex_buffer_, 0, GeneralShader3D::Position{});
 
     if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
         std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
@@ -145,6 +140,8 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
             mesh_.setPrimitive(from_proto(display.geometry_format().value()));
         }
     }
+
+    //    drawables_.add();
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}

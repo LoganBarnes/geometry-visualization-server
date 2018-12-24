@@ -51,7 +51,6 @@ target_link_libraries(gvs_net
         PUBLIC crossguid
         )
 
-set_target_properties(gvs_net PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 target_compile_options(gvs_net PUBLIC ${GVS_COMPILE_FLAGS})
 
 ##############
@@ -67,11 +66,14 @@ add_library(gvs_server ${SCENE_SERVER_SOURCE_FILES})
 
 target_link_libraries(gvs_server PUBLIC gvs_net)
 
-set_target_properties(gvs_server PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
-
 ##################
 ### Vis Client ###
 ##################
+# Compile resources separately to avoid linting issues on generated code
+corrade_add_resource(gvs_client_RESOURCES resources.conf)
+add_library(vis_client_resources ${gvs_client_RESOURCES})
+target_link_libraries(vis_client_resources PUBLIC gvs_gui_thirdparty)
+
 file(GLOB_RECURSE VIS_CLIENT_SOURCE_FILES
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
@@ -81,10 +83,9 @@ file(GLOB_RECURSE VIS_CLIENT_SOURCE_FILES
 add_library(vis_client ${VIS_CLIENT_SOURCE_FILES})
 
 target_link_libraries(vis_client
-        PUBLIC gvs_gui_thirdparty
+        PUBLIC vis_client_resources
         PUBLIC gvs_net
         )
-set_target_properties(vis_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 
 ######################
 ### Optional OptiX ###
@@ -162,7 +163,6 @@ file(GLOB_RECURSE LOG_CLIENT_SOURCE_FILES
 
 add_library(log_client ${LOG_CLIENT_SOURCE_FILES})
 target_link_libraries(log_client PUBLIC gvs_net)
-set_target_properties(log_client PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 
 ###################
 ### Executables ###
@@ -182,10 +182,20 @@ target_link_libraries(message_client log_client)
 add_executable(log_test exec/log_test.cpp)
 target_link_libraries(log_test log_client)
 
-set_target_properties(vis_client_and_server scene_server visualiser_client log_test PROPERTIES
+### Clang-Tidy for all ###
+set_target_properties(
+        gvs_net
+        gvs_server
+        vis_client
+        log_client
+        vis_client_and_server
+        scene_server
+        visualiser_client
+        log_test
+        PROPERTIES
         CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-        )
+)
 
 ###############
 ### Testing ###

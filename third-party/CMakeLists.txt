@@ -90,12 +90,14 @@ if (NOT magnum_dl_POPULATED)
 
     # Add the necessary libraries
     target_link_libraries(gvs_gui_thirdparty INTERFACE
+            Corrade::Utility
             Magnum::Application
             Magnum::Magnum
             Magnum::MeshTools
             Magnum::Primitives
             Magnum::SceneGraph
             Magnum::Shaders
+            Magnum::Trade
             )
 
     # Add the FindMagnum and FindCorrade cmake files

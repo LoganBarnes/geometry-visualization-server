@@ -25,6 +25,7 @@
 #include "gvs/vis-client/app/imgui_theme.hpp"
 #include "gvs/vis-client/scene/opengl_scene.hpp"
 
+#include <Corrade/Utility/Resource.h>
 #include <Corrade/Utility/Unicode.h>
 #include <Magnum/GL/Context.h>
 #include <Magnum/GL/Renderer.h>
@@ -35,6 +36,10 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+static void initialize_resources() {
+    CORRADE_RESOURCE_INITIALIZE(gvs_client_RESOURCES)
+}
+
 namespace gvs {
 namespace vis {
 
@@ -42,6 +47,7 @@ using namespace Magnum::Math::Literals;
 
 ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
     : GlfwApplication(arguments, configuration) {
+    initialize_resources();
 
     this->startTextInput(); // allow for text input callbacks
 
