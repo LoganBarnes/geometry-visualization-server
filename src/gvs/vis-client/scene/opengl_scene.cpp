@@ -68,7 +68,6 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
     camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
 
     root_object_ = &scene_.addChild<Object3D>();
-    //    root_object_.setParent(&scene_);
 
     /* Setup renderer and shader defaults */
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
@@ -79,7 +78,9 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
 
 void OpenGLScene::update(const Vector2i& /*viewport*/) {}
 
-void OpenGLScene::render() {
+void OpenGLScene::render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) {
+    camera_object_.setTransformation(camera_transformation);
+    camera_->setProjectionMatrix(camera->projectionMatrix());
     camera_->draw(drawables_);
 }
 
@@ -149,14 +150,6 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}
-
-SceneGraph::Object<SceneGraph::MatrixTransformation3D>& OpenGLScene::camera_object() {
-    return camera_object_;
-}
-
-SceneGraph::Camera3D& OpenGLScene::camera() {
-    return *camera_;
-}
 
 } // namespace vis
 } // namespace gvs

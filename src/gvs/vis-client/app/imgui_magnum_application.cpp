@@ -100,9 +100,7 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
         .setProjectionMatrix(Matrix4::perspectiveProjection(35.0_degf, 1.0f, 0.01f, 1000.0f))
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
-    scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
-
-    update_scene_camera();
+    update_camera();
     reset_draw_counter();
 }
 
@@ -132,7 +130,7 @@ void ImGuiMagnumApplication::drawEvent() {
 
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color | GL::FramebufferClear::Depth);
 
-    render();
+    render(camera_object_.transformation(), camera_);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -146,6 +144,7 @@ void ImGuiMagnumApplication::drawEvent() {
 
 void ImGuiMagnumApplication::viewportEvent(ViewportEvent& event) {
     GL::defaultFramebuffer.setViewport({{}, event.windowSize()});
+    camera_->setViewport(event.windowSize());
     resize(event.windowSize());
     reset_draw_counter();
 }
@@ -231,7 +230,7 @@ void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
     camera_yaw_and_pitch_ += (previous_position_ - current_position) * 0.005f;
     previous_position_ = current_position;
 
-    update_scene_camera();
+    update_camera();
 
     event.setAccepted(true);
     reset_draw_counter();
@@ -247,22 +246,18 @@ void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
     camera_orbit_distance_ += (event.offset().y() > 0.f ? event.offset().y() / 0.85f : event.offset().y() * 0.85f);
     camera_orbit_distance_ = std::max(0.f, camera_orbit_distance_);
 
-    update_scene_camera();
+    update_camera();
 
     event.setAccepted(true);
     reset_draw_counter();
 }
 
-void ImGuiMagnumApplication::update_scene_camera() {
-
+void ImGuiMagnumApplication::update_camera() {
     auto trans = Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.x()), {0.f, 1.f, 0.f})
         * Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.y()), {1.f, 0.f, 0.f})
         * Matrix4::translation({0.f, 0.f, camera_orbit_distance_});
 
     camera_object_.setTransformation(trans);
-
-    scene_->camera_object().setTransformation(camera_object_.transformation());
-    scene_->camera().setProjectionMatrix(camera_->projectionMatrix());
 }
 
 } // namespace vis

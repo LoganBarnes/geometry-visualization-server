@@ -44,7 +44,7 @@ public:
 
 private:
     void update() override;
-    void render() const override;
+    void render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) const override;
     void configure_gui() override;
 
     void resize(const Magnum::Vector2i& viewport) override;
@@ -75,6 +75,7 @@ private:
     std::string message_content_input_;
 
     // Scene
+    std::unique_ptr<SceneInterface> scene_; // forward declaration
     util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
 };
 

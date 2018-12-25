@@ -47,17 +47,14 @@ public:
 protected:
     // forward declaration
     std::unique_ptr<detail::Theme> theme_;
-    std::unique_ptr<SceneInterface> scene_;
 
     // Ensures the application renders at least 5 more times after all events are
     // finished to give ImGui a chance to update and render correctly.
     void reset_draw_counter();
 
-    void update_scene_camera();
-
 private:
     virtual void update() = 0;
-    virtual void render() const = 0;
+    virtual void render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) const = 0;
     virtual void configure_gui() = 0;
 
     virtual void resize(const Magnum::Vector2i& viewport) = 0;
@@ -75,6 +72,8 @@ private:
     void mouseReleaseEvent(MouseEvent& event) override;
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void mouseScrollEvent(MouseScrollEvent& event) override;
+
+    void update_camera();
 
     std::shared_ptr<ImGuiContext> imgui_;
     std::shared_ptr<bool> imgui_gl_;

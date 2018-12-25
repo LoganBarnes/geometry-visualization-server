@@ -41,16 +41,13 @@ public:
     ~OpenGLScene() override = default;
 
     void update(const Magnum::Vector2i& viewport) override;
-    void render() override;
+    void render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) override;
     void configure_gui(const Magnum::Vector2i& viewport) override;
 
     void add_item(const proto::SceneItemInfo& info) override;
     void reset(const proto::SceneItems& items) override;
 
     void resize(const Magnum::Vector2i& viewport) override;
-
-    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& camera_object() override;
-    Magnum::SceneGraph::Camera3D& camera() override;
 
 private:
     using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;

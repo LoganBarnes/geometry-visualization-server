@@ -44,6 +44,8 @@
 #include <limits>
 #include <sstream>
 
+using namespace Magnum;
+
 namespace gvs {
 namespace vis {
 
@@ -85,10 +87,12 @@ VisClient::VisClient(const std::string& initial_host_address, const Arguments& a
                                  .setTitle("Geometry Visualisation Client")
                                  .setSize({1280, 720})
                                  .setWindowFlags(Configuration::WindowFlag::Resizable))
-    , gl_version_str_(Magnum::GL::Context::current().versionString())
-    , gl_renderer_str_(Magnum::GL::Context::current().rendererString())
+    , gl_version_str_(GL::Context::current().versionString())
+    , gl_renderer_str_(GL::Context::current().rendererString())
     , server_address_input_(initial_host_address)
     , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>()) {
+
+    scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
 
     grpc_client_->change_server(server_address_input_,
                                 [this](const net::GrpcClientState&) { this->on_state_change(); });
@@ -135,8 +139,8 @@ void vis::VisClient::update() {
     scene_->update(this->windowSize());
 }
 
-void vis::VisClient::render() const {
-    scene_->render();
+void vis::VisClient::render(const Matrix4& camera_transformation, SceneGraph::Camera3D* camera) const {
+    scene_->render(camera_transformation, camera);
 }
 
 void vis::VisClient::configure_gui() {
@@ -304,9 +308,8 @@ void vis::VisClient::configure_gui() {
     }
 }
 
-void VisClient::resize(const Magnum::Vector2i& viewport) {
+void VisClient::resize(const Vector2i& viewport) {
     scene_->resize(viewport);
-    scene_->camera().setViewport(viewport);
 }
 
 void VisClient::process_message_update(const proto::Message& message) {
