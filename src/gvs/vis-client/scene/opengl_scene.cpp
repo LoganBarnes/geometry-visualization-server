@@ -67,7 +67,8 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
     camera_object_.setParent(&scene_);
     camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
 
-    root_object_.setParent(&scene_);
+    root_object_ = &scene_.addChild<Object3D>();
+    //    root_object_.setParent(&scene_);
 
     /* Setup renderer and shader defaults */
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
@@ -87,9 +88,13 @@ void OpenGLScene::configure_gui(const Vector2i& /*viewport*/) {
 }
 
 void OpenGLScene::reset(const proto::SceneItems& items) {
+    // Remove all items from the scene
+    scene_.children().erase(root_object_);
+    root_object_ = &scene_.addChild<Object3D>();
+
+    // Add new items to scene
     for (const auto& item : items.items()) {
         add_item(item.second);
-        break; // only one for now while implementing
     }
 }
 
@@ -139,7 +144,8 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
 
     meshes_.emplace_back(std::make_unique<GL::Mesh>(std::move(mesh)));
 
-    new OpaqueDrawable(root_object_, &drawables_, *meshes_.back(), shader_);
+    // Self deleting
+    new OpaqueDrawable(*root_object_, &drawables_, *meshes_.back(), shader_);
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}

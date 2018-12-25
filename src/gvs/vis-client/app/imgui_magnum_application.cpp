@@ -81,17 +81,16 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
                                          theme_->background.Value.z,
                                          theme_->background.Value.w});
 
-    scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
+    camera_object_.setParent(&camera_scene_).translate(Magnum::Vector3::zAxis(5.0f));
 
-    scene_->camera_object().translate(Magnum::Vector3::zAxis(5.0f));
-
-    //    scene_->camera().cameraMatrix().translate(Magnum::Vector3::zAxis(-5.f));
-
-    scene_->camera()
-        .setAspectRatioPolicy(Magnum::SceneGraph::AspectRatioPolicy::Extend)
+    camera_ = new Magnum::SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
+    camera_->setAspectRatioPolicy(Magnum::SceneGraph::AspectRatioPolicy::Extend)
         .setProjectionMatrix(Magnum::Matrix4::perspectiveProjection(35.0_degf, 1.0f, 0.01f, 1000.0f))
         .setViewport(Magnum::GL::defaultFramebuffer.viewport().size());
 
+    scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
+
+    update_scene_camera();
     reset_draw_counter();
 }
 
@@ -208,6 +207,11 @@ void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
     ImGui_ImplGlfw_ScrollCallback(this->window(), event.offset().x(), event.offset().y());
     event.setAccepted(true);
     reset_draw_counter();
+}
+
+void ImGuiMagnumApplication::update_scene_camera() {
+    scene_->camera_object().setTransformation(camera_object_.transformation());
+    scene_->camera().setProjectionMatrix(camera_->projectionMatrix());
 }
 
 //void ViewerExample::viewportEvent(ViewportEvent& event) {

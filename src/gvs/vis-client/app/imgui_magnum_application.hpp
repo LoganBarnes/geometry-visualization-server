@@ -26,6 +26,10 @@
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/Platform/GlfwApplication.h>
+#include <Magnum/SceneGraph/MatrixTransformation3D.h>
+#include <Magnum/SceneGraph/Object.h>
+#include <Magnum/SceneGraph/Scene.h>
+#include <Magnum/SceneGraph/SceneGraph.h>
 
 #include <memory>
 
@@ -46,8 +50,10 @@ protected:
     std::unique_ptr<SceneInterface> scene_;
 
     // Ensures the application renders at least 5 more times after all events are
-    // finished to give ImGui a chance to update and render correctly
+    // finished to give ImGui a chance to update and render correctly.
     void reset_draw_counter();
+
+    void update_scene_camera();
 
 private:
     virtual void update() = 0;
@@ -73,6 +79,11 @@ private:
     std::shared_ptr<ImGuiContext> imgui_;
     std::shared_ptr<bool> imgui_gl_;
     int draw_counter_; // continue drawing until this counter is zero
+
+    // Camera
+    Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> camera_object_;
+    Magnum::SceneGraph::Camera3D* camera_;
 };
 
 } // namespace vis

@@ -28,6 +28,7 @@
 #include "gvs/vis-client/app/imgui_theme.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
 #include "gvs/vis-client/scene/opengl_scene.hpp"
+#include "vis_client.hpp"
 
 #include <gvs/gvs_paths.hpp>
 
@@ -222,6 +223,7 @@ void vis::VisClient::configure_gui() {
             scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
         }
 
+        update_scene_camera();
         resize(this->windowSize());
         on_state_change(); // Get state if client is connected
     }

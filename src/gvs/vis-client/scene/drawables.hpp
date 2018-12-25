@@ -38,6 +38,8 @@ public:
                             Magnum::GL::Mesh& mesh,
                             GeneralShader3D& shader);
 
+    ~OpaqueDrawable() override = default;
+
 private:
     void draw(const Magnum::Matrix4& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 

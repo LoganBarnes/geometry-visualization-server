@@ -101,6 +101,7 @@ SceneServer::SceneServer(std::string server_address)
 
                                case proto::SceneUpdateRequest::kReplaceItem:
                                    break;
+
                                case proto::SceneUpdateRequest::kAppendToItem:
                                    break;
 

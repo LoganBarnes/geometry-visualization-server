@@ -53,14 +53,15 @@ public:
     Magnum::SceneGraph::Camera3D& camera() override;
 
 private:
-    using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
     using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
+    using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
 
     mutable GeneralShader3D shader_;
     std::vector<std::unique_ptr<Magnum::GL::Mesh>> meshes_;
 
     Scene3D scene_;
-    Object3D root_object_, camera_object_;
+    Object3D* root_object_;
+    Object3D camera_object_;
     Magnum::SceneGraph::Camera3D* camera_;
     Magnum::SceneGraph::DrawableGroup3D drawables_;
     Magnum::Vector3 previous_position_;
