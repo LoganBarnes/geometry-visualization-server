@@ -111,10 +111,6 @@ OptiXScene::OptiXScene(const SceneInitializationInfo& initialization_info)
     camera_object_.setParent(&scene_);
     camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
 
-    for (const auto& file_pair : ptx_files_) {
-        std::cout << file_pair.first << ": " << file_pair.second << std::endl;
-    }
-
     optix::Context& ctx = *context_;
 
     // Set up context
@@ -160,7 +156,10 @@ OptiXScene::~OptiXScene() = default;
 
 void OptiXScene::update(const Vector2i& /*viewport*/) {}
 
-void OptiXScene::render() {
+void OptiXScene::render(const Matrix4& camera_transformation, SceneGraph::Camera3D* camera) {
+    camera_object_.setTransformation(camera_transformation);
+    camera_->setProjectionMatrix(camera->projectionMatrix());
+
     // Get buffer size for ray tracing call
     optix::Buffer buffer = context()["output_buffer"]->getBuffer();
     RTsize buffer_width, buffer_height;
@@ -226,14 +225,6 @@ void OptiXScene::resize(const Vector2i& viewport) {
 
     optix_output_buffer->registerGLBuffer();
     context()->validate();
-}
-
-SceneGraph::Object<SceneGraph::MatrixTransformation3D>& OptiXScene::camera_object() {
-    return camera_object_;
-}
-
-SceneGraph::Camera3D& OptiXScene::camera() {
-    return *camera_;
 }
 
 } // namespace vis

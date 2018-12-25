@@ -46,7 +46,7 @@ public:
     ~OptiXScene() override;
 
     void update(const Magnum::Vector2i& viewport) override;
-    void render() override;
+    void render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) override;
     void configure_gui(const Magnum::Vector2i& viewport) override;
 
     void reset(const proto::SceneItems& items) override;
@@ -54,12 +54,10 @@ public:
 
     void resize(const Magnum::Vector2i& viewport) override;
 
-    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& camera_object() override;
-    Magnum::SceneGraph::Camera3D& camera() override;
-
 private:
     std::shared_ptr<optix::Context> context_;
 
+    // For geometry that can't be ray traced
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> scene_;
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> camera_object_;
     Magnum::SceneGraph::Camera3D* camera_;

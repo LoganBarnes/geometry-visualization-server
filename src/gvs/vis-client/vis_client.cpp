@@ -227,7 +227,6 @@ void vis::VisClient::configure_gui() {
             scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
         }
 
-        update_scene_camera();
         resize(this->windowSize());
         on_state_change(); // Get state if client is connected
     }
