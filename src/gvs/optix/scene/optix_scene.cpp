@@ -185,6 +185,8 @@ void OptiXScene::reset(const proto::SceneItems& /*items*/) {}
 
 void OptiXScene::add_item(const proto::SceneItemInfo& /*info*/) {}
 
+void OptiXScene::update_item(const proto::SceneItemInfo& /*info*/) {}
+
 optix::Context& OptiXScene::context() {
     return *context_;
 }

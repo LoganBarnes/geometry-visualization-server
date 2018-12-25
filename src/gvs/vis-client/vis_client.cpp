@@ -125,6 +125,10 @@ void vis::VisClient::update() {
                 scene_->add_item(update.add_item());
                 break;
 
+            case proto::SceneUpdate::kUpdateItem:
+                scene_->update_item(update.update_item());
+                break;
+
             case proto::SceneUpdate::kResetAllItems:
                 scene_->reset(update.reset_all_items());
                 break;

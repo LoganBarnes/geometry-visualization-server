@@ -55,7 +55,7 @@ message SceneUpdateRequest {
 message SceneUpdate {
     oneof update {
         SceneItemInfo add_item = 1;
-        // SceneItemInfo update_item = 2;
+        SceneItemInfo update_item = 2;
         // SceneItemInfo remove_item = 3;
         SceneItems reset_all_items = 4;
     }

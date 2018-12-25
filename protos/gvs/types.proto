@@ -107,7 +107,7 @@ message SceneItemInfo {
     ID id = 1;
     GeometryInfo3D geometry_info = 2;
     DisplayInfo display_info = 3;
-    // ID parent = 4;
+     ID parent = 4;
     // repeated ID children = 5;
 }
 

@@ -33,9 +33,11 @@ int main(int argc, char* argv[]) {
 
     gvs::log::GeometryLogger scene(server_address, 3s);
 
-    scene.item_stream("Axes") << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
-                              << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
-                              << gvs::lines({0, 1, 0, 2, 0, 3}) << gvs::send;
+    auto stream = scene.item_stream("Axes")
+        << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
+        << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
+        << gvs::display_mode(gvs::proto::DisplayMode::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3}) << gvs::replace;
+    CHECK_WITH_THROW(stream);
 
     //    gvs::log::GeometryItemStream stream = scene.item_stream()
     //        << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f}) << gvs::triangles({}) << gvs::send;

@@ -49,8 +49,9 @@ public:
     void render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) override;
     void configure_gui(const Magnum::Vector2i& viewport) override;
 
-    void reset(const proto::SceneItems& items) override;
     void add_item(const proto::SceneItemInfo& info) override;
+    void update_item(const proto::SceneItemInfo& info) override;
+    void reset(const proto::SceneItems& items) override;
 
     void resize(const Magnum::Vector2i& viewport) override;
 

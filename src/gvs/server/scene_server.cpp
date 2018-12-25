@@ -99,8 +99,26 @@ SceneServer::SceneServer(std::string server_address)
                                    scene_stream->write(update);
                                } break;
 
-                               case proto::SceneUpdateRequest::kReplaceItem:
-                                   break;
+                               case proto::SceneUpdateRequest::kReplaceItem: {
+                                   std::string id = update_request.replace_item().id().value();
+
+                                   if (util::has_key(scene_.items(), id)) {
+
+                                       proto::SceneUpdate update;
+                                       update.mutable_update_item()->CopyFrom(update_request.replace_item());
+
+                                       scene_stream->write(update);
+
+                                   } else {
+                                       scene_.mutable_items()->insert({id, update_request.replace_item()});
+                                       // TODO: Handle parent and children updates
+
+                                       proto::SceneUpdate update;
+                                       update.mutable_add_item()->CopyFrom(update_request.replace_item());
+
+                                       scene_stream->write(update);
+                                   }
+                               } break;
 
                                case proto::SceneUpdateRequest::kAppendToItem:
                                    break;

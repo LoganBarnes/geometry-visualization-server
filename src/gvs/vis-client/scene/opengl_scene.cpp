@@ -67,13 +67,13 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
     camera_object_.setParent(&scene_);
     camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
 
-    root_object_ = &scene_.addChild<Object3D>();
-
     /* Setup renderer and shader defaults */
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
     shader_.set_global_color({1.f, 0.5f, 0.1f});
+
+    reset({});
 }
 
 void OpenGLScene::update(const Vector2i& /*viewport*/) {}
@@ -90,8 +90,14 @@ void OpenGLScene::configure_gui(const Vector2i& /*viewport*/) {
 
 void OpenGLScene::reset(const proto::SceneItems& items) {
     // Remove all items from the scene
-    scene_.children().erase(root_object_);
+    if (root_object_) {
+        scene_.children().erase(root_object_);
+    }
+    objects_.clear();
+
+    // Add root
     root_object_ = &scene_.addChild<Object3D>();
+    objects_.emplace("", std::make_unique<ObjectMeshPackage>(root_object_));
 
     // Add new items to scene
     for (const auto& item : items.items()) {
@@ -107,11 +113,8 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
 
     std::vector<float> buffer_data;
 
-    MeshPackage mesh_package;
+    ObjectMeshPackage mesh_package;
     mesh_package.mesh.setPrimitive(MeshPrimitive::Points);
-
-    //    mesh.addVertexBuffer(buffer, 76 + 4*vertexCount, Shaders::Phong::Position{})
-    //        .addVertexBuffer(buffer, 76 + 24*vertexCount, Shaders::Phong::Normal{});
 
     GLintptr offset = 0;
 
@@ -123,11 +126,24 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
         offset += positions.value_size() * static_cast<int>(sizeof(float));
     }
 
+    if (geometry.has_normals()) {
+        const proto::FloatList& normals = geometry.normals();
+        buffer_data.insert(buffer_data.end(), normals.value().begin(), normals.value().end());
+        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::Normal{});
+        offset += normals.value_size() * static_cast<int>(sizeof(float));
+    }
+
+    if (geometry.has_tex_coords()) {
+        const proto::FloatList& tex_coords = geometry.tex_coords();
+        buffer_data.insert(buffer_data.end(), tex_coords.value().begin(), tex_coords.value().end());
+        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::TextureCoordinate{});
+        offset += tex_coords.value_size() * static_cast<int>(sizeof(float));
+    }
+
     if (geometry.has_vertex_colors()) {
         const proto::FloatList& vertex_colors = geometry.vertex_colors();
         buffer_data.insert(buffer_data.end(), vertex_colors.value().begin(), vertex_colors.value().end());
         mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::VertexColor{});
-        offset += vertex_colors.value_size() * static_cast<int>(sizeof(float));
     }
 
     mesh_package.vertex_buffer.setData(buffer_data);
@@ -154,10 +170,19 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
         }
     }
 
-    meshes_.emplace_back(std::make_unique<MeshPackage>(std::move(mesh_package)));
+    mesh_package.object = &objects_.at(info.parent().value())->object->addChild<Object3D>();
+    objects_.emplace(info.id().value(), std::make_unique<ObjectMeshPackage>(std::move(mesh_package)));
 
     // Self deleting
-    new OpaqueDrawable(*root_object_, &drawables_, meshes_.back()->mesh, shader_);
+    new OpaqueDrawable(*root_object_,
+                       &drawables_,
+                       objects_.at(info.id().value())->mesh,
+                       (info.has_display_info() ? &info.display_info() : nullptr),
+                       shader_);
+}
+
+void OpenGLScene::update_item(const proto::SceneItemInfo& /*info*/) {
+    // TODO
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}

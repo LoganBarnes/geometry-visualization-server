@@ -112,6 +112,16 @@ auto indices(std::vector<float> data) {
     };
 }
 
+inline auto display_mode(proto::DisplayMode data) {
+    return [data](proto::SceneItemInfo* info) {
+        if (info->mutable_display_info()->has_shader_display_mode()) {
+            return "shader_display_mode";
+        }
+        info->mutable_display_info()->mutable_shader_display_mode()->set_value(data);
+        return "";
+    };
+}
+
 constexpr auto points = indices<proto::GeometryFormat::POINTS>;
 constexpr auto lines = indices<proto::GeometryFormat::LINES>;
 constexpr auto line_strip = indices<proto::GeometryFormat::LINE_STRIP>;

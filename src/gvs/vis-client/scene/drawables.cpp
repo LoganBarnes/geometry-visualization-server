@@ -38,14 +38,22 @@ namespace vis {
 OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
                                SceneGraph::DrawableGroup3D* group,
                                GL::Mesh& mesh,
+                               const proto::DisplayInfo* display_info,
                                GeneralShader3D& shader)
-    : SceneGraph::Drawable3D{object, group}, mesh_(mesh), shader_(shader) {}
+    : SceneGraph::Drawable3D{object, group}, mesh_(mesh), shader_(shader) {
+
+    if (display_info) {
+        display_info_.CopyFrom(*display_info);
+    }
+}
 
 void OpaqueDrawable::draw(const Matrix4& transformation_matrix, SceneGraph::Camera3D& camera) {
     shader_.set_transformation_matrix(transformation_matrix)
         .set_normal_matrix(transformation_matrix.rotationScaling())
-        .set_projection_matrix(camera.projectionMatrix())
-        .set_display_mode(proto::DisplayMode::VERTEX_COLORS);
+        .set_projection_matrix(camera.projectionMatrix());
+
+    shader_.set_display_mode(display_info_.has_shader_display_mode() ? display_info_.shader_display_mode().value()
+                                                                     : proto::DisplayMode::GLOBAL_COLOR);
 
     mesh_.draw(shader_);
 }

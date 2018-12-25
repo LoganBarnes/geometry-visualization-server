@@ -41,6 +41,7 @@ public:
     virtual void configure_gui(const Magnum::Vector2i& viewport) = 0;
 
     virtual void add_item(const proto::SceneItemInfo& info) = 0;
+    virtual void update_item(const proto::SceneItemInfo& info) = 0;
     virtual void reset(const proto::SceneItems& items) = 0;
 
     virtual void resize(const Magnum::Vector2i& viewport) = 0;

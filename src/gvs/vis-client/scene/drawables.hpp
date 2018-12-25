@@ -36,6 +36,7 @@ public:
     explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
                             Magnum::SceneGraph::DrawableGroup3D* group,
                             Magnum::GL::Mesh& mesh,
+                            const proto::DisplayInfo* display_info,
                             GeneralShader3D& shader);
 
     ~OpaqueDrawable() override = default;
@@ -44,6 +45,7 @@ private:
     void draw(const Magnum::Matrix4& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 
     Magnum::GL::Mesh& mesh_;
+    proto::DisplayInfo display_info_;
     GeneralShader3D& shader_;
 };
 

@@ -45,6 +45,7 @@ public:
     void configure_gui(const Magnum::Vector2i& viewport) override;
 
     void add_item(const proto::SceneItemInfo& info) override;
+    void update_item(const proto::SceneItemInfo& info) override;
     void reset(const proto::SceneItems& items) override;
 
     void resize(const Magnum::Vector2i& viewport) override;
@@ -55,17 +56,19 @@ private:
 
     GeneralShader3D shader_;
 
-    struct MeshPackage {
+    struct ObjectMeshPackage {
         Magnum::GL::Buffer index_buffer;
         Magnum::GL::Buffer vertex_buffer;
         Magnum::GL::Mesh mesh;
+        Object3D* object = nullptr;
 
-        MeshPackage() = default;
+        ObjectMeshPackage() = default;
+        explicit ObjectMeshPackage(Object3D* obj) : object(obj) {}
     };
-    std::vector<std::unique_ptr<MeshPackage>> meshes_; // TODO: make items deletable
+    std::unordered_map<std::string, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 
     Scene3D scene_;
-    Object3D* root_object_;
+    Object3D* root_object_ = nullptr;
     Object3D camera_object_;
     Magnum::SceneGraph::Camera3D* camera_;
     Magnum::SceneGraph::DrawableGroup3D drawables_;
