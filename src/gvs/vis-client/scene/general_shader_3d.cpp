@@ -49,10 +49,12 @@ GeneralShader3D::GeneralShader3D() {
 
     CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 
-    global_color_uniform_ = uniformLocation("global_color");
     view_from_local_uniform_ = uniformLocation("view_from_local");
     view_from_local_normals_uniform_ = uniformLocation("view_from_local_normals");
     projection_from_view_uniform_ = uniformLocation("projection_from_view");
+
+    display_mode_uniform_ = uniformLocation("display_mode");
+    global_color_uniform_ = uniformLocation("global_color");
 }
 
 GeneralShader3D& GeneralShader3D::set_transformation_matrix(const Magnum::Matrix4& view_from_local) {
@@ -67,6 +69,11 @@ GeneralShader3D& GeneralShader3D::set_normal_matrix(const Magnum::Matrix3& view_
 
 GeneralShader3D& GeneralShader3D::set_projection_matrix(const Magnum::Matrix4& projection_from_view) {
     setUniform(projection_from_view_uniform_, projection_from_view);
+    return *this;
+}
+
+GeneralShader3D& GeneralShader3D::set_display_mode(const proto::DisplayMode& mode) {
+    setUniform(display_mode_uniform_, mode);
     return *this;
 }
 

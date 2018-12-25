@@ -44,7 +44,8 @@ OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformati
 void OpaqueDrawable::draw(const Matrix4& transformation_matrix, SceneGraph::Camera3D& camera) {
     shader_.set_transformation_matrix(transformation_matrix)
         .set_normal_matrix(transformation_matrix.rotationScaling())
-        .set_projection_matrix(camera.projectionMatrix());
+        .set_projection_matrix(camera.projectionMatrix())
+        .set_display_mode(proto::DisplayMode::VERTEX_COLORS);
 
     mesh_.draw(shader_);
 }

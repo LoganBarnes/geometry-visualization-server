@@ -53,8 +53,16 @@ private:
     using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
 
-    mutable GeneralShader3D shader_;
-    std::vector<std::unique_ptr<Magnum::GL::Mesh>> meshes_;
+    GeneralShader3D shader_;
+
+    struct MeshPackage {
+        Magnum::GL::Buffer index_buffer;
+        Magnum::GL::Buffer vertex_buffer;
+        Magnum::GL::Mesh mesh;
+
+        MeshPackage() = default;
+    };
+    std::vector<std::unique_ptr<MeshPackage>> meshes_; // TODO: make items deletable
 
     Scene3D scene_;
     Object3D* root_object_;

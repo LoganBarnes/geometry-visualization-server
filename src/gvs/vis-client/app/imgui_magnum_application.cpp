@@ -46,19 +46,8 @@ namespace vis {
 using namespace Magnum;
 using namespace Math::Literals;
 
-namespace {
-
-//Vector3 position_on_sphere(const Vector2i& position, SceneGraph::Camera3D* camera) {
-//    const Vector2 position_normalized = Vector2{position} / Vector2{camera->viewport()} - Vector2{0.5f};
-//    const Float length = position_normalized.length();
-//    const Vector3 result(length > 1.0f ? Vector3(position_normalized, 0.0f)
-//                                       : Vector3(position_normalized, 1.0f - length));
-//    return (result * Vector3::yScale(-1.0f)).normalized();
-//}
-}
-
 ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
-    : GlfwApplication(arguments, configuration) {
+    : GlfwApplication(arguments, configuration, GLConfiguration().setSampleCount(4)) {
     initialize_resources();
 
     this->startTextInput(); // allow for text input callbacks

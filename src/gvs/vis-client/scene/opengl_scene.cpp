@@ -107,19 +107,30 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
 
     std::vector<float> buffer_data;
 
-    Magnum::GL::Buffer index_buffer, vertex_buffer;
-    GL::Mesh mesh;
-    mesh.setPrimitive(MeshPrimitive::Points);
+    MeshPackage mesh_package;
+    mesh_package.mesh.setPrimitive(MeshPrimitive::Points);
+
+    //    mesh.addVertexBuffer(buffer, 76 + 4*vertexCount, Shaders::Phong::Position{})
+    //        .addVertexBuffer(buffer, 76 + 24*vertexCount, Shaders::Phong::Normal{});
+
+    GLintptr offset = 0;
 
     if (geometry.has_positions()) {
         const proto::FloatList& positions = geometry.positions();
-        buffer_data.insert(buffer_data.begin(), positions.value().begin(), positions.value().end());
-        mesh.setCount(positions.value_size() / 3);
+        buffer_data.insert(buffer_data.end(), positions.value().begin(), positions.value().end());
+        mesh_package.mesh.setCount(positions.value_size() / 3);
+        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::Position{});
+        offset += positions.value_size() * static_cast<int>(sizeof(float));
     }
 
-    vertex_buffer.setData(buffer_data);
+    if (geometry.has_vertex_colors()) {
+        const proto::FloatList& vertex_colors = geometry.vertex_colors();
+        buffer_data.insert(buffer_data.end(), vertex_colors.value().begin(), vertex_colors.value().end());
+        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::VertexColor{});
+        offset += vertex_colors.value_size() * static_cast<int>(sizeof(float));
+    }
 
-    mesh.addVertexBuffer(vertex_buffer, 0, GeneralShader3D::Position{});
+    mesh_package.vertex_buffer.setData(buffer_data);
 
     if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
         std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
@@ -129,24 +140,24 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
         MeshIndexType index_type;
         UnsignedInt index_start, index_end;
         std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
-        index_buffer.setData(index_data);
+        mesh_package.index_buffer.setData(index_data);
 
-        mesh.setCount(static_cast<int>(indices.size()))
-            .setIndexBuffer(index_buffer, 0, index_type, index_start, index_end);
+        mesh_package.mesh.setCount(static_cast<int>(indices.size()))
+            .setIndexBuffer(mesh_package.index_buffer, 0, index_type, index_start, index_end);
     }
 
     if (info.has_display_info()) {
         const proto::DisplayInfo& display = info.display_info();
 
         if (display.has_geometry_format()) {
-            mesh.setPrimitive(from_proto(display.geometry_format().value()));
+            mesh_package.mesh.setPrimitive(from_proto(display.geometry_format().value()));
         }
     }
 
-    meshes_.emplace_back(std::make_unique<GL::Mesh>(std::move(mesh)));
+    meshes_.emplace_back(std::make_unique<MeshPackage>(std::move(mesh_package)));
 
     // Self deleting
-    new OpaqueDrawable(*root_object_, &drawables_, *meshes_.back(), shader_);
+    new OpaqueDrawable(*root_object_, &drawables_, meshes_.back()->mesh, shader_);
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}
