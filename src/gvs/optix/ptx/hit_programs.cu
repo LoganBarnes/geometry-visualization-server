@@ -20,35 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-// This define shouldn't be here. TODO: Figure out how to include the header properly
-#define __CUDA_INCLUDE_COMPILER_INTERNAL_HEADERS__
-#include <optix.h>
-#include <optixu/optixu_math_namespace.h>
 
-struct PerRayData {
-    float3 result;
-    float depth;
-};
-
-rtDeclareVariable(float3, eye, , );
-rtDeclareVariable(float, scene_epsilon, , );
-//rtDeclareVariable(rtObject, top_shadower, , );
-//rtDeclareVariable(unsigned int, shadow_ray_type, , );
+#include "ray_types.hpp"
 
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 
-rtDeclareVariable(PerRayData, prd_current, rtPayload, );
-//rtDeclareVariable(PerRayData_shadow, prd_shadow, rtPayload, );
-
-rtDeclareVariable(float, t_hit, rtIntersectionDistance, );
-
-rtBuffer<float4> lights;
-
-// Material variables
-rtDeclareVariable(float3, albedo, , );
+rtDeclareVariable(gvs::PerRayData, prd_current, rtPayload, );
 
 RT_PROGRAM
 void closest_hit_normal() {

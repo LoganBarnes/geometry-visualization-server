@@ -35,6 +35,7 @@
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/GL/Version.h>
 #include <Magnum/Image.h>
+#include <Magnum/Math/Math.h>
 #include <Magnum/Mesh.h>
 #include <Magnum/PixelStorage.h>
 #include <Magnum/Shaders/Flat.h>
@@ -91,6 +92,33 @@ GL::Mesh set_up_fullscreen_quad() {
         .addVertexBuffer(vertices, 0, Shaders::Flat2D::Position{}, Shaders::Flat2D::TextureCoordinates{});
 
     return quad_mesh;
+}
+
+void build_ray_basis_vectors(SceneGraph::Camera3D* camera, Vector3* u_out, Vector3* v_out, Vector3* w_out) {
+    assert(u_out != nullptr);
+    assert(v_out != nullptr);
+    assert(w_out != nullptr);
+
+    Vector3& u = *u_out;
+    Vector3& v = *v_out;
+    Vector3& w = *w_out;
+
+    // normalized directions
+    w = camera->cameraMatrix().transformPoint({0.f, 0.f, -1.f});
+    u = Math::cross(w, {0.f, 1.f, 0.f}).normalized();
+    v = Math::cross(u, w).normalized();
+
+    Matrix4 inv_projection_view = (camera->projectionMatrix() * camera->cameraMatrix()).inverted();
+
+    // (w, h, -1) in window space back to world space
+    Vector3 window_space(camera->viewport().x(), camera->viewport().y(), -1.f);
+    Vector3 far_top_right_point = inv_projection_view.transformPoint(window_space);
+    Vector3 far_top_right_dir = far_top_right_point - camera->cameraMatrix().transformPoint({0.f, 0.f, 0.f});
+
+    // scaled to match current camera matrices
+    u *= Math::dot(u, far_top_right_dir);
+    v *= Math::dot(v, far_top_right_dir);
+    w *= Math::dot(w, far_top_right_dir);
 }
 
 } // namespace
@@ -159,6 +187,16 @@ void OptiXScene::update(const Vector2i& /*viewport*/) {}
 void OptiXScene::render(const Matrix4& camera_transformation, SceneGraph::Camera3D* camera) {
     camera_object_.setTransformation(camera_transformation);
     camera_->setProjectionMatrix(camera->projectionMatrix());
+
+    Vector3 eye = camera->cameraMatrix().transformPoint({0.f, 0.f, 0.f});
+    Vector3 u, v, w;
+
+    build_ray_basis_vectors(camera, &u, &v, &w);
+
+    context()["eye"]->setFloat(eye.x(), eye.y(), eye.z());
+    context()["u"]->setFloat(u.x(), u.y(), u.z());
+    context()["v"]->setFloat(v.x(), v.y(), eye.z());
+    context()["w"]->setFloat(w.x(), w.y(), w.z());
 
     // Get buffer size for ray tracing call
     optix::Buffer buffer = context()["output_buffer"]->getBuffer();

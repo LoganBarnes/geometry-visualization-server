@@ -24,6 +24,7 @@
 
 // This define shouldn't be here. TODO: Figure out how to include the header properly
 #define __CUDA_INCLUDE_COMPILER_INTERNAL_HEADERS__
+
 #include <optix.h>
 #include <optixu/optixu_math_namespace.h>
 
