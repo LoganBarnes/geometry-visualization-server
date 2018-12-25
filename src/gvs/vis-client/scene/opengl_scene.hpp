@@ -64,7 +64,6 @@ private:
     Object3D camera_object_;
     Magnum::SceneGraph::Camera3D* camera_;
     Magnum::SceneGraph::DrawableGroup3D drawables_;
-    Magnum::Vector3 previous_position_;
 };
 
 } // namespace vis

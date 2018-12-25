@@ -84,6 +84,10 @@ private:
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> camera_object_;
     Magnum::SceneGraph::Camera3D* camera_;
+
+    Magnum::Vector2 previous_position_ = {};
+    Magnum::Vector2 camera_yaw_and_pitch_ = {};
+    float camera_orbit_distance_ = 15.f;
 };
 
 } // namespace vis

@@ -43,7 +43,19 @@ static void initialize_resources() {
 namespace gvs {
 namespace vis {
 
-using namespace Magnum::Math::Literals;
+using namespace Magnum;
+using namespace Math::Literals;
+
+namespace {
+
+//Vector3 position_on_sphere(const Vector2i& position, SceneGraph::Camera3D* camera) {
+//    const Vector2 position_normalized = Vector2{position} / Vector2{camera->viewport()} - Vector2{0.5f};
+//    const Float length = position_normalized.length();
+//    const Vector3 result(length > 1.0f ? Vector3(position_normalized, 0.0f)
+//                                       : Vector3(position_normalized, 1.0f - length));
+//    return (result * Vector3::yScale(-1.0f)).normalized();
+//}
+}
 
 ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
     : GlfwApplication(arguments, configuration) {
@@ -76,17 +88,17 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
     theme_ = std::make_unique<detail::Theme>();
 
     theme_->set_style();
-    Magnum::GL::Renderer::setClearColor({theme_->background.Value.x,
-                                         theme_->background.Value.y,
-                                         theme_->background.Value.z,
-                                         theme_->background.Value.w});
+    GL::Renderer::setClearColor({theme_->background.Value.x,
+                                 theme_->background.Value.y,
+                                 theme_->background.Value.z,
+                                 theme_->background.Value.w});
 
-    camera_object_.setParent(&camera_scene_).translate(Magnum::Vector3::zAxis(5.0f));
+    camera_object_.setParent(&camera_scene_).translate(Vector3::zAxis(5.0f));
 
-    camera_ = new Magnum::SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
-    camera_->setAspectRatioPolicy(Magnum::SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Magnum::Matrix4::perspectiveProjection(35.0_degf, 1.0f, 0.01f, 1000.0f))
-        .setViewport(Magnum::GL::defaultFramebuffer.viewport().size());
+    camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
+    camera_->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
+        .setProjectionMatrix(Matrix4::perspectiveProjection(35.0_degf, 1.0f, 0.01f, 1000.0f))
+        .setViewport(GL::defaultFramebuffer.viewport().size());
 
     scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
 
@@ -118,7 +130,7 @@ void ImGuiMagnumApplication::drawEvent() {
     configure_gui();
     ImGui::PopFont();
 
-    Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color | Magnum::GL::FramebufferClear::Depth);
+    GL::defaultFramebuffer.clear(GL::FramebufferClear::Color | GL::FramebufferClear::Depth);
 
     render();
 
@@ -133,7 +145,7 @@ void ImGuiMagnumApplication::drawEvent() {
 }
 
 void ImGuiMagnumApplication::viewportEvent(ViewportEvent& event) {
-    Magnum::GL::defaultFramebuffer.setViewport({{}, event.windowSize()});
+    GL::defaultFramebuffer.setViewport({{}, event.windowSize()});
     resize(event.windowSize());
     reset_draw_counter();
 }
@@ -172,7 +184,7 @@ void ImGuiMagnumApplication::keyReleaseEvent(KeyEvent& event) {
 
 void ImGuiMagnumApplication::textInputEvent(TextInputEvent& event) {
     char32_t codepoint;
-    std::tie(codepoint, std::ignore) = Magnum::Utility::Unicode::nextChar(event.text(), 0);
+    std::tie(codepoint, std::ignore) = Utility::Unicode::nextChar(event.text(), 0);
 
     ImGui_ImplGlfw_CharCallback(this->window(), codepoint);
 
@@ -185,6 +197,11 @@ void ImGuiMagnumApplication::mousePressEvent(MouseEvent& event) {
                                        static_cast<int>(event.button()),
                                        GLFW_PRESS,
                                        static_cast<int>(event.modifiers()));
+
+    if (event.button() == MouseEvent::Button::Left) {
+        previous_position_ = Vector2(event.position());
+    }
+
     event.setAccepted(true);
     reset_draw_counter();
 }
@@ -194,77 +211,59 @@ void ImGuiMagnumApplication::mouseReleaseEvent(MouseEvent& event) {
                                        static_cast<int>(event.button()),
                                        GLFW_RELEASE,
                                        static_cast<int>(event.modifiers()));
+
+    // Not really necessary but may help find bugs if they occur
+    if (event.button() == MouseEvent::Button::Left) {
+        previous_position_ = Vector2();
+    }
+
     event.setAccepted(true);
     reset_draw_counter();
 }
 
 void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
+    if (not(event.buttons() & MouseMoveEvent::Button::Left)) {
+        return;
+    }
+
+    auto current_position = Vector2(event.position());
+
+    camera_yaw_and_pitch_ += (previous_position_ - current_position) * 0.005f;
+    previous_position_ = current_position;
+
+    update_scene_camera();
+
     event.setAccepted(true);
     reset_draw_counter();
 }
 
 void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
     ImGui_ImplGlfw_ScrollCallback(this->window(), event.offset().x(), event.offset().y());
+
+    if (event.offset().y() == 0.f) {
+        return;
+    }
+
+    camera_orbit_distance_ += (event.offset().y() > 0.f ? event.offset().y() / 0.85f : event.offset().y() * 0.85f);
+    camera_orbit_distance_ = std::max(0.f, camera_orbit_distance_);
+
+    update_scene_camera();
+
     event.setAccepted(true);
     reset_draw_counter();
 }
 
 void ImGuiMagnumApplication::update_scene_camera() {
+
+    auto trans = Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.x()), {0.f, 1.f, 0.f})
+        * Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.y()), {1.f, 0.f, 0.f})
+        * Matrix4::translation({0.f, 0.f, camera_orbit_distance_});
+
+    camera_object_.setTransformation(trans);
+
     scene_->camera_object().setTransformation(camera_object_.transformation());
     scene_->camera().setProjectionMatrix(camera_->projectionMatrix());
 }
-
-//void ViewerExample::viewportEvent(ViewportEvent& event) {
-//    GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
-//    _camera->setViewport(event.windowSize());
-//}
-//
-//void ViewerExample::mousePressEvent(MouseEvent& event) {
-//    if (event.button() == MouseEvent::Button::Left)
-//        _previousPosition = positionOnSphere(event.position());
-//}
-//
-//void ViewerExample::mouseReleaseEvent(MouseEvent& event) {
-//    if (event.button() == MouseEvent::Button::Left)
-//        _previousPosition = Vector3();
-//}
-//
-//void ViewerExample::mouseScrollEvent(MouseScrollEvent& event) {
-//    if (!event.offset().y())
-//        return;
-//
-//    /* Distance to origin */
-//    const Float distance = _cameraObject.transformation().translation().z();
-//
-//    /* Move 15% of the distance back or forward */
-//    _cameraObject.translate(Vector3::zAxis(distance * (1.0f - (event.offset().y() > 0 ? 1 / 0.85f : 0.85f))));
-//
-//    redraw();
-//}
-//
-//Magnum::Vector3 ViewerExample::positionOnSphere(const Magnum::Vector2i& position) const {
-//    const Vector2 positionNormalized = Vector2{position} / Vector2{_camera->viewport()} - Vector2{0.5f};
-//    const Float length = positionNormalized.length();
-//    const Vector3 result(length > 1.0f ? Vector3(positionNormalized, 0.0f)
-//                                       : Vector3(positionNormalized, 1.0f - length));
-//    return (result * Vector3::yScale(-1.0f)).normalized();
-//}
-//
-//void ViewerExample::mouseMoveEvent(MouseMoveEvent& event) {
-//    if (!(event.buttons() & MouseMoveEvent::Button::Left))
-//        return;
-//
-//    const Vector3 currentPosition = positionOnSphere(event.position());
-//    const Vector3 axis = Math::cross(_previousPosition, currentPosition);
-//
-//    if (_previousPosition.length() < 0.001f || axis.length() < 0.001f)
-//        return;
-//
-//    _manipulator.rotate(Math::angle(_previousPosition, currentPosition), axis.normalized());
-//    _previousPosition = currentPosition;
-//
-//    redraw();
-//}
 
 } // namespace vis
 } // namespace gvs
