@@ -22,6 +22,32 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "drawables.hpp"
 
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/Shader.h>
+#include <Magnum/Math/Matrix4.h>
+#include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/SceneGraph/MatrixTransformation3D.h>
+#include <Magnum/SceneGraph/Object.h>
+#include <Magnum/SceneGraph/SceneGraph.h>
+
+using namespace Magnum;
+
 namespace gvs {
-namespace replace_this {} // namespace replace_this
+namespace vis {
+
+OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
+                               SceneGraph::DrawableGroup3D* group,
+                               GL::Mesh& mesh,
+                               GeneralShader3D& shader)
+    : SceneGraph::Drawable3D{object, group}, mesh_(mesh), shader_(shader) {}
+
+void OpaqueDrawable::draw(const Matrix4& transformation_matrix, SceneGraph::Camera3D& camera) {
+    shader_.set_transformation_matrix(transformation_matrix)
+        .set_normal_matrix(transformation_matrix.rotationScaling())
+        .set_projection_matrix(camera.projectionMatrix());
+
+    mesh_.draw(shader_);
+}
+
+} // namespace vis
 } // namespace gvs

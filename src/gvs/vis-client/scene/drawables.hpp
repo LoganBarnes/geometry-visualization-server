@@ -22,12 +22,28 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/vis-client/scene/general_shader_3d.hpp"
+
+#include <gvs/types.grpc.pb.h>
+
 #include <Magnum/SceneGraph/Drawable.h>
 
 namespace gvs {
 namespace vis {
 
-class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {};
+class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {
+public:
+    explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
+                            Magnum::SceneGraph::DrawableGroup3D* group,
+                            Magnum::GL::Mesh& mesh,
+                            GeneralShader3D& shader);
+
+private:
+    void draw(const Magnum::Matrix4& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
+
+    Magnum::GL::Mesh& mesh_;
+    GeneralShader3D& shader_;
+};
 
 } // namespace vis
 } // namespace gvs

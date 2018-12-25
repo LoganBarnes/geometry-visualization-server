@@ -56,12 +56,8 @@ private:
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
     using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
 
-    GeneralShader3D shader_;
-    Corrade::Containers::Array<Corrade::Containers::Optional<Magnum::GL::Mesh>> meshes_;
-
-    // initial test_mesh
-    Magnum::GL::Buffer index_buffer_, vertex_buffer_;
-    Magnum::GL::Mesh mesh_;
+    mutable GeneralShader3D shader_;
+    std::vector<std::unique_ptr<Magnum::GL::Mesh>> meshes_;
 
     Scene3D scene_;
     Object3D root_object_, camera_object_;

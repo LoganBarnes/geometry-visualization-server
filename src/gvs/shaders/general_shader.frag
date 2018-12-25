@@ -38,8 +38,8 @@ const int DISPLAY_MODE_GLOBAL_COLOR = 4;
 /*
  * Inputs
  */
-layout(location = 0) in vec3 world_position;
-layout(location = 1) in vec3 world_normal;
+layout(location = 0) in vec3 view_position;
+layout(location = 1) in vec3 view_normal;
 layout(location = 2) in vec2 texture_coordinates;
 layout(location = 3) in vec3 vertex_color;
 
@@ -58,11 +58,11 @@ void main()
 
     switch(display_mode) {
         case DISPLAY_MODE_POSITIONS:
-            final_color = world_position;
+            final_color = view_position;
             break;
 
         case DISPLAY_MODE_NORMALS:
-            final_color = world_normal * 0.5f + 0.5f; // between 0 and 1
+            final_color = view_normal * 0.5f + 0.5f; // between 0 and 1
             break;
 
         case DISPLAY_MODE_TEXTURE_COORDINATES:

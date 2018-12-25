@@ -37,16 +37,16 @@ public:
 
     explicit GeneralShader3D();
 
-    GeneralShader3D& set_model_matrix(const Magnum::Matrix4& world_from_local);
-    GeneralShader3D& set_normal_matrix(const Magnum::Matrix3& world_from_local_normals);
-    GeneralShader3D& set_projection_view_matrix(const Magnum::Matrix4& projection_from_world);
+    GeneralShader3D& set_transformation_matrix(const Magnum::Matrix4& view_from_world);
+    GeneralShader3D& set_normal_matrix(const Magnum::Matrix3& view_from_world_normals);
+    GeneralShader3D& set_projection_matrix(const Magnum::Matrix4& projection_from_view);
 
     GeneralShader3D& set_global_color(const Magnum::Color3& color);
 
 private:
-    int projection_from_world_uniform_;
-    int world_from_local_uniform_;
-    int world_from_local_normals_uniform_;
+    int projection_from_view_uniform_;
+    int view_from_local_uniform_;
+    int view_from_local_normals_uniform_;
     int global_color_uniform_;
 };
 

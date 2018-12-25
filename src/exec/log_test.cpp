@@ -37,6 +37,11 @@ int main(int argc, char* argv[]) {
         << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f}) << gvs::triangles({}) << gvs::send;
     CHECK(stream);
 
+    gvs::log::GeometryItemStream stream2 = scene.item_stream()
+        << gvs::positions_3d({-2.f, -2.f, -2.f, 2.f, -2.f, -2.f, -2.f, 2.f, -2.f, 2.f, 2.f, -2.f})
+        << gvs::triangle_strip({}) << gvs::send;
+    CHECK(stream);
+
 #if 0
         gvs::log::GeometryItemStream blah_stream = scene.item_stream("blah") << gvs::positions_3d({});
 

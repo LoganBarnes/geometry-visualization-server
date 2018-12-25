@@ -16,6 +16,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "opengl_scene.hpp"
 
+#include "gvs/vis-client/scene/drawables.hpp"
+
 #include <gvs/gvs_paths.hpp>
 
 #include <Magnum/GL/DefaultFramebuffer.h>
@@ -71,23 +73,13 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
-    // TMP
-    mesh_.setCount(0);
-    mesh_.setPrimitive(MeshPrimitive::Points);
+    shader_.set_global_color({1.f, 0.5f, 0.1f});
 }
 
-void OpenGLScene::update(const Vector2i& /*viewport*/) {
-
-    auto transformation = Matrix4(Math::IdentityInit);
-
-    shader_.set_global_color({1.f, 0.5f, 0.1f})
-        .set_model_matrix(transformation)
-        .set_normal_matrix(transformation.rotationScaling());
-}
+void OpenGLScene::update(const Vector2i& /*viewport*/) {}
 
 void OpenGLScene::render() {
-    shader_.set_projection_view_matrix(camera_->projectionMatrix() * camera_object_.transformationMatrix());
-    mesh_.draw(shader_);
+    camera_->draw(drawables_);
 }
 
 void OpenGLScene::configure_gui(const Vector2i& /*viewport*/) {
@@ -109,15 +101,19 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
 
     std::vector<float> buffer_data;
 
+    Magnum::GL::Buffer index_buffer, vertex_buffer;
+    GL::Mesh mesh;
+    mesh.setPrimitive(MeshPrimitive::Points);
+
     if (geometry.has_positions()) {
         const proto::FloatList& positions = geometry.positions();
         buffer_data.insert(buffer_data.begin(), positions.value().begin(), positions.value().end());
-        mesh_.setCount(positions.value_size() / 3);
+        mesh.setCount(positions.value_size() / 3);
     }
 
-    vertex_buffer_.setData(buffer_data);
+    vertex_buffer.setData(buffer_data);
 
-    mesh_.addVertexBuffer(vertex_buffer_, 0, GeneralShader3D::Position{});
+    mesh.addVertexBuffer(vertex_buffer, 0, GeneralShader3D::Position{});
 
     if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
         std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
@@ -127,28 +123,26 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
         MeshIndexType index_type;
         UnsignedInt index_start, index_end;
         std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
-        index_buffer_.setData(index_data);
+        index_buffer.setData(index_data);
 
-        mesh_.setCount(static_cast<int>(indices.size()))
-            .setIndexBuffer(index_buffer_, 0, index_type, index_start, index_end);
+        mesh.setCount(static_cast<int>(indices.size()))
+            .setIndexBuffer(index_buffer, 0, index_type, index_start, index_end);
     }
 
     if (info.has_display_info()) {
         const proto::DisplayInfo& display = info.display_info();
 
         if (display.has_geometry_format()) {
-            mesh_.setPrimitive(from_proto(display.geometry_format().value()));
+            mesh.setPrimitive(from_proto(display.geometry_format().value()));
         }
     }
 
-    //    drawables_.add();
+    meshes_.emplace_back(std::make_unique<GL::Mesh>(std::move(mesh)));
+
+    new OpaqueDrawable(root_object_, &drawables_, *meshes_.back(), shader_);
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}
-
-//SceneGraph::Object<SceneGraph::MatrixTransformation3D>& OpenGLScene::scene_root() {
-//    return scene_;
-//}
 
 SceneGraph::Object<SceneGraph::MatrixTransformation3D>& OpenGLScene::camera_object() {
     return camera_object_;

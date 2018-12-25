@@ -83,7 +83,9 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
 
     scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
 
-    scene_->camera_object().translate(Magnum::Vector3::zAxis(-5.0f));
+    scene_->camera_object().translate(Magnum::Vector3::zAxis(5.0f));
+
+    //    scene_->camera().cameraMatrix().translate(Magnum::Vector3::zAxis(-5.f));
 
     scene_->camera()
         .setAspectRatioPolicy(Magnum::SceneGraph::AspectRatioPolicy::Extend)
