@@ -123,6 +123,13 @@ SceneServer::SceneServer(std::string server_address)
                                case proto::SceneUpdateRequest::kAppendToItem:
                                    break;
 
+                               case proto::SceneUpdateRequest::kClearAll: {
+                                   scene_.clear_items();
+                                   proto::SceneUpdate update;
+                                   update.mutable_reset_all_items()->CopyFrom(scene_);
+                                   scene_stream->write(update);
+                               } break;
+
                                case proto::SceneUpdateRequest::UPDATE_NOT_SET:
                                    errors->set_error_msg("No update set");
                                    break;

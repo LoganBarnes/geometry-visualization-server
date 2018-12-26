@@ -29,37 +29,6 @@
 
 namespace gvs {
 
-//enum class ParamType : uint32_t {
-//    positions_3d,
-//    normals_3d,
-//    tex_coords_3d,
-//    vertex_colors,
-//    indices,
-//};
-//
-//template <ParamType PT, typename Data, proto::GeometryFormat format = proto::GeometryFormat::DEFAULT>
-//class Param {
-//public:
-//    explicit Param(Data data) : data_(std::move(data)) {}
-//    std::string move_func(proto::SceneItemInfo* info);
-//
-//private:
-//    Data data_;
-//};
-
-//using Positions3D = Param<ParamType::positions_3d, std::vector<float>>;
-//template <>
-//void Positions3D::move_func(proto::SceneItemInfo* info) {
-//    *(info->mutable_geometry_info()->mutable_positions()) = {data_.begin(), data_.end()};
-//}
-//
-//using Points3D = Param<ParamType::positions_3d, std::vector<float>, proto::GeometryFormat::POINTS>;
-//template <>
-//void Points3D::move_func(proto::SceneItemInfo* info) {
-//    info->mutable_display_info()->mutable_geometry_format()->set_value(proto::GeometryFormat::POINTS);
-//    *(info->mutable_geometry_info()->mutable_positions()) = {data_.begin(), data_.end()};
-//}
-
 inline auto positions_3d(std::vector<float> data) {
     return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_positions()) {
@@ -112,6 +81,13 @@ auto indices(std::vector<float> data) {
     };
 }
 
+constexpr auto points = indices<proto::GeometryFormat::POINTS>;
+constexpr auto lines = indices<proto::GeometryFormat::LINES>;
+constexpr auto line_strip = indices<proto::GeometryFormat::LINE_STRIP>;
+constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
+constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
+constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
+
 inline auto display_mode(proto::DisplayMode data) {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_shader_display_mode()) {
@@ -122,11 +98,40 @@ inline auto display_mode(proto::DisplayMode data) {
     };
 }
 
-constexpr auto points = indices<proto::GeometryFormat::POINTS>;
-constexpr auto lines = indices<proto::GeometryFormat::LINES>;
-constexpr auto line_strip = indices<proto::GeometryFormat::LINE_STRIP>;
-constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
-constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
-constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
+// TODO: create a better input type that handles pointers, vectors, matrices, iterators, etc.
+inline auto transformation(std::array<float, 16> data) {
+    return [data](proto::SceneItemInfo* info) {
+        if (info->mutable_display_info()->has_transformation()) {
+            return "transformation";
+        }
+        proto::Mat4* transformation = info->mutable_display_info()->mutable_transformation();
+        *(transformation->mutable_data()) = {std::begin(data), std::end(data)};
+        return "";
+    };
+}
+
+// TODO: create a better input type that handles pointers, vectors, iterators, etc.
+inline auto global_color(std::array<float, 3> data) {
+    return [data](proto::SceneItemInfo* info) {
+        if (info->mutable_display_info()->has_global_color()) {
+            return "global_color";
+        }
+        proto::Vec3* global_color = info->mutable_display_info()->mutable_global_color();
+        global_color->set_x(data[0]);
+        global_color->set_y(data[1]);
+        global_color->set_z(data[2]);
+        return "";
+    };
+}
+
+inline auto parent(std::string data) {
+    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+        if (info->has_parent()) {
+            return "parent";
+        }
+        info->mutable_parent()->set_value(data);
+        return "";
+    };
+}
 
 } // namespace gvs

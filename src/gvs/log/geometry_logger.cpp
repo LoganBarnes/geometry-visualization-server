@@ -38,6 +38,27 @@ std::string GeometryLogger::generate_uuid() const {
     return xg::newGuid().str();
 }
 
+std::string GeometryLogger::clear_all_items() {
+    if (stub_) {
+        proto::SceneUpdateRequest update;
+        update.mutable_clear_all();
+
+        grpc::ClientContext context;
+        proto::Errors errors;
+
+        grpc::Status status = stub_->UpdateScene(&context, update, &errors);
+
+        if (not status.ok()) {
+            return status.error_message();
+        }
+
+        if (not errors.error_msg().empty()) {
+            return errors.error_msg();
+        }
+    }
+    return "";
+}
+
 GeometryItemStream GeometryLogger::item_stream(const std::string& id) {
     if (id.empty()) {
         return GeometryItemStream(generate_uuid(), stub_.get());

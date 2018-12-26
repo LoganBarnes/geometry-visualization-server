@@ -32,8 +32,8 @@
 namespace gvs {
 namespace log {
 
-#define CHECK_WITH_THROW(errors)                                                                                       \
-    if (not errors.success()) {                                                                                        \
+#define CHECK_WITH_THROW(stream)                                                                                       \
+    if (not stream.success()) {                                                                                        \
         throw std::runtime_error("Error (stream " + stream.id() + "): " + stream.error_message());                     \
     }
 

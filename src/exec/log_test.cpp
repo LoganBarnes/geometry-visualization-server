@@ -22,6 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/log/geometry_logger.hpp"
 
+#include <cmath>
+
 int main(int argc, char* argv[]) {
     std::string server_address;
 
@@ -33,42 +35,72 @@ int main(int argc, char* argv[]) {
 
     gvs::log::GeometryLogger scene(server_address, 3s);
 
-    auto stream = scene.item_stream("Axes")
-        << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
-        << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
-        << gvs::display_mode(gvs::proto::DisplayMode::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3}) << gvs::replace;
-    CHECK_WITH_THROW(stream);
+    scene.clear_all_items();
 
-    //    gvs::log::GeometryItemStream stream = scene.item_stream()
-    //        << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f}) << gvs::triangles({}) << gvs::send;
-    //    CHECK(stream);
-    //
-    //#if 0
-    //    gvs::log::GeometryItemStream stream2 = scene.item_stream()
-    //        << gvs::positions_3d({1.f, 1.f, -2.f, 2.f, 1.f, -2.f, 1.f, 2.f, -2.f, 2.f, 2.f, -2.f})
-    //        << gvs::triangle_strip({}) << gvs::send;
-    //    CHECK(stream);
-    //#else
-    //    gvs::log::GeometryItemStream stream2 = scene.item_stream()
-    //        << gvs::positions_3d({-1.f, -1.f, -2.f, 2.f, -1.f, -2.f, -1.f, 2.f, -2.f, 2.f, 2.f, -2.f})
-    //        << gvs::triangle_strip({}) << gvs::send;
-    //    CHECK(stream);
-    //#endif
-    //
-    //#if 0
-    //        gvs::log::GeometryItemStream blah_stream = scene.item_stream("blah") << gvs::positions_3d({});
-    //
-    //        stream << gvs::positions_3d({}) << gvs::normals_3d({}) << gvs::tex_coords_3d({}) << gvs::vertex_colors_3d({});
-    //        stream << gvs::indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>({}) << gvs::replace;
-    //        CHECK(stream);
-    //
-    //        stream << gvs::points({}) << gvs::append;
-    //        CHECK(stream);
-    //
-    //        stream << gvs::line_strip({}) << gvs::append;
-    //        CHECK(stream);
-    //
-    //        blah_stream << gvs::replace;
-    //        CHECK(blah_stream);
-    //#endif
+    {
+        auto stream = scene.item_stream("Axes")
+            << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
+            << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
+            << gvs::display_mode(gvs::proto::DisplayMode::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3})
+            << gvs::replace;
+        CHECK(stream);
+    }
+
+    std::vector<float> circle;
+    constexpr int max_verts = 50;
+    for (int i = 0; i <= max_verts; ++i) {
+        float angle = float(M_PI) * i * 2.f / max_verts;
+        circle.emplace_back(std::cos(angle));
+        circle.emplace_back(std::sin(angle));
+        circle.emplace_back(0.f);
+    }
+
+    // Snowman
+    {
+        auto stream = scene.item_stream("Head")
+            << gvs::positions_3d(circle)
+            << gvs::transformation({0.75f, 0, 0, 0, 0, 0.75f, 0, 0, 0, 0, 0.75f, 0, 2, 2, 1, 1})
+            << gvs::global_color({1.f, 0.5f, 1.f}) << gvs::line_strip({}) << gvs::replace;
+        CHECK_WITH_THROW(stream);
+    }
+
+    {
+        auto body_stream = scene.item_stream("Body")
+            << gvs::parent("Head") << gvs::positions_3d(circle)
+            << gvs::transformation({1.3f, 0, 0, 0, 0, 1.3f, 0, 0, 0, 0, 1.3f, 0, 0, -2.3f, 0, 1})
+            << gvs::global_color({1.f, 1.f, 0.5f}) << gvs::line_strip({}) << gvs::replace;
+        CHECK_WITH_THROW(body_stream);
+
+        auto feet_stream = scene.item_stream("Feet")
+            << gvs::parent(body_stream.id()) << gvs::positions_3d(circle)
+            << gvs::transformation({1.3f, 0, 0, 0, 0, 1.3f, 0, 0, 0, 0, 1.3f, 0, 0, -2.3f, 0, 1})
+            << gvs::global_color({0.5f, 1.f, 1.f}) << gvs::triangle_fan({}) << gvs::replace;
+        CHECK_WITH_THROW(feet_stream);
+    }
+
+    gvs::log::GeometryItemStream triangle = scene.item_stream()
+        << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f}) << gvs::triangles({}) << gvs::send;
+    CHECK(triangle);
+
+    gvs::log::GeometryItemStream stream2 = scene.item_stream()
+        << gvs::positions_3d({-1.f, -1.f, -2.f, 2.f, -1.f, -2.f, -1.f, 2.f, -2.f, 2.f, 2.f, -2.f})
+        << gvs::triangle_strip({}) << gvs::send;
+    CHECK(stream2);
+
+#if 0
+    gvs::log::GeometryItemStream blah_stream = scene.item_stream("blah") << gvs::positions_3d({});
+
+    blah_stream << gvs::positions_3d({}) << gvs::normals_3d({}) << gvs::tex_coords_3d({}) << gvs::vertex_colors_3d({});
+    blah_stream << gvs::indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>({}) << gvs::replace;
+    CHECK(blah_stream);
+
+    blah_stream << gvs::points({}) << gvs::append;
+    CHECK(blah_stream);
+
+    blah_stream << gvs::line_strip({}) << gvs::append;
+    CHECK(blah_stream);
+
+    blah_stream << gvs::replace;
+    CHECK(blah_stream);
+#endif
 }

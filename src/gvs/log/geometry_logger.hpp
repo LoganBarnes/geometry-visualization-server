@@ -50,6 +50,7 @@ public:
 
     std::string generate_uuid() const;
 
+    std::string clear_all_items();
     GeometryItemStream item_stream(const std::string& id = "");
 
 private:

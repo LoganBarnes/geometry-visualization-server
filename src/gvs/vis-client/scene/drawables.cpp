@@ -35,6 +35,8 @@ using namespace Magnum;
 namespace gvs {
 namespace vis {
 
+constexpr Magnum::Color3 default_color = {1.f, 0.9f, 0.7f};
+
 OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
                                SceneGraph::DrawableGroup3D* group,
                                GL::Mesh& mesh,
@@ -44,6 +46,15 @@ OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformati
 
     if (display_info) {
         display_info_.CopyFrom(*display_info);
+
+        if (display_info_.has_transformation()) {
+            assert(display_info_.transformation().data_size() == 16);
+            const float* transform_data = display_info_.transformation().data().data();
+
+            Matrix4 transform;
+            std::copy(transform_data, transform_data + 16, transform.data());
+            object.setTransformation(transform);
+        }
     }
 }
 
@@ -54,6 +65,11 @@ void OpaqueDrawable::draw(const Matrix4& transformation_matrix, SceneGraph::Came
 
     shader_.set_display_mode(display_info_.has_shader_display_mode() ? display_info_.shader_display_mode().value()
                                                                      : proto::DisplayMode::GLOBAL_COLOR);
+
+    shader_.set_global_color(display_info_.has_global_color() ? Magnum::Color3{display_info_.global_color().x(),
+                                                                               display_info_.global_color().y(),
+                                                                               display_info_.global_color().z()}
+                                                              : default_color);
 
     mesh_.draw(shader_);
 }

@@ -47,8 +47,9 @@ message SceneUpdateRequest {
         SceneItemInfo safe_set_item = 1;
         SceneItemInfo replace_item = 2;
         SceneItemInfo append_to_item = 3;
-        // SceneItemInfo update_item = 2;
-        // SceneItemInfo remove_item = 3;
+        // SceneItemInfo update_item = 4;
+        // SceneItemInfo remove_item = 5;
+        google.protobuf.Empty clear_all = 6;
     }
 }
 

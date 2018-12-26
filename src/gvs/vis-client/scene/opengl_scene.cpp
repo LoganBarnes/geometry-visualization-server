@@ -16,6 +16,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "opengl_scene.hpp"
 
+#include "gvs/util/container_util.hpp"
 #include "gvs/vis-client/scene/drawables.hpp"
 
 #include <gvs/gvs_paths.hpp>
@@ -113,7 +114,9 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
 
     std::vector<float> buffer_data;
 
-    ObjectMeshPackage mesh_package;
+    objects_.emplace(info.id().value(), std::make_unique<ObjectMeshPackage>());
+
+    ObjectMeshPackage& mesh_package = *objects_.at(info.id().value());
     mesh_package.mesh.setPrimitive(MeshPrimitive::Points);
 
     GLintptr offset = 0;
@@ -170,13 +173,17 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
         }
     }
 
+    if (not util::has_key(objects_, info.parent().value())) {
+        objects_.erase(info.id().value());
+        throw std::invalid_argument("Parent id '" + info.parent().value() + "' not found in scene");
+    }
+
     mesh_package.object = &objects_.at(info.parent().value())->object->addChild<Object3D>();
-    objects_.emplace(info.id().value(), std::make_unique<ObjectMeshPackage>(std::move(mesh_package)));
 
     // Self deleting
-    new OpaqueDrawable(*root_object_,
+    new OpaqueDrawable(*mesh_package.object,
                        &drawables_,
-                       objects_.at(info.id().value())->mesh,
+                       mesh_package.mesh,
                        (info.has_display_info() ? &info.display_info() : nullptr),
                        shader_);
 }
