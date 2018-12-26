@@ -22,43 +22,20 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <Magnum/SceneGraph/Camera.h>
+
 namespace gvs {
-namespace log {
-
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
-
-} // namespace log
-
-namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
 namespace vis {
-namespace detail {
 
-class Theme;
+struct CameraPackage {
+    Magnum::Matrix4 transformation = {};
+    Magnum::Matrix4 inverse_scale = {};
+    Magnum::SceneGraph::Camera3D* camera = nullptr;
 
-} // namespace detail
+    void set_camera(Magnum::SceneGraph::Camera3D* cam, const Magnum::Vector2i& viewport);
 
-class VisClient;
-struct CameraPackage;
-class SceneInterface;
+    void update_viewport(const Magnum::Vector2i& viewport);
+};
 
 } // namespace vis
 } // namespace gvs

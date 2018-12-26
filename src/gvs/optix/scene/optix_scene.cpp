@@ -94,7 +94,7 @@ GL::Mesh set_up_fullscreen_quad() {
     return quad_mesh;
 }
 
-void build_ray_basis_vectors(SceneGraph::Camera3D* camera, Vector3* u_out, Vector3* v_out, Vector3* w_out) {
+void build_ray_basis_vectors(const CameraPackage& camera_package, Vector3* u_out, Vector3* v_out, Vector3* w_out) {
     assert(u_out != nullptr);
     assert(v_out != nullptr);
     assert(w_out != nullptr);
@@ -104,16 +104,16 @@ void build_ray_basis_vectors(SceneGraph::Camera3D* camera, Vector3* u_out, Vecto
     Vector3& w = *w_out;
 
     // normalized directions
-    w = camera->cameraMatrix().transformPoint({0.f, 0.f, -1.f});
+    w = camera_package.transformation.transformPoint({0.f, 0.f, -1.f});
     u = Math::cross(w, {0.f, 1.f, 0.f}).normalized();
     v = Math::cross(u, w).normalized();
 
-    Matrix4 inv_projection_view = (camera->projectionMatrix() * camera->cameraMatrix()).inverted();
+    Matrix4 inv_scale_view = camera_package.transformation * camera_package.inverse_scale;
 
-    // (w, h, -1) in window space back to world space
-    Vector3 window_space(camera->viewport().x(), camera->viewport().y(), -1.f);
-    Vector3 far_top_right_point = inv_projection_view.transformPoint(window_space);
-    Vector3 far_top_right_dir = far_top_right_point - camera->cameraMatrix().transformPoint({0.f, 0.f, 0.f});
+    // (1, 1, -1) in clip space back to world space
+    Vector3 window_space(1.f, 1.f, -1.f);
+    Vector3 far_top_right_point = inv_scale_view.transformPoint(window_space);
+    Vector3 far_top_right_dir = far_top_right_point - camera_package.transformation.transformPoint({0.f, 0.f, 0.f});
 
     // scaled to match current camera matrices
     u *= Math::dot(u, far_top_right_dir);
@@ -184,19 +184,19 @@ OptiXScene::~OptiXScene() = default;
 
 void OptiXScene::update(const Vector2i& /*viewport*/) {}
 
-void OptiXScene::render(const Matrix4& camera_transformation, SceneGraph::Camera3D* camera) {
-    camera_object_.setTransformation(camera_transformation);
-    camera_->setProjectionMatrix(camera->projectionMatrix());
+void OptiXScene::render(const CameraPackage& camera_package) {
+    camera_object_.setTransformation(camera_package.transformation);
+    camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
 
-    Vector3 eye = camera->cameraMatrix().transformPoint({0.f, 0.f, 0.f});
+    Vector3 eye = camera_package.transformation.transformPoint({0.f, 0.f, 0.f});
     Vector3 u, v, w;
 
-    build_ray_basis_vectors(camera, &u, &v, &w);
+    build_ray_basis_vectors(camera_package, &u, &v, &w);
 
     context()["eye"]->setFloat(eye.x(), eye.y(), eye.z());
-    context()["u"]->setFloat(u.x(), u.y(), u.z());
-    context()["v"]->setFloat(v.x(), v.y(), eye.z());
-    context()["w"]->setFloat(w.x(), w.y(), w.z());
+    context()["U"]->setFloat(u.x(), u.y(), u.z());
+    context()["V"]->setFloat(v.x(), v.y(), v.z());
+    context()["W"]->setFloat(w.x(), w.y(), w.z());
 
     // Get buffer size for ray tracing call
     optix::Buffer buffer = context()["output_buffer"]->getBuffer();

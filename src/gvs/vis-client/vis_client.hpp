@@ -44,7 +44,7 @@ public:
 
 private:
     void update() override;
-    void render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) const override;
+    void render(const CameraPackage& camera_package) const override;
     void configure_gui() override;
 
     void resize(const Magnum::Vector2i& viewport) override;

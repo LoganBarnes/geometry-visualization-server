@@ -52,6 +52,7 @@ RT_PROGRAM void pinhole_camera() {
     optix::Ray ray = optix::make_Ray(ray_origin, ray_direction, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX);
 
     gvs::PerRayData prd;
+    prd.result = ray_direction;
     prd.depth = miss_depth;
 
     rtTrace(top_object, ray, prd);
@@ -63,7 +64,7 @@ RT_PROGRAM void pinhole_camera() {
  * @brief Sets the ray data if no intersections are found.
  */
 RT_PROGRAM void miss() {
-    prd_current.result = background_color;
+    prd_current.result.z = background_color.z;
 }
 
 /**

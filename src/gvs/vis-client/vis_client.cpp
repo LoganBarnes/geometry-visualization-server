@@ -143,8 +143,8 @@ void vis::VisClient::update() {
     scene_->update(this->windowSize());
 }
 
-void vis::VisClient::render(const Matrix4& camera_transformation, SceneGraph::Camera3D* camera) const {
-    scene_->render(camera_transformation, camera);
+void vis::VisClient::render(const CameraPackage& camera_package) const {
+    scene_->render(camera_package);
 }
 
 void vis::VisClient::configure_gui() {

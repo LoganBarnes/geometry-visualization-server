@@ -32,6 +32,8 @@
 #include <Magnum/GL/Version.h>
 #include <Magnum/Math/Angle.h>
 #include <Magnum/Math/Color.h>
+#include <Magnum/Math/Matrix4.h>
+#include <Magnum/Math/Vector2.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -44,7 +46,6 @@ namespace gvs {
 namespace vis {
 
 using namespace Magnum;
-using namespace Math::Literals;
 
 ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
     : GlfwApplication(arguments, configuration, GLConfiguration().setSampleCount(4)) {
@@ -84,10 +85,8 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
 
     camera_object_.setParent(&camera_scene_).translate(Vector3::zAxis(5.0f));
 
-    camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
-    camera_->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix4::perspectiveProjection(35.0_degf, 1.0f, 0.01f, 1000.0f))
-        .setViewport(GL::defaultFramebuffer.viewport().size());
+    // Memory ownership is handled elsewhere
+    camera_package_.set_camera(new SceneGraph::Camera3D(camera_object_), GL::defaultFramebuffer.viewport().size());
 
     update_camera();
     reset_draw_counter();
@@ -119,7 +118,7 @@ void ImGuiMagnumApplication::drawEvent() {
 
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color | GL::FramebufferClear::Depth);
 
-    render(camera_object_.transformation(), camera_);
+    render(camera_package_);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -133,7 +132,9 @@ void ImGuiMagnumApplication::drawEvent() {
 
 void ImGuiMagnumApplication::viewportEvent(ViewportEvent& event) {
     GL::defaultFramebuffer.setViewport({{}, event.windowSize()});
-    camera_->setViewport(event.windowSize());
+
+    camera_package_.update_viewport(event.windowSize());
+
     resize(event.windowSize());
     reset_draw_counter();
 }
@@ -242,11 +243,11 @@ void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
 }
 
 void ImGuiMagnumApplication::update_camera() {
-    auto trans = Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.x()), {0.f, 1.f, 0.f})
+    camera_package_.transformation = Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.x()), {0.f, 1.f, 0.f})
         * Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.y()), {1.f, 0.f, 0.f})
         * Matrix4::translation({0.f, 0.f, camera_orbit_distance_});
 
-    camera_object_.setTransformation(trans);
+    camera_object_.setTransformation(camera_package_.transformation);
 }
 
 } // namespace vis

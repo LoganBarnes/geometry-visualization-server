@@ -78,9 +78,9 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
 
 void OpenGLScene::update(const Vector2i& /*viewport*/) {}
 
-void OpenGLScene::render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) {
-    camera_object_.setTransformation(camera_transformation);
-    camera_->setProjectionMatrix(camera->projectionMatrix());
+void OpenGLScene::render(const CameraPackage& camera_package) {
+    camera_object_.setTransformation(camera_package.transformation);
+    camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
     camera_->draw(drawables_);
 }
 

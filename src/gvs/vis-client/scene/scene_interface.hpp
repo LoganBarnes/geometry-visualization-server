@@ -16,6 +16,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/vis-client/scene/camera_package.hpp"
+
 #include <gvs/types.pb.h>
 
 #include <Magnum/Magnum.h>
@@ -37,7 +39,7 @@ public:
     virtual ~SceneInterface() = 0;
 
     virtual void update(const Magnum::Vector2i& viewport) = 0;
-    virtual void render(const Magnum::Matrix4& camera_transformation, Magnum::SceneGraph::Camera3D* camera) = 0;
+    virtual void render(const CameraPackage& camera_package) = 0;
     virtual void configure_gui(const Magnum::Vector2i& viewport) = 0;
 
     virtual void add_item(const proto::SceneItemInfo& info) = 0;
