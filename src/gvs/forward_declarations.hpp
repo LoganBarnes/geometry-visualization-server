@@ -56,8 +56,9 @@ class Theme;
 
 } // namespace detail
 
-class VisClient;
 struct CameraPackage;
+class OpaqueDrawable;
+class VisClient;
 class SceneInterface;
 
 } // namespace vis

@@ -64,6 +64,10 @@ Magnum::MeshPrimitive from_proto(gvs::proto::GeometryFormat format) {
 using namespace Magnum;
 using namespace Math::Literals;
 
+OpenGLScene::ObjectMeshPackage::ObjectMeshPackage(Object3D* obj) : object(obj) {
+    mesh.setCount(0).setPrimitive(Magnum::MeshPrimitive::Points);
+}
+
 OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/) {
     camera_object_.setParent(&scene_);
     camera_ = new SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
@@ -100,69 +104,77 @@ void OpenGLScene::reset(const proto::SceneItems& items) {
     root_object_ = &scene_.addChild<Object3D>();
     objects_.emplace("", std::make_unique<ObjectMeshPackage>(root_object_));
 
+    for (const auto& item : items.items()) {
+        objects_.emplace(item.first, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>()));
+    }
+
     // Add new items to scene
     for (const auto& item : items.items()) {
-        add_item(item.second);
+        update_item(item.second);
     }
 }
 
 void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
-    const Trade::MeshData3D cube = Primitives::cubeSolid();
-
     assert(info.has_geometry_info());
-    const proto::GeometryInfo3D& geometry = info.geometry_info();
 
-    std::vector<float> buffer_data;
+    objects_.emplace(info.id().value(), std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>()));
+    update_item(info);
+}
 
-    objects_.emplace(info.id().value(), std::make_unique<ObjectMeshPackage>());
+void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
 
     ObjectMeshPackage& mesh_package = *objects_.at(info.id().value());
-    mesh_package.mesh.setPrimitive(MeshPrimitive::Points);
 
-    GLintptr offset = 0;
+    // TODO: Make it so individual parts of the geometry can be updated
+    if (info.has_geometry_info()) {
+        const proto::GeometryInfo3D& geometry = info.geometry_info();
 
-    if (geometry.has_positions()) {
-        const proto::FloatList& positions = geometry.positions();
-        buffer_data.insert(buffer_data.end(), positions.value().begin(), positions.value().end());
-        mesh_package.mesh.setCount(positions.value_size() / 3);
-        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::Position{});
-        offset += positions.value_size() * static_cast<int>(sizeof(float));
-    }
+        std::vector<float> buffer_data;
+        GLintptr offset = 0;
 
-    if (geometry.has_normals()) {
-        const proto::FloatList& normals = geometry.normals();
-        buffer_data.insert(buffer_data.end(), normals.value().begin(), normals.value().end());
-        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::Normal{});
-        offset += normals.value_size() * static_cast<int>(sizeof(float));
-    }
+        if (geometry.has_positions()) {
+            const proto::FloatList& positions = geometry.positions();
+            buffer_data.insert(buffer_data.end(), positions.value().begin(), positions.value().end());
+            mesh_package.mesh.setCount(positions.value_size() / 3);
+            mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::Position{});
+            offset += positions.value_size() * static_cast<int>(sizeof(float));
+        }
 
-    if (geometry.has_tex_coords()) {
-        const proto::FloatList& tex_coords = geometry.tex_coords();
-        buffer_data.insert(buffer_data.end(), tex_coords.value().begin(), tex_coords.value().end());
-        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::TextureCoordinate{});
-        offset += tex_coords.value_size() * static_cast<int>(sizeof(float));
-    }
+        if (geometry.has_normals()) {
+            const proto::FloatList& normals = geometry.normals();
+            buffer_data.insert(buffer_data.end(), normals.value().begin(), normals.value().end());
+            mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::Normal{});
+            offset += normals.value_size() * static_cast<int>(sizeof(float));
+        }
 
-    if (geometry.has_vertex_colors()) {
-        const proto::FloatList& vertex_colors = geometry.vertex_colors();
-        buffer_data.insert(buffer_data.end(), vertex_colors.value().begin(), vertex_colors.value().end());
-        mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::VertexColor{});
-    }
+        if (geometry.has_tex_coords()) {
+            const proto::FloatList& tex_coords = geometry.tex_coords();
+            buffer_data.insert(buffer_data.end(), tex_coords.value().begin(), tex_coords.value().end());
+            mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::TextureCoordinate{});
+            offset += tex_coords.value_size() * static_cast<int>(sizeof(float));
+        }
 
-    mesh_package.vertex_buffer.setData(buffer_data);
+        if (geometry.has_vertex_colors()) {
+            const proto::FloatList& vertex_colors = geometry.vertex_colors();
+            buffer_data.insert(buffer_data.end(), vertex_colors.value().begin(), vertex_colors.value().end());
+            mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::VertexColor{});
+        }
 
-    if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
-        std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
-                                      info.geometry_info().indices().value().end()};
+        mesh_package.vertex_buffer.setData(buffer_data);
 
-        Containers::Array<char> index_data;
-        MeshIndexType index_type;
-        UnsignedInt index_start, index_end;
-        std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
-        mesh_package.index_buffer.setData(index_data);
+        if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
+            std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
+                                          info.geometry_info().indices().value().end()};
 
-        mesh_package.mesh.setCount(static_cast<int>(indices.size()))
-            .setIndexBuffer(mesh_package.index_buffer, 0, index_type, index_start, index_end);
+            Containers::Array<char> index_data;
+            MeshIndexType index_type;
+            UnsignedInt index_start, index_end;
+            std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
+            mesh_package.index_buffer.setData(index_data);
+
+            mesh_package.mesh.setCount(static_cast<int>(indices.size()))
+                .setIndexBuffer(mesh_package.index_buffer, 0, index_type, index_start, index_end);
+        }
     }
 
     if (info.has_display_info()) {
@@ -178,18 +190,14 @@ void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
         throw std::invalid_argument("Parent id '" + info.parent().value() + "' not found in scene");
     }
 
-    mesh_package.object = &objects_.at(info.parent().value())->object->addChild<Object3D>();
+    mesh_package.object->setParent(objects_.at(info.parent().value())->object);
 
     // Self deleting
-    new OpaqueDrawable(*mesh_package.object,
-                       &drawables_,
-                       mesh_package.mesh,
-                       (info.has_display_info() ? &info.display_info() : nullptr),
-                       shader_);
-}
-
-void OpenGLScene::update_item(const proto::SceneItemInfo& /*info*/) {
-    // TODO
+    mesh_package.drawable = new OpaqueDrawable(*mesh_package.object,
+                                               &drawables_,
+                                               mesh_package.mesh,
+                                               (info.has_display_info() ? &info.display_info() : nullptr),
+                                               shader_);
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}

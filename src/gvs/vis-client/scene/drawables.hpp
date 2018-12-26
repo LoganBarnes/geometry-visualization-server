@@ -45,7 +45,8 @@ private:
     void draw(const Magnum::Matrix4& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 
     Magnum::GL::Mesh& mesh_;
-    proto::DisplayInfo display_info_;
+    proto::DisplayMode display_mode_ = proto::DisplayMode::GLOBAL_COLOR;
+    Magnum::Color3 global_color_ = {1.f, 0.9f, 0.7f};
     GeneralShader3D& shader_;
 };
 

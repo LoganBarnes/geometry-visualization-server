@@ -35,13 +35,13 @@ int main(int argc, char* argv[]) {
 
     gvs::log::GeometryLogger scene(server_address, 3s);
 
-    scene.clear_all_items();
+    //    scene.clear_all_items();
 
     {
         auto stream = scene.item_stream("Axes")
             << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
             << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
-            << gvs::display_mode(gvs::proto::DisplayMode::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3})
+            << gvs::display_mode(gvs::proto::DisplayMode::GLOBAL_COLOR) << gvs::lines({0, 1, 0, 2, 0, 3})
             << gvs::replace;
         CHECK(stream);
     }

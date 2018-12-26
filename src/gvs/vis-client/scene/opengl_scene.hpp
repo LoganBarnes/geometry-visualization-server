@@ -16,6 +16,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/forward_declarations.hpp"
 #include "gvs/vis-client/scene/general_shader_3d.hpp"
 #include "gvs/vis-client/scene/scene_interface.hpp"
 
@@ -61,9 +62,9 @@ private:
         Magnum::GL::Buffer vertex_buffer;
         Magnum::GL::Mesh mesh;
         Object3D* object = nullptr;
+        OpaqueDrawable* drawable = nullptr;
 
-        ObjectMeshPackage() = default;
-        explicit ObjectMeshPackage(Object3D* obj) : object(obj) {}
+        explicit ObjectMeshPackage(Object3D* obj);
     };
     std::unordered_map<std::string, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 

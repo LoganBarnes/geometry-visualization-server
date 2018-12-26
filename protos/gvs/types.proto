@@ -96,8 +96,8 @@ message GeometryInfo3D {
 message DisplayInfo {
     google.protobuf.StringValue readable_id = 1;
     GeometryFormatValue geometry_format = 2;
-    DisplayModeValue shader_display_mode = 3;
-    Mat4 transformation = 4;
+    Mat4 transformation = 3;
+    DisplayModeValue shader_display_mode = 4;
     Vec3 global_color = 5;
     // google.protobuf.BoolValue visible = 6;
     // google.protobuf.FloatValue opacity = 7;
