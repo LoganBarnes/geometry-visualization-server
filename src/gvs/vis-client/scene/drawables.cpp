@@ -38,30 +38,28 @@ namespace vis {
 OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
                                SceneGraph::DrawableGroup3D* group,
                                GL::Mesh& mesh,
-                               const proto::DisplayInfo* display_info,
                                GeneralShader3D& shader)
-    : SceneGraph::Drawable3D{object, group}, mesh_(mesh), shader_(shader) {
+    : SceneGraph::Drawable3D{object, group}, object_(object), mesh_(mesh), shader_(shader) {}
 
-    if (display_info) {
+void OpaqueDrawable::update_display_info(const gvs::proto::DisplayInfo& display_info) {
 
-        if (display_info->has_transformation()) {
-            assert(display_info->transformation().data_size() == 16);
-            const float* transform_data = display_info->transformation().data().data();
+    if (display_info.has_transformation()) {
+        assert(display_info.transformation().data_size() == 16);
+        const float* transform_data = display_info.transformation().data().data();
 
-            Matrix4 transform;
-            std::copy(transform_data, transform_data + 16, transform.data());
-            object.setTransformation(transform);
-        }
+        Matrix4 transform;
+        std::copy(transform_data, transform_data + 16, transform.data());
+        object_.setTransformation(transform);
+    }
 
-        if (display_info->has_shader_display_mode()) {
-            display_mode_ = display_info->shader_display_mode().value();
-        }
+    if (display_info.has_shader_display_mode()) {
+        display_mode_ = display_info.shader_display_mode().value();
+    }
 
-        if (display_info->has_global_color()) {
-            global_color_ = Magnum::Color3{display_info->global_color().x(),
-                                           display_info->global_color().y(),
-                                           display_info->global_color().z()};
-        }
+    if (display_info.has_global_color()) {
+        global_color_ = Magnum::Color3{display_info.global_color().x(),
+                                       display_info.global_color().y(),
+                                       display_info.global_color().z()};
     }
 }
 

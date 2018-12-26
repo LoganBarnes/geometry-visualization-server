@@ -36,14 +36,16 @@ public:
     explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
                             Magnum::SceneGraph::DrawableGroup3D* group,
                             Magnum::GL::Mesh& mesh,
-                            const proto::DisplayInfo* display_info,
                             GeneralShader3D& shader);
+
+    void update_display_info(const proto::DisplayInfo& display_info);
 
     ~OpaqueDrawable() override = default;
 
 private:
     void draw(const Magnum::Matrix4& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object_;
     Magnum::GL::Mesh& mesh_;
     proto::DisplayMode display_mode_ = proto::DisplayMode::GLOBAL_COLOR;
     Magnum::Color3 global_color_ = {1.f, 0.9f, 0.7f};

@@ -64,7 +64,9 @@ private:
         Object3D* object = nullptr;
         OpaqueDrawable* drawable = nullptr;
 
-        explicit ObjectMeshPackage(Object3D* obj);
+        explicit ObjectMeshPackage(Object3D* obj,
+                                   Magnum::SceneGraph::DrawableGroup3D* drawables,
+                                   GeneralShader3D& shader);
     };
     std::unordered_map<std::string, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 

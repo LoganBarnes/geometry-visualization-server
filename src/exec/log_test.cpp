@@ -35,13 +35,17 @@ int main(int argc, char* argv[]) {
 
     gvs::log::GeometryLogger scene(server_address, 3s);
 
-    //    scene.clear_all_items();
+    scene.clear_all_items();
 
     {
         auto stream = scene.item_stream("Axes")
             << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
             << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
+#if 1
+            << gvs::display_mode(gvs::proto::DisplayMode::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3})
+#else
             << gvs::display_mode(gvs::proto::DisplayMode::GLOBAL_COLOR) << gvs::lines({0, 1, 0, 2, 0, 3})
+#endif
             << gvs::replace;
         CHECK(stream);
     }
@@ -79,7 +83,8 @@ int main(int argc, char* argv[]) {
     }
 
     gvs::log::GeometryItemStream triangle = scene.item_stream()
-        << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f}) << gvs::triangles({}) << gvs::send;
+        << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f})
+        << gvs::global_color({.5f, 0.25f, 0.05f}) << gvs::triangles({}) << gvs::send;
     CHECK(triangle);
 
     gvs::log::GeometryItemStream stream2 = scene.item_stream()

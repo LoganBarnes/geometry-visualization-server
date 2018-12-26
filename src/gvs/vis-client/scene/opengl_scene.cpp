@@ -64,8 +64,12 @@ Magnum::MeshPrimitive from_proto(gvs::proto::GeometryFormat format) {
 using namespace Magnum;
 using namespace Math::Literals;
 
-OpenGLScene::ObjectMeshPackage::ObjectMeshPackage(Object3D* obj) : object(obj) {
+OpenGLScene::ObjectMeshPackage::ObjectMeshPackage(Object3D* obj,
+                                                  Magnum::SceneGraph::DrawableGroup3D* drawables,
+                                                  GeneralShader3D& shader)
+    : object(obj) {
     mesh.setCount(0).setPrimitive(Magnum::MeshPrimitive::Points);
+    drawable = new OpaqueDrawable(*object, drawables, mesh, shader);
 }
 
 OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/) {
@@ -102,10 +106,11 @@ void OpenGLScene::reset(const proto::SceneItems& items) {
 
     // Add root
     root_object_ = &scene_.addChild<Object3D>();
-    objects_.emplace("", std::make_unique<ObjectMeshPackage>(root_object_));
+    objects_.emplace("", std::make_unique<ObjectMeshPackage>(root_object_, &drawables_, shader_));
 
     for (const auto& item : items.items()) {
-        objects_.emplace(item.first, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>()));
+        objects_.emplace(item.first,
+                         std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
     }
 
     // Add new items to scene
@@ -117,7 +122,8 @@ void OpenGLScene::reset(const proto::SceneItems& items) {
 void OpenGLScene::add_item(const proto::SceneItemInfo& info) {
     assert(info.has_geometry_info());
 
-    objects_.emplace(info.id().value(), std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>()));
+    objects_.emplace(info.id().value(),
+                     std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
     update_item(info);
 }
 
@@ -192,12 +198,9 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
 
     mesh_package.object->setParent(objects_.at(info.parent().value())->object);
 
-    // Self deleting
-    mesh_package.drawable = new OpaqueDrawable(*mesh_package.object,
-                                               &drawables_,
-                                               mesh_package.mesh,
-                                               (info.has_display_info() ? &info.display_info() : nullptr),
-                                               shader_);
+    if (info.has_display_info()) {
+        mesh_package.drawable->update_display_info(info.display_info());
+    }
 }
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}

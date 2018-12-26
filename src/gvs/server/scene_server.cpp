@@ -90,6 +90,7 @@ SceneServer::SceneServer(std::string server_address)
                                        return grpc::Status::OK;
                                    }
 
+                                   // TODO: Error check? (has_geometry, etc.)
                                    scene_.mutable_items()->insert({id, update_request.safe_set_item()});
                                    // TODO: Handle parent and children updates
 
@@ -110,6 +111,8 @@ SceneServer::SceneServer(std::string server_address)
                                        scene_stream->write(update);
 
                                    } else {
+                                       // Item doesn't yet exist. Add it.
+                                       // TODO: Error check? (has_geometry, etc.)
                                        scene_.mutable_items()->insert({id, update_request.replace_item()});
                                        // TODO: Handle parent and children updates
 
@@ -120,8 +123,33 @@ SceneServer::SceneServer(std::string server_address)
                                    }
                                } break;
 
-                               case proto::SceneUpdateRequest::kAppendToItem:
-                                   break;
+                               case proto::SceneUpdateRequest::kAppendToItem: {
+                                   std::string id = update_request.replace_item().id().value();
+
+                                   if (util::has_key(scene_.items(), id)) {
+                                       if (update_request.append_to_item().has_geometry_info()) {
+                                           errors->set_error_msg("Appending geometry is not supported yet");
+                                           return grpc::Status::OK;
+                                       }
+
+                                       proto::SceneUpdate update;
+                                       update.mutable_update_item()->CopyFrom(update_request.replace_item());
+
+                                       scene_stream->write(update);
+
+                                   } else {
+                                       // Item doesn't yet exist. Add it.
+                                       // TODO: Error check? (has_geometry, etc.)
+                                       scene_.mutable_items()->insert({id, update_request.replace_item()});
+                                       // TODO: Handle parent and children updates
+
+                                       proto::SceneUpdate update;
+                                       update.mutable_add_item()->CopyFrom(update_request.replace_item());
+
+                                       scene_stream->write(update);
+                                   }
+
+                               } break;
 
                                case proto::SceneUpdateRequest::kClearAll: {
                                    scene_.clear_items();
@@ -134,6 +162,7 @@ SceneServer::SceneServer(std::string server_address)
                                    errors->set_error_msg("No update set");
                                    break;
                                }
+
                                return grpc::Status::OK;
                            });
 }
