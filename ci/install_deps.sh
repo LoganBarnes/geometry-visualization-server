@@ -5,5 +5,5 @@ export PATH=/deps/cmake/bin:$PATH
 cmake --version
 
 # install deps
-#apt upgrade
-#apt install gcc-7
+apt upgrade
+apt install xorg-dev
