@@ -32,6 +32,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#ifdef DOCTEST_LIBRARY_INCLUDED
+#include <testing/testing.grpc.pb.h>
+#endif
+
 namespace gvs {
 namespace net {
 namespace detail {

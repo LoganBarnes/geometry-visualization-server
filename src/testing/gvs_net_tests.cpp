@@ -24,3 +24,5 @@
 #include <doctest/doctest.h>
 
 #include "gvs_net_tests.hpp"
+
+template struct gvs::net::detail::AsyncConnection<gvs::test::proto::TestMessage, gvs::test::proto::TestMessage>;
