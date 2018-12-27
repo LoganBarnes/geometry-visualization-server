@@ -12,7 +12,7 @@ services:
 
 before_install:
   - docker pull grpc/cxx
-#  - docker pull rikorose/gcc-cmake
+  #  - docker pull rikorose/gcc-cmake
   - docker pull bash
 
 install:
