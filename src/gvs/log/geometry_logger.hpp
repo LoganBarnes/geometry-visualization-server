@@ -27,7 +27,7 @@
 
 // third party
 #include <crossguid/guid.hpp>
-#include <grpcpp/create_channel.h>
+#include <grpc++/create_channel.h>
 
 namespace gvs {
 namespace log {

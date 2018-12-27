@@ -29,7 +29,7 @@
 #include <gvs/scene.grpc.pb.h>
 
 // third party
-#include <grpcpp/create_channel.h>
+#include <grpc++/create_channel.h>
 
 // standard
 #include <sstream>

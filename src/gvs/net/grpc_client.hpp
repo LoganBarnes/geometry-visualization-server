@@ -27,9 +27,9 @@
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/callback_handler.hpp"
 
-#include <grpcpp/channel.h>
-#include <grpcpp/completion_queue.h>
-#include <grpcpp/create_channel.h>
+#include <grpc++/channel.h>
+#include <grpc++/completion_queue.h>
+#include <grpc++/create_channel.h>
 
 #ifdef DOCTEST_LIBRARY_INCLUDED
 #include <sstream>

@@ -10,5 +10,5 @@ Building
 ### Linux
 
 ```bash
-sudo apt install g++7
+sudo apt install xorg-dev libgl1-mesa-dev uuid-dev
 ```

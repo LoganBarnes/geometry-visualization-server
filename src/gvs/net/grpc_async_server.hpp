@@ -25,9 +25,9 @@
 #include "gvs/net/detail/async_handler.hpp"
 #include "gvs/net/detail/stream_handler.hpp"
 
-#include <grpcpp/security/server_credentials.h>
-#include <grpcpp/server.h>
-#include <grpcpp/server_builder.h>
+#include <grpc++/security/server_credentials.h>
+#include <grpc++/server.h>
+#include <grpc++/server_builder.h>
 
 namespace gvs {
 namespace net {

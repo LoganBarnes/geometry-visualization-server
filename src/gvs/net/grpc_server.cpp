@@ -22,7 +22,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/net/grpc_server.hpp"
 
-#include <grpcpp/server_builder.h>
+#include <grpc++/server_builder.h>
 
 #include <utility>
 

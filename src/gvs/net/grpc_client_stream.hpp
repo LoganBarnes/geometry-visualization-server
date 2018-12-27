@@ -22,7 +22,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <grpcpp/client_context.h>
+#include <grpc++/client_context.h>
 #include <thread>
 
 namespace gvs {

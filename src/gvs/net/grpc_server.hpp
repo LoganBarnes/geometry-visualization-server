@@ -24,7 +24,7 @@
 
 #include "gvs/forward_declarations.hpp"
 
-#include <grpcpp/server.h>
+#include <grpc++/server.h>
 
 namespace gvs {
 namespace net {

@@ -29,8 +29,8 @@
 
 #include <gvs/scene.grpc.pb.h>
 
-#include <grpcpp/channel.h>
-#include <grpcpp/completion_queue.h>
+#include <grpc++/channel.h>
+#include <grpc++/completion_queue.h>
 
 #include <thread>
 

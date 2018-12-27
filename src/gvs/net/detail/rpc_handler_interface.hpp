@@ -24,8 +24,8 @@
 
 #include "gvs/util/blocking_queue.hpp"
 
-#include <grpcpp/completion_queue.h>
-#include <grpcpp/server_context.h>
+#include <grpc++/completion_queue.h>
+#include <grpc++/server_context.h>
 
 #include <experimental/optional>
 

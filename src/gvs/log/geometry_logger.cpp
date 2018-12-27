@@ -22,7 +22,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "geometry_logger.hpp"
 
-#include <grpcpp/client_context.h>
+#include <grpc++/client_context.h>
 
 namespace gvs {
 namespace log {
