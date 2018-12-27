@@ -36,5 +36,5 @@ install:
   - cmake --version
 
 script:
-  - docker run -v ${TRAVIS_BUILD_DIR}:/gvs -v ${DEPS_DIR}:/deps grpc/cxx rikorose/gcc-cmake bash -c "cd /gvs && ls /deps/cmake/bin && cmake --version"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/gvs -v ${DEPS_DIR}:/deps grpc/cxx -c "cd /gvs && ls /deps/cmake/bin && cmake --version"
 #  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make AirWaves_coverage -j; fi;
