@@ -12,6 +12,26 @@ services:
 before_install:
   - docker pull grpc/cxx
 
+install:
+  ############################################################################
+  # All compiled dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/
+  ############################################################################
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+
+  ############################################################################
+  # Install a recent CMake
+  ############################################################################
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.12/cmake-3.12.0-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    else
+      brew outdated cmake || brew upgrade cmake
+    fi
+  - cmake --version
+
 script:
-  - docker run -v ${TRAVIS_BUILD_DIR}:/gvs bash -c "cd /gvs && ./ci/install_deps.sh && ./ci/build_and_run.sh"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/gvs -v ${DEPS_DIR}:/deps bash -c "cd /gvs && export PATH=${DEPS_DIR}/cmake/bin:${PATH} && ./ci/build_and_run.sh"
 #  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make AirWaves_coverage -j; fi;

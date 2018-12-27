@@ -10,4 +10,5 @@ Building
 ### Linux
 
 ```bash
+sudo apt install g++7
 ```
