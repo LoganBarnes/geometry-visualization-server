@@ -224,7 +224,7 @@ if (${GVS_BUILD_TESTS})
     endif ()
 
     add_executable(gvs_net_tests testing/gvs_net_tests.cpp)
-    target_link_libraries(gvs_net_tests PRIVATE gvs_net gvs_testing_thirdparty gvs_protos)
+    target_link_libraries(gvs_net_tests PRIVATE gvs_net gvs_testing_thirdparty testing_protos)
 
     add_executable(all_gvs_tests testing/all_gvs_tests.cpp)
     target_link_libraries(all_gvs_tests PRIVATE
@@ -233,7 +233,7 @@ if (${GVS_BUILD_TESTS})
             vis_client
             log_client
             gvs_testing_thirdparty
-            gvs_protos
+            testing_protos
             )
 
     set_target_properties(
