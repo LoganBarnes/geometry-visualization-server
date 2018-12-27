@@ -13,5 +13,5 @@ before_install:
   - docker pull grpc/cxx
 
 script:
-  - docker run -v ${TRAVIS_BUILD_DIR}:/gvs bash -c "cd /gvs && ls && ./ci/build_and_run.sh"
+  - docker run -a stdout -v ${TRAVIS_BUILD_DIR}:/gvs bash -c "cd /gvs && ls ci && sudo ./ci/build_and_run.sh"
 #  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make AirWaves_coverage -j; fi;
