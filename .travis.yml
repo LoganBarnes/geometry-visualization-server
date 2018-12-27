@@ -37,7 +37,6 @@ install:
 
 script:
   - docker run -v ${TRAVIS_BUILD_DIR}:/gvs -v ${DEPS_DIR}:/deps grpc/cxx bash -c "cd /gvs && . ./ci/install_deps.sh && ./ci/build_and_run.sh"
-  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make AirWaves_coverage -j; fi;
 
 after_success:
   ############################################################################
