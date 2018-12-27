@@ -31,6 +31,10 @@
 #include <grpcpp/completion_queue.h>
 #include <grpcpp/create_channel.h>
 
+#ifdef DOCTEST_LIBRARY_INCLUDED
+#include <sstream>
+#endif
+
 #include <thread>
 #include <unordered_map>
 
@@ -64,6 +68,43 @@ inline ::std::ostream& operator<<(::std::ostream& os, grpc_connectivity_state st
     return os << to_string(state);
 }
 
+#ifdef DOCTEST_LIBRARY_INCLUDED
+TEST_CASE("[gvs] testing the grpc_connectivity_state string functions") {
+    std::stringstream ss;
+
+    SUBCASE("GRPC_CHANNEL_CONNECTING_string") {
+        ss << grpc_connectivity_state::GRPC_CHANNEL_CONNECTING;
+        CHECK(ss.str() == "GRPC_CHANNEL_CONNECTING");
+    }
+
+    SUBCASE("GRPC_CHANNEL_IDLE_string") {
+        ss << grpc_connectivity_state::GRPC_CHANNEL_IDLE;
+        CHECK(ss.str() == "GRPC_CHANNEL_IDLE");
+    }
+
+    SUBCASE("GRPC_CHANNEL_READY_string") {
+        ss << grpc_connectivity_state::GRPC_CHANNEL_READY;
+        CHECK(ss.str() == "GRPC_CHANNEL_READY");
+    }
+
+    SUBCASE("GRPC_CHANNEL_SHUTDOWN_string") {
+        ss << grpc_connectivity_state::GRPC_CHANNEL_SHUTDOWN;
+        CHECK(ss.str() == "GRPC_CHANNEL_SHUTDOWN");
+    }
+
+    SUBCASE("GRPC_CHANNEL_TRANSIENT_FAILURE_string") {
+        ss << grpc_connectivity_state::GRPC_CHANNEL_TRANSIENT_FAILURE;
+        CHECK(ss.str() == "GRPC_CHANNEL_TRANSIENT_FAILURE");
+    }
+
+    SUBCASE("invalid_grpc_connectivity_state_string") {
+        // Really have to do some shadily incorrect coding to cause this
+        ss << static_cast<grpc_connectivity_state>(-1);
+        CHECK(ss.str() == "Invalid enum value");
+    }
+}
+#endif
+
 namespace gvs {
 namespace net {
 
@@ -83,6 +124,42 @@ inline GrpcClientState to_typed_state(grpc_connectivity_state state) {
 
     throw std::invalid_argument("Invalid grpc_connectivity_state");
 }
+
+#ifdef DOCTEST_LIBRARY_INCLUDED
+TEST_CASE("[gvs] testing the grpc_connectivity_state string functions") {
+    std::stringstream ss;
+
+    SUBCASE("GRPC_CHANNEL_CONNECTING_to_typed_state") {
+        CHECK(gvs::net::to_typed_state(grpc_connectivity_state::GRPC_CHANNEL_CONNECTING)
+              == gvs::net::GrpcClientState::attempting_to_connect);
+    }
+
+    SUBCASE("GRPC_CHANNEL_IDLE_to_typed_state") {
+        CHECK(gvs::net::to_typed_state(grpc_connectivity_state::GRPC_CHANNEL_IDLE)
+              == gvs::net::GrpcClientState::not_connected);
+    }
+
+    SUBCASE("GRPC_CHANNEL_READY_to_typed_state") {
+        CHECK(gvs::net::to_typed_state(grpc_connectivity_state::GRPC_CHANNEL_READY)
+              == gvs::net::GrpcClientState::connected);
+    }
+
+    SUBCASE("GRPC_CHANNEL_SHUTDOWN_to_typed_state") {
+        CHECK(gvs::net::to_typed_state(grpc_connectivity_state::GRPC_CHANNEL_SHUTDOWN)
+              == gvs::net::GrpcClientState::not_connected);
+    }
+
+    SUBCASE("GRPC_CHANNEL_TRANSIENT_FAILURE_to_typed_state") {
+        CHECK(gvs::net::to_typed_state(grpc_connectivity_state::GRPC_CHANNEL_TRANSIENT_FAILURE)
+              == gvs::net::GrpcClientState::attempting_to_connect);
+    }
+
+    SUBCASE("invalid_grpc_connectivity_state_throws") {
+        // Really have to do some shadily incorrect coding to cause this
+        CHECK_THROWS_AS(gvs::net::to_typed_state(static_cast<grpc_connectivity_state>(-1)), std::invalid_argument);
+    }
+}
+#endif
 
 template <typename Service>
 class GrpcClient {

@@ -58,7 +58,7 @@ function(add_test_executable target_to_test test_directory)
     target_link_libraries(${target_to_test}_tests
             PUBLIC ${target_to_test}
             PUBLIC test_util
-            PUBLIC gmock_main
+            PUBLIC gvs_testing_thirdparty
             )
     set_target_properties(${target_to_test}_tests PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 

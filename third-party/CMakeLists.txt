@@ -197,24 +197,17 @@ endif ()
 ### GoogleTest ###
 ##################
 if (${GVS_BUILD_TESTS})
-    FetchContent_Declare(googletest_dl
-            GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG release-1.8.1
+    FetchContent_Declare(doctest_dl
+            GIT_REPOSITORY https://github.com/onqtam/doctest.git
+            GIT_TAG 2.2.0
             )
 
-    FetchContent_GetProperties(googletest_dl)
-    if (NOT googletest_dl_POPULATED)
-        FetchContent_Populate(googletest_dl)
+    FetchContent_GetProperties(doctest_dl)
+    if (NOT doctest_dl_POPULATED)
+        FetchContent_Populate(doctest_dl)
 
-        # Prevent overriding the parent project's compiler/linker settings on Windows
-        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-        # compile googletest with current project
-        add_subdirectory(${googletest_dl_SOURCE_DIR} ${googletest_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
-        target_compile_options(gtest PRIVATE -w)
-        target_compile_options(gtest_main PRIVATE -w)
-        target_compile_options(gmock PRIVATE -w)
-        target_compile_options(gmock_main PRIVATE -w)
+        add_library(gvs_testing_thirdparty INTERFACE)
+        target_include_directories(gvs_testing_thirdparty INTERFACE ${doctest_dl_SOURCE_DIR})
     endif ()
 endif ()
 

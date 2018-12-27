@@ -97,13 +97,6 @@ add_subdirectory(protos)
 ##################
 add_subdirectory(src)
 
-###############
-### Testing ###
-###############
-if (${GVS_BUILD_TESTS})
-    add_subdirectory(testing)
-endif ()
-
 ####################
 ### Clang-Format ###
 ####################

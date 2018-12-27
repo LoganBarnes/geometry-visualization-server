@@ -29,7 +29,7 @@ template class gvs::util::AtomicData<char>;
 
 namespace {
 
-TEST(AtomicDataTests, atomic_data_wait_timeout) {
+test(AtomicDataTests, atomic_data_wait_timeout) {
 
     struct SharedData {
         bool stop_waiting = false;
@@ -64,7 +64,7 @@ TEST(AtomicDataTests, atomic_data_wait_timeout) {
     ASSERT_TRUE(shared_data.unsafe_data().update_happened);
 }
 
-TEST(AtomicDataTests, atomic_data_notify_all) {
+test(AtomicDataTests, atomic_data_notify_all) {
 
     struct SharedData {
         bool write_away = false;
@@ -98,9 +98,9 @@ template <typename T>
 class AtomicDataTests : public ::testing::Test {};
 
 typedef ::testing::Types<short, int, unsigned, float, double> Types;
-TYPED_TEST_CASE(AtomicDataTests, Types, );
+typed_test_case(AtomicDataTests, Types);
 
-TYPED_TEST(AtomicDataTests, interleaved_atomic_data) {
+typed_test(AtomicDataTests, interleaved_atomic_data) {
 
     struct SharedData {
         TypeParam current_number = 0;

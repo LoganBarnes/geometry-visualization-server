@@ -27,7 +27,7 @@
 
 namespace {
 
-TEST(ClientStateTests, GRPC_CHANNEL_CONNECTING_string) {
+test(ClientStateTests, GRPC_CHANNEL_CONNECTING_string) {
     std::stringstream ss;
     ss << grpc_connectivity_state::GRPC_CHANNEL_CONNECTING;
     EXPECT_EQ(ss.str(), "GRPC_CHANNEL_CONNECTING");

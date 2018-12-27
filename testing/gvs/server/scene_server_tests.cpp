@@ -27,7 +27,7 @@ namespace {
 
 class EmptyServerTest : public ::testing::Test {};
 
-TEST_F(EmptyServerTest, empty_test) {
+test_f(EmptyServerTest, empty_test) {
     // TODO
 }
 

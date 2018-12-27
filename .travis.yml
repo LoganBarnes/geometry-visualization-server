@@ -1,0 +1,19 @@
+language: c++
+
+branches:
+  only:
+    - master
+
+dist: trusty
+
+services:
+  - docker
+
+before_install:
+  - docker pull grpc/cxx
+
+script:
+  - docker run -v ${PWD}:/gvs
+  - cd /gvs
+  -
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make AirWaves_coverage -j; fi;

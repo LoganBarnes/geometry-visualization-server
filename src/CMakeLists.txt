@@ -209,7 +209,7 @@ if (${GVS_BUILD_TESTS})
 
     if (LCOV_EXE AND CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "Debug")
         include(CodeCoverage)
-        setup_target_for_coverage(gvs_coverage all_proto_scene_tests coverage)
+        setup_target_for_coverage(gvs_coverage all_gvs_tests coverage)
         set(PROFILE_FLAGS --coverage -fprofile-arcs -ftest-coverage -fno-inline)
 
         target_compile_options(gvs_net PUBLIC ${PROFILE_FLAGS})
@@ -222,4 +222,27 @@ if (${GVS_BUILD_TESTS})
         target_link_libraries(vis_client PUBLIC gcov)
         target_link_libraries(log_client PUBLIC gcov)
     endif ()
+
+    add_executable(gvs_net_tests testing/gvs_net_tests.cpp)
+    target_link_libraries(gvs_net_tests PRIVATE gvs_net gvs_testing_thirdparty)
+
+    add_executable(all_gvs_tests testing/all_gvs_tests.cpp)
+    target_link_libraries(all_gvs_tests PRIVATE
+            gvs_net
+            gvs_server
+            vis_client
+            log_client
+            gvs_testing_thirdparty
+            )
+
+    set_target_properties(
+            gvs_net_tests
+#            gvs_server_tests
+#            vis_client_tests
+#            log_client_tests
+            all_gvs_tests
+            PROPERTIES
+            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/tests"
+    )
 endif ()

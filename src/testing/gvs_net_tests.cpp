@@ -20,45 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/util/callback_handler.hpp"
-#include <gmock/gmock.h>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
 
-namespace {
-
-test(CallbackHandlerTests, simple_callback) {
-    auto add = [](int a, int b) { return a + b; };
-    std::unique_ptr<gvs::util::CallbackInterface<int>> callback = gvs::util::make_callback<int>(add, 5, 7);
-
-    ASSERT_EQ(callback->invoke(), 12);
-}
-
-test(CallbackHandlerTests, callback_with_additional_arguments) {
-    auto add = [](int a, int b, int c) { return a + b + c; };
-    std::unique_ptr<gvs::util::CallbackInterface<int, int>> callback = gvs::util::make_callback<int, int>(add, 5, 7);
-
-    ASSERT_EQ(callback->invoke(-12), 0);
-}
-
-class Adder {
-public:
-    int add2(int a, int b) { return a + b; }
-    int add3(int a, int b, int c) { return a + b + c; }
-};
-
-test(CallbackHandlerTests, member_function_callback) {
-    Adder adder;
-    std::unique_ptr<gvs::util::CallbackInterface<int>> callback
-        = gvs::util::make_callback<int>(&Adder::add2, &adder, 5, 7);
-
-    ASSERT_EQ(callback->invoke(), 12);
-}
-
-test(CallbackHandlerTests, member_function_callback_with_additional_arguments) {
-    Adder adder;
-    std::unique_ptr<gvs::util::CallbackInterface<int, int>> callback
-        = gvs::util::make_callback<int, int>(&Adder::add3, &adder, 5, 7);
-
-    ASSERT_EQ(callback->invoke(-12), 0);
-}
-
-} // namespace
+#include "gvs_net_tests.hpp"

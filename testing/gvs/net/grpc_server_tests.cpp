@@ -29,7 +29,7 @@
 
 namespace {
 
-TEST(GrpcServerTests, run_testing_server_and_check_echo_rpc_call) {
+test(GrpcServerTests, run_testing_server_and_check_echo_rpc_call) {
     std::string server_address = "0.0.0.0:50050";
     gvs::test::TestServer server(server_address);
 
@@ -50,7 +50,7 @@ TEST(GrpcServerTests, run_testing_server_and_check_echo_rpc_call) {
     ASSERT_EQ(response.msg(), test_msg);
 }
 
-TEST(GrpcServerTests, run_inprocess_testing_server_and_check_echo_rpc_call) {
+test(GrpcServerTests, run_inprocess_testing_server_and_check_echo_rpc_call) {
     gvs::test::TestServer server;
 
     auto stub = gvs::test::proto::Test::NewStub(server.inprocess_channel());

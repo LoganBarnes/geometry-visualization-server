@@ -56,7 +56,7 @@ protected:
     gvs::util::BlockingQueue<gvs::net::GrpcClientState> state_queue;
 };
 
-TEST_F(GrpcClientTests, no_server) {
+test_f(GrpcClientTests, no_server) {
     std::string address = "0.0.0.0:50050";
 
     {
@@ -72,7 +72,7 @@ TEST_F(GrpcClientTests, no_server) {
     EXPECT_TRUE(state_queue.empty());
 }
 
-TEST_F(GrpcClientTests, no_server_stop_connection_attempts) {
+test_f(GrpcClientTests, no_server_stop_connection_attempts) {
     std::string address = "0.0.0.0:50051";
 
     {
@@ -91,7 +91,7 @@ TEST_F(GrpcClientTests, no_server_stop_connection_attempts) {
     EXPECT_TRUE(state_queue.empty());
 }
 
-TEST_F(GrpcClientTests, delayed_server) {
+test_f(GrpcClientTests, delayed_server) {
     std::string server_address = "0.0.0.0:50052";
 
     {
@@ -115,7 +115,7 @@ TEST_F(GrpcClientTests, delayed_server) {
     EXPECT_TRUE(state_queue.empty());
 }
 
-TEST_F(GrpcClientTests, external_server) {
+test_f(GrpcClientTests, external_server) {
     std::string server_address = "0.0.0.0:50053";
 
     gvs::test::TestServer server(server_address);
@@ -133,7 +133,7 @@ TEST_F(GrpcClientTests, external_server) {
     EXPECT_TRUE(state_queue.empty());
 }
 
-TEST_F(GrpcClientTests, mutiple_channels) {
+test_f(GrpcClientTests, mutiple_channels) {
     std::string server_address1 = "0.0.0.0:50054";
     std::string server_address2 = "0.0.0.0:50055";
 

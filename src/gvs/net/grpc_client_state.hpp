@@ -25,6 +25,10 @@
 #include <stdexcept>
 #include <string>
 
+#ifdef DOCTEST_LIBRARY_INCLUDED
+#include <sstream>
+#endif
+
 namespace gvs {
 namespace net {
 
@@ -49,6 +53,32 @@ inline std::string to_string(const GrpcClientState& state) {
 inline ::std::ostream& operator<<(::std::ostream& os, const GrpcClientState& state) {
     return os << to_string(state);
 }
+
+#ifdef DOCTEST_LIBRARY_INCLUDED
+TEST_CASE("[gvs] testing the GrpcClientState string functions") {
+    std::stringstream ss;
+
+    SUBCASE("not_connected_string") {
+        ss << GrpcClientState::not_connected;
+        CHECK(ss.str() == "not_connected");
+    }
+
+    SUBCASE("attempting_to_connect_string") {
+        ss << GrpcClientState::attempting_to_connect;
+        CHECK(ss.str() == "attempting_to_connect");
+    }
+
+    SUBCASE("connected_string") {
+        ss << GrpcClientState::connected;
+        CHECK(ss.str() == "connected");
+    }
+
+    SUBCASE("invalid_GrpcClientState_string") {
+        // Really have to do some shadily incorrect coding to cause this
+        CHECK_THROWS_AS(ss << static_cast<GrpcClientState>(-1), std::invalid_argument);
+    }
+}
+#endif
 
 } // namespace net
 } // namespace gvs

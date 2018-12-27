@@ -60,7 +60,7 @@ private:
     std::unique_ptr<gvs::test::proto::Test::Stub> stub_;
 };
 
-TEST(MultiClientGrpcServerTests, run_inprocess_echo_rpc_call) {
+test(MultiClientGrpcServerTests, run_inprocess_echo_rpc_call) {
     std::string address = "0.0.0.0:50051";
 
     // Set up the server
@@ -91,7 +91,7 @@ TEST(MultiClientGrpcServerTests, run_inprocess_echo_rpc_call) {
     ASSERT_EQ(response.msg(), test_msg);
 }
 
-TEST(MultiClientGrpcServerTests, streaming_client_cancelled) {
+test(MultiClientGrpcServerTests, streaming_client_cancelled) {
     std::string address = "0.0.0.0:50051";
 
     using Service = gvs::test::proto::Test::AsyncService;
@@ -171,7 +171,7 @@ TEST(MultiClientGrpcServerTests, streaming_client_cancelled) {
     update_thread.join();
 }
 
-TEST(MultiClientGrpcServerTests, mutiple_threads_writing) {
+test(MultiClientGrpcServerTests, mutiple_threads_writing) {
     std::string address = "0.0.0.0:50051";
 
     using Service = gvs::test::proto::Test::AsyncService;

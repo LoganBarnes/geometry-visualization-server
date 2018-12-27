@@ -27,6 +27,6 @@ namespace {
 
 class EmptyVisClientTest : public ::testing::Test {};
 
-TEST_F(EmptyVisClientTest, empty_test) {}
+test_f(EmptyVisClientTest, empty_test) {}
 
 } // namespace

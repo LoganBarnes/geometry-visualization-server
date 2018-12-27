@@ -31,7 +31,7 @@ template class gvs::util::BlockingQueue<char>;
 
 namespace {
 
-TEST(BlockingQueueTests, empty_is_empty) {
+test(BlockingQueueTests, empty_is_empty) {
     gvs::util::BlockingQueue<char> bq;
     ASSERT_EQ(bq.size(), 0);
     ASSERT_TRUE(bq.empty());
@@ -42,7 +42,7 @@ TEST(BlockingQueueTests, empty_is_empty) {
     ASSERT_FALSE(bq.empty());
 }
 
-TEST(BlockingQueueTests, pop_all_but_most_recent) {
+test(BlockingQueueTests, pop_all_but_most_recent) {
     gvs::util::BlockingQueue<std::string> strings;
 
     std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
@@ -59,9 +59,9 @@ template <typename T>
 class BlockingQueueTests : public ::testing::Test {};
 
 typedef ::testing::Types<int, float, double> Types;
-TYPED_TEST_CASE(BlockingQueueTests, Types, );
+typed_test_case(BlockingQueueTests, Types);
 
-TYPED_TEST(BlockingQueueTests, interleaved_data) {
+typed_test(BlockingQueueTests, interleaved_data) {
 
     std::vector<TypeParam> shared_data;
 
