@@ -6,4 +6,4 @@ cmake --version
 
 # install deps
 apt update
-apt install -y xorg-dev g++-7
+apt install -y xorg-dev
