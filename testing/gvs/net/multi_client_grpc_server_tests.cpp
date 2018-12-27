@@ -25,12 +25,13 @@
 
 #include <testing/testing.grpc.pb.h>
 
-#include <grpcpp/create_channel.h>
-
 #include <gmock/gmock.h>
+#include <grpcpp/create_channel.h>
 
 #include <experimental/optional>
 #include <thread>
+
+template class gvs::net::GrpcAsyncServer<gvs::test::proto::Test::AsyncService>;
 
 namespace {
 
@@ -59,13 +60,43 @@ private:
     std::unique_ptr<gvs::test::proto::Test::Stub> stub_;
 };
 
+TEST(MultiClientGrpcServerTests, run_inprocess_echo_rpc_call) {
+    std::string address = "0.0.0.0:50051";
+
+    // Set up the server
+    using Service = gvs::test::proto::Test::AsyncService;
+    gvs::net::GrpcAsyncServer<Service> server(std::make_shared<Service>(), address);
+
+    server.register_async(&Service::Requestecho,
+                          [&](const gvs::test::proto::TestMessage& request, gvs::test::proto::TestMessage* response) {
+                              response->CopyFrom(request); // Respond with the same exact message that was received
+                              return grpc::Status::OK;
+                          });
+
+    // Set up the client using the in-process channel
+    auto stub = gvs::test::proto::Test::NewStub(server.server().InProcessChannel(grpc::ChannelArguments{}));
+
+    // Send a message and check for an identical response
+    std::string test_msg = "a1, 23kqv9 !F(VMas3982fj!#!#+(*@)(a assdaf;le 1342 asdw32nm";
+
+    gvs::test::proto::TestMessage request = {};
+    request.set_msg(test_msg);
+
+    grpc::ClientContext context;
+    gvs::test::proto::TestMessage response;
+
+    grpc::Status status = stub->echo(&context, request, &response);
+
+    ASSERT_TRUE(status.ok());
+    ASSERT_EQ(response.msg(), test_msg);
+}
+
 TEST(MultiClientGrpcServerTests, streaming_client_cancelled) {
     std::string address = "0.0.0.0:50051";
 
     using Service = gvs::test::proto::Test::AsyncService;
 
     gvs::net::GrpcAsyncServer<Service> server(std::make_shared<Service>(), address);
-
     std::thread::id thread_id1, thread_id2;
 
     server.register_async(&Service::Requestecho,

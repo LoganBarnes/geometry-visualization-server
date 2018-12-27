@@ -24,9 +24,8 @@
 
 #include <testing/testing.grpc.pb.h>
 
-#include <grpcpp/create_channel.h>
-
 #include <gmock/gmock.h>
+#include <grpcpp/create_channel.h>
 
 namespace {
 
@@ -45,8 +44,9 @@ TEST(GrpcServerTests, run_testing_server_and_check_echo_rpc_call) {
     grpc::ClientContext context;
     gvs::test::proto::TestMessage response;
 
-    stub->echo(&context, request, &response);
+    grpc::Status status = stub->echo(&context, request, &response);
 
+    ASSERT_TRUE(status.ok());
     ASSERT_EQ(response.msg(), test_msg);
 }
 
@@ -63,8 +63,9 @@ TEST(GrpcServerTests, run_inprocess_testing_server_and_check_echo_rpc_call) {
     grpc::ClientContext context;
     gvs::test::proto::TestMessage response;
 
-    stub->echo(&context, request, &response);
+    grpc::Status status = stub->echo(&context, request, &response);
 
+    ASSERT_TRUE(status.ok());
     ASSERT_EQ(response.msg(), test_msg);
 }
 

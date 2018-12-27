@@ -28,9 +28,10 @@
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
 
+#include <gmock/gmock.h>
 #include <grpcpp/create_channel.h>
 
-#include <gmock/gmock.h>
+template class gvs::net::GrpcClient<gvs::test::proto::Test>;
 
 namespace {
 
@@ -164,5 +165,33 @@ TEST_F(GrpcClientTests, mutiple_channels) {
     EXPECT_EQ(state_queue.pop_front(), gvs::net::GrpcClientState::not_connected);
     EXPECT_TRUE(state_queue.empty());
 }
+
+//TEST_F(GrpcClientTests, mutiple_channels) {
+//    std::string server_address1 = "0.0.0.0:50056";
+//
+//    gvs::test::TestServer server(server_address1);
+//
+//    gvs::util::BlockingQueue<gvs::test::proto::TestMessage> queue;
+//
+//    {
+//        gvs::net::GrpcClient<gvs::test::proto::Test> client;
+//        EXPECT_EQ(client.get_state(), gvs::net::GrpcClientState::not_connected);
+//
+//    // Connect to the stream that delivers message updates
+//    client.register_stream<gvs::test::proto::TestMessage>(
+//        [](std::unique_ptr<gvs::test::proto::Test::Stub>& stub, grpc::ClientContext* context) {
+//            gvs::test::proto::TestMessage request;
+//            return stub->endless_echo_stream(context, request);
+//        },
+//        [&queue](const gvs::test::proto::TestMessage& msg) { queue.push_back(msg); });
+//
+//        client.change_server(server_address1, &GrpcClientTests::handle_state_change, this);
+//
+//        check_connects(state_queue);
+//    }
+//    // Client is deleted.
+//    EXPECT_EQ(state_queue.pop_front(), gvs::net::GrpcClientState::not_connected);
+//    EXPECT_TRUE(state_queue.empty());
+//}
 
 } // namespace
