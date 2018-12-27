@@ -13,5 +13,5 @@ set -e # fail script if any individual commands fail
 #build_and_run cmake-build-release Release
 
 cmake -E make_directory cmake-build-debug
-cmake -E chdir $1 cmake -DCMAKE_BUILD_TYPE=Debug -DGVS_USE_DEV_FLAGS=ON -DGVS_BUILD_TESTS=ON ..
+cmake -E chdir cmake-build-debug cmake -DCMAKE_BUILD_TYPE=Debug -DGVS_USE_DEV_FLAGS=ON -DGVS_BUILD_TESTS=ON ..
 cmake -E chdir cmake-build-debug cmake --build . --target gvs_coverage --parallel
