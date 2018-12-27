@@ -22,8 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/net/detail/rpc_handler_interface.hpp"
-#include "gvs/net/detail/stream_handler.hpp"
+#include "gvs/net/detail/async_rpc_handler_interface.hpp"
+#include "gvs/net/detail/stream_rpc_handler.hpp"
 #include "gvs/net/detail/tag.hpp"
 #include "gvs/util/atomic_data.hpp"
 
@@ -40,48 +40,74 @@ namespace gvs {
 namespace net {
 namespace detail {
 
+/**
+ * @brief Handles an individual non-streaming gRPC call when a client requests this rpc
+ * @tparam Request is the Protobuf request type
+ * @tparam Response is the Protobuf response type
+ */
 template <typename Request, typename Response>
-struct AsyncConnection {
+struct NonStreamRpcConnection {
     grpc::ServerContext context;
     Request request;
     grpc::ServerAsyncResponseWriter<Response> responder;
 
-    AsyncConnection() : responder(&context) {}
+    NonStreamRpcConnection() : responder(&context) {}
 };
 
+/**
+ * @brief Handles non-streaming gRPC responses for a single rpc call
+ * @tparam Service is the gRPC service
+ * @tparam Request is the Protobuf request type
+ * @tparam Response is the Protobuf response type
+ * @tparam Callback is the implementation of this rpc call (signature: <grpc::Status(const Request&, Response*)>)
+ */
 template <typename Service, typename Request, typename Response, typename Callback>
-class AsyncHandler : public RpcHandlerInterface {
+class NonStreamRpcHandler : public AsyncRpcHandlerInterface {
 public:
-    explicit AsyncHandler(Service& service,
-                          grpc::ServerCompletionQueue& server_queue,
-                          AysncFunc<Service, Request, Response> stream_func,
-                          Callback callback);
+    explicit NonStreamRpcHandler(Service& service,
+                                 grpc::ServerCompletionQueue& server_queue,
+                                 AsyncNoStreamFunc<Service, Request, Response> stream_func,
+                                 Callback callback);
 
-    ~AsyncHandler() override;
+    ~NonStreamRpcHandler() override;
 
+    /**
+     * @see AsyncRpcHandlerInterface::activate_next()
+     */
     void activate_next() override;
 
 private:
-    Service& service_;
-    grpc::ServerCompletionQueue& server_queue_;
-    AysncFunc<Service, Request, Response> stream_func_;
-    Callback callback_;
-    grpc::CompletionQueue queue_;
+    Service& service_; ///< The gRPC service with the RPC call this class is handling
+    grpc::ServerCompletionQueue& server_queue_; ///< The queue that handles server updates
+    AsyncNoStreamFunc<Service, Request, Response> stream_func_; ///< The service function used to update the queue
+    Callback callback_; ///< The server specific implementation of this RPC call
+    grpc::CompletionQueue queue_; ///< Internal queue used to handle responses (required for async api)
 
-    std::unique_ptr<AsyncConnection<Request, Response>> connection_;
+    /// All the data needed to handle the RPC call when a client make a request
+    std::unique_ptr<NonStreamRpcConnection<Request, Response>> connection_;
 };
 
 template <typename Service, typename Request, typename Response, typename Callback>
-AsyncHandler<Service, Request, Response, Callback>::AsyncHandler(Service& service,
-                                                                 grpc::ServerCompletionQueue& server_queue,
-                                                                 AysncFunc<Service, Request, Response> stream_func,
-                                                                 Callback callback)
+NonStreamRpcHandler<Service, Request, Response, Callback>::NonStreamRpcHandler(
+    Service& service,
+    grpc::ServerCompletionQueue& server_queue,
+    AsyncNoStreamFunc<Service, Request, Response> stream_func,
+    Callback callback)
     : service_(service), server_queue_(server_queue), stream_func_(stream_func), callback_(std::move(callback)) {
     activate_next();
 }
 
+#ifdef DOCTEST_LIBRARY_INCLUDED
+TEST_CASE("[gvs-net] tests NonStreamRpcConnection") {
+    using namespace gvs::test::proto;
+    //    std::unique_ptr<AsyncRpcHandlerInterface> rpc_handle;
+    // TODO: Make/use a test server
+    //    rpc_handle = std::make_unique<NonStreamRpcHandler<Test::Service, TestMessage, TestMessage>>()
+}
+#endif
+
 template <typename Service, typename Request, typename Response, typename Callback>
-AsyncHandler<Service, Request, Response, Callback>::~AsyncHandler() {
+NonStreamRpcHandler<Service, Request, Response, Callback>::~NonStreamRpcHandler() {
     queue_.Shutdown();
 
     void* ignored_tag;
@@ -92,7 +118,7 @@ AsyncHandler<Service, Request, Response, Callback>::~AsyncHandler() {
 }
 
 template <typename Service, typename Request, typename Response, typename Callback>
-void AsyncHandler<Service, Request, Response, Callback>::activate_next() {
+void NonStreamRpcHandler<Service, Request, Response, Callback>::activate_next() {
     if (connection_) {
         Response response;
         grpc::Status status = callback_(connection_->request, &response);
@@ -110,7 +136,7 @@ void AsyncHandler<Service, Request, Response, Callback>::activate_next() {
     }
 
     // Add a new connection that is waiting to be activated
-    connection_ = std::make_unique<AsyncConnection<Request, Response>>();
+    connection_ = std::make_unique<NonStreamRpcConnection<Request, Response>>();
 
     (service_.*stream_func_)(&connection_->context,
                              &connection_->request,

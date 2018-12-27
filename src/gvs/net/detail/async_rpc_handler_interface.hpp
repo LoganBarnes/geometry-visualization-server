@@ -32,19 +32,22 @@
 namespace gvs {
 namespace net {
 
-template <typename Data>
-using UpdateQueue = util::BlockingQueue<std::experimental::optional<Data>>;
-
+/**
+ * @brief The function signature for a service's non-streaming calls
+ */
 template <typename Service, typename Request, typename Response>
-using AysncFunc = void (Service::*)(grpc::ServerContext*,
-                                    Request*,
-                                    grpc::ServerAsyncResponseWriter<Response>*,
-                                    grpc::CompletionQueue*,
-                                    grpc::ServerCompletionQueue*,
-                                    void*);
+using AsyncNoStreamFunc = void (Service::*)(grpc::ServerContext*,
+                                            Request*,
+                                            grpc::ServerAsyncResponseWriter<Response>*,
+                                            grpc::CompletionQueue*,
+                                            grpc::ServerCompletionQueue*,
+                                            void*);
 
+/**
+ * @brief The function signature for a service's server-side-streaming calls
+ */
 template <typename Service, typename Request, typename Response>
-using AysncServerStreamFunc = void (Service::*)(grpc::ServerContext* context,
+using AsyncServerStreamFunc = void (Service::*)(grpc::ServerContext* context,
                                                 Request*,
                                                 grpc::ServerAsyncWriter<Response>*,
                                                 grpc::CompletionQueue*,
@@ -53,9 +56,18 @@ using AysncServerStreamFunc = void (Service::*)(grpc::ServerContext* context,
 
 namespace detail {
 
-class RpcHandlerInterface {
+class AsyncRpcHandlerInterface {
 public:
-    virtual ~RpcHandlerInterface() = default;
+    virtual ~AsyncRpcHandlerInterface() = default;
+
+    /**
+     * @brief Tells the handler to call the appropriate service function from above
+     *
+     * (AysncNoStreamFunc or AysncServerStreamFunc)
+     *
+     * This will update the server's queue so client requests can be handled when
+     * they are received.
+     */
     virtual void activate_next() = 0;
 };
 

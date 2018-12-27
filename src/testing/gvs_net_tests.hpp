@@ -22,9 +22,9 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/net/detail/async_handler.hpp"
-#include "gvs/net/detail/rpc_handler_interface.hpp"
-#include "gvs/net/detail/stream_handler.hpp"
+#include "gvs/net/detail/async_rpc_handler_interface.hpp"
+#include "gvs/net/detail/non_stream_rpc_handler.hpp"
+#include "gvs/net/detail/stream_rpc_handler.hpp"
 #include "gvs/net/detail/tag.hpp"
 #include "gvs/net/grpc_async_server.hpp"
 #include "gvs/net/grpc_client.hpp"

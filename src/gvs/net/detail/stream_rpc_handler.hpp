@@ -22,7 +22,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/net/detail/rpc_handler_interface.hpp"
+#include "gvs/net/detail/async_rpc_handler_interface.hpp"
 #include "gvs/net/detail/tag.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/container_util.hpp"
@@ -58,22 +58,25 @@ struct StreamConnection {
 };
 
 template <typename Service, typename Request, typename Response, typename Callback>
-class StreamHandler : public RpcHandlerInterface, public StreamInterface<Response> {
+class StreamRpcHandler : public AsyncRpcHandlerInterface, public StreamInterface<Response> {
 public:
-    explicit StreamHandler(Service& service,
-                           grpc::ServerCompletionQueue& server_queue,
-                           AysncServerStreamFunc<Service, Request, Response> stream_func,
-                           Callback callback);
+    explicit StreamRpcHandler(Service& service,
+                              grpc::ServerCompletionQueue& server_queue,
+                              AsyncServerStreamFunc<Service, Request, Response> stream_func,
+                              Callback callback);
 
-    ~StreamHandler() override;
+    ~StreamRpcHandler() override;
 
+    /**
+     * @see AsyncRpcHandlerInterface::activate_next()
+     */
     void activate_next() override;
     bool write(const Response& update) override;
 
 private:
     Service& service_;
     grpc::ServerCompletionQueue& server_queue_;
-    AysncServerStreamFunc<Service, Request, Response> stream_func_;
+    AsyncServerStreamFunc<Service, Request, Response> stream_func_;
     Callback callback_;
 
     struct Connections {
@@ -93,26 +96,26 @@ private:
 };
 
 template <typename Service, typename Request, typename Response, typename Callback>
-StreamHandler<Service, Request, Response, Callback>::StreamHandler(
+StreamRpcHandler<Service, Request, Response, Callback>::StreamRpcHandler(
     Service& service,
     grpc::ServerCompletionQueue& server_queue,
-    AysncServerStreamFunc<Service, Request, Response> stream_func,
+    AsyncServerStreamFunc<Service, Request, Response> stream_func,
     Callback callback)
     : service_(service), server_queue_(server_queue), stream_func_(stream_func), callback_(std::move(callback)) {
 
-    sync_thread_ = std::thread(&StreamHandler<Service, Request, Response, Callback>::run_synchronization, this);
+    sync_thread_ = std::thread(&StreamRpcHandler<Service, Request, Response, Callback>::run_synchronization, this);
 
     activate_next();
 }
 
 template <typename Service, typename Request, typename Response, typename Callback>
-StreamHandler<Service, Request, Response, Callback>::~StreamHandler() {
+StreamRpcHandler<Service, Request, Response, Callback>::~StreamRpcHandler() {
     queue_.Shutdown();
     sync_thread_.join();
 }
 
 template <typename Service, typename Request, typename Response, typename Callback>
-void StreamHandler<Service, Request, Response, Callback>::activate_next() {
+void StreamRpcHandler<Service, Request, Response, Callback>::activate_next() {
     connections_.use_safely([this](Connections& connections) {
         if (connections.next) {
             callback_(connections.next->request);
@@ -138,7 +141,7 @@ void StreamHandler<Service, Request, Response, Callback>::activate_next() {
 }
 
 template <typename Service, typename Request, typename Response, typename Callback>
-bool StreamHandler<Service, Request, Response, Callback>::write(const Response& update) {
+bool StreamRpcHandler<Service, Request, Response, Callback>::write(const Response& update) {
 
     auto previous_updates_processed = [](const Connections& connections) { return connections.processing.empty(); };
 
@@ -166,7 +169,7 @@ bool StreamHandler<Service, Request, Response, Callback>::write(const Response& 
 }
 
 template <typename Service, typename Request, typename Response, typename Callback>
-void StreamHandler<Service, Request, Response, Callback>::run_synchronization() {
+void StreamRpcHandler<Service, Request, Response, Callback>::run_synchronization() {
 
     void* recv_tag;
     bool call_ok;

@@ -55,7 +55,7 @@ inline ::std::ostream& operator<<(::std::ostream& os, const GrpcClientState& sta
 }
 
 #ifdef DOCTEST_LIBRARY_INCLUDED
-TEST_CASE("[gvs] testing the GrpcClientState string functions") {
+TEST_CASE("[gvs-net] testing the GrpcClientState string functions") {
     std::stringstream ss;
 
     SUBCASE("not_connected_string") {

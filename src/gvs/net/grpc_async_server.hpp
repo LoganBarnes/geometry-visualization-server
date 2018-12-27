@@ -22,8 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/net/detail/async_handler.hpp"
-#include "gvs/net/detail/stream_handler.hpp"
+#include "gvs/net/detail/non_stream_rpc_handler.hpp"
+#include "gvs/net/detail/stream_rpc_handler.hpp"
 
 #include <grpc++/security/server_credentials.h>
 #include <grpc++/server.h>
@@ -39,13 +39,13 @@ public:
     ~GrpcAsyncServer();
 
     template <typename BaseService, typename Request, typename Response, typename Callback>
-    void register_async(AysncFunc<BaseService, Request, Response> stream_func, Callback&& callback);
+    void register_async(AsyncNoStreamFunc<BaseService, Request, Response> no_stream_func, Callback&& callback);
 
     /**
      * @brief StreamInterface* should stop being used before GrpcAsyncServer is destroyed
      */
     template <typename BaseService, typename Request, typename Response, typename Callback>
-    StreamInterface<Response>* register_async_stream(AysncServerStreamFunc<BaseService, Request, Response> stream_func,
+    StreamInterface<Response>* register_async_stream(AsyncServerStreamFunc<BaseService, Request, Response> stream_func,
                                                      Callback&& callback);
 
     grpc::Server& server();
@@ -55,7 +55,7 @@ private:
     std::unique_ptr<grpc::ServerCompletionQueue> server_queue_;
     std::unique_ptr<grpc::Server> server_;
 
-    util::AtomicData<std::unordered_map<void*, std::unique_ptr<detail::RpcHandlerInterface>>> rpc_handlers_;
+    util::AtomicData<std::unordered_map<void*, std::unique_ptr<detail::AsyncRpcHandlerInterface>>> rpc_handlers_;
 
     std::thread run_thread_;
 };
@@ -94,15 +94,14 @@ GrpcAsyncServer<Service>::~GrpcAsyncServer() {
 
 template <typename Service>
 template <typename BaseService, typename Request, typename Response, typename Callback>
-void GrpcAsyncServer<Service>::register_async(AysncFunc<BaseService, Request, Response> stream_func,
+void GrpcAsyncServer<Service>::register_async(AsyncNoStreamFunc<BaseService, Request, Response> no_stream_func,
                                               Callback&& callback) {
     static_assert(std::is_base_of<BaseService, Service>::value, "BaseService must be a base class of Service");
-    auto handler
-        = std::make_unique<detail::AsyncHandler<BaseService, Request, Response, Callback>>(*service_,
-                                                                                           *server_queue_,
-                                                                                           stream_func,
-                                                                                           std::forward<Callback>(
-                                                                                               callback));
+    auto handler = std::make_unique<
+        detail::NonStreamRpcHandler<BaseService, Request, Response, Callback>>(*service_,
+                                                                               *server_queue_,
+                                                                               no_stream_func,
+                                                                               std::forward<Callback>(callback));
 
     void* tag = handler.get();
     rpc_handlers_.use_safely([&](auto& rpc_handlers) { rpc_handlers.emplace(tag, std::move(handler)); });
@@ -111,15 +110,15 @@ void GrpcAsyncServer<Service>::register_async(AysncFunc<BaseService, Request, Re
 template <typename Service>
 template <typename BaseService, typename Request, typename Response, typename Callback>
 StreamInterface<Response>*
-GrpcAsyncServer<Service>::register_async_stream(AysncServerStreamFunc<BaseService, Request, Response> stream_func,
+GrpcAsyncServer<Service>::register_async_stream(AsyncServerStreamFunc<BaseService, Request, Response> stream_func,
                                                 Callback&& callback) {
     static_assert(std::is_base_of<BaseService, Service>::value, "BaseService must be a base class of Service");
     auto handler
-        = std::make_unique<detail::StreamHandler<BaseService, Request, Response, Callback>>(*service_,
-                                                                                            *server_queue_,
-                                                                                            stream_func,
-                                                                                            std::forward<Callback>(
-                                                                                                callback));
+        = std::make_unique<detail::StreamRpcHandler<BaseService, Request, Response, Callback>>(*service_,
+                                                                                               *server_queue_,
+                                                                                               stream_func,
+                                                                                               std::forward<Callback>(
+                                                                                                   callback));
 
     auto* tag = handler.get();
     rpc_handlers_.use_safely([&](auto& rpc_handlers) { rpc_handlers.emplace(tag, std::move(handler)); });
