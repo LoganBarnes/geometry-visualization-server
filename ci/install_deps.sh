@@ -6,4 +6,4 @@ cmake --version
 
 # install deps
 apt update
-apt install -y xorg-dev mesa-utils libglu1-mesa-dev
+apt install -y xorg-dev libgl1-mesa-dev uuid-dev #libxrandr-dev libxinerama-dev libxcursor-dev
