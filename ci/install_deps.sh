@@ -5,5 +5,5 @@ export PATH=/deps/cmake/bin:$PATH
 cmake --version
 
 # install deps
-apt upgrade
+apt update
 apt install -y xorg-dev g++-7
