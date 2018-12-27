@@ -5,5 +5,7 @@ export PATH=/deps/cmake/bin:$PATH
 cmake --version
 
 # install deps
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 apt update
-apt install -y xorg-dev libgl1-mesa-dev uuid-dev lcov #libxrandr-dev libxinerama-dev libxcursor-dev
+apt install -y gcc-7 g++-7 xorg-dev libgl1-mesa-dev uuid-dev lcov
+gcc-7 --version
