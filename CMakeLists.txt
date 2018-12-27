@@ -21,7 +21,7 @@
 # SOFTWARE.
 ##########################################################################################
 cmake_minimum_required(VERSION 3.12)
-project(GeometryVisualizationServer LANGUAGES CXX CUDA)
+project(GeometryVisualizationServer LANGUAGES CXX)
 
 option(GVS_BUILD_TESTS "Build unit tests" OFF)
 option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
