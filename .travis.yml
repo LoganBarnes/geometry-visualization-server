@@ -4,7 +4,7 @@ branches:
   only:
     - master
 
-dist: trusty
+dist: xenial
 
 services:
   - docker
