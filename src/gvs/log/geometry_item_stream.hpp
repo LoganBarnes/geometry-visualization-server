@@ -52,12 +52,21 @@ class GeometryItemStream {
 public:
     explicit GeometryItemStream(std::string id, proto::Scene::Stub* stub);
 
-    void send(SendType type);
+    void send_current_data(SendType type);
 
     template <typename Functor>
     GeometryItemStream& operator<<(Functor&& functor);
 
     GeometryItemStream& operator<<(GeometryItemStream& (*send_func)(GeometryItemStream&));
+
+    template <typename... Functors>
+    GeometryItemStream& send(Functors&&... functors);
+
+    template <typename... Functors>
+    GeometryItemStream& replace(Functors&&... functors);
+
+    template <typename... Functors>
+    GeometryItemStream& append(Functors&&... functors);
 
     const std::string& id() const;
     bool success() const;
@@ -77,6 +86,33 @@ GeometryItemStream& GeometryItemStream::operator<<(Functor&& functor) {
     if (not error_name.empty()) {
         throw std::invalid_argument(error_name + " is already set");
     }
+    return *this;
+}
+
+template <typename... Functors>
+GeometryItemStream& GeometryItemStream::send(Functors&&... functors) {
+    int dummy[] = {(this->operator<<(std::forward<Functors>(functors)), 0)...};
+    (void)dummy;
+
+    this->send_current_data(SendType::safe);
+    return *this;
+}
+
+template <typename... Functors>
+GeometryItemStream& GeometryItemStream::replace(Functors&&... functors) {
+    int dummy[] = {(this->operator<<(std::forward<Functors>(functors)), 0)...};
+    (void)dummy;
+
+    this->send_current_data(SendType::replace);
+    return *this;
+}
+
+template <typename... Functors>
+GeometryItemStream& GeometryItemStream::append(Functors&&... functors) {
+    int dummy[] = {(this->operator<<(std::forward<Functors>(functors)), 0)...};
+    (void)dummy;
+
+    this->send_current_data(SendType::append);
     return *this;
 }
 

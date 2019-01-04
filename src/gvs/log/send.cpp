@@ -33,17 +33,17 @@ log::MessageStream& send(log::MessageStream& stream) {
 }
 
 log::GeometryItemStream& send(log::GeometryItemStream& stream) {
-    stream.send(log::SendType::safe);
+    stream.send_current_data(log::SendType::safe);
     return stream;
 }
 
 log::GeometryItemStream& replace(log::GeometryItemStream& stream) {
-    stream.send(log::SendType::replace);
+    stream.send_current_data(log::SendType::replace);
     return stream;
 }
 
 log::GeometryItemStream& append(log::GeometryItemStream& stream) {
-    stream.send(log::SendType::append);
+    stream.send_current_data(log::SendType::append);
     return stream;
 }
 

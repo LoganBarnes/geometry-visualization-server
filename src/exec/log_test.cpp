@@ -23,6 +23,7 @@
 #include "gvs/log/geometry_logger.hpp"
 
 #include <cmath>
+#include <random>
 
 int main(int argc, char* argv[]) {
     std::string server_address;
@@ -108,4 +109,29 @@ int main(int argc, char* argv[]) {
     blah_stream << gvs::replace;
     CHECK(blah_stream);
 #endif
+
+    std::vector<float> sphere;
+
+    {
+        float u, theta, coeff;
+        std::mt19937 gen{std::random_device{}()};
+        std::uniform_real_distribution<float> u_dist(-1.f, 1.f);
+        std::uniform_real_distribution<float> theta_dist(0.f, 2.f * M_PIf32);
+
+        for (int i = 0; i < 500; ++i) {
+            u = u_dist(gen);
+            theta = theta_dist(gen);
+
+            coeff = std::sqrt(1.f - u * u);
+
+            sphere.emplace_back(coeff * std::cos(theta));
+            sphere.emplace_back(coeff * std::sin(theta));
+            sphere.emplace_back(u);
+        }
+    }
+
+    CHECK(scene.item_stream("sphere").send(gvs::positions_3d(sphere),
+                                           gvs::normals_3d(sphere),
+                                           gvs::transformation({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 2, 2, 1}),
+                                           gvs::display_mode(gvs::proto::DisplayMode::NORMALS)));
 }

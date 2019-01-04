@@ -29,7 +29,7 @@ GeometryItemStream::GeometryItemStream(std::string id, proto::Scene::Stub* stub)
     info_.mutable_id()->set_value(id_);
 }
 
-void GeometryItemStream::send(SendType type) {
+void GeometryItemStream::send_current_data(SendType type) {
     if (stub_) {
         proto::SceneUpdateRequest update;
 
