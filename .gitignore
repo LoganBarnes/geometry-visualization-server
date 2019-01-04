@@ -1,2 +1,8 @@
+# build directories
 *build*
+
+# auto generated imgui config
 imgui.ini
+
+# virtual environment for documentation
+/venv/
