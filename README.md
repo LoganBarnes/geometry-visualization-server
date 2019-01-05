@@ -31,7 +31,7 @@ sudo apt install xorg-dev libgl1-mesa-dev uuid-dev
 [codecov-badge]: https://codecov.io/gh/LoganBarnes/geometry-visualization-server/branch/master/graph/badge.svg
 [codecov-link]: https://codecov.io/gh/LoganBarnes/geometry-visualization-server
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
-[license-link]: https://github.com/LoganBarnes/geometry-visualization-server/LICENSE
+[license-link]: https://github.com/LoganBarnes/geometry-visualization-server/blob/master/LICENSE
 [docs-badge]: https://codedocs.xyz/LoganBarnes/geometry-visualization-server.svg
 [docs-link]: https://codedocs.xyz/LoganBarnes/geometry-visualization-server
 
