@@ -2,10 +2,12 @@ Geometry Visualization Server
 =============================
 [![Travis CI][travis-badge]][travis-link]
 [![Codecov][codecov-badge]][codecov-link]
-[![MIT License][license-badge]](LICENSE.md)
+[![MIT License][license-badge]][license-link]
+[![Docs][docs-badge]][docs-link]
 
-An application for visually debugging geometric applications. 
-Built on a [Protobuf][protobuf-link]/[gRPC][grpc-link] service and a [Magnum][magnum-link] rendering backend.
+A tool for visually debugging geometric applications. Built on a 
+[Protobuf][protobuf-link]/[gRPC][grpc-link] service and a 
+[Magnum][magnum-link] rendering backend.
 
 Building
 --------
@@ -29,6 +31,9 @@ sudo apt install xorg-dev libgl1-mesa-dev uuid-dev
 [codecov-badge]: https://codecov.io/gh/LoganBarnes/geometry-visualization-server/branch/master/graph/badge.svg
 [codecov-link]: https://codecov.io/gh/LoganBarnes/geometry-visualization-server
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
+[license-link]: https://github.com/LoganBarnes/geometry-visualization-server/LICENSE
+[docs-badge]: https://codedocs.xyz/LoganBarnes/geometry-visualization-server.svg
+[docs-link]: https://codedocs.xyz/LoganBarnes/geometry-visualization-server
 
 [protobuf-link]: https://developers.google.com/protocol-buffers/
 [grpc-link]: https://grpc.io/
