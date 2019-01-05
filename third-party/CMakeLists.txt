@@ -193,9 +193,9 @@ if (CMAKE_CUDA_COMPILER)
     endif ()
 endif ()
 
-##################
-### GoogleTest ###
-##################
+###############
+### DocTest ###
+###############
 if (${GVS_BUILD_TESTS})
     FetchContent_Declare(doctest_dl
             GIT_REPOSITORY https://github.com/onqtam/doctest.git

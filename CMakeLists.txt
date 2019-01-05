@@ -122,7 +122,6 @@ endif ()
 #####################
 ### Documentation ###
 #####################
-
 if (GVS_BUILD_DOCS)
     # check if Doxygen is installed
     find_package(Doxygen)
