@@ -42,7 +42,7 @@ namespace log {
         std::cerr << "Error (stream " << stream.id() << "): " << stream.error_message() << std::endl;                  \
     }
 
-enum class SendType {
+enum class SendType : uint8_t {
     safe,
     replace,
     append,

@@ -61,9 +61,8 @@ public:
     virtual ~AsyncRpcHandlerInterface() = default;
 
     /**
-     * @brief Tells the handler to call the appropriate service function from above
-     *
-     * (AysncNoStreamFunc or AysncServerStreamFunc)
+     * @brief Tells the handler to call the appropriate service
+     *     function (AysncNoStreamFunc or AysncServerStreamFunc)
      *
      * This will update the server's queue so client requests can be handled when
      * they are received.

@@ -819,6 +819,7 @@ FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
                          *.cpp \
+                         *.cu \
                          *.c++ \
                          *.java \
                          *.ii \
@@ -1079,6 +1080,7 @@ VERBATIM_HEADERS       = YES
 # generated with the -Duse-libclang=ON option for CMake.
 # The default value is: NO.
 
+# TODO: set to yes after includes are fixed
 CLANG_ASSISTED_PARSING = NO
 
 # If clang assisted parsing is enabled you can provide the compiler with command
@@ -2081,7 +2083,8 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           =
+# TODO: get all includes from cmake
+INCLUDE_PATH           = @CMAKE_CURRENT_BINARY_DIR@/protos
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the
