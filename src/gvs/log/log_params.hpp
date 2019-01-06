@@ -98,7 +98,7 @@ inline auto display_mode(proto::DisplayMode data) {
     };
 }
 
-// TODO: create a better input type that handles pointers, vectors, matrices, iterators, etc.
+/// \TODO: create a better input type that handles pointers, vectors, matrices, iterators, etc.
 inline auto transformation(std::array<float, 16> data) {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_transformation()) {
@@ -110,7 +110,7 @@ inline auto transformation(std::array<float, 16> data) {
     };
 }
 
-// TODO: create a better input type that handles pointers, vectors, iterators, etc.
+/// \TODO: create a better input type that handles pointers, vectors, iterators, etc.
 inline auto global_color(std::array<float, 3> data) {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_global_color()) {
