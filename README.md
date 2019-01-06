@@ -9,6 +9,25 @@ A tool for visually debugging geometric applications. Built on a
 [Protobuf][protobuf-link]/[gRPC][grpc-link] service and a 
 [Magnum][magnum-link] rendering backend.
 
+The General Idea
+----------------
+
+Start the visualization server:
+
+![start-the-server](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/start-the-server.gif)
+
+In your code, create a scene that is connected to the server:
+
+![connect-to-server](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/connect-to-server.gif)
+
+Create a geometry stream and send some data to the server:
+
+![send-geometry](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/send-geometry.gif)
+
+Run your code and watch the geometry magically appear!
+
+![view-geometry](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/view-geometry.gif)
+
 Building
 --------
 
