@@ -25,6 +25,7 @@ syntax = "proto3";
 package gvs.proto;
 
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
 
 message Message {
     string identifier = 1;
@@ -62,19 +63,30 @@ message GeometryFormatValue {
     GeometryFormat value = 1;
 }
 
-enum DisplayMode {
-    POSITION = 0;
+enum Coloring {
+    POSITIONS = 0;
     NORMALS = 1;
-    TEX_COORDS = 2;
+    TEXTURE_COORDINATES = 2;
     VERTEX_COLORS = 3;
-    GLOBAL_COLOR = 4;
-    SIMPLE_SHADING = 5;
-    ADVANCED_SHADING = 6;
-    WHITE = 7;
+    UNIFORM_COLOR = 4;
+    TEXTURE = 5;
+    WHITE = 6;
 }
 
-message DisplayModeValue {
-    DisplayMode value = 1;
+message ColoringValue {
+    Coloring value = 1;
+}
+
+message LambertianShading {
+    Vec3 light_direction = 1;
+    Vec3 light_color = 3;
+}
+
+message Shading {
+    oneof value {
+        google.protobuf.Empty uniform_color = 1;
+        LambertianShading lambertian = 2;
+    }
 }
 
 message FloatList {
@@ -97,10 +109,11 @@ message DisplayInfo {
     google.protobuf.StringValue readable_id = 1;
     GeometryFormatValue geometry_format = 2;
     Mat4 transformation = 3;
-    DisplayModeValue shader_display_mode = 4;
-    Vec3 global_color = 5;
-    // google.protobuf.BoolValue visible = 6;
-    // google.protobuf.FloatValue opacity = 7;
+    Vec3 uniform_color = 4;
+    ColoringValue coloring = 5;
+    Shading shading = 6;
+    // google.protobuf.BoolValue visible = 7;
+    // google.protobuf.FloatValue opacity = 8;
 }
 
 message SceneItemInfo {

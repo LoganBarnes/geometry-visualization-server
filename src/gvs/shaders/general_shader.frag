@@ -29,11 +29,13 @@
 const float PI = 3.141592653589793f;
 const float INF = 1.f / 0.f;
 
-const int DISPLAY_MODE_POSITIONS = 0;
-const int DISPLAY_MODE_NORMALS = 1;
-const int DISPLAY_MODE_TEXTURE_COORDINATES = 2;
-const int DISPLAY_MODE_VERTEX_COLORS = 3;
-const int DISPLAY_MODE_GLOBAL_COLOR = 4;
+const int COLOR_TYPE_POSITIONS = 0;
+const int COLOR_TYPE_NORMALS = 1;
+const int COLOR_TYPE_TEXTURE_COORDINATES = 2;
+const int COLOR_TYPE_VERTEX_COLORS = 3;
+const int COLOR_TYPE_UNIFORM_COLOR = 4;
+const int COLOR_TYPE_TEXTURE = 5;
+const int COLOR_TYPE_WHITE = 6;
 
 /*
  * Inputs
@@ -46,38 +48,42 @@ layout(location = 3) in vec3 vertex_color;
 /*
  * Uniforms
  */
-uniform int display_mode = DISPLAY_MODE_GLOBAL_COLOR;
-uniform vec3 global_color = {1.f, 0.9f, 0.7f};
+uniform int coloring = COLOR_TYPE_UNIFORM_COLOR;
+uniform vec3 uniform_color = {1.f, 0.9f, 0.7f};
 uniform float opacity = 1.f;
 
 layout(location = 0) out vec4 out_color;
 
 void main()
 {
-    vec3 final_color = {1.f, 1.f, 1.f};
+    vec3 shape_color = {1.f, 1.f, 1.f};
 
-    switch(display_mode) {
-        case DISPLAY_MODE_POSITIONS:
-            final_color = view_position;
+    switch(coloring) {
+        case COLOR_TYPE_POSITIONS:
+            shape_color = view_position;
             break;
 
-        case DISPLAY_MODE_NORMALS:
-            final_color = view_normal * 0.5f + 0.5f; // between 0 and 1
+        case COLOR_TYPE_NORMALS:
+            shape_color = view_normal * 0.5f + 0.5f; // between 0 and 1
             break;
 
-        case DISPLAY_MODE_TEXTURE_COORDINATES:
-            final_color = vec3(texture_coordinates, 1.f);
+        case COLOR_TYPE_TEXTURE_COORDINATES:
+            shape_color = vec3(texture_coordinates, 1.f);
             break;
 
-        case DISPLAY_MODE_VERTEX_COLORS:
-            final_color = vertex_color;
+        case COLOR_TYPE_VERTEX_COLORS:
+            shape_color = vertex_color;
             break;
 
-        case DISPLAY_MODE_GLOBAL_COLOR:
-            final_color = global_color;
+        case COLOR_TYPE_UNIFORM_COLOR:
+            shape_color = uniform_color;
+            break;
+
+        case COLOR_TYPE_TEXTURE: // TODO
+        case COLOR_TYPE_WHITE:
             break;
 
     }
 
-    out_color = vec4(final_color, opacity);
+    out_color = vec4(shape_color, opacity);
 }

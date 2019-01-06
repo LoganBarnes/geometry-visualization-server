@@ -43,16 +43,16 @@ public:
     GeneralShader3D& set_normal_matrix(const Magnum::Matrix3& view_from_world_normals);
     GeneralShader3D& set_projection_matrix(const Magnum::Matrix4& projection_from_view);
 
-    GeneralShader3D& set_display_mode(const proto::DisplayMode& mode);
-    GeneralShader3D& set_global_color(const Magnum::Color3& color);
+    GeneralShader3D& set_coloring(const proto::Coloring& coloring);
+    GeneralShader3D& set_uniform_color(const Magnum::Color3& color);
 
 private:
     int projection_from_view_uniform_;
     int view_from_local_uniform_;
     int view_from_local_normals_uniform_;
 
-    int display_mode_uniform_;
-    int global_color_uniform_;
+    int coloring_uniform_;
+    int uniform_color_uniform_;
 };
 
 } // namespace vis

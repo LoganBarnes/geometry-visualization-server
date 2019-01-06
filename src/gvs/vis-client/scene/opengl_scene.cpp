@@ -80,7 +80,7 @@ OpenGLScene::OpenGLScene(const SceneInitializationInfo& /*initialization_info*/)
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
-    shader_.set_global_color({1.f, 0.5f, 0.1f});
+    shader_.set_uniform_color({1.f, 0.5f, 0.1f});
 
     reset({});
 }

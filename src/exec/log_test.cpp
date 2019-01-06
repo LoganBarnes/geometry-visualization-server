@@ -43,9 +43,9 @@ int main(int argc, char* argv[]) {
             << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
             << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
 #if 1
-            << gvs::display_mode(gvs::proto::DisplayMode::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3})
+            << gvs::coloring(gvs::proto::Coloring::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3})
 #else
-            << gvs::display_mode(gvs::proto::DisplayMode::GLOBAL_COLOR) << gvs::lines({0, 1, 0, 2, 0, 3})
+            << gvs::coloring(gvs::proto::Coloring::GLOBAL_COLOR) << gvs::lines({0, 1, 0, 2, 0, 3})
 #endif
             << gvs::replace;
         CHECK(stream);
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
         auto stream = scene.item_stream("Head")
             << gvs::positions_3d(circle)
             << gvs::transformation({0.75f, 0, 0, 0, 0, 0.75f, 0, 0, 0, 0, 0.75f, 0, 2, 2, 1, 1})
-            << gvs::global_color({1.f, 0.5f, 1.f}) << gvs::line_strip({}) << gvs::replace;
+            << gvs::uniform_color({1.f, 0.5f, 1.f}) << gvs::line_strip({}) << gvs::replace;
         CHECK_WITH_THROW(stream);
     }
 
@@ -73,19 +73,19 @@ int main(int argc, char* argv[]) {
         auto body_stream = scene.item_stream("Body")
             << gvs::parent("Head") << gvs::positions_3d(circle)
             << gvs::transformation({1.3f, 0, 0, 0, 0, 1.3f, 0, 0, 0, 0, 1.3f, 0, 0, -2.3f, 0, 1})
-            << gvs::global_color({1.f, 1.f, 0.5f}) << gvs::line_strip({}) << gvs::replace;
+            << gvs::uniform_color({1.f, 1.f, 0.5f}) << gvs::line_strip({}) << gvs::replace;
         CHECK_WITH_THROW(body_stream);
 
         auto feet_stream = scene.item_stream("Feet")
             << gvs::parent(body_stream.id()) << gvs::positions_3d(circle)
             << gvs::transformation({1.3f, 0, 0, 0, 0, 1.3f, 0, 0, 0, 0, 1.3f, 0, 0, -2.3f, 0, 1})
-            << gvs::global_color({0.5f, 1.f, 1.f}) << gvs::triangle_fan({}) << gvs::replace;
+            << gvs::uniform_color({0.5f, 1.f, 1.f}) << gvs::triangle_fan({}) << gvs::replace;
         CHECK_WITH_THROW(feet_stream);
     }
 
     gvs::log::GeometryItemStream triangle = scene.item_stream()
         << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f})
-        << gvs::global_color({.5f, 0.25f, 0.05f}) << gvs::triangles({}) << gvs::send;
+        << gvs::uniform_color({.5f, 0.25f, 0.05f}) << gvs::triangles({}) << gvs::send;
     CHECK(triangle);
 
     gvs::log::GeometryItemStream stream2 = scene.item_stream()
@@ -133,5 +133,5 @@ int main(int argc, char* argv[]) {
     CHECK(scene.item_stream("sphere").send(gvs::positions_3d(sphere),
                                            gvs::normals_3d(sphere),
                                            gvs::transformation({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 2, 2, 1}),
-                                           gvs::display_mode(gvs::proto::DisplayMode::NORMALS)));
+                                           gvs::coloring(gvs::proto::Coloring::NORMALS)));
 }

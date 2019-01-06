@@ -47,8 +47,8 @@ private:
 
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object_;
     Magnum::GL::Mesh& mesh_;
-    proto::DisplayMode display_mode_ = proto::DisplayMode::GLOBAL_COLOR;
-    Magnum::Color3 global_color_ = {1.f, 0.9f, 0.7f};
+    proto::Coloring coloring_ = proto::Coloring::UNIFORM_COLOR;
+    Magnum::Color3 uniform_color_ = {1.f, 0.9f, 0.7f};
     GeneralShader3D& shader_;
 };
 

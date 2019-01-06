@@ -88,12 +88,12 @@ constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
 constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
 constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
 
-inline auto display_mode(proto::DisplayMode data) {
+inline auto coloring(proto::Coloring data) {
     return [data](proto::SceneItemInfo* info) {
-        if (info->mutable_display_info()->has_shader_display_mode()) {
-            return "shader_display_mode";
+        if (info->mutable_display_info()->has_coloring()) {
+            return "coloring";
         }
-        info->mutable_display_info()->mutable_shader_display_mode()->set_value(data);
+        info->mutable_display_info()->mutable_coloring()->set_value(data);
         return "";
     };
 }
@@ -111,15 +111,15 @@ inline auto transformation(std::array<float, 16> data) {
 }
 
 /// \TODO: create a better input type that handles pointers, vectors, iterators, etc.
-inline auto global_color(std::array<float, 3> data) {
+inline auto uniform_color(std::array<float, 3> data) {
     return [data](proto::SceneItemInfo* info) {
-        if (info->mutable_display_info()->has_global_color()) {
-            return "global_color";
+        if (info->mutable_display_info()->has_uniform_color()) {
+            return "uniform_color";
         }
-        proto::Vec3* global_color = info->mutable_display_info()->mutable_global_color();
-        global_color->set_x(data[0]);
-        global_color->set_y(data[1]);
-        global_color->set_z(data[2]);
+        proto::Vec3* uniform_color = info->mutable_display_info()->mutable_uniform_color();
+        uniform_color->set_x(data[0]);
+        uniform_color->set_y(data[1]);
+        uniform_color->set_z(data[2]);
         return "";
     };
 }

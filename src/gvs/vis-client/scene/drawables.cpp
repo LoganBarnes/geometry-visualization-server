@@ -47,19 +47,19 @@ void OpaqueDrawable::update_display_info(const gvs::proto::DisplayInfo& display_
         assert(display_info.transformation().data_size() == 16);
         const float* transform_data = display_info.transformation().data().data();
 
-        Matrix4 transform;
+        Matrix4 transform{};
         std::copy(transform_data, transform_data + 16, transform.data());
         object_.setTransformation(transform);
     }
 
-    if (display_info.has_shader_display_mode()) {
-        display_mode_ = display_info.shader_display_mode().value();
+    if (display_info.has_coloring()) {
+        coloring_ = display_info.coloring().value();
     }
 
-    if (display_info.has_global_color()) {
-        global_color_ = Magnum::Color3{display_info.global_color().x(),
-                                       display_info.global_color().y(),
-                                       display_info.global_color().z()};
+    if (display_info.has_uniform_color()) {
+        uniform_color_ = Magnum::Color3{display_info.uniform_color().x(),
+                                        display_info.uniform_color().y(),
+                                        display_info.uniform_color().z()};
     }
 }
 
@@ -67,8 +67,8 @@ void OpaqueDrawable::draw(const Matrix4& transformation_matrix, SceneGraph::Came
     shader_.set_transformation_matrix(transformation_matrix)
         .set_normal_matrix(transformation_matrix.rotationScaling())
         .set_projection_matrix(camera.projectionMatrix())
-        .set_display_mode(display_mode_)
-        .set_global_color(global_color_);
+        .set_coloring(coloring_)
+        .set_uniform_color(uniform_color_);
 
     mesh_.draw(shader_);
 }
