@@ -36,11 +36,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
-endif ()
-message("-- Build type: ${CMAKE_BUILD_TYPE}")
-
 if (MSVC)
     add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS) # silly microsoft
     set(SYSTEM_FLAGS /experimental:external /external:anglebrackets /external:W0)
