@@ -134,4 +134,43 @@ inline auto parent(std::string data) {
     };
 }
 
+struct UniformColorShading {
+    explicit UniformColorShading() = default;
+};
+
+struct LambertianShading {
+    std::array<float, 3> light_direction;
+    std::array<float, 3> light_color;
+    explicit LambertianShading(std::array<float, 3> light_dir = {-1.f, -1.f, -1.f},
+                               std::array<float, 3> light_colour = {1.f, 1.f, 1.f})
+        : light_direction(light_dir), light_color(light_colour) {}
+};
+
+inline auto shading(const UniformColorShading&) {
+    return [](proto::SceneItemInfo* info) {
+        if (info->mutable_display_info()->has_shading()) {
+            return "shading";
+        }
+        info->mutable_display_info()->mutable_shading()->uniform_color();
+        return "";
+    };
+}
+
+inline auto shading(LambertianShading data) {
+    return [data](proto::SceneItemInfo* info) {
+        if (info->mutable_display_info()->has_shading()) {
+            return "shading";
+        }
+        proto::LambertianShading* shading = info->mutable_display_info()->mutable_shading()->mutable_lambertian();
+        shading->mutable_light_direction()->set_x(data.light_direction[0]);
+        shading->mutable_light_direction()->set_y(data.light_direction[1]);
+        shading->mutable_light_direction()->set_z(data.light_direction[2]);
+
+        shading->mutable_light_color()->set_x(data.light_color[0]);
+        shading->mutable_light_color()->set_y(data.light_color[1]);
+        shading->mutable_light_color()->set_z(data.light_color[2]);
+        return "";
+    };
+}
+
 } // namespace gvs

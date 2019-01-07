@@ -61,14 +61,24 @@ void OpaqueDrawable::update_display_info(const gvs::proto::DisplayInfo& display_
                                         display_info.uniform_color().y(),
                                         display_info.uniform_color().z()};
     }
+
+    if (display_info.has_shading()) {
+        shading_.CopyFrom(display_info.shading());
+    }
 }
 
 void OpaqueDrawable::draw(const Matrix4& transformation_matrix, SceneGraph::Camera3D& camera) {
-    shader_.set_transformation_matrix(transformation_matrix)
-        .set_normal_matrix(transformation_matrix.rotationScaling())
-        .set_projection_matrix(camera.projectionMatrix())
+    // unnecessarily expensive doing the inverse every time.
+    auto world_transform = camera.cameraMatrix().inverted() * transformation_matrix;
+    // TODO: figure out how to cache the variable since the camera won't changer during a render
+    //  (OR) firgure out how to get the transformation_matrix without the camera transform part
+
+    shader_.set_world_from_local_matrix(world_transform)
+        .set_world_from_local_normal_matrix(world_transform.rotationScaling())
+        .set_projection_from_local_matrix(camera.projectionMatrix() * transformation_matrix)
         .set_coloring(coloring_)
-        .set_uniform_color(uniform_color_);
+        .set_uniform_color(uniform_color_)
+        .set_shading(shading_);
 
     mesh_.draw(shader_);
 }

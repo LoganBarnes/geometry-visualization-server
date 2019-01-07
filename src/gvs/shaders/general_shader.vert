@@ -28,12 +28,12 @@ layout(location = 1) in vec3 local_normal;
 layout(location = 2) in vec2 texture_coordinates;
 layout(location = 3) in vec3 vertex_color;
 
-uniform mat4 view_from_local = mat4(1.f);
-uniform mat3 view_from_local_normals = mat3(1.f);
-uniform mat4 projection_from_view = mat4(1.f);
+uniform mat4 world_from_local = mat4(1.f);
+uniform mat3 world_from_local_normals = mat3(1.f);
+uniform mat4 projection_from_local = mat4(1.f);
 
-layout(location = 0) out vec3 view_position_out;
-layout(location = 1) out vec3 view_normal_out;
+layout(location = 0) out vec3 world_position_out;
+layout(location = 1) out vec3 world_normal_out;
 layout(location = 2) out vec2 texture_coordinates_out;
 layout(location = 3) out vec3 vertex_color_out;
 
@@ -44,10 +44,10 @@ out gl_PerVertex
 
 void main()
 {
-    view_position_out       = vec3(view_from_local * local_position);
-    view_normal_out         = view_from_local_normals * local_normal;
+    world_position_out       = vec3(world_from_local * local_position);
+    world_normal_out         = world_from_local_normals * local_normal;
     texture_coordinates_out = texture_coordinates;
     vertex_color_out        = vertex_color;
 
-    gl_Position = projection_from_view * vec4(view_position_out, 1.f);
+    gl_Position = projection_from_local * local_position;
 }

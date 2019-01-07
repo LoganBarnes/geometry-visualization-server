@@ -65,7 +65,8 @@ int main(int argc, char* argv[]) {
         auto stream = scene.item_stream("Head")
             << gvs::positions_3d(circle)
             << gvs::transformation({0.75f, 0, 0, 0, 0, 0.75f, 0, 0, 0, 0, 0.75f, 0, 2, 2, 1, 1})
-            << gvs::uniform_color({1.f, 0.5f, 1.f}) << gvs::line_strip({}) << gvs::replace;
+            << gvs::uniform_color({1.f, 0.5f, 1.f}) << gvs::line_strip({}) << gvs::shading(gvs::UniformColorShading{})
+            << gvs::replace;
         CHECK_WITH_THROW(stream);
     }
 
@@ -118,7 +119,7 @@ int main(int argc, char* argv[]) {
         std::uniform_real_distribution<float> u_dist(-1.f, 1.f);
         std::uniform_real_distribution<float> theta_dist(0.f, 2.f * M_PIf32);
 
-        for (int i = 0; i < 500; ++i) {
+        for (int i = 0; i < 5000; ++i) {
             u = u_dist(gen);
             theta = theta_dist(gen);
 
@@ -133,5 +134,6 @@ int main(int argc, char* argv[]) {
     CHECK(scene.item_stream("sphere").send(gvs::positions_3d(sphere),
                                            gvs::normals_3d(sphere),
                                            gvs::transformation({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 2, 2, 1}),
+                                           gvs::shading(gvs::LambertianShading()),
                                            gvs::coloring(gvs::proto::Coloring::NORMALS)));
 }

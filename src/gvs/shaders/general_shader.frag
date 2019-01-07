@@ -29,28 +29,37 @@
 const float PI = 3.141592653589793f;
 const float INF = 1.f / 0.f;
 
-const int COLOR_TYPE_POSITIONS = 0;
-const int COLOR_TYPE_NORMALS = 1;
-const int COLOR_TYPE_TEXTURE_COORDINATES = 2;
-const int COLOR_TYPE_VERTEX_COLORS = 3;
-const int COLOR_TYPE_UNIFORM_COLOR = 4;
-const int COLOR_TYPE_TEXTURE = 5;
-const int COLOR_TYPE_WHITE = 6;
+const int COLORING_POSITIONS = 0;
+const int COLORING_NORMALS = 1;
+const int COLORING_TEXTURE_COORDINATES = 2;
+const int COLORING_VERTEX_COLORS = 3;
+const int COLORING_UNIFORM_COLOR = 4;
+const int COLORING_TEXTURE = 5;
+const int COLORING_WHITE = 6;
+
+const int SHADING_COLOR = 0;
+const int SHADING_LAMBERTIAN = 1;
 
 /*
  * Inputs
  */
-layout(location = 0) in vec3 view_position;
-layout(location = 1) in vec3 view_normal;
+layout(location = 0) in vec3 world_position;
+layout(location = 1) in vec3 world_normal;
 layout(location = 2) in vec2 texture_coordinates;
 layout(location = 3) in vec3 vertex_color;
 
 /*
  * Uniforms
  */
-uniform int coloring = COLOR_TYPE_UNIFORM_COLOR;
+uniform int coloring = COLORING_UNIFORM_COLOR;
 uniform vec3 uniform_color = {1.f, 0.9f, 0.7f};
 uniform float opacity = 1.f;
+
+uniform int shading = SHADING_COLOR;
+uniform vec3 light_direction = {-1.f, -1.f, -1.f};
+uniform vec3 light_color = {1.f, 1.f, 1.f};
+
+uniform vec3 ambient_intentsity = {0.15f, 0.15f, 0.15f};
 
 layout(location = 0) out vec4 out_color;
 
@@ -58,32 +67,48 @@ void main()
 {
     vec3 shape_color = {1.f, 1.f, 1.f};
 
-    switch(coloring) {
-        case COLOR_TYPE_POSITIONS:
-            shape_color = view_position;
+    switch (coloring) {
+        case COLORING_POSITIONS:
+            shape_color = world_position;
             break;
 
-        case COLOR_TYPE_NORMALS:
-            shape_color = view_normal * 0.5f + 0.5f; // between 0 and 1
+        case COLORING_NORMALS:
+            shape_color = world_normal * 0.5f + 0.5f; // between 0 and 1
             break;
 
-        case COLOR_TYPE_TEXTURE_COORDINATES:
+        case COLORING_TEXTURE_COORDINATES:
             shape_color = vec3(texture_coordinates, 1.f);
             break;
 
-        case COLOR_TYPE_VERTEX_COLORS:
+        case COLORING_VERTEX_COLORS:
             shape_color = vertex_color;
             break;
 
-        case COLOR_TYPE_UNIFORM_COLOR:
+        case COLORING_UNIFORM_COLOR:
             shape_color = uniform_color;
             break;
 
-        case COLOR_TYPE_TEXTURE: // TODO
-        case COLOR_TYPE_WHITE:
+        case COLORING_TEXTURE: // TODO
+        case COLORING_WHITE:
             break;
 
     }
 
-    out_color = vec4(shape_color, opacity);
+    vec3 final_color = {1.f, 1.f, 1.f};
+
+    vec3 surface_normal = normalize(world_normal);
+    vec3 direction_to_light = normalize(-light_direction);
+
+    switch (shading) {
+        case SHADING_COLOR:
+            final_color = shape_color;
+            break;
+
+        case SHADING_LAMBERTIAN:
+            vec3 diffuse_lighting = max(0.f, dot(surface_normal, direction_to_light)) * light_color;
+            final_color = (diffuse_lighting + ambient_intentsity) * shape_color;
+            break;
+    }
+
+    out_color = vec4(final_color, opacity);
 }

@@ -49,26 +49,30 @@ GeneralShader3D::GeneralShader3D() {
 
     CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 
-    view_from_local_uniform_ = uniformLocation("view_from_local");
-    view_from_local_normals_uniform_ = uniformLocation("view_from_local_normals");
-    projection_from_view_uniform_ = uniformLocation("projection_from_view");
+    world_from_local_uniform_ = uniformLocation("world_from_local");
+    world_from_local_normals_uniform_ = uniformLocation("world_from_local_normals");
+    projection_from_local_uniform_ = uniformLocation("projection_from_local");
 
     coloring_uniform_ = uniformLocation("coloring");
     uniform_color_uniform_ = uniformLocation("uniform_color");
+
+    shading_uniform_ = uniformLocation("shading");
+    light_direction_uniform_ = uniformLocation("light_direction");
+    light_color_uniform_ = uniformLocation("light_color");
 }
 
-GeneralShader3D& GeneralShader3D::set_transformation_matrix(const Magnum::Matrix4& view_from_local) {
-    setUniform(view_from_local_uniform_, view_from_local);
+GeneralShader3D& GeneralShader3D::set_world_from_local_matrix(const Magnum::Matrix4& world_from_local) {
+    setUniform(world_from_local_uniform_, world_from_local);
     return *this;
 }
 
-GeneralShader3D& GeneralShader3D::set_normal_matrix(const Magnum::Matrix3& view_from_local_normals) {
-    setUniform(view_from_local_normals_uniform_, view_from_local_normals);
+GeneralShader3D& GeneralShader3D::set_world_from_local_normal_matrix(const Magnum::Matrix3& world_from_local_normals) {
+    setUniform(world_from_local_normals_uniform_, world_from_local_normals);
     return *this;
 }
 
-GeneralShader3D& GeneralShader3D::set_projection_matrix(const Magnum::Matrix4& projection_from_view) {
-    setUniform(projection_from_view_uniform_, projection_from_view);
+GeneralShader3D& GeneralShader3D::set_projection_from_local_matrix(const Magnum::Matrix4& projection_from_local) {
+    setUniform(projection_from_local_uniform_, projection_from_local);
     return *this;
 }
 
@@ -79,6 +83,38 @@ GeneralShader3D& GeneralShader3D::set_coloring(const proto::Coloring& coloring) 
 
 GeneralShader3D& GeneralShader3D::set_uniform_color(const Magnum::Color3& color) {
     setUniform(uniform_color_uniform_, color);
+    return *this;
+}
+
+GeneralShader3D& GeneralShader3D::set_shading(const proto::Shading& shading) {
+    switch (shading.value_case()) {
+    case proto::Shading::VALUE_NOT_SET:
+    case proto::Shading::kUniformColor:
+        setUniform(shading_uniform_, 0);
+        break;
+
+    case proto::Shading::kLambertian:
+        setUniform(shading_uniform_, 1);
+
+        const proto::LambertianShading& lambertian = shading.lambertian();
+
+        Magnum::Vector3 light_direction{-1.f, -1.f, -1.f};
+
+        if (lambertian.has_light_direction()) {
+            light_direction = {lambertian.light_direction().x(),
+                               lambertian.light_direction().y(),
+                               lambertian.light_direction().z()};
+        }
+
+        Magnum::Vector3 light_color{1.f, 1.f, 1.f};
+        if (lambertian.has_light_color()) {
+            light_color = {lambertian.light_color().x(), lambertian.light_color().y(), lambertian.light_color().z()};
+        }
+
+        setUniform(light_direction_uniform_, light_direction);
+        setUniform(light_color_uniform_, light_color);
+        break;
+    }
     return *this;
 }
 
