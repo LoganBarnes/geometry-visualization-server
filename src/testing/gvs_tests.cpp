@@ -23,4 +23,16 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include "gvs_net_tests.hpp"
+#include "testing/util/test_proto_util.hpp"
+#include "testing/util/test_server.hpp"
+#include "testing/util/test_service.hpp"
+
+#include "gvs/net/detail/async_rpc_handler_interface.hpp"
+#include "gvs/net/detail/non_stream_rpc_handler.hpp"
+#include "gvs/net/detail/stream_rpc_handler.hpp"
+#include "gvs/net/detail/tag.hpp"
+#include "gvs/net/grpc_async_server.hpp"
+#include "gvs/net/grpc_client.hpp"
+#include "gvs/net/grpc_client_state.hpp"
+#include "gvs/net/grpc_client_stream.hpp"
+#include "gvs/net/grpc_server.hpp"

@@ -67,6 +67,10 @@ void GrpcServer::shutdown(const TimePoint& deadline) {
 #ifdef DOCTEST_LIBRARY_INCLUDED
 #include "testing/util/test_service.hpp"
 
+#include <grpc++/create_channel.h>
+
+#include <thread>
+
 TEST_CASE("[gvs-net] shared_service_is_the_same") {
     std::string server_address = "0.0.0.0:50050";
     auto service = std::make_shared<gvs::test::TestService>();
