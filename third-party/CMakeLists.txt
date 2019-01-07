@@ -118,7 +118,7 @@ FetchContent_GetProperties(imgui_dl)
 if (NOT imgui_dl_POPULATED)
     FetchContent_Populate(imgui_dl)
 
-    add_library(imgui
+    add_library(gvs_imgui
             ${imgui_dl_SOURCE_DIR}/imconfig.h
             ${imgui_dl_SOURCE_DIR}/imgui.cpp
             ${imgui_dl_SOURCE_DIR}/imgui.h
@@ -135,17 +135,17 @@ if (NOT imgui_dl_POPULATED)
             ${imgui_dl_SOURCE_DIR}/examples/imgui_impl_opengl3.cpp
             pseudo-header/GL/gl3w.h # fake gl3w header
             )
-    target_include_directories(imgui SYSTEM PUBLIC
+    target_include_directories(gvs_imgui SYSTEM PUBLIC
             ${imgui_dl_SOURCE_DIR}
             ${imgui_dl_SOURCE_DIR}/examples
             pseudo-header
             )
-    target_link_libraries(imgui
+    target_link_libraries(gvs_imgui
             PUBLIC glfw
             PUBLIC Magnum::GL
             )
-    target_compile_options(imgui PRIVATE -w) # ignore thirdparty compilation warnings
-    target_link_libraries(gvs_gui_thirdparty INTERFACE imgui)
+    target_compile_options(gvs_imgui PRIVATE -w) # ignore thirdparty compilation warnings
+    target_link_libraries(gvs_gui_thirdparty INTERFACE gvs_imgui)
 endif ()
 
 #################
