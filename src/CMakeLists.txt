@@ -80,9 +80,9 @@ file(GLOB_RECURSE VIS_CLIENT_SOURCE_FILES
         ${CMAKE_CURRENT_LIST_DIR}/gvs/vis-client/*
         )
 
-add_library(vis_client ${VIS_CLIENT_SOURCE_FILES})
+add_library(gvs_vis_client ${VIS_CLIENT_SOURCE_FILES})
 
-target_link_libraries(vis_client
+target_link_libraries(gvs_vis_client
         PUBLIC vis_client_resources
         PUBLIC gvs_net
         )
@@ -148,8 +148,8 @@ constexpr const char* ptx_files = "$<TARGET_OBJECTS:gvs_ptx>";
             LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/ptx"
             )
 
-    # link to vis_client
-    target_link_libraries(vis_client PUBLIC gvs_optix_scene)
+    # link to gvs_vis_client
+    target_link_libraries(gvs_vis_client PUBLIC gvs_optix_scene)
 endif ()
 
 ##################
@@ -161,37 +161,38 @@ file(GLOB_RECURSE LOG_CLIENT_SOURCE_FILES
         ${CMAKE_CURRENT_LIST_DIR}/gvs/log/*
         )
 
-add_library(log_client ${LOG_CLIENT_SOURCE_FILES})
-target_link_libraries(log_client PUBLIC gvs_net)
+add_library(gvs_log_client ${LOG_CLIENT_SOURCE_FILES})
+target_link_libraries(gvs_log_client PUBLIC gvs_net)
 
 ###################
 ### Executables ###
 ###################
-add_executable(vis_client_and_server exec/visualiser_client_and_server.cpp)
-target_link_libraries(vis_client_and_server vis_client gvs_server)
+add_executable(gvs_vis_client_and_server exec/visualiser_client_and_server.cpp)
+target_link_libraries(gvs_vis_client_and_server gvs_vis_client gvs_server)
 
-add_executable(scene_server exec/scene_server.cpp)
-target_link_libraries(scene_server gvs_server)
+add_executable(gvs_scene_server exec/scene_server.cpp)
+target_link_libraries(gvs_scene_server gvs_server)
 
-add_executable(visualiser_client exec/visualiser_client.cpp)
-target_link_libraries(visualiser_client vis_client)
+add_executable(gvs_visualiser_client exec/visualiser_client.cpp)
+target_link_libraries(gvs_visualiser_client gvs_vis_client)
 
-add_executable(message_client exec/message_client.cpp)
-target_link_libraries(message_client log_client)
+add_executable(gvs_message_client exec/message_client.cpp)
+target_link_libraries(gvs_message_client gvs_log_client)
 
-add_executable(log_test exec/log_test.cpp)
-target_link_libraries(log_test log_client)
+add_executable(gvs_log_test exec/log_test.cpp)
+target_link_libraries(gvs_log_test gvs_log_client)
 
 ### Clang-Tidy for all ###
 set_target_properties(
         gvs_net
         gvs_server
-        vis_client
-        log_client
-        vis_client_and_server
-        scene_server
-        visualiser_client
-        log_test
+        gvs_vis_client
+        gvs_log_client
+        gvs_vis_client_and_server
+        gvs_scene_server
+        gvs_visualiser_client
+        gvs_message_client
+        gvs_log_test
         PROPERTIES
         CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -214,13 +215,13 @@ if (${GVS_BUILD_TESTS})
 
         target_compile_options(gvs_net PUBLIC ${PROFILE_FLAGS})
         target_compile_options(gvs_server PUBLIC ${PROFILE_FLAGS})
-        target_compile_options(vis_client PUBLIC ${PROFILE_FLAGS})
-        target_compile_options(log_client PUBLIC ${PROFILE_FLAGS})
+        target_compile_options(gvs_vis_client PUBLIC ${PROFILE_FLAGS})
+        target_compile_options(gvs_log_client PUBLIC ${PROFILE_FLAGS})
 
         target_link_libraries(gvs_net PUBLIC gcov)
         target_link_libraries(gvs_server PUBLIC gcov)
-        target_link_libraries(vis_client PUBLIC gcov)
-        target_link_libraries(log_client PUBLIC gcov)
+        target_link_libraries(gvs_vis_client PUBLIC gcov)
+        target_link_libraries(gvs_log_client PUBLIC gcov)
     endif ()
 
     add_executable(gvs_net_tests testing/gvs_net_tests.cpp)
@@ -230,8 +231,8 @@ if (${GVS_BUILD_TESTS})
     target_link_libraries(all_gvs_tests PRIVATE
             gvs_net
             gvs_server
-            vis_client
-            log_client
+            gvs_vis_client
+            gvs_log_client
             gvs_testing_thirdparty
             testing_protos
             )
@@ -239,8 +240,8 @@ if (${GVS_BUILD_TESTS})
     set_target_properties(
             gvs_net_tests
 #            gvs_server_tests
-#            vis_client_tests
-#            log_client_tests
+#            gvs_vis_client_tests
+#            gvs_log_client_tests
             all_gvs_tests
             PROPERTIES
             CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
