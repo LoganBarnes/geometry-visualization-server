@@ -24,7 +24,7 @@ Create a geometry stream and send some data to the server:
 
 ![send-geometry](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/send-geometry.gif)
 
-Run your code and watch the geometry magically appear!
+Run your code and view the geometry!
 
 ![view-geometry](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/view-geometry.gif)
 
