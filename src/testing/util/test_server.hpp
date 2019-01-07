@@ -46,3 +46,59 @@ private:
 
 } // namespace test
 } // namespace gvs
+
+// //////////////////////////////////////////////////////////////////////////////////// //
+// ///////////////////////////////////  TESTING  ////////////////////////////////////// //
+// //////////////////////////////////////////////////////////////////////////////////// //
+#ifdef DOCTEST_LIBRARY_INCLUDED
+
+TEST_CASE("[gvs-test-util] run_test_server_and_check_echo_rpc_call") {
+    // Create a server and run it in a separate thread
+    std::string server_address = "0.0.0.0:50050";
+    gvs::test::TestServer server(server_address);
+
+    // Create a client to connect to the server
+    auto channel = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+    auto stub = gvs::test::proto::Test::NewStub(channel);
+
+    // Send a message to the server
+    std::string test_msg = "a1, 23kqv9 !F(VMas3982fj!#!#+(*@)(a assdaf;le 1342 asdw32nm";
+
+    gvs::test::proto::TestMessage request = {};
+    request.set_msg(test_msg);
+
+    grpc::ClientContext context;
+    gvs::test::proto::TestMessage response;
+
+    grpc::Status status = stub->echo(&context, request, &response);
+
+    // Check the server recieved the message and responded with the same message
+    CHECK(status.ok());
+    CHECK(response.msg() == test_msg);
+}
+
+TEST_CASE("[gvs-test-util] run_inprocess_test_server_and_check_echo_rpc_call") {
+
+    // Create a server and run it in a separate thread
+    gvs::test::TestServer server;
+
+    // Create a client using the server's in-process channel
+    auto stub = gvs::test::proto::Test::NewStub(server.inprocess_channel());
+
+    // Send a message to the server
+    std::string test_msg = "a1, 23kqv9 !F(VMas3982fj!#!#+(*@)(a assdaf;le 1342 asdw32nm";
+
+    gvs::test::proto::TestMessage request = {};
+    request.set_msg(test_msg);
+
+    grpc::ClientContext context;
+    gvs::test::proto::TestMessage response;
+
+    grpc::Status status = stub->echo(&context, request, &response);
+
+    // Check the server recieved the message and responded with the same message
+    CHECK(status.ok());
+    CHECK(response.msg() == test_msg);
+}
+
+#endif

@@ -24,6 +24,10 @@
 
 #include "testing/testing.grpc.pb.h"
 
+#ifdef DOCTEST_LIBRARY_INCLUDED
+#include "testing/util/test_proto_util.hpp"
+#endif
+
 namespace gvs {
 namespace test {
 
@@ -33,6 +37,23 @@ public:
                       const gvs::test::proto::TestMessage* request,
                       gvs::test::proto::TestMessage* response) override;
 };
+
+#ifdef DOCTEST_LIBRARY_INCLUDED
+TEST_CASE("[gvs-test-util] echo_service_echos") {
+    const std::string message = "01234aBcDeFgHiJkLmNoPqRsTuVwXyZ56789";
+
+    TestService service;
+
+    gvs::test::proto::TestMessage request, response;
+    request.set_msg(message);
+
+    grpc::ServerContext context;
+    service.echo(&context, &request, &response);
+
+    CHECK(request.msg() == message); // request is unchanged
+    CHECK(response == request); // response is an exact copy of request
+}
+#endif
 
 } // namespace test
 } // namespace gvs

@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#pragma once
 
-#include "gvs_net_tests.hpp"
-#include "gvs_test_util_tests.hpp"
+#include "testing/util/test_proto_util.hpp"
+#include "testing/util/test_server.hpp"
+#include "testing/util/test_service.hpp"

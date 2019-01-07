@@ -66,7 +66,6 @@ void GrpcServer::shutdown(const TimePoint& deadline) {
 // //////////////////////////////////////////////////////////////////////////////////// //
 #ifdef DOCTEST_LIBRARY_INCLUDED
 #include "testing/util/test_service.hpp"
-#include <doctest/doctest.h>
 
 TEST_CASE("[gvs-net] shared_service_is_the_same") {
     std::string server_address = "0.0.0.0:50050";

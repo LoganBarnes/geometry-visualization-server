@@ -23,5 +23,4 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include "gvs_net_tests.hpp"
 #include "gvs_test_util_tests.hpp"

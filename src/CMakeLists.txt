@@ -250,12 +250,17 @@ if (${GVS_BUILD_TESTS})
         target_compile_options(gvs_server PUBLIC ${PROFILE_FLAGS})
         target_compile_options(gvs_vis_client PUBLIC ${PROFILE_FLAGS})
         target_compile_options(gvs_log_client PUBLIC ${PROFILE_FLAGS})
+        target_compile_options(gvs_test_util PUBLIC ${PROFILE_FLAGS})
 
         target_link_libraries(gvs_net PUBLIC gcov)
         target_link_libraries(gvs_server PUBLIC gcov)
         target_link_libraries(gvs_vis_client PUBLIC gcov)
         target_link_libraries(gvs_log_client PUBLIC gcov)
+        target_link_libraries(gvs_test_util PUBLIC gcov)
     endif ()
+
+    add_executable(gvs_test_util_tests testing/gvs_test_util_tests.cpp)
+    target_link_libraries(gvs_test_util_tests PRIVATE gvs_test_util)
 
     add_executable(gvs_net_tests testing/gvs_net_tests.cpp)
     target_link_libraries(gvs_net_tests PRIVATE gvs_test_util)
@@ -269,6 +274,7 @@ if (${GVS_BUILD_TESTS})
             )
 
     set_target_properties(
+            gvs_test_util_tests
             gvs_net_tests
             # gvs_server_tests
             # gvs_vis_client_tests
