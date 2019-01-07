@@ -51,20 +51,22 @@ endif ()
 ############
 ### GLFW ###
 ############
-FetchContent_Declare(glfw_dl
-        GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG master
-        )
+if (NOT TARGET glfw)
+    FetchContent_Declare(glfw_dl
+            GIT_REPOSITORY https://github.com/glfw/glfw.git
+            GIT_TAG master
+            )
 
-FetchContent_GetProperties(glfw_dl)
-if (NOT glfw_dl_POPULATED)
-    FetchContent_Populate(glfw_dl)
+    FetchContent_GetProperties(glfw_dl)
+    if (NOT glfw_dl_POPULATED)
+        FetchContent_Populate(glfw_dl)
 
-    set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-    set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-    add_subdirectory(${glfw_dl_SOURCE_DIR} ${glfw_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+        add_subdirectory(${glfw_dl_SOURCE_DIR} ${glfw_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif ()
 endif ()
 
 ##############
