@@ -59,7 +59,7 @@ std::string GeometryLogger::clear_all_items() {
     return "";
 }
 
-GeometryItemStream GeometryLogger::item_stream(const std::string& id) {
+GeometryItemStream GeometryLogger::item_stream(const std::string& id) const {
     if (id.empty()) {
         return GeometryItemStream(generate_uuid(), stub_.get());
     }

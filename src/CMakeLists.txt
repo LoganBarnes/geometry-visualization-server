@@ -184,6 +184,12 @@ if (NOT GVS_LOGGING_ONLY)
     add_executable(gvs_message_client exec/message_client.cpp)
     target_link_libraries(gvs_message_client gvs_log_client)
 
+    add_executable(gvs_log_test exec/logging_examples/log_test.cpp)
+    target_link_libraries(gvs_log_test gvs_log_client)
+
+    add_executable(gvs_mesh_test exec/logging_examples/mesh_test.cpp)
+    target_link_libraries(gvs_mesh_test gvs_log_client)
+
     ### Clang-Tidy for all ###
     set_target_properties(
             gvs_net
@@ -193,6 +199,8 @@ if (NOT GVS_LOGGING_ONLY)
             gvs_scene_server
             gvs_visualiser_client
             gvs_message_client
+            gvs_log_test
+            gvs_mesh_test
             PROPERTIES
             CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -200,13 +208,9 @@ if (NOT GVS_LOGGING_ONLY)
 
 endif (NOT GVS_LOGGING_ONLY)
 
-add_executable(gvs_log_test exec/log_test.cpp)
-target_link_libraries(gvs_log_test gvs_log_client)
-
 ### Clang-Tidy for all ###
 set_target_properties(
         gvs_log_client
-        gvs_log_test
         PROPERTIES
         CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -253,9 +257,9 @@ if (${GVS_BUILD_TESTS})
 
     set_target_properties(
             gvs_net_tests
-            #            gvs_server_tests
-            #            gvs_vis_client_tests
-            #            gvs_log_client_tests
+            # gvs_server_tests
+            # gvs_vis_client_tests
+            # gvs_log_client_tests
             all_gvs_tests
             PROPERTIES
             CXX_CLANG_TIDY "${DO_CLANG_TIDY}"

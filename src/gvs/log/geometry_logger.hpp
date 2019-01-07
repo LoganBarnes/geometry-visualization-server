@@ -51,7 +51,7 @@ public:
     std::string generate_uuid() const;
 
     std::string clear_all_items();
-    GeometryItemStream item_stream(const std::string& id = "");
+    GeometryItemStream item_stream(const std::string& id = "") const;
 
 private:
     std::shared_ptr<grpc::Channel> channel_;

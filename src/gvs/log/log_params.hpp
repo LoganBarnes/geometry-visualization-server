@@ -70,7 +70,7 @@ inline auto vertex_colors_3d(std::vector<float> data) {
 }
 
 template <proto::GeometryFormat format>
-auto indices(std::vector<float> data) {
+auto indices(std::vector<unsigned> data) {
     return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_indices()) {
             return "indices";
