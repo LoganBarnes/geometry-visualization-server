@@ -59,6 +59,7 @@ GeneralShader3D::GeneralShader3D() {
     shading_uniform_ = uniformLocation("shading");
     light_direction_uniform_ = uniformLocation("light_direction");
     light_color_uniform_ = uniformLocation("light_color");
+    ambient_color_uniform_ = uniformLocation("ambient_color");
 }
 
 GeneralShader3D& GeneralShader3D::set_world_from_local_matrix(const Magnum::Matrix4& world_from_local) {
@@ -99,6 +100,8 @@ GeneralShader3D& GeneralShader3D::set_shading(const proto::Shading& shading) {
         const proto::LambertianShading& lambertian = shading.lambertian();
 
         Magnum::Vector3 light_direction{-1.f, -1.f, -1.f};
+        Magnum::Vector3 light_color{1.f, 1.f, 1.f};
+        Magnum::Vector3 ambient_color{0.15f, 0.15f, 0.15f};
 
         if (lambertian.has_light_direction()) {
             light_direction = {lambertian.light_direction().x(),
@@ -106,13 +109,18 @@ GeneralShader3D& GeneralShader3D::set_shading(const proto::Shading& shading) {
                                lambertian.light_direction().z()};
         }
 
-        Magnum::Vector3 light_color{1.f, 1.f, 1.f};
         if (lambertian.has_light_color()) {
             light_color = {lambertian.light_color().x(), lambertian.light_color().y(), lambertian.light_color().z()};
         }
 
+        if (lambertian.has_ambient_color()) {
+            ambient_color
+                = {lambertian.ambient_color().x(), lambertian.ambient_color().y(), lambertian.ambient_color().z()};
+        }
+
         setUniform(light_direction_uniform_, light_direction);
         setUniform(light_color_uniform_, light_color);
+        setUniform(ambient_color_uniform_, ambient_color);
         break;
     }
     return *this;

@@ -58,8 +58,7 @@ uniform float opacity = 1.f;
 uniform int shading = SHADING_COLOR;
 uniform vec3 light_direction = {-1.f, -1.f, -1.f};
 uniform vec3 light_color = {1.f, 1.f, 1.f};
-
-uniform vec3 ambient_intentsity = {0.15f, 0.15f, 0.15f};
+uniform vec3 ambient_color = {0.15f, 0.15f, 0.15f};
 
 layout(location = 0) out vec4 out_color;
 
@@ -106,7 +105,7 @@ void main()
 
         case SHADING_LAMBERTIAN:
             vec3 diffuse_lighting = max(0.f, dot(surface_normal, direction_to_light)) * light_color;
-            final_color = (diffuse_lighting + ambient_intentsity) * shape_color;
+            final_color = (diffuse_lighting + ambient_color) * shape_color;
             break;
     }
 

@@ -141,9 +141,12 @@ struct UniformColorShading {
 struct LambertianShading {
     std::array<float, 3> light_direction;
     std::array<float, 3> light_color;
+    std::array<float, 3> ambient_color;
+
     explicit LambertianShading(std::array<float, 3> light_dir = {-1.f, -1.f, -1.f},
-                               std::array<float, 3> light_colour = {1.f, 1.f, 1.f})
-        : light_direction(light_dir), light_color(light_colour) {}
+                               std::array<float, 3> light_colour = {1.f, 1.f, 1.f},
+                               std::array<float, 3> ambient_colour = {0.15f, 0.15f, 0.15f})
+        : light_direction(light_dir), light_color(light_colour), ambient_color(ambient_colour) {}
 };
 
 inline auto shading(const UniformColorShading&) {
@@ -169,6 +172,10 @@ inline auto shading(LambertianShading data) {
         shading->mutable_light_color()->set_x(data.light_color[0]);
         shading->mutable_light_color()->set_y(data.light_color[1]);
         shading->mutable_light_color()->set_z(data.light_color[2]);
+
+        shading->mutable_ambient_color()->set_x(data.ambient_color[0]);
+        shading->mutable_ambient_color()->set_y(data.ambient_color[1]);
+        shading->mutable_ambient_color()->set_z(data.ambient_color[2]);
         return "";
     };
 }

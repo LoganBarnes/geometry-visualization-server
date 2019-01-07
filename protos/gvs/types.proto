@@ -79,7 +79,8 @@ message ColoringValue {
 
 message LambertianShading {
     Vec3 light_direction = 1;
-    Vec3 light_color = 3;
+    Vec3 light_color = 2;
+    Vec3 ambient_color = 3;
 }
 
 message Shading {
