@@ -53,11 +53,10 @@ target_link_libraries(gvs_net
 
 target_compile_options(gvs_net PUBLIC ${GVS_COMPILE_FLAGS})
 
-if (NOT GVS_LOGGING_ONLY)
-
     ##############
     ### Server ###
     ##############
+if (NOT GVS_LOGGING_ONLY)
     file(GLOB_RECURSE SCENE_SERVER_SOURCE_FILES
             LIST_DIRECTORIES false
             CONFIGURE_DEPENDS
@@ -220,6 +219,22 @@ set_target_properties(
 ### Testing ###
 ###############
 if (${GVS_BUILD_TESTS})
+    file(GLOB_RECURSE GVS_TEST_UTIL_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/testing/util/*
+            )
+
+    add_library(gvs_test_util ${GVS_TEST_UTIL_SOURCE_FILES})
+
+    target_link_libraries(gvs_test_util PUBLIC
+            gvs_testing_thirdparty
+            testing_protos
+            gvs_net
+            )
+
+    target_compile_options(gvs_test_util PUBLIC ${GVS_COMPILE_FLAGS})
+
     # add test coverage capabilities
     find_program(LCOV_EXE
             NAMES "lcov"
@@ -243,16 +258,14 @@ if (${GVS_BUILD_TESTS})
     endif ()
 
     add_executable(gvs_net_tests testing/gvs_net_tests.cpp)
-    target_link_libraries(gvs_net_tests PRIVATE gvs_net gvs_testing_thirdparty testing_protos)
+    target_link_libraries(gvs_net_tests PRIVATE gvs_test_util)
 
     add_executable(all_gvs_tests testing/all_gvs_tests.cpp)
     target_link_libraries(all_gvs_tests PRIVATE
-            gvs_net
             gvs_server
             gvs_vis_client
             gvs_log_client
-            gvs_testing_thirdparty
-            testing_protos
+            gvs_test_util
             )
 
     set_target_properties(

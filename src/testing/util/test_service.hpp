@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,47 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/net/grpc_server.hpp"
+#pragma once
 
-#include <grpc++/server_builder.h>
-
-#include <utility>
+#include "testing/testing.grpc.pb.h"
 
 namespace gvs {
-namespace net {
+namespace test {
 
-GrpcServer::GrpcServer(std::shared_ptr<grpc::Service> service, const std::string& server_address)
-    : service_(std::move(service)) {
+class TestService : public gvs::test::proto::Test::Service {
+public:
+    grpc::Status echo(grpc::ServerContext* context,
+                      const gvs::test::proto::TestMessage* request,
+                      gvs::test::proto::TestMessage* response) override;
+};
 
-    grpc::ServerBuilder builder;
-    builder.RegisterService(service_.get());
-
-    if (not server_address.empty()) {
-        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    }
-
-    server_ = builder.BuildAndStart();
-}
-
-void GrpcServer::run() {
-    server_->Wait();
-}
-
-void GrpcServer::shutdown() {
-    server_->Shutdown();
-}
-
-std::shared_ptr<grpc::Service>& GrpcServer::service() {
-    return service_;
-}
-
-const std::shared_ptr<grpc::Service>& GrpcServer::service() const {
-    return service_;
-}
-
-std::unique_ptr<grpc::Server>& GrpcServer::server() {
-    return server_;
-}
-
-} // namespace net
+} // namespace test
 } // namespace gvs

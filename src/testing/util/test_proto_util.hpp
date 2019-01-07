@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,47 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/net/grpc_server.hpp"
+#pragma once
 
-#include <grpc++/server_builder.h>
-
-#include <utility>
+#include <google/protobuf/message.h>
+#include <google/protobuf/util/message_differencer.h>
 
 namespace gvs {
-namespace net {
+namespace test {
+namespace proto {
 
-GrpcServer::GrpcServer(std::shared_ptr<grpc::Service> service, const std::string& server_address)
-    : service_(std::move(service)) {
-
-    grpc::ServerBuilder builder;
-    builder.RegisterService(service_.get());
-
-    if (not server_address.empty()) {
-        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    }
-
-    server_ = builder.BuildAndStart();
+template <typename Proto, typename = std::enable_if_t<std::is_base_of<google::protobuf::Message, Proto>::value>>
+::std::ostream& operator<<(::std::ostream& os, const Proto& proto) {
+    return os << proto.DebugString();
 }
 
-void GrpcServer::run() {
-    server_->Wait();
+template <typename Proto, typename = std::enable_if_t<std::is_base_of<google::protobuf::Message, Proto>::value>>
+bool operator==(const Proto& lhs, const Proto& rhs) {
+    return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
 }
 
-void GrpcServer::shutdown() {
-    server_->Shutdown();
-}
-
-std::shared_ptr<grpc::Service>& GrpcServer::service() {
-    return service_;
-}
-
-const std::shared_ptr<grpc::Service>& GrpcServer::service() const {
-    return service_;
-}
-
-std::unique_ptr<grpc::Server>& GrpcServer::server() {
-    return server_;
-}
-
-} // namespace net
+} // namespace proto
+} // namespace test
 } // namespace gvs
