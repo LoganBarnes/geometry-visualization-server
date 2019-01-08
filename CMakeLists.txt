@@ -27,7 +27,6 @@ option(GVS_LOGGING_ONLY "Only build the logging library" OFF)
 option(GVS_BUILD_TESTS "Build unit tests" OFF)
 option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
 option(GVS_UPDATES_DISCONNECTED "Update third party repos" OFF)
-option(GVS_BUILD_DOCS "Build documentation" OFF)
 
 #############################
 ### Project Configuration ###
