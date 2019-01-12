@@ -24,7 +24,7 @@
 
 #include "gvs/net/grpc_server.hpp"
 
-#include <grpcpp/channel.h>
+#include <grpc++/channel.h>
 
 #include <memory>
 #include <thread>

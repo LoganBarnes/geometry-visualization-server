@@ -14,22 +14,25 @@ The General Idea
 
 Start the visualization server:
 
-![start-the-server](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/start-the-server.gif)
+![start-the-server][start-the-server-gif]
 
 In your code, create a scene that is connected to the server:
 
-![connect-to-server](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/connect-to-server.gif)
+![connect-to-server][connect-to-server-gif]
 
 Create a geometry stream and send some data to the server:
 
-![send-geometry](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/send-geometry.gif)
+![send-geometry][send-geometry-gif]
 
 Run your code and view the geometry!
 
-![view-geometry](https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/view-geometry.gif)
+![view-geometry][view-geometry-gif]
 
 Building
 --------
+
+GVS probably does not compile on windows or mac. This has not 
+been confirmed but the probability seems really low.
 
 ### Linux
 
@@ -57,3 +60,9 @@ sudo apt install xorg-dev libgl1-mesa-dev uuid-dev
 [protobuf-link]: https://developers.google.com/protocol-buffers/
 [grpc-link]: https://grpc.io/
 [magnum-link]: https://magnum.graphics/
+
+[view-geometry-gif]: https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/view-geometry.gif
+
+[start-the-server-gif]: https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/start-the-server.gif
+[connect-to-server-gif]: https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/connect-to-server.gif
+[send-geometry-gif]: https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/send-geometry.gif
