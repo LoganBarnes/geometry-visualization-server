@@ -47,6 +47,13 @@ private:
     // atomicize these
     proto::SceneItems scene_;
     proto::Messages messages_;
+
+    gvs::net::StreamInterface<proto::Message>* message_stream_;
+    gvs::net::StreamInterface<proto::SceneUpdate>* scene_stream_;
+
+    grpc::Status safe_set_item(const proto::SceneItemInfo& info, proto::Errors* errors);
+    grpc::Status replace_item(const proto::SceneItemInfo& info, proto::Errors* errors);
+    grpc::Status append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors);
 };
 
 } // namespace host

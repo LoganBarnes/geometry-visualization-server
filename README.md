@@ -48,6 +48,28 @@ Required packages for visualization:
 sudo apt install xorg-dev libgl1-mesa-dev uuid-dev
 ```
 
+Logging
+-------
+
+###Logging Rules
+
+There are 3 ways to send data
+
+| Send Type      | With Positions | Item Exists                     | Item Does Not Exist |
+| -------------- |:--------------:| ------------------------------- | ------------------- |
+| `gvs::send`    |     **Yes**    | **Error**                       | Creates new item    |
+| `gvs::send`    |      *No*      | Updates item                    | **Error**           |
+| `gvs::replace` |     **Yes**    | Replaces existing geometry*     | Creates new item    |
+| `gvs::replace` |      *No*      | Updates item                    | **Error**           |
+| `gvs::append`  |     **Yes**    | Appends positions to geometry** | Creates new item    |
+| `gvs::append`  |      *No*      | Updates item                    | **Error**           |
+
+\* Non-geometry info is also updated
+
+** If the geometry format does not that of the existing item, the server 
+will return an error. If no error is thrown the non-geometry info will also be updated.
+
+
 [travis-badge]: https://travis-ci.org/LoganBarnes/geometry-visualization-server.svg?branch=master
 [travis-link]: https://travis-ci.org/LoganBarnes/geometry-visualization-server
 [codecov-badge]: https://codecov.io/gh/LoganBarnes/geometry-visualization-server/branch/master/graph/badge.svg
