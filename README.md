@@ -51,7 +51,50 @@ sudo apt install xorg-dev libgl1-mesa-dev uuid-dev
 Logging
 -------
 
-###Logging Rules
+### Item Options
+
+#### Geometry
+
+| Name                           | Data type               |
+| ------------------------------ | ----------------------- |
+| `gvs::positions_3d`            | `std::vector<float>`    |
+| `gvs::normals_3d`              | `std::vector<float>`    |
+| `gvs::tex_coords_3d`           | `std::vector<float>`    |
+| `gvs::vertex_colors_3d`        | `std::vector<float>`    |
+| `gvs::vertex_colors_3d`        | `std::vector<float>`    |
+| `gvs::indices<GeometryFormat>` | `std::vector<unsigned>` |
+
+#### Indices Aliases
+
+| Name                  | Index type                                     |
+| --------------------- | ---------------------------------------------- |
+| `gvs::points`         | `gvs::incices<GeometryFormat::POINTS>`         |
+| `gvs::lines`          | `gvs::incices<GeometryFormat::LINES>`          |
+| `gvs::line_strip`     | `gvs::incices<GeometryFormat::LINE_STRIP>`     |
+| `gvs::triangles`      | `gvs::incices<GeometryFormat::TRIANGLES>`      |
+| `gvs::triangle_strip` | `gvs::incices<GeometryFormat::TRIANGLE_STRIP>` |
+| `gvs::triangle_fan`   | `gvs::incices<GeometryFormat::TRIANGLE_FAN>`   |
+
+| Name              | Type                  | Default                           |
+| ----------------- | --------------------- | --------------------------------- |
+| `geometry_format` | proto::GeometryFormat | proto::GeometryFormat::POINTS     |
+| `coloring`        | proto::Coloring       | proto::Coloring::UNIFORM_COLOR    |
+| `transformation`  | std::array<float, 16> | 1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1 |
+| `uniform_color`   | std::array<float, 3>  | 0.9f, 0.8f, 0.7f                  |
+| `parent`          | std::string data      | ""                                |
+| `shading`         | See below             | See below                         |
+
+#### Shading
+
+**Lambertian**
+
+|                 |                         |
+| --------------- | ----------------------- |
+| light direction | `{-1.f, -2.f, -3.f}`    |
+| light color     | `{0.85f, 0.85f, 0.85f}` |
+| ambient color   | `{0.1f, 0.1f, 0.1f}`    |
+
+### Logging Rules
 
 There are 3 ways to send data
 

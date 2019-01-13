@@ -88,6 +88,16 @@ constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
 constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
 constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
 
+inline auto geometry_format(proto::GeometryFormat data) {
+    return [data](proto::SceneItemInfo* info) {
+        if (info->mutable_display_info()->has_geometry_format()) {
+            return "geometry_format";
+        }
+        info->mutable_display_info()->mutable_geometry_format()->set_value(data);
+        return "";
+    };
+}
+
 inline auto coloring(proto::Coloring data) {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_coloring()) {
@@ -179,5 +189,33 @@ inline auto shading(LambertianShading data) {
         return "";
     };
 }
+
+//inline auto positions_3d(std::vector<float> data) {
+//inline auto normals_3d(std::vector<float> data) {
+//inline auto tex_coords_3d(std::vector<float> data) {
+//inline auto vertex_colors_3d(std::vector<float> data) {
+//constexpr auto points = indices<proto::GeometryFormat::POINTS>;
+//constexpr auto lines = indices<proto::GeometryFormat::LINES>;
+//constexpr auto line_strip = indices<proto::GeometryFormat::LINE_STRIP>;
+//constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
+//constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
+//constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
+//inline auto coloring(proto::Coloring data) {
+//inline auto transformation(std::array<float, 16> data) {
+//inline auto uniform_color(std::array<float, 3> data) {
+//inline auto parent(std::string data) {
+//struct UniformColorShading {
+//struct LambertianShading {
+//    std::array<float, 3> light_direction;
+//    std::array<float, 3> light_color;
+//    std::array<float, 3> ambient_color;
+//
+//    explicit LambertianShading(std::array<float, 3> light_dir = {-1.f, -1.f, -1.f},
+//                               std::array<float, 3> light_colour = {1.f, 1.f, 1.f},
+//                               std::array<float, 3> ambient_colour = {0.15f, 0.15f, 0.15f})
+//        : light_direction(light_dir), light_color(light_colour), ambient_color(ambient_colour) {}
+//};
+//inline auto shading(const UniformColorShading&) {
+//inline auto shading(LambertianShading data) {
 
 } // namespace gvs

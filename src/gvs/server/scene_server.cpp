@@ -21,13 +21,71 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/server/scene_server.hpp"
-#include "scene_server.hpp"
+#include "gvs/item_defaults.hpp"
 
 #include <grpc++/security/server_credentials.h>
 #include <grpc++/server_builder.h>
 
 namespace gvs {
 namespace host {
+
+namespace {
+
+void set_non_geom_defaults(proto::SceneItemInfo* info) {
+    if (info->has_display_info()) {
+        proto::DisplayInfo* display_info = info->mutable_display_info();
+
+        if (not display_info->has_readable_id()) {
+            display_info->mutable_readable_id()->set_value(info->id().value());
+        }
+
+        if (not display_info->has_geometry_format()) {
+            display_info->mutable_geometry_format()->set_value(default_geom_format);
+        }
+
+        if (not display_info->has_transformation()) {
+            (*display_info->mutable_transformation()->mutable_data())
+                = {std::begin(default_transformation), std::end(default_transformation)};
+        }
+
+        if (not display_info->has_uniform_color()) {
+            display_info->mutable_uniform_color()->set_x(default_color[0]);
+            display_info->mutable_uniform_color()->set_y(default_color[1]);
+            display_info->mutable_uniform_color()->set_z(default_color[2]);
+        }
+
+        if (not display_info->has_coloring()) {
+            display_info->mutable_coloring()->set_value(default_coloring);
+        }
+
+        if (not display_info->has_shading()) {
+            display_info->mutable_shading()->mutable_uniform_color();
+
+        } else if (display_info->shading().has_lambertian()) {
+            proto::LambertianShading* lambertian = display_info->mutable_shading()->mutable_lambertian();
+
+            if (not lambertian->has_light_direction()) {
+                lambertian->mutable_light_direction()->set_x(default_light_direction[0]);
+                lambertian->mutable_light_direction()->set_y(default_light_direction[1]);
+                lambertian->mutable_light_direction()->set_z(default_light_direction[2]);
+            }
+
+            if (not lambertian->has_light_color()) {
+                lambertian->mutable_light_color()->set_x(default_light_color[0]);
+                lambertian->mutable_light_color()->set_y(default_light_color[1]);
+                lambertian->mutable_light_color()->set_z(default_light_color[2]);
+            }
+
+            if (not lambertian->has_ambient_color()) {
+                lambertian->mutable_ambient_color()->set_x(default_ambient_color[0]);
+                lambertian->mutable_ambient_color()->set_y(default_ambient_color[1]);
+                lambertian->mutable_ambient_color()->set_z(default_ambient_color[2]);
+            }
+        }
+    }
+}
+
+} // namespace
 
 SceneServer::SceneServer(std::string server_address)
     : server_(std::make_shared<proto::Scene::AsyncService>(), server_address) {
@@ -109,6 +167,14 @@ grpc::Server& SceneServer::server() {
     return server_.server();
 }
 
+/*
+ * See the full table in "scene_server.hpp"
+ *
+ * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
+ * | -------------- |:-----------------:| ------------------------------- | ------------------- |
+ * | `gvs::send`    |      **Yes**      | **Error**                       | Creates new item    |
+ * | `gvs::send`    |       *No*        | Updates item                    | **Error**           |
+ */
 grpc::Status SceneServer::safe_set_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
     std::string id = info.id().value();
 
@@ -121,13 +187,23 @@ grpc::Status SceneServer::safe_set_item(const proto::SceneItemInfo& info, proto:
     scene_.mutable_items()->insert({id, info});
     // TODO: Handle parent and children updates
 
+    set_non_geom_defaults(&scene_.mutable_items()->at(id));
+
     proto::SceneUpdate update;
-    update.mutable_add_item()->CopyFrom(info);
+    update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
 
     scene_stream_->write(update);
     return grpc::Status::OK;
 }
 
+/*
+ * See the full table in "scene_server.hpp"
+ *
+ * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
+ * | -------------- |:-----------------:| ------------------------------- | ------------------- |
+ * | `gvs::replace` |      **Yes**      | Replaces existing geometry*     | Creates new item    |
+ * | `gvs::replace` |       *No*        | Updates item                    | **Error**           |
+ */
 grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
     std::string id = info.id().value();
 
@@ -144,8 +220,10 @@ grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::
         scene_.mutable_items()->insert({id, info});
         // TODO: Handle parent and children updates
 
+        set_non_geom_defaults(&scene_.mutable_items()->at(id));
+
         proto::SceneUpdate update;
-        update.mutable_add_item()->CopyFrom(info);
+        update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
 
         scene_stream_->write(update);
     }
@@ -153,6 +231,14 @@ grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::
     return grpc::Status::OK;
 }
 
+/*
+ * See the full table in "scene_server.hpp"
+ *
+ * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
+ * | -------------- |:-----------------:| ------------------------------- | ------------------- |
+ * | `gvs::append`  |      **Yes**      | Appends positions to geometry** | Creates new item    |
+ * | `gvs::append`  |       *No*        | Updates item                    | **Error**           |
+ */
 grpc::Status SceneServer::append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
     std::string id = info.id().value();
 
@@ -173,8 +259,10 @@ grpc::Status SceneServer::append_to_item(const proto::SceneItemInfo& info, proto
         scene_.mutable_items()->insert({id, info});
         // TODO: Handle parent and children updates
 
+        set_non_geom_defaults(&scene_.mutable_items()->at(id));
+
         proto::SceneUpdate update;
-        update.mutable_add_item()->CopyFrom(info);
+        update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
 
         scene_stream_->write(update);
     }

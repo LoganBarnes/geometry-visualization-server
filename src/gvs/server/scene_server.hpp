@@ -51,6 +51,19 @@ private:
     gvs::net::StreamInterface<proto::Message>* message_stream_;
     gvs::net::StreamInterface<proto::SceneUpdate>* scene_stream_;
 
+    /*
+     * How items are handled based on the update request:
+     *
+     * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
+     * | -------------- |:-----------------:| ------------------------------- | ------------------- |
+     * | `gvs::send`    |      **Yes**      | **Error**                       | Creates new item    |
+     * | `gvs::send`    |       *No*        | Updates item                    | **Error**           |
+     * | `gvs::replace` |      **Yes**      | Replaces existing geometry*     | Creates new item    |
+     * | `gvs::replace` |       *No*        | Updates item                    | **Error**           |
+     * | `gvs::append`  |      **Yes**      | Appends positions to geometry** | Creates new item    |
+     * | `gvs::append`  |       *No*        | Updates item                    | **Error**           |
+     */
+
     grpc::Status safe_set_item(const proto::SceneItemInfo& info, proto::Errors* errors);
     grpc::Status replace_item(const proto::SceneItemInfo& info, proto::Errors* errors);
     grpc::Status append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors);
