@@ -75,20 +75,31 @@ Logging
 | `gvs::triangle_strip` | `gvs::incices<GeometryFormat::TRIANGLE_STRIP>` |
 | `gvs::triangle_fan`   | `gvs::incices<GeometryFormat::TRIANGLE_FAN>`   |
 
-| Name              | Type                  | Default                           |
-| ----------------- | --------------------- | --------------------------------- |
-| `geometry_format` | proto::GeometryFormat | proto::GeometryFormat::POINTS     |
-| `coloring`        | proto::Coloring       | proto::Coloring::UNIFORM_COLOR    |
-| `transformation`  | std::array<float, 16> | 1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1 |
-| `uniform_color`   | std::array<float, 3>  | 0.9f, 0.8f, 0.7f                  |
-| `parent`          | std::string data      | ""                                |
-| `shading`         | See below             | See below                         |
+| Name                   | Type                  | Default                                        |
+| ---------------------- | --------------------- | ---------------------------------------------- |
+| `gvs::geometry_format` | proto::GeometryFormat | proto::GeometryFormat::POINTS                  |
+| `gvs::coloring`        | proto::Coloring       | proto::Coloring::UNIFORM_COLOR                 |
+| `gvs::transformation`  | std::array<float, 16> | 1,0,0,0,<br> 0,1,0,0,<br> 0,0,1,0,<br> 0,0,0,1 |
+| `gvs::uniform_color`   | std::array<float, 3>  | {0.9f, 0.8f, 0.7f}                             |
+| `gvs::parent`          | std::string data      | ""                                             |
+| `gvs::shading`         | See below             | See below                                      |
 
 #### Shading
 
+**Current Options:**
+
+* Uniform color
+* Lambertian
+
+**Uniform Color**
+
+Uses the color style defined by `gvs::coloring()`.
+
 **Lambertian**
 
-|                 |                         |
+Uses the color style defined by `gvs::coloring()` but also applies shading using the folowing parameters:
+
+| Parameter       | Default                 |
 | --------------- | ----------------------- |
 | light direction | `{-1.f, -2.f, -3.f}`    |
 | light color     | `{0.85f, 0.85f, 0.85f}` |

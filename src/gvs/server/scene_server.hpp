@@ -67,6 +67,10 @@ private:
     grpc::Status safe_set_item(const proto::SceneItemInfo& info, proto::Errors* errors);
     grpc::Status replace_item(const proto::SceneItemInfo& info, proto::Errors* errors);
     grpc::Status append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors);
+
+    void add_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* errors);
+    void update_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* errors);
+    void remove_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* errors);
 };
 
 } // namespace host

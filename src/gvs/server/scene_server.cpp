@@ -22,6 +22,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/server/scene_server.hpp"
 #include "gvs/item_defaults.hpp"
+#include "scene_server.hpp"
 
 #include <grpc++/security/server_credentials.h>
 #include <grpc++/server_builder.h>
@@ -178,21 +179,21 @@ grpc::Server& SceneServer::server() {
 grpc::Status SceneServer::safe_set_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
     std::string id = info.id().value();
 
-    if (util::has_key(scene_.items(), id)) {
-        errors->set_error_msg("Item with ID already exists");
-        return grpc::Status::OK;
+    if (info.has_geometry_info()) {
+
+        if (util::has_key(scene_.items(), id)) {
+            errors->set_error_msg(
+                "Item '" + id
+                + "' already exists. If this is expected, try using gvs::replace or gvs::append to modify geometry");
+            return grpc::Status::OK;
+        }
+
+        add_item_and_send_update(info, errors);
+
+    } else {
+        update_item_and_send_update(info, errors);
     }
 
-    // TODO: Error check? (has_geometry, etc.)
-    scene_.mutable_items()->insert({id, info});
-    // TODO: Handle parent and children updates
-
-    set_non_geom_defaults(&scene_.mutable_items()->at(id));
-
-    proto::SceneUpdate update;
-    update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
-
-    scene_stream_->write(update);
     return grpc::Status::OK;
 }
 
@@ -205,7 +206,7 @@ grpc::Status SceneServer::safe_set_item(const proto::SceneItemInfo& info, proto:
  * | `gvs::replace` |       *No*        | Updates item                    | **Error**           |
  */
 grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
-    std::string id = info.id().value();
+    const std::string& id = info.id().value();
 
     if (util::has_key(scene_.items(), id)) {
 
@@ -268,6 +269,28 @@ grpc::Status SceneServer::append_to_item(const proto::SceneItemInfo& info, proto
     }
 
     return grpc::Status::OK;
+}
+
+void SceneServer::add_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
+    const std::string& id = info.id().value();
+
+    // TODO: Error check (has correct geometry, etc.)
+    scene_.mutable_items()->insert({id, info});
+    // TODO: Handle parent and children updates
+
+    set_non_geom_defaults(&scene_.mutable_items()->at(id));
+
+    proto::SceneUpdate update;
+    update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
+    scene_stream_->write(update);
+}
+
+void SceneServer::update_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
+    // TODO
+}
+
+void SceneServer::remove_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
+    // TODO
 }
 
 } // namespace host
