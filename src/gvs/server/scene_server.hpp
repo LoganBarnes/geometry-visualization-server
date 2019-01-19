@@ -240,6 +240,113 @@ TEST_CASE("[gvs-host] test_safe_send") {
     }
 }
 
+TEST_CASE("[gvs-host] test_replace") {
+    std::string server_address = "0.0.0.0:50050";
+
+    // Set up the scene server
+    gvs::host::SceneServer server(server_address);
+
+    // Set up the scene client
+    SceneTestClient client(server_address);
+
+    /*
+     * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
+     * | -------------- |:-----------------:| ------------------------------- | ------------------- |
+     * | `gvs::replace` |      **Yes**      | Replaces existing geometry*     | Creates new item    |
+     * | `gvs::replace` |       *No*        | Updates item                    | **Error**           |
+     */
+    SUBCASE("replace_with_geometry") {
+        // Check an item is added if it doesn't yet exist
+        {
+            gvs::proto::SceneUpdateRequest request;
+            request.mutable_replace_item()->mutable_id()->set_value("replace_item");
+            gvs::proto::GeometryInfo3D* geom_info = request.mutable_replace_item()->mutable_geometry_info();
+            geom_info->mutable_positions()->add_value(1.f);
+            geom_info->mutable_positions()->add_value(2.f);
+            geom_info->mutable_positions()->add_value(3.f);
+            gvs::proto::Errors errors = client.send_request(request);
+
+            CHECK(errors.error_msg().empty());
+
+            // Item was added to scene
+            gvs::proto::SceneUpdate update = client.updates.pop_front();
+            CHECK(update.update_case() == gvs::proto::SceneUpdate::kAddItem);
+            CHECK(update.add_item().geometry_info().positions().value_size() == 3);
+            CHECK(update.add_item().geometry_info().positions().value(0) == 1.f);
+            CHECK(update.add_item().geometry_info().positions().value(1) == 2.f);
+            CHECK(update.add_item().geometry_info().positions().value(2) == 3.f);
+        }
+
+        // Check geometry is replaced if item exists
+        {
+            gvs::proto::SceneUpdateRequest request;
+            request.mutable_replace_item()->mutable_id()->set_value("replace_item");
+            gvs::proto::GeometryInfo3D* geom_info = request.mutable_replace_item()->mutable_geometry_info();
+            geom_info->mutable_positions()->add_value(-4.f);
+            geom_info->mutable_positions()->add_value(-2.f);
+            gvs::proto::Errors errors = client.send_request(request);
+
+            CHECK(errors.error_msg().empty());
+
+            // Item geometry was updated
+            gvs::proto::SceneUpdate update = client.updates.pop_front();
+            CHECK(update.update_case() == gvs::proto::SceneUpdate::kUpdateItem);
+            CHECK(update.update_item().geometry_info().positions().value_size() == 2);
+            CHECK(update.update_item().geometry_info().positions().value(0) == -4.f);
+            CHECK(update.update_item().geometry_info().positions().value(1) == -2.f);
+        }
+    }
+
+    //    /*
+    //     * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
+    //     * | -------------- |:-----------------:| ------------------------------- | ------------------- |
+    //     * | `gvs::replace` |      **Yes**      | Replaces existing geometry*     | Creates new item    |
+    //     * | `gvs::replace` |       *No*        | Updates item                    | **Error**           |
+    //     */
+    //    SUBCASE("safe_send_no_geometry") {
+    //        // Check an error is returned if the item does not exist
+    //        {
+    //            gvs::proto::SceneUpdateRequest request;
+    //            request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
+    //            request.mutable_safe_set_item()->mutable_display_info()->mutable_readable_id()->set_value("lower-case");
+    //            gvs::proto::Errors errors = client.send_request(request);
+    //
+    //            CHECK(errors.error_msg() == "Item 'safe_set_item' does not exist and no geometry was specified.");
+    //        }
+    //
+    //        // Add an item to the scene
+    //        {
+    //            gvs::proto::SceneUpdateRequest request;
+    //            request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
+    //            request.mutable_safe_set_item()->mutable_geometry_info()->mutable_positions();
+    //            request.mutable_safe_set_item()->mutable_display_info()->mutable_readable_id()->set_value("lower-case");
+    //            gvs::proto::Errors errors = client.send_request(request);
+    //
+    //            CHECK(errors.error_msg().empty());
+    //
+    //            // Item was added to scene
+    //            gvs::proto::SceneUpdate update = client.updates.pop_front();
+    //            CHECK(update.update_case() == gvs::proto::SceneUpdate::kAddItem);
+    //            CHECK(update.add_item().display_info().readable_id().value() == "lower-case");
+    //        }
+    //
+    //        // Check existing item can be updated now.
+    //        {
+    //            gvs::proto::SceneUpdateRequest request;
+    //            request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
+    //            request.mutable_safe_set_item()->mutable_display_info()->mutable_readable_id()->set_value("UPPER CASE");
+    //            gvs::proto::Errors errors = client.send_request(request);
+    //
+    //            CHECK(errors.error_msg().empty());
+    //
+    //            // Item was updated
+    //            gvs::proto::SceneUpdate update = client.updates.pop_front();
+    //            CHECK(update.update_case() == gvs::proto::SceneUpdate::kUpdateItem);
+    //            CHECK(update.update_item().display_info().readable_id().value() == "UPPER CASE");
+    //        }
+    //    }
+}
+
 TEST_CASE("[gvs-host] check_defaults_are_set_properly") {
     std::string server_address = "0.0.0.0:50050";
 

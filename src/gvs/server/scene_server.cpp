@@ -237,31 +237,30 @@ grpc::Status SceneServer::safe_set_item(const proto::SceneItemInfo& info, proto:
  *
  * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
  * | -------------- |:-----------------:| ------------------------------- | ------------------- |
- * | `gvs::replace` |      **Yes**      | Replaces existing geometry*     | Creates new item    |
+ * | `gvs::replace` |      **Yes**      | Replaces existing geometry      | Creates new item    |
  * | `gvs::replace` |       *No*        | Updates item                    | **Error**           |
  */
-grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
-    const std::string& id = info.id().value();
+grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
+    std::string id = info.id().value();
 
-    if (util::has_key(scene_.items(), id)) {
+    if (info.has_geometry_info()) {
 
-        proto::SceneUpdate update;
-        update.mutable_update_item()->CopyFrom(info);
+        if (util::has_key(scene_.items(), id)) {
+            scene_.mutable_items()->at(id).mutable_geometry_info()->CopyFrom(info.geometry_info());
+            update_item_and_send_update(info, errors);
+            return grpc::Status::OK;
+        }
 
-        scene_stream_->write(update);
+        add_item_and_send_update(info, errors);
 
     } else {
-        // Item doesn't yet exist. Add it.
-        // TODO: Error check? (has_geometry, etc.)
-        scene_.mutable_items()->insert({id, info});
-        // TODO: Handle parent and children updates
 
-        set_display_defaults(&scene_.mutable_items()->at(id));
+        if (not util::has_key(scene_.items(), id)) {
+            errors->set_error_msg("Item '" + id + "' does not exist and no geometry was specified.");
+            return grpc::Status::OK;
+        }
 
-        proto::SceneUpdate update;
-        update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
-
-        scene_stream_->write(update);
+        update_item_and_send_update(info, errors);
     }
 
     return grpc::Status::OK;
@@ -275,7 +274,7 @@ grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::
  * | `gvs::append`  |      **Yes**      | Appends positions to geometry** | Creates new item    |
  * | `gvs::append`  |       *No*        | Updates item                    | **Error**           |
  */
-grpc::Status SceneServer::append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
+grpc::Status host::SceneServer::append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
     std::string id = info.id().value();
 
     if (util::has_key(scene_.items(), id)) {
@@ -306,7 +305,7 @@ grpc::Status SceneServer::append_to_item(const proto::SceneItemInfo& info, proto
     return grpc::Status::OK;
 }
 
-void SceneServer::add_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
+void host::SceneServer::add_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
     const std::string& id = info.id().value();
 
     // TODO: Error check (has correct geometry, etc.)
@@ -320,7 +319,7 @@ void SceneServer::add_item_and_send_update(const proto::SceneItemInfo& info, pro
     scene_stream_->write(update);
 }
 
-void SceneServer::update_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
+void host::SceneServer::update_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
     const std::string& id = info.id().value();
 
     update_display_defaults(&scene_.mutable_items()->at(id), info);
@@ -333,7 +332,7 @@ void SceneServer::update_item_and_send_update(const proto::SceneItemInfo& info, 
     scene_stream_->write(update);
 }
 
-void SceneServer::remove_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
+void host::SceneServer::remove_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
     // TODO
 }
 
