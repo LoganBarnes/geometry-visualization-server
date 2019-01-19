@@ -75,6 +75,8 @@ Logging
 | `gvs::triangle_strip` | `gvs::incices<GeometryFormat::TRIANGLE_STRIP>` |
 | `gvs::triangle_fan`   | `gvs::incices<GeometryFormat::TRIANGLE_FAN>`   |
 
+#### Display
+
 | Name                   | Type                  | Default                                        |
 | ---------------------- | --------------------- | ---------------------------------------------- |
 | `gvs::geometry_format` | proto::GeometryFormat | proto::GeometryFormat::POINTS                  |
