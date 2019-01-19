@@ -80,7 +80,9 @@ private:
 // ///////////////////////////////////  TESTING  ////////////////////////////////////// //
 // //////////////////////////////////////////////////////////////////////////////////// //
 #ifdef DOCTEST_LIBRARY_INCLUDED
-#include <gvs/item_defaults.hpp>
+#include "gvs/item_defaults.hpp"
+#include "gvs/net/grpc_client.hpp"
+#include "gvs/util/string.hpp"
 
 #include <grpc++/create_channel.h>
 

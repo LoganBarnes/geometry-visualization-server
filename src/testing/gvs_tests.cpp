@@ -23,17 +23,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include "testing/util/test_proto_util.hpp"
-#include "testing/util/test_server.hpp"
-#include "testing/util/test_service.hpp"
-
-#include "gvs/util/apply.hpp"
-#include "gvs/util/atomic_data.hpp"
-#include "gvs/util/blocking_queue.hpp"
-#include "gvs/util/callback_handler.hpp"
-#include "gvs/util/container_util.hpp"
-#include "gvs/util/proto_util.hpp"
-#include "gvs/util/string.hpp"
+//#include "gvs/server/scene_server.hpp"
 
 #include "gvs/net/detail/async_rpc_handler_interface.hpp"
 #include "gvs/net/detail/non_stream_rpc_handler.hpp"
@@ -45,4 +35,14 @@
 #include "gvs/net/grpc_client_stream.hpp"
 #include "gvs/net/grpc_server.hpp"
 
-#include "gvs/server/scene_server.hpp"
+#include "gvs/util/apply.hpp"
+#include "gvs/util/atomic_data.hpp"
+#include "gvs/util/blocking_queue.hpp"
+#include "gvs/util/callback_handler.hpp"
+#include "gvs/util/container_util.hpp"
+#include "gvs/util/proto_util.hpp"
+#include "gvs/util/string.hpp"
+
+#include "testing/util/test_proto_util.hpp"
+#include "testing/util/test_server.hpp"
+#include "testing/util/test_service.hpp"
