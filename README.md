@@ -109,9 +109,11 @@ Uses the color style defined by `gvs::coloring()` but also applies shading using
 
 ### Logging Rules
 
-There are 3 ways to send data
+There are 3 request types that can be used to send data: `gvs::send`, `gvs::replace` (not implemented), 
+or `gvs::update` (not implemented). The server behaves differently depending on what data you send and 
+which request you use:
 
-| Send Type      | With Positions | Item Exists                     | Item Does Not Exist |
+| Request Type   | With Positions | Item Exists                     | Item Does Not Exist |
 | -------------- |:--------------:| ------------------------------- | ------------------- |
 | `gvs::send`    |     **Yes**    | **Error**                       | Creates new item    |
 | `gvs::send`    |      *No*      | Updates item                    | **Error**           |
