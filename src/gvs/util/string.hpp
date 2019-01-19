@@ -20,29 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#pragma once
 
-#include "testing/util/test_proto_util.hpp"
-#include "testing/util/test_server.hpp"
-#include "testing/util/test_service.hpp"
+#include <string>
 
-#include "gvs/util/apply.hpp"
-#include "gvs/util/atomic_data.hpp"
-#include "gvs/util/blocking_queue.hpp"
-#include "gvs/util/callback_handler.hpp"
-#include "gvs/util/container_util.hpp"
-#include "gvs/util/proto_util.hpp"
-#include "gvs/util/string.hpp"
+namespace gvs {
+namespace util {
 
-#include "gvs/net/detail/async_rpc_handler_interface.hpp"
-#include "gvs/net/detail/non_stream_rpc_handler.hpp"
-#include "gvs/net/detail/stream_rpc_handler.hpp"
-#include "gvs/net/detail/tag.hpp"
-#include "gvs/net/grpc_async_server.hpp"
-#include "gvs/net/grpc_client.hpp"
-#include "gvs/net/grpc_client_state.hpp"
-#include "gvs/net/grpc_client_stream.hpp"
-#include "gvs/net/grpc_server.hpp"
+inline bool starts_with(const std::string& str, const std::string& prefix) {
+    return str.compare(0, prefix.length(), prefix) == 0;
+}
 
-#include "gvs/server/scene_server.hpp"
+#ifdef DOCTEST_LIBRARY_INCLUDED
+TEST_CASE("[gvs-util] string_starts_with") {
+    CHECK(starts_with("", ""));
+    CHECK(starts_with("check for prefix", ""));
+    CHECK(starts_with("check for prefix", "c"));
+    CHECK(starts_with("check for prefix", "check"));
+    CHECK(starts_with("check for prefix", "check "));
+    CHECK(starts_with("check for prefix", "check for prefix"));
+
+    CHECK_FALSE(starts_with("", "?"));
+    CHECK_FALSE(starts_with("check for prefix", "z"));
+    CHECK_FALSE(starts_with("check for prefix", "checkk"));
+    CHECK_FALSE(starts_with("check for prefix", "check  "));
+    CHECK_FALSE(starts_with("check for prefix", "check for prefix?"));
+}
+#endif
+
+} // namespace util
+} // namespace gvs

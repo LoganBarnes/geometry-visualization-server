@@ -164,7 +164,7 @@ file(GLOB_RECURSE LOG_CLIENT_SOURCE_FILES
         ${CMAKE_CURRENT_LIST_DIR}/gvs/log/*
         )
 
-add_library(gvs_log_client ${LOG_CLIENT_SOURCE_FILES})
+add_library(gvs_log_client ${LOG_CLIENT_SOURCE_FILES} gvs/util/string.hpp)
 target_link_libraries(gvs_log_client PUBLIC gvs_net)
 
 ###################

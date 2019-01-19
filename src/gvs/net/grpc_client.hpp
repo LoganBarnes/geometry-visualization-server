@@ -170,6 +170,9 @@ public:
     template <typename ConnectionCallback, typename... Args>
     void change_server(std::string address, ConnectionCallback connection_change_callback, Args&&... callback_args);
 
+    template <typename TimePoint>
+    bool change_server_and_wait_for_connect(std::string address, const TimePoint& deadline);
+
     template <typename Return, typename InitFunc, typename Callback>
     void* register_stream(InitFunc init_func, Callback callback);
 
@@ -250,6 +253,27 @@ void GrpcClient<Service>::change_server(std::string address,
                                         util::make_callback<void, const GrpcClientState&>(connection_change_callback,
                                                                                           std::forward<Args>(
                                                                                               callback_args)...));
+}
+
+template <typename Service>
+template <typename TimePoint>
+bool GrpcClient<Service>::change_server_and_wait_for_connect(std::string address, const TimePoint& deadline) {
+    kill_streams_and_channel();
+
+    server_address_ = std::move(address);
+    queue_ = std::make_unique<grpc::CompletionQueue>();
+
+    bool connected;
+
+    shared_data_.use_safely([&](SharedData& data) {
+        data.channel = grpc::CreateChannel(server_address_, grpc::InsecureChannelCredentials());
+        data.stub = Service::NewStub(data.channel);
+
+        connected = data.channel->WaitForConnected(deadline);
+        data.connection_state = data.channel->GetState(false);
+    });
+
+    return connected;
 }
 
 template <typename Service>

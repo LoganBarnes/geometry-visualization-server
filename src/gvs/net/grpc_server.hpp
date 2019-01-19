@@ -117,7 +117,7 @@ TEST_CASE("[gvs-net] run_server_and_check_echo_rpc_call") {
 
     grpc::Status status = stub->echo(&context, request, &response);
 
-    // Check the server recieved the message and responded with the same message
+    // Check the server received the message and responded with the same message
     CHECK(status.ok());
     CHECK(response.msg() == test_msg);
 
@@ -148,7 +148,7 @@ TEST_CASE("[gvs-net] run_inprocess_server_and_check_echo_rpc_call") {
 
     grpc::Status status = stub->echo(&context, request, &response);
 
-    // Check the server recieved the message and responded with the same message
+    // Check the server received the message and responded with the same message
     CHECK(status.ok());
     CHECK(response.msg() == test_msg);
 

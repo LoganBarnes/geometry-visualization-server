@@ -77,14 +77,14 @@ Logging
 
 #### Display
 
-| Name                   | Type                  | Default                                        |
-| ---------------------- | --------------------- | ---------------------------------------------- |
-| `gvs::geometry_format` | proto::GeometryFormat | proto::GeometryFormat::POINTS                  |
-| `gvs::coloring`        | proto::Coloring       | proto::Coloring::UNIFORM_COLOR                 |
-| `gvs::transformation`  | std::array<float, 16> | 1,0,0,0,<br> 0,1,0,0,<br> 0,0,1,0,<br> 0,0,0,1 |
-| `gvs::uniform_color`   | std::array<float, 3>  | {0.9f, 0.8f, 0.7f}                             |
-| `gvs::parent`          | std::string data      | ""                                             |
-| `gvs::shading`         | See below             | See below                                      |
+| Name                   | Type                    | Default                                        |
+| ---------------------- | ----------------------- | ---------------------------------------------- |
+| `gvs::geometry_format` | `proto::GeometryFormat` | `proto::GeometryFormat::POINTS`                |
+| `gvs::coloring`        | `proto::Coloring`       | `proto::Coloring::UNIFORM_COLOR`               |
+| `gvs::transformation`  | `std::array<float, 16>` | 1,0,0,0,<br> 0,1,0,0,<br> 0,0,1,0,<br> 0,0,0,1 |
+| `gvs::uniform_color`   | `std::array<float, 3>`  | `{0.9f, 0.8f, 0.7f}`                           |
+| `gvs::parent`          | `std::string`           | `""`                                           |
+| `gvs::shading`         | See below               | See below                                      |
 
 #### Shading
 

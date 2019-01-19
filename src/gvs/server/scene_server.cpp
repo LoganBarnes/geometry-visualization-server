@@ -32,7 +32,7 @@ namespace host {
 
 namespace {
 
-void set_non_geom_defaults(proto::SceneItemInfo* info) {
+void set_display_defaults(proto::SceneItemInfo* info) {
     if (info->has_display_info()) {
         proto::DisplayInfo* display_info = info->mutable_display_info();
 
@@ -82,6 +82,37 @@ void set_non_geom_defaults(proto::SceneItemInfo* info) {
                 lambertian->mutable_ambient_color()->set_y(default_ambient_color[1]);
                 lambertian->mutable_ambient_color()->set_z(default_ambient_color[2]);
             }
+        }
+    }
+}
+
+void update_display_defaults(proto::SceneItemInfo* old_info, const proto::SceneItemInfo& new_info) {
+    if (new_info.has_display_info()) {
+        proto::DisplayInfo* old_display_info = old_info->mutable_display_info();
+        const proto::DisplayInfo& new_display_info = new_info.display_info();
+
+        if (new_display_info.has_readable_id()) {
+            old_display_info->mutable_readable_id()->CopyFrom(new_display_info.readable_id());
+        }
+
+        if (new_display_info.has_geometry_format()) {
+            old_display_info->mutable_geometry_format()->CopyFrom(new_display_info.geometry_format());
+        }
+
+        if (new_display_info.has_transformation()) {
+            old_display_info->mutable_transformation()->CopyFrom(new_display_info.transformation());
+        }
+
+        if (new_display_info.has_uniform_color()) {
+            old_display_info->mutable_uniform_color()->CopyFrom(new_display_info.uniform_color());
+        }
+
+        if (new_display_info.has_coloring()) {
+            old_display_info->mutable_coloring()->CopyFrom(new_display_info.coloring());
+        }
+
+        if (new_display_info.has_shading()) {
+            old_display_info->mutable_shading()->CopyFrom(new_display_info.shading());
         }
     }
 }
@@ -191,6 +222,12 @@ grpc::Status SceneServer::safe_set_item(const proto::SceneItemInfo& info, proto:
         add_item_and_send_update(info, errors);
 
     } else {
+
+        if (not util::has_key(scene_.items(), id)) {
+            errors->set_error_msg("Item '" + id + "' does not exist and no geometry was specified.");
+            return grpc::Status::OK;
+        }
+
         update_item_and_send_update(info, errors);
     }
 
@@ -221,7 +258,7 @@ grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::
         scene_.mutable_items()->insert({id, info});
         // TODO: Handle parent and children updates
 
-        set_non_geom_defaults(&scene_.mutable_items()->at(id));
+        set_display_defaults(&scene_.mutable_items()->at(id));
 
         proto::SceneUpdate update;
         update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
@@ -260,7 +297,7 @@ grpc::Status SceneServer::append_to_item(const proto::SceneItemInfo& info, proto
         scene_.mutable_items()->insert({id, info});
         // TODO: Handle parent and children updates
 
-        set_non_geom_defaults(&scene_.mutable_items()->at(id));
+        set_display_defaults(&scene_.mutable_items()->at(id));
 
         proto::SceneUpdate update;
         update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
@@ -278,15 +315,24 @@ void SceneServer::add_item_and_send_update(const proto::SceneItemInfo& info, pro
     scene_.mutable_items()->insert({id, info});
     // TODO: Handle parent and children updates
 
-    set_non_geom_defaults(&scene_.mutable_items()->at(id));
+    set_display_defaults(&scene_.mutable_items()->at(id));
 
     proto::SceneUpdate update;
     update.mutable_add_item()->CopyFrom(scene_.mutable_items()->at(id));
     scene_stream_->write(update);
 }
 
-void SceneServer::update_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
-    // TODO
+void SceneServer::update_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
+    const std::string& id = info.id().value();
+
+    update_display_defaults(&scene_.mutable_items()->at(id), info);
+
+    // TODO: Handle parent and children updates
+
+    proto::SceneUpdate update;
+    update.mutable_update_item()->CopyFrom(scene_.mutable_items()->at(id));
+
+    scene_stream_->write(update);
 }
 
 void SceneServer::remove_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
