@@ -80,40 +80,35 @@ private:
 // ///////////////////////////////////  TESTING  ////////////////////////////////////// //
 // //////////////////////////////////////////////////////////////////////////////////// //
 #ifdef DOCTEST_LIBRARY_INCLUDED
+#include <gvs/item_defaults.hpp>
+
 #include <grpc++/create_channel.h>
 
 #include <thread>
 
-TEST_CASE("[gvs-host] test_all_ways_of_modifying_the_server") {
-    std::string server_address = "0.0.0.0:50050";
+class SceneTestClient {
 
-    // Set up the scene server
-    gvs::host::SceneServer server(server_address);
+public:
+    explicit SceneTestClient(const std::string& server_address) {
+        auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
+        REQUIRE(grpc_client_.change_server_and_wait_for_connect(server_address, deadline));
 
-    // Set up the scene client
-    gvs::net::GrpcClient<gvs::proto::Scene> client;
-
-    auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
-    REQUIRE(client.change_server_and_wait_for_connect(server_address, deadline));
-
-    // keeps track of scene updates received on a separate thread
-    gvs::util::BlockingQueue<gvs::proto::SceneUpdate> updates;
-
-    // Connect to the stream that delivers scene updates
-    client.register_stream<gvs::proto::SceneUpdate>(
-        [](std::unique_ptr<gvs::proto::Scene::Stub>& stub, grpc::ClientContext* context) {
-            google::protobuf::Empty empty;
-            return stub->SceneUpdates(context, empty);
-        },
-        [&updates](const gvs::proto::SceneUpdate& update) { updates.push_back(update); });
+        // Connect to the stream that delivers scene updates
+        grpc_client_.register_stream<gvs::proto::SceneUpdate>(
+            [](std::unique_ptr<gvs::proto::Scene::Stub>& stub, grpc::ClientContext* context) {
+                google::protobuf::Empty empty;
+                return stub->SceneUpdates(context, empty);
+            },
+            [this](const gvs::proto::SceneUpdate& update) { updates.push_back(update); });
+    }
 
     /**
      * @brief Send a request, make sure it was sent successfully, return any errors.
      */
-    auto send_request = [&](const gvs::proto::SceneUpdateRequest& request) {
+    gvs::proto::Errors send_request(const gvs::proto::SceneUpdateRequest& request) {
         gvs::proto::Errors errors;
 
-        bool successfully_sent = client.use_stub([&](auto& stub) {
+        bool successfully_sent = grpc_client_.use_stub([&](auto& stub) {
             grpc::ClientContext context;
             grpc::Status status = stub->UpdateScene(&context, request, &errors);
 
@@ -124,9 +119,39 @@ TEST_CASE("[gvs-host] test_all_ways_of_modifying_the_server") {
         return errors;
     };
 
+    // keeps track of scene updates received on a separate thread
+    gvs::util::BlockingQueue<gvs::proto::SceneUpdate> updates;
+
+private:
+    gvs::net::GrpcClient<gvs::proto::Scene> grpc_client_;
+};
+
+TEST_CASE("[gvs-host] test_no_update_set") {
+    std::string server_address = "0.0.0.0:50050";
+
+    // Set up the scene server
+    gvs::host::SceneServer server(server_address);
+
+    // Set up the scene client
+    SceneTestClient client(server_address);
+
+    gvs::proto::SceneUpdateRequest request;
+    gvs::proto::Errors errors = client.send_request(request);
+    CHECK(errors.error_msg() == "No update set");
+}
+
+TEST_CASE("[gvs-host] test_safe_send") {
+    std::string server_address = "0.0.0.0:50050";
+
+    // Set up the scene server
+    gvs::host::SceneServer server(server_address);
+
+    // Set up the scene client
+    SceneTestClient client(server_address);
+
     SUBCASE("no_update_set") {
         gvs::proto::SceneUpdateRequest request;
-        gvs::proto::Errors errors = send_request(request);
+        gvs::proto::Errors errors = client.send_request(request);
         CHECK(errors.error_msg() == "No update set");
     }
 
@@ -141,12 +166,12 @@ TEST_CASE("[gvs-host] test_all_ways_of_modifying_the_server") {
             gvs::proto::SceneUpdateRequest request;
             request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
             request.mutable_safe_set_item()->mutable_geometry_info()->mutable_positions();
-            gvs::proto::Errors errors = send_request(request);
+            gvs::proto::Errors errors = client.send_request(request);
 
             CHECK(errors.error_msg().empty());
 
             // Item was added to scene
-            gvs::proto::SceneUpdate update = updates.pop_front();
+            gvs::proto::SceneUpdate update = client.updates.pop_front();
             CHECK(update.update_case() == gvs::proto::SceneUpdate::kAddItem);
         }
 
@@ -155,7 +180,7 @@ TEST_CASE("[gvs-host] test_all_ways_of_modifying_the_server") {
             gvs::proto::SceneUpdateRequest request;
             request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
             request.mutable_safe_set_item()->mutable_geometry_info()->mutable_positions();
-            gvs::proto::Errors errors = send_request(request);
+            gvs::proto::Errors errors = client.send_request(request);
 
             CHECK_FALSE(errors.error_msg().empty());
 
@@ -175,7 +200,7 @@ TEST_CASE("[gvs-host] test_all_ways_of_modifying_the_server") {
             gvs::proto::SceneUpdateRequest request;
             request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
             request.mutable_safe_set_item()->mutable_display_info()->mutable_readable_id()->set_value("lower-case");
-            gvs::proto::Errors errors = send_request(request);
+            gvs::proto::Errors errors = client.send_request(request);
 
             CHECK(errors.error_msg() == "Item 'safe_set_item' does not exist and no geometry was specified.");
         }
@@ -186,12 +211,12 @@ TEST_CASE("[gvs-host] test_all_ways_of_modifying_the_server") {
             request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
             request.mutable_safe_set_item()->mutable_geometry_info()->mutable_positions();
             request.mutable_safe_set_item()->mutable_display_info()->mutable_readable_id()->set_value("lower-case");
-            gvs::proto::Errors errors = send_request(request);
+            gvs::proto::Errors errors = client.send_request(request);
 
             CHECK(errors.error_msg().empty());
 
             // Item was added to scene
-            gvs::proto::SceneUpdate update = updates.pop_front();
+            gvs::proto::SceneUpdate update = client.updates.pop_front();
             CHECK(update.update_case() == gvs::proto::SceneUpdate::kAddItem);
             CHECK(update.add_item().display_info().readable_id().value() == "lower-case");
         }
@@ -201,25 +226,91 @@ TEST_CASE("[gvs-host] test_all_ways_of_modifying_the_server") {
             gvs::proto::SceneUpdateRequest request;
             request.mutable_safe_set_item()->mutable_id()->set_value("safe_set_item");
             request.mutable_safe_set_item()->mutable_display_info()->mutable_readable_id()->set_value("UPPER CASE");
-            gvs::proto::Errors errors = send_request(request);
+            gvs::proto::Errors errors = client.send_request(request);
 
             CHECK(errors.error_msg().empty());
 
             // Item was updated
-            gvs::proto::SceneUpdate update = updates.pop_front();
+            gvs::proto::SceneUpdate update = client.updates.pop_front();
             CHECK(update.update_case() == gvs::proto::SceneUpdate::kUpdateItem);
             CHECK(update.update_item().display_info().readable_id().value() == "UPPER CASE");
         }
     }
+}
 
-    /*
-     * | Request Type   | Contains Geometry | Item Already Exists             | Item Does Not Exist |
-     * | -------------- |:-----------------:| ------------------------------- | ------------------- |
-     * | `gvs::replace` |      **Yes**      | Replaces existing geometry*     | Creates new item    |
-     * | `gvs::replace` |       *No*        | Updates item                    | **Error**           |
-     * | `gvs::append`  |      **Yes**      | Appends positions to geometry** | Creates new item    |
-     * | `gvs::append`  |       *No*        | Updates item                    | **Error**           |
-     */
+TEST_CASE("[gvs-host] check_defaults_are_set_properly") {
+    std::string server_address = "0.0.0.0:50050";
+
+    // Set up the scene server
+    gvs::host::SceneServer server(server_address);
+
+    // Set up the scene client
+    SceneTestClient client(server_address);
+
+    // Add an item with no default values
+    gvs::proto::SceneUpdateRequest request;
+    request.mutable_safe_set_item()->mutable_id()->set_value("unique_item_id");
+    request.mutable_safe_set_item()->mutable_geometry_info()->mutable_positions();
+    gvs::proto::Errors errors = client.send_request(request);
+
+    CHECK(errors.error_msg().empty());
+
+    // Item was added to scene
+    gvs::proto::SceneUpdate update = client.updates.pop_front();
+    CHECK(update.update_case() == gvs::proto::SceneUpdate::kAddItem);
+
+    const gvs::proto::DisplayInfo& display_info = update.add_item().display_info();
+
+    CHECK(display_info.readable_id().value() == "unique_item_id");
+    CHECK(display_info.geometry_format().value() == gvs::default_geom_format);
+    CHECK(display_info.transformation().data_size() == 16);
+    CHECK(std::equal(display_info.transformation().data().data(),
+                     display_info.transformation().data().data() + 16,
+                     gvs::default_transformation.data()));
+    CHECK(display_info.uniform_color().x() == gvs::default_color[0]);
+    CHECK(display_info.uniform_color().y() == gvs::default_color[1]);
+    CHECK(display_info.uniform_color().z() == gvs::default_color[2]);
+    CHECK(display_info.coloring().value() == gvs::default_coloring);
+    CHECK(display_info.shading().value_case() == gvs::proto::Shading::kUniformColor);
+}
+
+TEST_CASE("[gvs-host] check_lambertian_defaults_are_set_properly") {
+    std::string server_address = "0.0.0.0:50050";
+
+    // Set up the scene server
+    gvs::host::SceneServer server(server_address);
+
+    // Set up the scene client
+    SceneTestClient client(server_address);
+
+    // Add an item with empty lambertian shading
+    gvs::proto::SceneUpdateRequest request;
+    request.mutable_safe_set_item()->mutable_id()->set_value("unique_item_id");
+    request.mutable_safe_set_item()->mutable_geometry_info()->mutable_positions();
+    request.mutable_safe_set_item()->mutable_display_info()->mutable_shading()->mutable_lambertian();
+    gvs::proto::Errors errors = client.send_request(request);
+
+    CHECK(errors.error_msg().empty());
+
+    // Item was added to scene
+    gvs::proto::SceneUpdate update = client.updates.pop_front();
+    CHECK(update.update_case() == gvs::proto::SceneUpdate::kAddItem);
+
+    const gvs::proto::DisplayInfo& display_info = update.add_item().display_info();
+    CHECK(display_info.shading().value_case() == gvs::proto::Shading::kLambertian);
+
+    const gvs::proto::LambertianShading& shading = display_info.shading().lambertian();
+    CHECK(shading.light_direction().x() == gvs::default_light_direction[0]);
+    CHECK(shading.light_direction().y() == gvs::default_light_direction[1]);
+    CHECK(shading.light_direction().z() == gvs::default_light_direction[2]);
+
+    CHECK(shading.light_color().x() == gvs::default_light_color[0]);
+    CHECK(shading.light_color().y() == gvs::default_light_color[1]);
+    CHECK(shading.light_color().z() == gvs::default_light_color[2]);
+
+    CHECK(shading.ambient_color().x() == gvs::default_ambient_color[0]);
+    CHECK(shading.ambient_color().y() == gvs::default_ambient_color[1]);
+    CHECK(shading.ambient_color().z() == gvs::default_ambient_color[2]);
 }
 
 #endif

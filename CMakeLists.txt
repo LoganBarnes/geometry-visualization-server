@@ -27,6 +27,7 @@ option(GVS_LOGGING_ONLY "Only build the logging library" OFF)
 option(GVS_BUILD_TESTS "Build unit tests" OFF)
 option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
 option(GVS_UPDATES_DISCONNECTED "Update third party repos" OFF)
+option(GVS_FORMAT_ON_BUILD "Format the code when building" OFF)
 
 #############################
 ### Project Configuration ###
@@ -98,7 +99,7 @@ add_subdirectory(src)
 ####################
 # only format things if this is the parent directory
 get_directory_property(has_parent PARENT_DIRECTORY)
-if (NOT has_parent)
+if (NOT has_parent AND ${GVS_FORMAT_ON_BUILD})
     find_program(CLANG_FORMAT_EXE
             NAMES "clang-format"
             DOC "Path to clang-format executable"

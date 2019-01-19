@@ -33,55 +33,53 @@ namespace host {
 namespace {
 
 void set_display_defaults(proto::SceneItemInfo* info) {
-    if (info->has_display_info()) {
-        proto::DisplayInfo* display_info = info->mutable_display_info();
+    proto::DisplayInfo* display_info = info->mutable_display_info();
 
-        if (not display_info->has_readable_id()) {
-            display_info->mutable_readable_id()->set_value(info->id().value());
+    if (not display_info->has_readable_id()) {
+        display_info->mutable_readable_id()->set_value(info->id().value());
+    }
+
+    if (not display_info->has_geometry_format()) {
+        display_info->mutable_geometry_format()->set_value(default_geom_format);
+    }
+
+    if (not display_info->has_transformation()) {
+        (*display_info->mutable_transformation()->mutable_data())
+            = {std::begin(default_transformation), std::end(default_transformation)};
+    }
+
+    if (not display_info->has_uniform_color()) {
+        display_info->mutable_uniform_color()->set_x(default_color[0]);
+        display_info->mutable_uniform_color()->set_y(default_color[1]);
+        display_info->mutable_uniform_color()->set_z(default_color[2]);
+    }
+
+    if (not display_info->has_coloring()) {
+        display_info->mutable_coloring()->set_value(default_coloring);
+    }
+
+    if (not display_info->has_shading()) {
+        display_info->mutable_shading()->mutable_uniform_color();
+
+    } else if (display_info->shading().has_lambertian()) {
+        proto::LambertianShading* lambertian = display_info->mutable_shading()->mutable_lambertian();
+
+        if (not lambertian->has_light_direction()) {
+            lambertian->mutable_light_direction()->set_x(default_light_direction[0]);
+            lambertian->mutable_light_direction()->set_y(default_light_direction[1]);
+            lambertian->mutable_light_direction()->set_z(default_light_direction[2]);
         }
 
-        if (not display_info->has_geometry_format()) {
-            display_info->mutable_geometry_format()->set_value(default_geom_format);
+        if (not lambertian->has_light_color()) {
+            lambertian->mutable_light_color()->set_x(default_light_color[0]);
+            lambertian->mutable_light_color()->set_y(default_light_color[1]);
+            lambertian->mutable_light_color()->set_z(default_light_color[2]);
         }
 
-        if (not display_info->has_transformation()) {
-            (*display_info->mutable_transformation()->mutable_data())
-                = {std::begin(default_transformation), std::end(default_transformation)};
-        }
-
-        if (not display_info->has_uniform_color()) {
-            display_info->mutable_uniform_color()->set_x(default_color[0]);
-            display_info->mutable_uniform_color()->set_y(default_color[1]);
-            display_info->mutable_uniform_color()->set_z(default_color[2]);
-        }
-
-        if (not display_info->has_coloring()) {
-            display_info->mutable_coloring()->set_value(default_coloring);
-        }
-
-        if (not display_info->has_shading()) {
-            display_info->mutable_shading()->mutable_uniform_color();
-
-        } else if (display_info->shading().has_lambertian()) {
-            proto::LambertianShading* lambertian = display_info->mutable_shading()->mutable_lambertian();
-
-            if (not lambertian->has_light_direction()) {
-                lambertian->mutable_light_direction()->set_x(default_light_direction[0]);
-                lambertian->mutable_light_direction()->set_y(default_light_direction[1]);
-                lambertian->mutable_light_direction()->set_z(default_light_direction[2]);
-            }
-
-            if (not lambertian->has_light_color()) {
-                lambertian->mutable_light_color()->set_x(default_light_color[0]);
-                lambertian->mutable_light_color()->set_y(default_light_color[1]);
-                lambertian->mutable_light_color()->set_z(default_light_color[2]);
-            }
-
-            if (not lambertian->has_ambient_color()) {
-                lambertian->mutable_ambient_color()->set_x(default_ambient_color[0]);
-                lambertian->mutable_ambient_color()->set_y(default_ambient_color[1]);
-                lambertian->mutable_ambient_color()->set_z(default_ambient_color[2]);
-            }
+        if (not lambertian->has_ambient_color()) {
+            lambertian->mutable_ambient_color()->set_x(default_ambient_color[0]);
+            lambertian->mutable_ambient_color()->set_y(default_ambient_color[1]);
+            lambertian->mutable_ambient_color()->set_z(default_ambient_color[2]);
         }
     }
 }
