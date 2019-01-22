@@ -25,11 +25,10 @@
 namespace gvs {
 namespace log {
 
-GeometryItemStream::GeometryItemStream(std::string id, proto::Scene::Stub* stub) : id_(std::move(id)), stub_(stub) {
-    info_.mutable_id()->set_value(id_);
-}
+GeometryItemStream::GeometryItemStream(std::string id, proto::Scene::Stub* stub) : id_(std::move(id)), stub_(stub) {}
 
 void GeometryItemStream::send_current_data(SendType type) {
+    info_.mutable_id()->set_value(id_);
     if (stub_) {
         proto::SceneUpdateRequest update;
 
