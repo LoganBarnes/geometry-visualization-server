@@ -137,6 +137,7 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
 
         std::vector<float> buffer_data;
         GLintptr offset = 0;
+        mesh_package.mesh.setCount(0);
 
         if (geometry.has_positions()) {
             const proto::FloatList& positions = geometry.positions();

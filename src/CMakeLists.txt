@@ -53,9 +53,9 @@ target_link_libraries(gvs_net
 
 target_compile_options(gvs_net PUBLIC ${GVS_COMPILE_FLAGS})
 
-    ##############
-    ### Server ###
-    ##############
+##############
+### Server ###
+##############
 if (NOT GVS_LOGGING_ONLY)
     file(GLOB_RECURSE SCENE_SERVER_SOURCE_FILES
             LIST_DIRECTORIES false
@@ -164,7 +164,7 @@ file(GLOB_RECURSE LOG_CLIENT_SOURCE_FILES
         ${CMAKE_CURRENT_LIST_DIR}/gvs/log/*
         )
 
-add_library(gvs_log_client ${LOG_CLIENT_SOURCE_FILES} gvs/util/string.hpp)
+add_library(gvs_log_client ${LOG_CLIENT_SOURCE_FILES})
 target_link_libraries(gvs_log_client PUBLIC gvs_net)
 
 ###################
@@ -270,5 +270,5 @@ if (${GVS_BUILD_TESTS})
     set_target_properties(gvs_tests PROPERTIES
             CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/tests"
-    )
+            )
 endif ()

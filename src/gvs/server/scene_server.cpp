@@ -327,7 +327,7 @@ void host::SceneServer::update_item_and_send_update(const proto::SceneItemInfo& 
     // TODO: Handle parent and children updates
 
     proto::SceneUpdate update;
-    update.mutable_update_item()->CopyFrom(scene_.mutable_items()->at(id));
+    update.mutable_update_item()->CopyFrom(info);
 
     scene_stream_->write(update);
 }
