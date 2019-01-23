@@ -39,7 +39,7 @@ namespace log {
     }
 
 /// \brief Checks for errors from a GeometryItemStream and prints them to std::cerr if they exist
-#define CHECK(stream)                                                                                                  \
+#define CHECK_WITH_PRINT(stream)                                                                                       \
     if (not stream.success()) {                                                                                        \
         std::cerr << "Error (stream " << stream.id() << "): " << stream.error_message() << std::endl;                  \
     }

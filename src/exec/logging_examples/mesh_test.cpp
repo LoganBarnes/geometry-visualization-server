@@ -82,7 +82,7 @@ void add_translated_mesh_to_scene(const gvs::log::GeometryLogger& scene, const M
     cube_stream << gvs::positions_3d(mesh.verts) << gvs::normals_3d(mesh.norms) << gvs::triangles(mesh.tris)
                 << gvs::transformation({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1})
                 << gvs::shading(gvs::LambertianShading{{-1.f, -2.f, -3.f}}) << gvs::send;
-    CHECK(cube_stream);
+    CHECK_WITH_PRINT(cube_stream);
 }
 
 int main(int argc, char* argv[]) {
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
             << gvs::positions_3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
             << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
             << gvs::coloring(gvs::proto::Coloring::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3}) << gvs::replace;
-        CHECK(stream);
+        CHECK_WITH_PRINT(stream);
     }
 
     Mesh cube_mesh;

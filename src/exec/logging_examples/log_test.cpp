@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
             << gvs::coloring(gvs::proto::Coloring::GLOBAL_COLOR) << gvs::lines({0, 1, 0, 2, 0, 3})
 #endif
             << gvs::replace;
-        CHECK(stream);
+        CHECK_WITH_PRINT(stream);
     }
 
     std::vector<float> circle;
@@ -87,28 +87,28 @@ int main(int argc, char* argv[]) {
     gvs::log::GeometryItemStream triangle = scene.item_stream()
         << gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f})
         << gvs::uniform_color({.5f, 0.25f, 0.05f}) << gvs::triangles({}) << gvs::send;
-    CHECK(triangle);
+    CHECK_WITH_PRINT(triangle);
 
     gvs::log::GeometryItemStream stream2 = scene.item_stream()
         << gvs::positions_3d({-1.f, -1.f, -2.f, 2.f, -1.f, -2.f, -1.f, 2.f, -2.f, 2.f, 2.f, -2.f})
         << gvs::triangle_strip({}) << gvs::send;
-    CHECK(stream2);
+    CHECK_WITH_PRINT(stream2);
 
 #if 0
     gvs::log::GeometryItemStream blah_stream = scene.item_stream("blah") << gvs::positions_3d({});
 
     blah_stream << gvs::positions_3d({}) << gvs::normals_3d({}) << gvs::tex_coords_3d({}) << gvs::vertex_colors_3d({});
     blah_stream << gvs::indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>({}) << gvs::replace;
-    CHECK(blah_stream);
+    CHECK_WITH_PRINT(blah_stream);
 
     blah_stream << gvs::points({}) << gvs::append;
-    CHECK(blah_stream);
+    CHECK_WITH_PRINT(blah_stream);
 
     blah_stream << gvs::line_strip({}) << gvs::append;
-    CHECK(blah_stream);
+    CHECK_WITH_PRINT(blah_stream);
 
     blah_stream << gvs::replace;
-    CHECK(blah_stream);
+    CHECK_WITH_PRINT(blah_stream);
 #endif
 
     std::vector<float> sphere;
@@ -131,9 +131,10 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    CHECK(scene.item_stream("sphere").send(gvs::positions_3d(sphere),
-                                           gvs::normals_3d(sphere),
-                                           gvs::transformation({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 2, 2, 1}),
-                                           gvs::shading(gvs::LambertianShading()),
-                                           gvs::coloring(gvs::proto::Coloring::NORMALS)));
+    CHECK_WITH_PRINT(
+        scene.item_stream("sphere").send(gvs::positions_3d(sphere),
+                                         gvs::normals_3d(sphere),
+                                         gvs::transformation({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 2, 2, 1}),
+                                         gvs::shading(gvs::LambertianShading()),
+                                         gvs::coloring(gvs::proto::Coloring::NORMALS)));
 }
