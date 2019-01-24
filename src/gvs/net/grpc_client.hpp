@@ -228,7 +228,10 @@ void GrpcClient<Service>::change_server(std::string address,
     GrpcClientState typed_state;
 
     shared_data_.use_safely([&](SharedData& data) {
-        data.channel = grpc::CreateChannel(server_address_, grpc::InsecureChannelCredentials());
+        grpc::ChannelArguments channel_args;
+        channel_args.SetMaxReceiveMessageSize(std::numeric_limits<int>::max());
+
+        data.channel = grpc::CreateCustomChannel(server_address_, grpc::InsecureChannelCredentials(), channel_args);
         data.stub = Service::NewStub(data.channel);
 
         // Get the current state and check if it has changed

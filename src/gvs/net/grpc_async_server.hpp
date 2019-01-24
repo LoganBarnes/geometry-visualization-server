@@ -67,6 +67,7 @@ GrpcAsyncServer<Service>::GrpcAsyncServer(std::shared_ptr<Service> service, cons
     grpc::ServerBuilder builder;
     builder.RegisterService(service_.get());
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
+    builder.SetMaxMessageSize(std::numeric_limits<int>::max());
     server_queue_ = builder.AddCompletionQueue();
     server_ = builder.BuildAndStart();
 
