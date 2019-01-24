@@ -66,7 +66,10 @@ GeometryLogger::GeometryLogger(const std::string& server_address,
         std::cout << "No server address provided. Ignoring stream requests." << std::endl;
 
     } else {
-        channel_ = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+        grpc::ChannelArguments channel_args;
+        channel_args.SetMaxReceiveMessageSize(std::numeric_limits<int>::max());
+
+        channel_ = grpc::CreateCustomChannel(server_address, grpc::InsecureChannelCredentials(), channel_args);
 
         if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
             stub_ = proto::Scene::NewStub(channel_);

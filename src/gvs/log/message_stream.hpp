@@ -63,8 +63,12 @@ private:
 template <typename Rep, typename Period>
 MessageStream::MessageStream(const std::string& server_address,
                              const std::chrono::duration<Rep, Period>& max_connection_wait_duration,
-                             const std::string& identifier)
-    : channel_(grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials())) {
+                             const std::string& identifier) {
+
+    grpc::ChannelArguments channel_args;
+    channel_args.SetMaxReceiveMessageSize(std::numeric_limits<int>::max());
+
+    channel_ = grpc::CreateCustomChannel(server_address, grpc::InsecureChannelCredentials(), channel_args);
 
     message_.set_identifier(identifier);
 
