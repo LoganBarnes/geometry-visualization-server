@@ -34,6 +34,7 @@ GrpcServer::GrpcServer(std::shared_ptr<grpc::Service> service, const std::string
 
     grpc::ServerBuilder builder;
     builder.RegisterService(service_.get());
+    builder.SetMaxMessageSize(std::numeric_limits<int>::max());
 
     if (not server_address.empty()) {
         builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
