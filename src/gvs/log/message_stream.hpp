@@ -39,6 +39,14 @@ namespace log {
 
 class MessageStream {
 public:
+    /// \brief Handles the server connection for messages
+    ///
+    ///        Defaults to a maximum 4 second wait time when attempting to connect.
+    ///
+    /// \param server_address - the logger will attempt to connect to this address
+    /// \param identifier - the "name" of this client when sending messages
+    explicit MessageStream(const std::string& server_address, const std::string& identifier = "Client");
+
     template <typename Rep, typename Period>
     explicit MessageStream(const std::string& server_address,
                            const std::chrono::duration<Rep, Period>& max_connection_wait_duration,

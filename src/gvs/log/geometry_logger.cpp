@@ -28,7 +28,7 @@ namespace gvs {
 namespace log {
 
 GeometryLogger::GeometryLogger(const std::string& server_address)
-    : GeometryLogger(server_address, std::chrono::seconds(3)) {}
+    : GeometryLogger(server_address, std::chrono::seconds(4)) {}
 
 bool GeometryLogger::connected() const {
     return stub_ != nullptr;

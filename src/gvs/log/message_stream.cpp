@@ -26,6 +26,9 @@
 namespace gvs {
 namespace log {
 
+MessageStream::MessageStream(const std::string& server_address, const std::string& identifier)
+    : MessageStream(server_address, std::chrono::seconds(4), identifier) {}
+
 bool MessageStream::connected() const {
     return stub_ != nullptr;
 }

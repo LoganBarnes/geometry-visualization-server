@@ -37,9 +37,9 @@ public:
     /// \brief Handles the server connection for geometry streams
     ///
     ///        If 'server_address' is an empty string, no connection attempt will be made.
-    ///        Defaults to a maximum 3 second wait time when attempting to connect.
+    ///        Defaults to a maximum 4 second wait time when attempting to connect.
     ///
-    /// \param server_address
+    /// \param server_address - the logger will attempt to connect to this address
     explicit GeometryLogger(const std::string& server_address);
 
     template <typename Rep, typename Period>
