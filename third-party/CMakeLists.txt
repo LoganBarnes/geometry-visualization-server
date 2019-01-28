@@ -55,7 +55,7 @@ if (NOT GVS_LOGGING_ONLY)
     ############
     FetchContent_Declare(glfw_dl
             GIT_REPOSITORY https://github.com/glfw/glfw.git
-            GIT_TAG master
+            GIT_TAG 29d8ca4ce4aef8e0afca62b8ace9ee18a24a9ffd
             )
 
     FetchContent_GetProperties(glfw_dl)
