@@ -186,6 +186,19 @@ void ImGuiMagnumApplication::keyReleaseEvent(KeyEvent& event) {
         this->exit();
     }
 
+    if (not ImGui::GetIO().WantCaptureKeyboard) {
+        switch (event.key()) {
+
+        case KE::Key::R: {
+            camera_orbit_point_ = {0.f, 0.f, 0.f};
+            update_camera();
+        } break;
+
+        default:
+            break;
+        }
+    }
+
     event.setAccepted(true);
     reset_draw_counter();
 }
