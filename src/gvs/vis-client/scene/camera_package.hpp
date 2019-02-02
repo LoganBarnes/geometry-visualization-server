@@ -23,18 +23,27 @@
 #pragma once
 
 #include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/SceneGraph/MatrixTransformation3D.h>
+#include <Magnum/SceneGraph/Object.h>
 
 namespace gvs {
 namespace vis {
 
+struct Ray {
+    Magnum::Vector3 origin;
+    Magnum::Vector3 direction;
+};
+
 struct CameraPackage {
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> object;
     Magnum::Matrix4 transformation = {};
-    Magnum::Matrix4 inverse_scale = {};
     Magnum::SceneGraph::Camera3D* camera = nullptr;
 
     void set_camera(Magnum::SceneGraph::Camera3D* cam, const Magnum::Vector2i& viewport);
 
     void update_viewport(const Magnum::Vector2i& viewport);
+
+    Ray get_camera_ray_from_window_pos(const Magnum::Vector2& mouse_position);
 };
 
 } // namespace vis

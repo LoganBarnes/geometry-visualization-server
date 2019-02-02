@@ -47,6 +47,24 @@ namespace vis {
 
 using namespace Magnum;
 
+namespace {
+
+// 'p' is a point on a plane
+float intersect_plane(const Ray& ray, Vector3 p, const Vector3& plane_normal) {
+    // plane ray intersection
+    const float denom = Math::dot(ray.direction, plane_normal);
+
+    p -= ray.origin;
+    const float t = Math::dot(p, plane_normal) / denom;
+
+    if (t >= 0.f && t != std::numeric_limits<float>::infinity()) {
+        return t;
+    }
+    return std::numeric_limits<float>::infinity();
+}
+
+} // namespace
+
 ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
     : GlfwApplication(arguments, configuration, GLConfiguration().setSampleCount(4)) {
     initialize_resources();
@@ -83,10 +101,11 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
                                  theme_->background.Value.z,
                                  theme_->background.Value.w});
 
-    camera_object_.setParent(&camera_scene_).translate(Vector3::zAxis(5.0f));
+    camera_package_.object.setParent(&camera_scene_).translate(Vector3::zAxis(5.0f));
 
     // Memory ownership is handled elsewhere
-    camera_package_.set_camera(new SceneGraph::Camera3D(camera_object_), GL::defaultFramebuffer.viewport().size());
+    camera_package_.set_camera(new SceneGraph::Camera3D(camera_package_.object),
+                               GL::defaultFramebuffer.viewport().size());
 
     update_camera();
     reset_draw_counter();
@@ -186,13 +205,12 @@ void ImGuiMagnumApplication::mousePressEvent(MouseEvent& event) {
                                        static_cast<int>(event.button()),
                                        GLFW_PRESS,
                                        static_cast<int>(event.modifiers()));
-
-    if (event.button() == MouseEvent::Button::Left) {
-        previous_position_ = Vector2(event.position());
-    }
-
     event.setAccepted(true);
     reset_draw_counter();
+
+    if (not ImGui::GetIO().WantCaptureMouse) {
+        previous_position_ = Vector2(event.position());
+    }
 }
 
 void ImGuiMagnumApplication::mouseReleaseEvent(MouseEvent& event) {
@@ -200,30 +218,46 @@ void ImGuiMagnumApplication::mouseReleaseEvent(MouseEvent& event) {
                                        static_cast<int>(event.button()),
                                        GLFW_RELEASE,
                                        static_cast<int>(event.modifiers()));
-
-    // Not really necessary but may help find bugs if they occur
-    if (event.button() == MouseEvent::Button::Left) {
-        previous_position_ = Vector2();
-    }
-
     event.setAccepted(true);
     reset_draw_counter();
 }
 
 void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
-    if (not(event.buttons() & MouseMoveEvent::Button::Left)) {
-        return;
-    }
-
-    auto current_position = Vector2(event.position());
-
-    camera_yaw_and_pitch_ += (previous_position_ - current_position) * 0.005f;
-    previous_position_ = current_position;
-
-    update_camera();
 
     event.setAccepted(true);
     reset_draw_counter();
+
+    if (not ImGui::GetIO().WantCaptureMouse) {
+        auto current_position = Vector2(event.position());
+
+        if (event.buttons() & MouseMoveEvent::Button::Left) {
+            camera_yaw_and_pitch_ += (previous_position_ - current_position) * 0.005f;
+
+        } else if (event.buttons() & MouseMoveEvent::Button::Middle) {
+            // pan camera
+
+            auto world_from_mouse_pos = [&](const auto& mouse_pos, float* dist_to_plane) {
+                auto ray = camera_package_.get_camera_ray_from_window_pos(mouse_pos);
+                auto plane_normal = (ray.origin - camera_orbit_point_).normalized();
+
+                *dist_to_plane = intersect_plane(ray, camera_orbit_point_, plane_normal);
+                return ray.origin + ray.direction * (*dist_to_plane);
+            };
+
+            float should_not_be_inf1, should_not_be_inf2;
+
+            auto previous_world_pos = world_from_mouse_pos(previous_position_, &should_not_be_inf1);
+            auto current_world_pos = world_from_mouse_pos(current_position, &should_not_be_inf2);
+
+            if (not std::isinf(should_not_be_inf1) and not std::isinf(should_not_be_inf2)) {
+                auto diff = current_world_pos - previous_world_pos;
+                camera_orbit_point_ -= diff;
+            }
+        }
+
+        previous_position_ = current_position;
+        update_camera();
+    }
 }
 
 void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
@@ -243,11 +277,12 @@ void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
 }
 
 void ImGuiMagnumApplication::update_camera() {
-    camera_package_.transformation = Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.x()), {0.f, 1.f, 0.f})
+    camera_package_.transformation = Matrix4::translation(camera_orbit_point_)
+        * Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.x()), {0.f, 1.f, 0.f})
         * Matrix4::rotation(Math::Rad<float>(camera_yaw_and_pitch_.y()), {1.f, 0.f, 0.f})
         * Matrix4::translation({0.f, 0.f, camera_orbit_distance_});
 
-    camera_object_.setTransformation(camera_package_.transformation);
+    camera_package_.object.setTransformation(camera_package_.transformation);
 }
 
 } // namespace vis

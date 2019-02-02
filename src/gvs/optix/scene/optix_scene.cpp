@@ -108,7 +108,8 @@ void build_ray_basis_vectors(const CameraPackage& camera_package, Vector3* u_out
     u = Math::cross(w, {0.f, 1.f, 0.f}).normalized();
     v = Math::cross(u, w).normalized();
 
-    Matrix4 inv_scale_view = camera_package.transformation * camera_package.inverse_scale;
+    //    Matrix4 inv_scale_view = camera_package.transformation * camera_package.inverse_scale;
+    Matrix4 inv_scale_view = camera_package.transformation;
 
     // (1, 1, -1) in clip space back to world space
     Vector3 window_space(1.f, 1.f, -1.f);

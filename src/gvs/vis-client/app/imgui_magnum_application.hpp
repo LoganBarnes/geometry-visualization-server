@@ -27,8 +27,6 @@
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/Platform/GlfwApplication.h>
-#include <Magnum/SceneGraph/MatrixTransformation3D.h>
-#include <Magnum/SceneGraph/Object.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/SceneGraph.h>
 
@@ -82,12 +80,12 @@ private:
 
     // Camera
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
-    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> camera_object_;
     CameraPackage camera_package_;
 
     Magnum::Vector2 previous_position_ = {};
     Magnum::Vector2 camera_yaw_and_pitch_ = {};
     float camera_orbit_distance_ = 15.f;
+    Magnum::Vector3 camera_orbit_point_ = {};
 };
 
 } // namespace vis
