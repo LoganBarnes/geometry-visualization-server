@@ -55,7 +55,7 @@ if (NOT GVS_LOGGING_ONLY)
     ############
     FetchContent_Declare(glfw_dl
             GIT_REPOSITORY https://github.com/glfw/glfw.git
-            GIT_TAG master
+            GIT_TAG 29d8ca4ce4aef8e0afca62b8ace9ee18a24a9ffd
             )
 
     FetchContent_GetProperties(glfw_dl)
@@ -157,7 +157,7 @@ endif (NOT GVS_LOGGING_ONLY)
 #################
 FetchContent_Declare(crossguid_dl
         GIT_REPOSITORY https://github.com/graeme-hill/crossguid.git
-        GIT_TAG master
+        GIT_TAG 0f2753174c914bc561504b14c963d179283fe829
         )
 
 FetchContent_GetProperties(crossguid_dl)
