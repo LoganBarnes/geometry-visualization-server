@@ -13,19 +13,19 @@ before_install:
   - docker pull loganbarnes/gvs-ci:grpc
 
 install:
-#  # All compiled dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/
-#  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-#  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
-#
-#  # Install a recent CMake
-#  - |
-#    CMAKE_URL="https://cmake.org/files/v3.12/cmake-3.12.0-Linux-x86_64.tar.gz"
-#    mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-#    export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+  # All compiled dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+
+  # Install a recent CMake
+  - |
+    CMAKE_URL="https://cmake.org/files/v3.12/cmake-3.12.0-Linux-x86_64.tar.gz"
+    mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+    export PATH=${DEPS_DIR}/cmake/bin:${PATH}
   - cmake --version
 
 script:
-  - docker run -v ${TRAVIS_BUILD_DIR}:/gvs loganbarnes/gvs-ci:grpc bash -c "cd /gvs && . ./ci/install_deps.sh && ./ci/build_and_run.sh"
+  - docker run -v ${TRAVIS_BUILD_DIR}:/gvs -v ${DEPS_DIR}:/deps loganbarnes/gvs-ci:grpc bash -c "cd /gvs && . ./ci/install_deps.sh && ./ci/build_and_run.sh"
 
 after_success:
   # Upload report to CodeCov
