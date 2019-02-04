@@ -343,34 +343,63 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GRPC DEFAULT_MSG
         GRPC_LIBRARY GRPC_INCLUDE_DIR PROTOBUF_INCLUDE_DIR
         GRPC_PYTHON_PLUGIN GRPC_CPP_PLUGIN)
 
-if (PROTOBUF_FOUND)
-    set(PROTOBUF_INCLUDE_DIRS ${PROTOBUF_INCLUDE_DIR})
-endif ()
 if (GRPC_FOUND)
-    set(GRPC_INCLUDE_DIRS ${GRPC_INCLUDE_DIR})
+    if (GRPC++_LIBRARY)
+        if (NOT TARGET gRPC::grpc++)
+            add_library(gRPC::grpc++ UNKNOWN IMPORTED)
+            set_target_properties(gRPC::grpc++ PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${GRPC_INCLUDE_DIR}")
+            if (EXISTS "${GRPC++_LIBRARY}")
+                set_target_properties(gRPC::grpc++ PROPERTIES
+                        IMPORTED_LOCATION "${GRPC++_LIBRARY}")
+            endif ()
+            if (EXISTS "${GRPC_LIBRARY}")
+                set_target_properties(gRPC::grpc++ PROPERTIES
+                        INTERFACE_LINK_LIBRARIES "${GRPC_LIBRARY}")
+            endif ()
+            if (EXISTS "${CMAKE_DL_LIBS}")
+                set_target_properties(gRPC::grpc++ PROPERTIES
+                        INTERFACE_LINK_LIBRARIES "${CMAKE_DL_LIBS}")
+            endif ()
+        endif ()
+    endif ()
+
+    if (GRPC++_REFLECTION_LIBRARY)
+        if (NOT TARGET gRPC::grpc++_reflection)
+            add_library(gRPC::grpc++_reflection UNKNOWN IMPORTED)
+            set_target_properties(gRPC::grpc++_reflection PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${GRPC_INCLUDE_DIR}")
+            if (EXISTS "${GRPC++_REFLECTION_LIBRARY}")
+                set_target_properties(gRPC::grpc++_reflection PROPERTIES
+                        IMPORTED_LOCATION "${GRPC++_REFLECTION_LIBRARY}")
+            endif ()
+            if (EXISTS "${GRPC++_LIBRARY}")
+                set_target_properties(gRPC::grpc++_reflection PROPERTIES
+                        IMPORTED_LOCATION "${GRPC++_LIBRARY}")
+            endif ()
+            if (EXISTS "${GRPC_LIBRARY}")
+                set_target_properties(gRPC::grpc++_reflection PROPERTIES
+                        INTERFACE_LINK_LIBRARIES "${GRPC_LIBRARY}")
+            endif ()
+            if (EXISTS "${CMAKE_DL_LIBS}")
+                set_target_properties(gRPC::grpc++_reflection PROPERTIES
+                        INTERFACE_LINK_LIBRARIES "${CMAKE_DL_LIBS}")
+            endif ()
+        endif ()
+    endif ()
+
+    if (GRPC_CPP_PLUGIN)
+        if (NOT TARGET gRPC::grpc_cpp_plugin)
+            add_executable(gRPC::grpc_cpp_plugin IMPORTED)
+            if (EXISTS "${GRPC_CPP_PLUGIN}")
+                set_target_properties(gRPC::grpc_cpp_plugin PROPERTIES
+                        IMPORTED_LOCATION "${GRPC_CPP_PLUGIN}")
+            endif ()
+        endif ()
+    endif ()
 endif ()
 
 if (GRPC_FOUND)
-    if (NOT TARGET gRPC::grpc++)
-        add_library(gRPC::grpc++ UNKNOWN IMPORTED)
-        set_target_properties(gRPC::grpc++ PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES ${GRPC_INCLUDE_DIRS}
-                IMPORTED_LOCATION ${GRPC++_LIBRARY}
-                )
-        target_link_libraries(gRPC::grpc++ INTERFACE ${GRPC_LIBRARY} ${CMAKE_DL_LIBS})
-    endif ()
-    if (NOT TARGET gRPC::grpc++_reflection)
-        add_library(gRPC::grpc++_reflection UNKNOWN IMPORTED)
-        set_target_properties(gRPC::grpc++_reflection PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES ${GRPC_INCLUDE_DIRS}
-                IMPORTED_LOCATION ${GRPC++_REFLECTION_LIBRARY}
-                )
-        target_link_libraries(gRPC::grpc++_reflection INTERFACE gRPC::grpc++ ${CMAKE_DL_LIBS})
-    endif ()
-    if (NOT TARGET gRPC::grpc_cpp_plugin)
-        add_library(gRPC::grpc_cpp_plugin UNKNOWN IMPORTED)
-        set_target_properties(gRPC::grpc_cpp_plugin PROPERTIES IMPORTED_LOCATION ${GRPC_CPP_PLUGIN})
-    endif ()
 
     # Generates C++ sources from the .proto files
     #
