@@ -343,7 +343,14 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GRPC DEFAULT_MSG
         GRPC_LIBRARY GRPC_INCLUDE_DIR PROTOBUF_INCLUDE_DIR
         GRPC_PYTHON_PLUGIN GRPC_CPP_PLUGIN)
 
+if (PROTOBUF_FOUND)
+    set(PROTOBUF_INCLUDE_DIRS ${PROTOBUF_INCLUDE_DIR})
+endif ()
 if (GRPC_FOUND)
+    set(GRPC_INCLUDE_DIRS ${GRPC_INCLUDE_DIR})
+endif ()
+
+if (GRPC_INCLUDE_DIRS)
     if (GRPC++_LIBRARY)
         if (NOT TARGET gRPC::grpc++)
             add_library(gRPC::grpc++ UNKNOWN IMPORTED)
@@ -397,9 +404,6 @@ if (GRPC_FOUND)
             endif ()
         endif ()
     endif ()
-endif ()
-
-if (GRPC_FOUND)
 
     # Generates C++ sources from the .proto files
     #
