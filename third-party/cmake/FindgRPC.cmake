@@ -400,8 +400,6 @@ if (GRPC_FOUND)
         set(${HDRS})
         set(ABS_PROTOS "")
 
-        get_target_property(GRPC_CPP_PLUGIN gRPC::grpc_cpp_plugin LOCATION)
-
         foreach (PROTO_FILE ${ARGN})
             get_filename_component(ABS_FILE ${PROTO_FILE} ABSOLUTE)
 
