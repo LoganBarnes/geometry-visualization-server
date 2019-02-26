@@ -200,7 +200,7 @@ private:
     std::string server_address_;
     util::AtomicData<SharedData> shared_data_;
 
-    void* state_change_tag = reinterpret_cast<void*>(0x1);
+    void* state_change_tag_ = reinterpret_cast<void*>(0x1);
 
     // These are resused after calling 'Shutdown' and 'join' respectively.
     std::unique_ptr<grpc::CompletionQueue> queue_;
@@ -243,7 +243,7 @@ void GrpcClient<Service>::change_server(std::string address,
         data.connection_state = new_state;
 
         auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(15);
-        data.channel->NotifyOnStateChange(data.connection_state, deadline, queue_.get(), state_change_tag);
+        data.channel->NotifyOnStateChange(data.connection_state, deadline, queue_.get(), state_change_tag_);
     });
 
     if (state_changed) {
@@ -351,13 +351,12 @@ void GrpcClient<Service>::run(
     std::unique_ptr<util::CallbackInterface<void, const GrpcClientState&>> connection_change_callback) {
 
     GrpcClientState typed_state;
-    grpc::Status status;
 
     void* current_tag;
     bool result_ok;
 
     while (queue_->Next(&current_tag, &result_ok)) {
-        assert(current_tag == state_change_tag);
+        assert(current_tag == state_change_tag_);
 
         bool state_changed = false;
 
@@ -385,7 +384,7 @@ void GrpcClient<Service>::run(
                 }
 
                 auto deadline = std::chrono::high_resolution_clock::now() + std::chrono::seconds(60);
-                data.channel->NotifyOnStateChange(data.connection_state, deadline, queue_.get(), state_change_tag);
+                data.channel->NotifyOnStateChange(data.connection_state, deadline, queue_.get(), state_change_tag_);
 
             } else if (to_typed_state(data.connection_state) != GrpcClientState::not_connected) {
                 data.connection_state = GRPC_CHANNEL_SHUTDOWN;
