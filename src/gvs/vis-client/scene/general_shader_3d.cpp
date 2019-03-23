@@ -22,6 +22,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "general_shader_3d.hpp"
 
+#include <Corrade/Containers/Reference.h>
 #include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/Context.h>
 #include <Magnum/GL/Shader.h>

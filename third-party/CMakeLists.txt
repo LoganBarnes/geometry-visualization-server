@@ -38,7 +38,7 @@ if (NOT GVS_LOGGING_ONLY)
 
     FetchContent_Declare(corrade_dl
             GIT_REPOSITORY https://github.com/mosra/corrade.git
-            GIT_TAG v2018.10
+            GIT_TAG v2019.01
             )
 
     FetchContent_GetProperties(corrade_dl)
@@ -74,7 +74,7 @@ if (NOT GVS_LOGGING_ONLY)
     ##############
     FetchContent_Declare(magnum_dl
             GIT_REPOSITORY https://github.com/mosra/magnum.git
-            GIT_TAG v2018.10
+            GIT_TAG v2019.01
             )
 
     FetchContent_GetProperties(magnum_dl)
