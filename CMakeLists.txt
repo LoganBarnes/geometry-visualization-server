@@ -28,6 +28,7 @@ option(GVS_BUILD_TESTS "Build unit tests" OFF)
 option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
 option(GVS_UPDATES_DISCONNECTED "Update third party repos" OFF)
 option(GVS_FORMAT_ON_BUILD "Format the code when building" OFF)
+option(GVS_USE_CUDA "Use CUDA if it's available" ON)
 
 #############################
 ### Project Configuration ###
@@ -74,13 +75,15 @@ endif ()
 ### THIRD PARTY LIBRARIES ###
 #############################
 # Add Cuda if available
-include(CheckLanguage)
-check_language(CUDA)
-if (CMAKE_CUDA_COMPILER)
-    enable_language(CUDA)
-else ()
-    message(STATUS "-- No CUDA support")
-endif ()
+if (GVS_USE_CUDA)
+    include(CheckLanguage)
+    check_language(CUDA)
+    if (CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+    else ()
+        message(STATUS "-- No CUDA support")
+    endif ()
+endif()
 
 add_subdirectory(third-party)
 
