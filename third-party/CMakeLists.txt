@@ -113,7 +113,7 @@ if (NOT GVS_LOGGING_ONLY)
     ##############
     FetchContent_Declare(imgui_dl
             GIT_REPOSITORY https://github.com/ocornut/imgui.git
-            GIT_TAG v1.65
+            GIT_TAG v1.70
             )
 
     FetchContent_GetProperties(imgui_dl)
