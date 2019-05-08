@@ -36,59 +36,59 @@ if (NOT GVS_LOGGING_ONLY)
     ###############
     set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-    FetchContent_Declare(corrade_dl
+    FetchContent_Declare(corrade_gvs_dl
             GIT_REPOSITORY https://github.com/mosra/corrade.git
             GIT_TAG v2019.01
             )
 
-    FetchContent_GetProperties(corrade_dl)
-    if (NOT corrade_dl_POPULATED)
-        FetchContent_Populate(corrade_dl)
-        add_subdirectory(${corrade_dl_SOURCE_DIR} ${corrade_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+    FetchContent_GetProperties(corrade_gvs_dl)
+    if (NOT corrade_gvs_dl_POPULATED)
+        FetchContent_Populate(corrade_gvs_dl)
+        add_subdirectory(${corrade_gvs_dl_SOURCE_DIR} ${corrade_gvs_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 
         # Set the include directory as system headers to avoid compiler warnings
-        target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${corrade_dl_SOURCE_DIR}/src)
+        target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${corrade_gvs_dl_SOURCE_DIR}/src)
     endif ()
 
     ############
     ### GLFW ###
     ############
-    FetchContent_Declare(glfw_dl
+    FetchContent_Declare(glfw_gvs_dl
             GIT_REPOSITORY https://github.com/glfw/glfw.git
             GIT_TAG 3.3
             )
 
-    FetchContent_GetProperties(glfw_dl)
-    if (NOT glfw_dl_POPULATED)
-        FetchContent_Populate(glfw_dl)
+    FetchContent_GetProperties(glfw_gvs_dl)
+    if (NOT glfw_gvs_dl_POPULATED)
+        FetchContent_Populate(glfw_gvs_dl)
 
         set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
         set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
         set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-        add_subdirectory(${glfw_dl_SOURCE_DIR} ${glfw_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+        add_subdirectory(${glfw_gvs_dl_SOURCE_DIR} ${glfw_gvs_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif ()
 
     ##############
     ### Magnum ###
     ##############
-    FetchContent_Declare(magnum_dl
+    FetchContent_Declare(magnum_gvs_dl
             GIT_REPOSITORY https://github.com/mosra/magnum.git
             GIT_TAG v2019.01
             )
 
-    FetchContent_GetProperties(magnum_dl)
-    if (NOT magnum_dl_POPULATED)
-        FetchContent_Populate(magnum_dl)
+    FetchContent_GetProperties(magnum_gvs_dl)
+    if (NOT magnum_gvs_dl_POPULATED)
+        FetchContent_Populate(magnum_gvs_dl)
 
         set(WITH_GLFWAPPLICATION ON CACHE BOOL "" FORCE)
         set(BUILD_DEPRECATED OFF CACHE BOOL "" FORCE)
 
-        add_subdirectory(${magnum_dl_SOURCE_DIR} ${magnum_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+        add_subdirectory(${magnum_gvs_dl_SOURCE_DIR} ${magnum_gvs_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
         target_compile_options(MagnumGlfwApplication PRIVATE -w) # ignore thirdparty compilation warnings
 
         # Set the include directory as system headers to avoid compiler warnings
-        target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${magnum_dl_SOURCE_DIR}/src)
+        target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${magnum_gvs_dl_SOURCE_DIR}/src)
 
         # Add the necessary libraries
         target_link_libraries(gvs_gui_thirdparty INTERFACE
@@ -103,7 +103,7 @@ if (NOT GVS_LOGGING_ONLY)
                 )
 
         # Add the FindMagnum and FindCorrade cmake files
-        list(APPEND CMAKE_MODULE_PATH ${magnum_dl_SOURCE_DIR}/modules)
+        list(APPEND CMAKE_MODULE_PATH ${magnum_gvs_dl_SOURCE_DIR}/modules)
     endif ()
 
     find_package(Magnum REQUIRED GL GlfwApplication)
@@ -111,35 +111,35 @@ if (NOT GVS_LOGGING_ONLY)
     ##############
     ### ImGui ###
     ##############
-    FetchContent_Declare(imgui_dl
+    FetchContent_Declare(imgui_gvs_dl
             GIT_REPOSITORY https://github.com/ocornut/imgui.git
             GIT_TAG v1.70
             )
 
-    FetchContent_GetProperties(imgui_dl)
-    if (NOT imgui_dl_POPULATED)
-        FetchContent_Populate(imgui_dl)
+    FetchContent_GetProperties(imgui_gvs_dl)
+    if (NOT imgui_gvs_dl_POPULATED)
+        FetchContent_Populate(imgui_gvs_dl)
 
         add_library(gvs_imgui
-                ${imgui_dl_SOURCE_DIR}/imconfig.h
-                ${imgui_dl_SOURCE_DIR}/imgui.cpp
-                ${imgui_dl_SOURCE_DIR}/imgui.h
-                ${imgui_dl_SOURCE_DIR}/imgui_demo.cpp
-                ${imgui_dl_SOURCE_DIR}/imgui_draw.cpp
-                ${imgui_dl_SOURCE_DIR}/imgui_internal.h
-                ${imgui_dl_SOURCE_DIR}/imgui_widgets.cpp
-                ${imgui_dl_SOURCE_DIR}/imstb_rectpack.h
-                ${imgui_dl_SOURCE_DIR}/imstb_textedit.h
-                ${imgui_dl_SOURCE_DIR}/imstb_truetype.h
-                ${imgui_dl_SOURCE_DIR}/examples/imgui_impl_glfw.h
-                ${imgui_dl_SOURCE_DIR}/examples/imgui_impl_glfw.cpp
-                ${imgui_dl_SOURCE_DIR}/examples/imgui_impl_opengl3.h
-                ${imgui_dl_SOURCE_DIR}/examples/imgui_impl_opengl3.cpp
+                ${imgui_gvs_dl_SOURCE_DIR}/imconfig.h
+                ${imgui_gvs_dl_SOURCE_DIR}/imgui.cpp
+                ${imgui_gvs_dl_SOURCE_DIR}/imgui.h
+                ${imgui_gvs_dl_SOURCE_DIR}/imgui_demo.cpp
+                ${imgui_gvs_dl_SOURCE_DIR}/imgui_draw.cpp
+                ${imgui_gvs_dl_SOURCE_DIR}/imgui_internal.h
+                ${imgui_gvs_dl_SOURCE_DIR}/imgui_widgets.cpp
+                ${imgui_gvs_dl_SOURCE_DIR}/imstb_rectpack.h
+                ${imgui_gvs_dl_SOURCE_DIR}/imstb_textedit.h
+                ${imgui_gvs_dl_SOURCE_DIR}/imstb_truetype.h
+                ${imgui_gvs_dl_SOURCE_DIR}/examples/imgui_impl_glfw.h
+                ${imgui_gvs_dl_SOURCE_DIR}/examples/imgui_impl_glfw.cpp
+                ${imgui_gvs_dl_SOURCE_DIR}/examples/imgui_impl_opengl3.h
+                ${imgui_gvs_dl_SOURCE_DIR}/examples/imgui_impl_opengl3.cpp
                 pseudo-header/GL/gl3w.h # fake gl3w header
                 )
         target_include_directories(gvs_imgui SYSTEM
-                PUBLIC ${imgui_dl_SOURCE_DIR}
-                PUBLIC ${imgui_dl_SOURCE_DIR}/examples
+                PUBLIC ${imgui_gvs_dl_SOURCE_DIR}
+                PUBLIC ${imgui_gvs_dl_SOURCE_DIR}/examples
                 PUBLIC pseudo-header
                 )
         target_link_libraries(gvs_imgui
@@ -155,28 +155,28 @@ endif (NOT GVS_LOGGING_ONLY)
 # All non-GUI thirdparty libraries put into a single target
 add_library(gvs_non_gui_thirdparty INTERFACE)
 
-#################
-### crossguid ###
-#################
-FetchContent_Declare(crossguid_dl
-        GIT_REPOSITORY https://github.com/graeme-hill/crossguid.git
-        GIT_TAG 0f2753174c914bc561504b14c963d179283fe829
-        )
-
-FetchContent_GetProperties(crossguid_dl)
-if (NOT crossguid_dl_POPULATED)
-    FetchContent_Populate(crossguid_dl)
-    add_subdirectory(${crossguid_dl_SOURCE_DIR} ${crossguid_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
-    target_compile_options(crossguid PRIVATE -w)
-    target_link_libraries(gvs_non_gui_thirdparty INTERFACE crossguid)
-endif ()
-
 ###############
 ### Threads ###
 ###############
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(gvs_non_gui_thirdparty INTERFACE Threads::Threads)
+
+#################
+### crossguid ###
+#################
+FetchContent_Declare(crossguid_gvs_dl
+        GIT_REPOSITORY https://github.com/graeme-hill/crossguid.git
+        GIT_TAG 0f2753174c914bc561504b14c963d179283fe829
+        )
+
+FetchContent_GetProperties(crossguid_gvs_dl)
+if (NOT crossguid_gvs_dl_POPULATED)
+    FetchContent_Populate(crossguid_gvs_dl)
+    add_subdirectory(${crossguid_gvs_dl_SOURCE_DIR} ${crossguid_gvs_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+    target_compile_options(crossguid PRIVATE -w)
+    target_link_libraries(gvs_non_gui_thirdparty INTERFACE crossguid)
+endif ()
 
 #############
 ### OptiX ###
@@ -212,17 +212,17 @@ endif ()
 ### DocTest ###
 ###############
 if (${GVS_BUILD_TESTS})
-    FetchContent_Declare(doctest_dl
+    FetchContent_Declare(doctest_gvs_dl
             GIT_REPOSITORY https://github.com/onqtam/doctest.git
             GIT_TAG 2.2.0
             )
 
-    FetchContent_GetProperties(doctest_dl)
-    if (NOT doctest_dl_POPULATED)
-        FetchContent_Populate(doctest_dl)
+    FetchContent_GetProperties(doctest_gvs_dl)
+    if (NOT doctest_gvs_dl_POPULATED)
+        FetchContent_Populate(doctest_gvs_dl)
 
         add_library(gvs_testing_thirdparty INTERFACE)
-        target_include_directories(gvs_testing_thirdparty INTERFACE ${doctest_dl_SOURCE_DIR})
+        target_include_directories(gvs_testing_thirdparty INTERFACE ${doctest_gvs_dl_SOURCE_DIR})
         target_link_libraries(gvs_testing_thirdparty INTERFACE Threads::Threads)
     endif ()
 endif ()
