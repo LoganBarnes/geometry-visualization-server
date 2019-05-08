@@ -176,8 +176,8 @@ endif ()
 ###############
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(gvs_gui_thirdparty INTERFACE ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(gvs_non_gui_thirdparty INTERFACE ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(gvs_gui_thirdparty INTERFACE Threads::Threads)
+target_link_libraries(gvs_non_gui_thirdparty INTERFACE Threads::Threads)
 
 #############
 ### OptiX ###
