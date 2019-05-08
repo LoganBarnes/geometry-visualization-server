@@ -48,7 +48,7 @@ add_library(gvs_net ${GVS_COMMON_SOURCE_FILES})
 target_link_libraries(gvs_net
         PUBLIC gvs_protos
         PUBLIC gvs_util
-        PUBLIC crossguid
+        PUBLIC gvs_non_gui_thirdparty
         )
 
 target_compile_options(gvs_net PUBLIC ${GVS_COMPILE_FLAGS})

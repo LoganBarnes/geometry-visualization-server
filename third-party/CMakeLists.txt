@@ -137,10 +137,10 @@ if (NOT GVS_LOGGING_ONLY)
                 ${imgui_dl_SOURCE_DIR}/examples/imgui_impl_opengl3.cpp
                 pseudo-header/GL/gl3w.h # fake gl3w header
                 )
-        target_include_directories(gvs_imgui SYSTEM PUBLIC
-                ${imgui_dl_SOURCE_DIR}
-                ${imgui_dl_SOURCE_DIR}/examples
-                pseudo-header
+        target_include_directories(gvs_imgui SYSTEM
+                PUBLIC ${imgui_dl_SOURCE_DIR}
+                PUBLIC ${imgui_dl_SOURCE_DIR}/examples
+                PUBLIC pseudo-header
                 )
         target_link_libraries(gvs_imgui
                 PUBLIC glfw
@@ -151,6 +151,16 @@ if (NOT GVS_LOGGING_ONLY)
     endif ()
 
 endif (NOT GVS_LOGGING_ONLY)
+
+# All non-GUI thirdparty libraries put into a single target
+add_library(gvs_non_gui_thirdparty INTERFACE)
+
+###############
+### Threads ###
+###############
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(gvs_non_gui_thirdparty INTERFACE Threads::Threads)
 
 #################
 ### crossguid ###
@@ -165,6 +175,7 @@ if (NOT crossguid_dl_POPULATED)
     FetchContent_Populate(crossguid_dl)
     add_subdirectory(${crossguid_dl_SOURCE_DIR} ${crossguid_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
     target_compile_options(crossguid PRIVATE -w)
+    target_link_libraries(gvs_non_gui_thirdparty INTERFACE crossguid)
 endif ()
 
 #############
@@ -212,6 +223,7 @@ if (${GVS_BUILD_TESTS})
 
         add_library(gvs_testing_thirdparty INTERFACE)
         target_include_directories(gvs_testing_thirdparty INTERFACE ${doctest_dl_SOURCE_DIR})
+        target_link_libraries(gvs_testing_thirdparty INTERFACE Threads::Threads)
     endif ()
 endif ()
 

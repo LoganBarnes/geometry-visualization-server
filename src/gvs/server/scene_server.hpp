@@ -22,11 +22,16 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// project
 #include "gvs/net/grpc_async_server.hpp"
-#include <crossguid/guid.hpp>
 
+// generated
 #include <gvs/scene.grpc.pb.h>
 
+// third-party
+#include <crossguid/guid.hpp>
+
+// standard
 #include <thread>
 
 namespace gvs {
