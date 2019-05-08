@@ -155,13 +155,6 @@ endif (NOT GVS_LOGGING_ONLY)
 # All non-GUI thirdparty libraries put into a single target
 add_library(gvs_non_gui_thirdparty INTERFACE)
 
-###############
-### Threads ###
-###############
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-target_link_libraries(gvs_non_gui_thirdparty INTERFACE Threads::Threads)
-
 #################
 ### crossguid ###
 #################
@@ -177,6 +170,13 @@ if (NOT crossguid_dl_POPULATED)
     target_compile_options(crossguid PRIVATE -w)
     target_link_libraries(gvs_non_gui_thirdparty INTERFACE crossguid)
 endif ()
+
+###############
+### Threads ###
+###############
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(gvs_non_gui_thirdparty INTERFACE Threads::Threads)
 
 #############
 ### OptiX ###

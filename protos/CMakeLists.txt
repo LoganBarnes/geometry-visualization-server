@@ -46,10 +46,10 @@ function(create_proto_library target_name proto_dir)
 
     add_library(${target_name} ${GRPC_HDRS} ${GRPC_SRCS})
     target_link_libraries(${target_name}
-            PUBLIC Threads::Threads
             PUBLIC protobuf::libprotobuf
             PUBLIC gRPC::grpc++
             PUBLIC ${CMAKE_DL_LIBS}
+            PUBLIC Threads::Threads
             )
     target_include_directories(${target_name} SYSTEM PUBLIC ${PROTO_DST_DIR})
 endfunction()
