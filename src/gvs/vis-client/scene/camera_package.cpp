@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,7 @@
 #include <Magnum/Math/Math.h>
 #include <Magnum/SceneGraph/MatrixTransformation3D.h>
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 using namespace Magnum;
 using namespace Math::Literals;
@@ -67,5 +66,4 @@ Ray CameraPackage::get_camera_ray_from_window_pos(const Vector2& mouse_position)
     return {eye_point, direction};
 }
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

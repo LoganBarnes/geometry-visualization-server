@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,10 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/scene/scene_interface.hpp"
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 SceneInitializationInfo make_scene_init_info(const ImColor& background_color, const Magnum::Vector2i& viewport) {
     return {{background_color.Value.x, background_color.Value.y, background_color.Value.z}, viewport};
 }
 
-} // namespace vis
 } // namespace gvs
