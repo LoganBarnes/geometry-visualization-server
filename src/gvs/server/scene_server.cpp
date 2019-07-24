@@ -20,15 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/server/scene_server.hpp"
-#include "gvs/item_defaults.hpp"
 #include "scene_server.hpp"
 
-#include <grpc++/security/server_credentials.h>
-#include <grpc++/server_builder.h>
+// gvs
+#include "gvs/item_defaults.hpp"
+#include "gvs/util/container_util.hpp"
 
-namespace gvs {
-namespace host {
+// external
+#include <grpcw/server/grpc_async_server.hpp>
+
+namespace gvs::server {
 
 namespace {
 
@@ -117,85 +118,88 @@ void update_display_defaults(proto::SceneItemInfo* old_info, const proto::SceneI
 
 } // namespace
 
-SceneServer::SceneServer(std::string server_address)
-    : server_(std::make_shared<proto::Scene::AsyncService>(), server_address) {
+SceneServer::SceneServer(const std::string& server_address)
+    : server_(std::make_unique<grpcw::server::GrpcAsyncServer<Service>>(std::make_shared<Service>(), server_address)) {
 
     /*
      * Streaming calls
      */
-    message_stream_ = server_.register_async_stream(&Service::RequestMessageUpdates,
-                                                    [](const google::protobuf::Empty& /*ignored*/) {});
+    message_stream_ = server_->register_async_stream(&Service::RequestMessageUpdates,
+                                                     [](const google::protobuf::Empty& /*ignored*/) {});
 
-    scene_stream_ = server_.register_async_stream(&Service::RequestSceneUpdates,
-                                                  [](const google::protobuf::Empty& /*ignored*/) {});
+    scene_stream_ = server_->register_async_stream(&Service::RequestSceneUpdates,
+                                                   [](const google::protobuf::Empty& /*ignored*/) {});
 
     /*
      * Getters for current state
      */
-    server_.register_async(&Service::RequestGetAllMessages,
-                           [this](const google::protobuf::Empty& /*empty*/, proto::Messages* messages) {
-                               messages->CopyFrom(messages_);
-                               return grpc::Status::OK;
-                           });
+    server_->register_async(&Service::RequestGetAllMessages,
+                            [this](const google::protobuf::Empty& /*empty*/, proto::Messages* messages) {
+                                messages->CopyFrom(messages_);
+                                return grpc::Status::OK;
+                            });
 
-    server_.register_async(&Service::RequestGetAllItems,
-                           [this](const google::protobuf::Empty& /*empty*/, proto::SceneItems* scene) {
-                               scene->CopyFrom(scene_);
-                               return grpc::Status::OK;
-                           });
+    server_->register_async(&Service::RequestGetAllItems,
+                            [this](const google::protobuf::Empty& /*empty*/, proto::SceneItems* scene) {
+                                scene->CopyFrom(scene_);
+                                return grpc::Status::OK;
+                            });
 
     /*
      * Setters for current state
      */
-    server_.register_async(&Service::RequestSetAllItems,
-                           [this](const proto::SceneItems& scene, proto::Errors* /*errors*/) {
-                               // TODO: Error check and set errors if necessary
-                               scene_.CopyFrom(scene);
-                               return grpc::Status::OK;
-                           });
+    server_->register_async(&Service::RequestSetAllItems,
+                            [this](const proto::SceneItems& scene, proto::Errors* /*errors*/) {
+                                // TODO: Error check and set errors if necessary
+                                scene_.CopyFrom(scene);
+                                return grpc::Status::OK;
+                            });
 
     /*
      * Update requests
      */
-    server_.register_async(&Service::RequestSendMessage,
-                           [this](const proto::Message& message, proto::Errors* /*errors*/) {
-                               messages_.add_messages()->CopyFrom(message);
-                               message_stream_->write(message);
-                               return grpc::Status::OK;
-                           });
+    server_->register_async(&Service::RequestSendMessage,
+                            [this](const proto::Message& message, proto::Errors* /*errors*/) {
+                                messages_.add_messages()->CopyFrom(message);
+                                message_stream_->write(message);
+                                return grpc::Status::OK;
+                            });
 
-    server_.register_async(&Service::RequestUpdateScene,
-                           [this](const proto::SceneUpdateRequest& update_request, proto::Errors* errors) {
-                               switch (update_request.update_case()) {
+    server_->register_async(&Service::RequestUpdateScene,
+                            [this](const proto::SceneUpdateRequest& update_request, proto::Errors* errors) {
+                                switch (update_request.update_case()) {
 
-                               case proto::SceneUpdateRequest::kSafeSetItem:
-                                   return safe_set_item(update_request.safe_set_item(), errors);
+                                case proto::SceneUpdateRequest::kSafeSetItem:
+                                    return safe_set_item(update_request.safe_set_item(), errors);
 
-                               case proto::SceneUpdateRequest::kReplaceItem:
-                                   return replace_item(update_request.replace_item(), errors);
+                                case proto::SceneUpdateRequest::kReplaceItem:
+                                    return replace_item(update_request.replace_item(), errors);
 
-                               case proto::SceneUpdateRequest::kAppendToItem:
-                                   return append_to_item(update_request.append_to_item(), errors);
+                                case proto::SceneUpdateRequest::kAppendToItem:
+                                    return append_to_item(update_request.append_to_item(), errors);
 
-                               case proto::SceneUpdateRequest::kClearAll: {
-                                   scene_.clear_items();
-                                   proto::SceneUpdate update;
-                                   update.mutable_reset_all_items()->CopyFrom(scene_);
-                                   scene_stream_->write(update);
-                               } break;
+                                case proto::SceneUpdateRequest::kUpdateItem:
+                                case proto::SceneUpdateRequest::kRemoveItem:
+                                    errors->set_error_msg("Action not yet handled by server");
+                                    break;
 
-                               case proto::SceneUpdateRequest::UPDATE_NOT_SET:
-                                   errors->set_error_msg("No update set");
-                                   break;
-                               }
+                                case proto::SceneUpdateRequest::kClearAll: {
+                                    scene_.clear_items();
+                                    proto::SceneUpdate update;
+                                    update.mutable_reset_all_items()->CopyFrom(scene_);
+                                    scene_stream_->write(update);
+                                } break;
 
-                               return grpc::Status::OK;
-                           });
+                                case proto::SceneUpdateRequest::UPDATE_NOT_SET:
+                                    errors->set_error_msg("No update set");
+                                    break;
+                                }
+
+                                return grpc::Status::OK;
+                            });
 }
 
-grpc::Server& SceneServer::server() {
-    return server_.server();
-}
+SceneServer::~SceneServer()  = default;
 
 /*
  * See the full table in "scene_server.hpp"
@@ -274,7 +278,7 @@ grpc::Status SceneServer::replace_item(const proto::SceneItemInfo& info, proto::
  * | `gvs::append`  |      **Yes**      | Appends positions to geometry** | Creates new item    |
  * | `gvs::append`  |       *No*        | Updates item                    | **Error**           |
  */
-grpc::Status host::SceneServer::append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
+grpc::Status SceneServer::append_to_item(const proto::SceneItemInfo& info, proto::Errors* errors) {
     std::string id = info.id().value();
 
     if (util::has_key(scene_.items(), id)) {
@@ -305,7 +309,7 @@ grpc::Status host::SceneServer::append_to_item(const proto::SceneItemInfo& info,
     return grpc::Status::OK;
 }
 
-void host::SceneServer::add_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
+void SceneServer::add_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
     const std::string& id = info.id().value();
 
     // TODO: Error check (has correct geometry, etc.)
@@ -319,7 +323,7 @@ void host::SceneServer::add_item_and_send_update(const proto::SceneItemInfo& inf
     scene_stream_->write(update);
 }
 
-void host::SceneServer::update_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
+void SceneServer::update_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* /*errors*/) {
     const std::string& id = info.id().value();
 
     update_display_defaults(&scene_.mutable_items()->at(id), info);
@@ -332,9 +336,8 @@ void host::SceneServer::update_item_and_send_update(const proto::SceneItemInfo& 
     scene_stream_->write(update);
 }
 
-void host::SceneServer::remove_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
+void SceneServer::remove_item_and_send_update(const proto::SceneItemInfo& /*info*/, proto::Errors* /*errors*/) {
     // TODO
 }
 
-} // namespace host
-} // namespace gvs
+} // namespace gvs::server

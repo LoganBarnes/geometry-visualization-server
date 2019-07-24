@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 //                                                                           |________|
-//  Copyright (c) 2018 CloudNC Ltd - All Rights Reserved                        |  |
+//  Copyright (c) 2019 CloudNC Ltd - All Rights Reserved                        |  |
 //                                                                              |__|
 //        ____                                                                .  ||
 //       / __ \                                                               .`~||$$$$
@@ -16,18 +16,20 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// gvs
 #include "gvs/vis-client/scene/camera_package.hpp"
 
-#include <gvs/types.pb.h>
+// generated
+#include <types.pb.h>
 
+// external
 #include <Magnum/Magnum.h>
 #include <Magnum/Math/Vector3.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/SceneGraph/Object.h>
 #include <imgui.h>
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 struct SceneInitializationInfo {
     Magnum::Vector3 background_color;
@@ -53,5 +55,4 @@ inline SceneInterface::~SceneInterface() = default;
 
 SceneInitializationInfo make_scene_init_info(const ImColor& background_color, const Magnum::Vector2i& viewport);
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

@@ -1,6 +1,8 @@
+#include <utility>
+
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,58 +24,54 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/vis-client/vis_client.hpp"
 
-#include "gvs/net/grpc_client.hpp"
-#include "gvs/net/grpc_server.hpp"
 #include "gvs/server/scene_server.hpp"
 #include "gvs/vis-client/app/imgui_theme.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
 #include "gvs/vis-client/scene/opengl_scene.hpp"
 #include "vis_client.hpp"
 
+// generated
 #include <gvs/gvs_paths.hpp>
 
-#ifdef OptiX_FOUND
-#include "gvs/optix/scene/optix_scene.hpp"
-#endif
-
+// third-party
 #include <Magnum/GL/Context.h>
+#include <grpcw/client/grpc_client.hpp>
 #include <imgui.h>
 
+// standard
 #include <chrono>
-#include <gvs/scene.pb.h>
 #include <limits>
 #include <sstream>
 
 using namespace Magnum;
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 namespace {
 
-std::string to_pretty_string(const net::GrpcClientState& state) {
+std::string to_pretty_string(const grpcw::client::GrpcClientState& state) {
     switch (state) {
-    case net::GrpcClientState::not_connected:
+    case grpcw::client::GrpcClientState::not_connected:
         return "Not Connected";
 
-    case net::GrpcClientState::connected:
+    case grpcw::client::GrpcClientState::connected:
         return "Connected";
 
-    case net::GrpcClientState::attempting_to_connect:
+    case grpcw::client::GrpcClientState::attempting_to_connect:
         return "Connecting...";
     }
     return "Unknown Enum value";
 }
 
-ImVec4 to_pretty_color(const net::GrpcClientState& state) {
+ImVec4 to_pretty_color(const grpcw::client::GrpcClientState& state) {
     switch (state) {
-    case net::GrpcClientState::not_connected:
+    case grpcw::client::GrpcClientState::not_connected:
         return {1.f, 0.f, 0.f, 1.f}; // Red
 
-    case net::GrpcClientState::connected:
+    case grpcw::client::GrpcClientState::connected:
         return {0.f, 1.f, 0.f, 1.f}; // Green
 
-    case net::GrpcClientState::attempting_to_connect:
+    case grpcw::client::GrpcClientState::attempting_to_connect:
         return {1.f, 1.f, 0.f, 1.f}; // Yellow
     }
     return {1.f, 1.f, 1.f, 1.f}; // White
@@ -81,21 +79,20 @@ ImVec4 to_pretty_color(const net::GrpcClientState& state) {
 
 } // namespace
 
-VisClient::VisClient(const std::string& initial_host_address, const Arguments& arguments)
+VisClient::VisClient(std::string initial_host_address, const Arguments& arguments)
     : ImGuiMagnumApplication(arguments,
                              Configuration{}
                                  .setTitle("Geometry Visualisation Client")
                                  .setSize({1280, 720})
-                                 .setWindowFlags(Configuration::WindowFlag::Resizable))
-    , gl_version_str_(GL::Context::current().versionString())
-    , gl_renderer_str_(GL::Context::current().rendererString())
-    , server_address_input_(initial_host_address)
-    , grpc_client_(std::make_unique<net::GrpcClient<proto::Scene>>()) {
+                                 .setWindowFlags(Configuration::WindowFlag::Resizable)),
+      gl_version_str_(GL::Context::current().versionString()),
+      gl_renderer_str_(GL::Context::current().rendererString()),
+      server_address_input_(std::move(initial_host_address)),
+      grpc_client_(std::make_unique<grpcw::client::GrpcClient<proto::Scene>>()) {
 
     scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
 
-    grpc_client_->change_server(server_address_input_,
-                                [this](const net::GrpcClientState&) { this->on_state_change(); });
+    grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
 
     // Connect to the stream that delivers message updates
     grpc_client_->register_stream<proto::Message>(
@@ -131,6 +128,9 @@ void vis::VisClient::update() {
 
             case proto::SceneUpdate::kResetAllItems:
                 scene_->reset(update.reset_all_items());
+                break;
+
+            case proto::SceneUpdate::kRemoveItem:
                 break;
 
             case proto::SceneUpdate::UPDATE_NOT_SET:
@@ -190,16 +190,15 @@ void vis::VisClient::configure_gui() {
         bool value_changed = imgui::configure_gui("Change Server", &server_address_input_);
         {
             imgui::Disable::Guard disable(server_address_input_ == grpc_client_->get_server_address()
-                                          and state != net::GrpcClientState::connected);
+                                          and state != grpcw::client::GrpcClientState::connected);
             value_changed |= (ImGui::Button("Connect"));
         }
 
         if (value_changed) {
-            grpc_client_->change_server(server_address_input_,
-                                        [this](const net::GrpcClientState&) { this->on_state_change(); });
+            grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
         }
 
-        if (state == net::GrpcClientState::attempting_to_connect) {
+        if (state == grpcw::client::GrpcClientState::attempting_to_connect) {
             ImGui::SameLine();
             if (ImGui::Button("Stop Connecting")) {
                 grpc_client_->kill_streams_and_channel();
@@ -214,7 +213,7 @@ void vis::VisClient::configure_gui() {
     ImGui::Checkbox("Run app as fast as possible", &run_as_fast_as_possible_);
 
     if (run_as_fast_as_possible_) {
-        ImGui::TextColored({0.f, 1.f, 0.f, 1.f}, "FPS: %.3f", ImGui::GetIO().Framerate);
+        ImGui::TextColored({0.f, 1.f, 0.f, 1.f}, "FPS: %.3f", static_cast<double>(ImGui::GetIO().Framerate));
         reset_draw_counter();
     }
 
@@ -377,5 +376,4 @@ void VisClient::get_scene_state(bool redraw) {
     }
 }
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

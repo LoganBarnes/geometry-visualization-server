@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "general_shader_3d.hpp"
 
+#include <Corrade/Containers/Reference.h>
 #include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/Context.h>
 #include <Magnum/GL/Shader.h>
@@ -29,8 +30,7 @@
 #include <Magnum/Math/Matrix3.h>
 #include <Magnum/Math/Matrix4.h>
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 GeneralShader3D::GeneralShader3D() {
     MAGNUM_ASSERT_GL_VERSION_SUPPORTED(Magnum::GL::Version::GL450);
@@ -43,7 +43,10 @@ GeneralShader3D::GeneralShader3D() {
     vert.addSource(rs.get("general_shader.vert"));
     frag.addSource(rs.get("general_shader.frag"));
 
-    CORRADE_INTERNAL_ASSERT_OUTPUT(Magnum::GL::Shader::compile({vert, frag}));
+    auto vert_ref = Corrade::Containers::Reference<Magnum::GL::Shader>(vert);
+    auto frag_ref = Corrade::Containers::Reference<Magnum::GL::Shader>(frag);
+
+    CORRADE_INTERNAL_ASSERT_OUTPUT(Magnum::GL::Shader::compile({vert_ref, frag_ref}));
 
     attachShaders({vert, frag});
 
@@ -126,5 +129,4 @@ GeneralShader3D& GeneralShader3D::set_shading(const proto::Shading& shading) {
     return *this;
 }
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

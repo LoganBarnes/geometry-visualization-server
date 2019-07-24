@@ -25,7 +25,7 @@ syntax = "proto3";
 package gvs.proto;
 
 import "google/protobuf/empty.proto";
-import "gvs/types.proto";
+import "types.proto";
 
 service Scene {
     rpc UpdateScene (SceneUpdateRequest) returns (Errors);
@@ -47,8 +47,8 @@ message SceneUpdateRequest {
         SceneItemInfo safe_set_item = 1;
         SceneItemInfo replace_item = 2;
         SceneItemInfo append_to_item = 3;
-        // SceneItemInfo update_item = 4;
-        // SceneItemInfo remove_item = 5;
+        SceneItemInfo update_item = 4;
+        SceneItemInfo remove_item = 5;
         google.protobuf.Empty clear_all = 6;
     }
 }
@@ -57,7 +57,7 @@ message SceneUpdate {
     oneof update {
         SceneItemInfo add_item = 1;
         SceneItemInfo update_item = 2;
-        // SceneItemInfo remove_item = 3;
+        SceneItemInfo remove_item = 3;
         SceneItems reset_all_items = 4;
     }
 }

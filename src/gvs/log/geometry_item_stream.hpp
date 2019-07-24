@@ -27,7 +27,7 @@
 #include "gvs/log/send.hpp"
 
 // generated
-#include <gvs/scene.grpc.pb.h>
+#include <scene.grpc.pb.h>
 
 namespace gvs {
 namespace log {
