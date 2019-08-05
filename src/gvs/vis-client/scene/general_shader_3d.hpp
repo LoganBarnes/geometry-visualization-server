@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,12 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <gvs/types.pb.h>
+#include <types.pb.h>
 
 #include <Magnum/GL/AbstractShaderProgram.h>
 #include <Magnum/Math/Color.h>
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 class GeneralShader3D : public Magnum::GL::AbstractShaderProgram {
 public:
@@ -62,5 +61,4 @@ private:
     int ambient_color_uniform_;
 };
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

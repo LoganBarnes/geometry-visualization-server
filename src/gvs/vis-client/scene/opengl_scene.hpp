@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 //                                                                           |________|
-//  Copyright (c) 2018 CloudNC Ltd - All Rights Reserved                        |  |
+//  Copyright (c) 2019 CloudNC Ltd - All Rights Reserved                        |  |
 //                                                                              |__|
 //        ____                                                                .  ||
 //       / __ \                                                               .`~||$$$$
@@ -20,7 +20,7 @@
 #include "gvs/vis-client/scene/general_shader_3d.hpp"
 #include "gvs/vis-client/scene/scene_interface.hpp"
 
-#include <gvs/types.pb.h>
+#include <types.pb.h>
 
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Containers/Optional.h>
@@ -33,8 +33,7 @@
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/SceneGraph.h>
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 class OpenGLScene : public SceneInterface {
 public:
@@ -77,5 +76,4 @@ private:
     Magnum::SceneGraph::DrawableGroup3D drawables_;
 };
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

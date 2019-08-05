@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,8 +42,7 @@ static void initialize_resources() {
     CORRADE_RESOURCE_INITIALIZE(gvs_client_RESOURCES)
 }
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 using namespace Magnum;
 
@@ -274,7 +273,9 @@ void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
 }
 
 void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
-    ImGui_ImplGlfw_ScrollCallback(this->window(), event.offset().x(), event.offset().y());
+    ImGui_ImplGlfw_ScrollCallback(this->window(),
+                                  static_cast<double>(event.offset().x()),
+                                  static_cast<double>(event.offset().y()));
 
     if (event.offset().y() == 0.f) {
         return;
@@ -298,5 +299,4 @@ void ImGuiMagnumApplication::update_camera() {
     camera_package_.object.setTransformation(camera_package_.transformation);
 }
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

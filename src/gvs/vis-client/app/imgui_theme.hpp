@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,7 @@
 #include <imgui.h>
 #include <string>
 
-namespace gvs {
-namespace vis {
-namespace detail {
+namespace gvs::vis::detail {
 
 class Theme {
 public:
@@ -43,6 +41,4 @@ public:
     ImFont* font;
 };
 
-} // namespace detail
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis::detail

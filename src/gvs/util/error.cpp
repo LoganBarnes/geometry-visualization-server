@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-syntax = "proto3";
+#include "error.hpp"
 
-package gvs.test.proto;
+namespace gvs {
+namespace replace_this {
 
-service Test {
-    rpc echo (TestMessage) returns (TestMessage);
-    rpc endless_echo_stream (TestMessage) returns (stream TestMessage);
-}
-
-message TestMessage {
-    string msg = 1;
-}
+} // namespace replace_this
+} // namespace gvs

@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 //                                                                           |________|
-//  Copyright (c) 2018 CloudNC Ltd - All Rights Reserved                        |  |
+//  Copyright (c) 2019 CloudNC Ltd - All Rights Reserved                        |  |
 //                                                                              |__|
 //        ____                                                                .  ||
 //       / __ \                                                               .`~||$$$$
@@ -30,8 +30,7 @@
 #include <Magnum/Trade/MeshData3D.h>
 #include <imgui.h>
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 namespace {
 
@@ -206,5 +205,4 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}
 
-} // namespace vis
 } // namespace gvs

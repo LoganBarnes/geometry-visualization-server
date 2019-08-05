@@ -26,7 +26,7 @@
 #include "gvs/log/send.hpp"
 
 // generated
-#include <gvs/scene.grpc.pb.h>
+#include <scene.grpc.pb.h>
 
 // third party
 #include <grpc++/create_channel.h>
