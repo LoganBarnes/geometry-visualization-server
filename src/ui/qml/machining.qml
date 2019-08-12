@@ -3,7 +3,7 @@ import QtQuick.Controls 2.5
 import QtQuick.Controls.Material 2.3
 
 Item {
-    id: window
+    id: machining
     visible: true
 
     TestForm {
@@ -14,4 +14,3 @@ Item {
     D{i:0;autoSize:true;height:480;width:640}
 }
  ##^##*/
-

@@ -28,6 +28,8 @@ private:
     std::unordered_set<std::shared_ptr<ads::CDockWidget>> dock_widgets_;
 
     std::unordered_set<std::shared_ptr<QQuickView>> qml_views_;
+
+    ads::CDockWidget* add_qml_widget(QUrl url, const QString& title);
 };
 
 } // namespace trid::ui

@@ -1,7 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
-        <file>qml/main.qml</file>
         <file>qml/TestForm.ui.qml</file>
+        <file>qml/dataflow.qml</file>
+        <file>qml/machining.qml</file>
+        <file>qml/strategy.qml</file>
     </qresource>
 </RCC>
