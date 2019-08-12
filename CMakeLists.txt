@@ -1,31 +1,11 @@
 ##########################################################################################
-# Geometry Visualization Server
 # Copyright (c) 2019 Logan Barnes - All Rights Reserved
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 ##########################################################################################
 cmake_minimum_required(VERSION 3.12)
-project(GeometryVisualizationServer LANGUAGES CXX)
+project(TriDexel LANGUAGES C CXX CUDA)
 
-option(GVS_LOGGING_ONLY "Only build the logging library" OFF)
-option(GVS_BUILD_TESTS "Build unit tests" OFF)
-option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
+option(TRID_BUILD_TESTS "Build unit tests" OFF)
+option(TRID_USE_DEV_FLAGS "Compile with all the flags" OFF)
 
 #############################
 ### Project Configuration ###
@@ -33,31 +13,24 @@ option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
 include(cmake/ClangTidy.cmake)
 include(cmake/ThirdParty.cmake)
 
-if (NOT ${GVS_LOGGING_ONLY})
-    include(cmake/ThirdPartyGui.cmake)
-endif ()
-
-if (${GVS_BUILD_TESTS})
+if (${TRID_BUILD_TESTS})
     include(cmake/ThirdPartyTesting.cmake)
 endif ()
-#set(CMAKE_CXX_STANDARD 14)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (MSVC)
     add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS) # silly microsoft
     set(SYSTEM_FLAGS /experimental:external /external:anglebrackets /external:W0)
 endif ()
 
-if (GVS_USE_DEV_FLAGS)
+if (TRID_USE_DEV_FLAGS)
     if (NOT MSVC)
-        set(GVS_COMPILE_FLAGS
+        set(TRID_COMPILE_FLAGS
                 -Wall -Wextra -Werror -Wpedantic -Wunused -pedantic-errors -Winit-self
                 -Wold-style-cast -Woverloaded-virtual -Wsign-conversion -Wshadow
                 -Wmissing-declarations -Wmissing-include-dirs -Wno-unknown-pragmas
                 )
     else ()
-        set(GVS_COMPILE_FLAGS /WX)
+        set(TRID_COMPILE_FLAGS /WX)
     endif ()
 endif ()
 
@@ -65,250 +38,80 @@ endif ()
 # helps to fix that and it is super useful when refactoring
 cmake_policy(SET CMP0009 NEW)
 
-################################
-### gRPC/Protobuf Generation ###
-################################
-create_proto_library(gvs_protos
-        ${CMAKE_CURRENT_LIST_DIR}/protos/gvs
-        ${CMAKE_BINARY_DIR}/generated/protos
-        )
-target_compile_options(gvs_protos PRIVATE -w) # ignore warning on generated headers
-set_target_properties(
-        gvs_protos
-        PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-        CXX_EXTENSIONS OFF
-        POSITION_INDEPENDENT_CODE ON
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-)
-
-##########################################################################################
-# Geometry Visualization Server
-# Copyright (c) 2018 Logan Barnes - All Rights Reserved
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-##########################################################################################
-set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-
 set(AUTO_GENERATION_MESSAGE "***This file is auto generated. If you modify it the changes will be overwritten.***")
-configure_file(${CMAKE_CURRENT_LIST_DIR}/src/gvs_paths.hpp.in ${CMAKE_BINARY_DIR}/generated/gvs/gvs_paths.hpp)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/src/paths.hpp.in ${CMAKE_BINARY_DIR}/generated/trid/paths.hpp)
 
-############
-### Util ###
-############
-file(GLOB_RECURSE GVS_SOURCE_FILES
+###############
+### Library ###
+###############
+file(GLOB_RECURSE TRID_RESOURCE_FILES
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
-        ${CMAKE_CURRENT_LIST_DIR}/src/gvs/util/*
+        ${CMAKE_CURRENT_LIST_DIR}/*.qrc
         )
-
-add_library(gvs_util ${GVS_SOURCE_FILES})
-
-target_link_libraries(gvs_util
-        PUBLIC gvs_protos
-        PUBLIC crossguid
-        PUBLIC expected
-        )
-target_include_directories(gvs_util
-        PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
-        PUBLIC ${CMAKE_BINARY_DIR}/generated
-        )
-
-target_compile_options(gvs_util PUBLIC ${GVS_COMPILE_FLAGS})
-
-set_target_properties(
-        gvs_util
-        PROPERTIES
-        CXX_STANDARD 11
-        CXX_STANDARD_REQUIRED ON
-        CXX_EXTENSIONS OFF
-        POSITION_INDEPENDENT_CODE ON
-        CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-)
-
-##################
-### Log Client ###
-##################
-file(GLOB_RECURSE GVS_SOURCE_FILES
+file(GLOB_RECURSE TRID_SOURCE_FILES
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
-        ${CMAKE_CURRENT_LIST_DIR}/src/gvs/log/*
+        ${CMAKE_CURRENT_LIST_DIR}/src/trid/*
+        ${CMAKE_CURRENT_LIST_DIR}/src/util/*
+        ${CMAKE_CURRENT_LIST_DIR}/src/ui/*.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/ui/*.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/ui/*.ui
         )
 
-add_library(gvs_log_client ${GVS_SOURCE_FILES})
-target_link_libraries(gvs_log_client PUBLIC gvs_util)
+add_library(tridexel
+        ${TRID_RESOURCE_FILES}
+        ${TRID_SOURCE_FILES}
+        )
 
+target_link_libraries(tridexel
+        PUBLIC
+        expected
+        gl3w
+        qtadvanceddocking
+        Qt5::Core
+        Qt5::Gui
+        Qt5::Quick
+        Qt5::QuickWidgets
+        Qt5::QuickControls2
+        Qt5::Qml
+        )
+target_include_directories(tridexel
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src;${CMAKE_BINARY_DIR}/generated>"
+        )
+
+target_compile_options(tridexel PRIVATE ${TRID_COMPILE_FLAGS})
+
+##################
+### Executable ###
+##################
+add_executable(tridexel_viewer
+        ${TRID_RESOURCE_FILES}
+        ${CMAKE_CURRENT_LIST_DIR}/src/exec/tridexel_viewer.cpp
+        )
+target_link_libraries(tridexel_viewer PRIVATE tridexel)
+target_compile_options(tridexel_viewer PRIVATE ${TRID_COMPILE_FLAGS})
+
+#########################
+### Target Properties ###
+#########################
 set_target_properties(
-        gvs_log_client
+        tridexel
+        tridexel_viewer
         PROPERTIES
+        # C++ flags
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
         POSITION_INDEPENDENT_CODE ON
-        CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+        # Binary locations
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+        # Just Qt things
+        INCLUDE_CURRENT_DIR ON # Find includes in corresponding build directories
+        AUTOMOC ON # Instruct CMake to run moc automatically when needed
+        AUTOUIC ON # Create code from a list of Qt designer ui files
+        AUTORCC ON # Create code for resource loading
 )
-
-if (NOT ${GVS_LOGGING_ONLY})
-    ##############
-    ### Server ###
-    ##############
-    file(GLOB_RECURSE GVS_SOURCE_FILES
-            LIST_DIRECTORIES false
-            CONFIGURE_DEPENDS
-            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/server/*
-            )
-
-    add_library(gvs_server ${GVS_SOURCE_FILES})
-    target_link_libraries(gvs_server PUBLIC gvs_util)
-
-    ##################
-    ### Vis Client ###
-    ##################
-    # Compile resources separately to avoid linting issues on generated code
-    corrade_add_resource(gvs_client_RESOURCES ${CMAKE_CURRENT_LIST_DIR}/src/resources.conf)
-    add_library(vis_client_resources ${gvs_client_RESOURCES})
-    target_link_libraries(vis_client_resources PUBLIC gvs_gui_thirdparty)
-
-    file(GLOB_RECURSE GVS_SOURCE_FILES
-            LIST_DIRECTORIES false
-            CONFIGURE_DEPENDS
-            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
-            )
-
-    add_library(gvs_vis_client ${GVS_SOURCE_FILES})
-    target_link_libraries(gvs_vis_client
-            PUBLIC vis_client_resources
-            PUBLIC gvs_util
-            )
-
-    ####################
-    #### Executables ###
-    ####################
-    add_executable(run_gvs ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
-    target_link_libraries(run_gvs
-            PRIVATE gvs_server
-            PRIVATE gvs_vis_client
-            )
-
-    add_executable(gvs_message_client ${CMAKE_CURRENT_LIST_DIR}/src/exec/message_client.cpp)
-    target_link_libraries(gvs_message_client gvs_log_client)
-
-    set_target_properties(
-            gvs_server
-            gvs_vis_client
-            run_gvs
-            gvs_message_client
-            PROPERTIES
-            CXX_STANDARD 17
-            CXX_STANDARD_REQUIRED ON
-            CXX_EXTENSIONS OFF
-            POSITION_INDEPENDENT_CODE ON
-            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    )
-
-    add_executable(gvs_log_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/log_test.cpp)
-    target_link_libraries(gvs_log_test gvs_log_client)
-
-    add_executable(gvs_mesh_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test.cpp)
-    target_link_libraries(gvs_mesh_test gvs_log_client)
-
-    set_target_properties(
-            gvs_log_test
-            gvs_mesh_test
-            PROPERTIES
-            CXX_STANDARD 14
-            CXX_STANDARD_REQUIRED ON
-            CXX_EXTENSIONS OFF
-            POSITION_INDEPENDENT_CODE ON
-            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    )
-endif (NOT ${GVS_LOGGING_ONLY})
-
-################
-#### Testing ###
-################
-if (${GVS_BUILD_TESTS})
-    #    file(GLOB_RECURSE GVS_TEST_UTIL_SOURCE_FILES
-    #            LIST_DIRECTORIES false
-    #            CONFIGURE_DEPENDS
-    #            ${CMAKE_CURRENT_LIST_DIR}/testing/util/*
-    #            )
-    #
-    #    add_library(gvs_test_util ${GVS_TEST_UTIL_SOURCE_FILES})
-    #
-    #    target_link_libraries(gvs_test_util PUBLIC
-    #            gvs_testing_thirdparty
-    #            testing_protos
-    #            gvs_net
-    #            )
-    #
-    #    target_compile_options(gvs_test_util PUBLIC ${GVS_COMPILE_FLAGS})
-    #
-    #    # add test coverage capabilities
-    #    find_program(LCOV_EXE
-    #            NAMES "lcov"
-    #            DOC "Path to lcov executable"
-    #            )
-    #
-    #    if (LCOV_EXE AND CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "Debug")
-    #        include(CodeCoverage)
-    #        setup_target_for_coverage(gvs_coverage gvs_tests coverage)
-    #        set(PROFILE_FLAGS --coverage -fprofile-arcs -ftest-coverage -fno-inline)
-    #
-    #        target_compile_options(gvs_net PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_server PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_vis_client PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_log_client PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_test_util PUBLIC ${PROFILE_FLAGS})
-    #
-    #        target_link_libraries(gvs_net PUBLIC gcov)
-    #        target_link_libraries(gvs_server PUBLIC gcov)
-    #        target_link_libraries(gvs_vis_client PUBLIC gcov)
-    #        target_link_libraries(gvs_log_client PUBLIC gcov)
-    #        target_link_libraries(gvs_test_util PUBLIC gcov)
-    #    endif ()
-    #
-    #    add_executable(gvs_tests testing/gvs_tests.cpp)
-    #    target_link_libraries(gvs_tests PRIVATE
-    #            gvs_server
-    #            gvs_vis_client
-    #            gvs_log_client
-    #            gvs_test_util
-    #            )
-    #
-    #    set_target_properties(gvs_tests PROPERTIES
-    #            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-    #            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/tests"
-    #            )
-endif ()
