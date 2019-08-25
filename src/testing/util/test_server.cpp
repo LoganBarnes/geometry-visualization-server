@@ -29,8 +29,8 @@ namespace test {
 
 TestServer::TestServer(std::string server_address)
     : server_(
-          std::make_unique<gvs::net::GrpcServer>(std::make_shared<gvs::test::TestService>(), std::move(server_address)))
-    , run_thread_([&] { server_->run(); }) {}
+        std::make_unique<gvs::net::GrpcServer>(std::make_shared<gvs::test::TestService>(), std::move(server_address))),
+      run_thread_([&] { server_->run(); }) {}
 
 TestServer::~TestServer() {
     server_->shutdown();

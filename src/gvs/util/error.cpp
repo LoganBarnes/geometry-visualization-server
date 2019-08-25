@@ -23,7 +23,5 @@
 #include "error.hpp"
 
 namespace gvs {
-namespace replace_this {
-
-} // namespace replace_this
+namespace replace_this {} // namespace replace_this
 } // namespace gvs

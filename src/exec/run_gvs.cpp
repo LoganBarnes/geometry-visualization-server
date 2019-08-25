@@ -25,9 +25,7 @@
 
 #include <condition_variable>
 #include <csignal>
-#include <cstdlib>
 #include <mutex>
-#include <unistd.h>
 
 namespace {
 

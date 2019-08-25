@@ -26,13 +26,12 @@
 #include "gvs/vis-client/scene/camera_package.hpp"
 
 #include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/GlfwApplication.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/SceneGraph.h>
 
 #include <memory>
-
-struct ImGuiContext;
 
 namespace gvs::vis {
 
@@ -73,9 +72,8 @@ private:
 
     void update_camera();
 
-    std::shared_ptr<ImGuiContext> imgui_;
-    std::shared_ptr<bool> imgui_gl_;
-    int draw_counter_; // continue drawing until this counter is zero
+    Magnum::ImGuiIntegration::Context imgui_{Magnum::NoCreate};
+    int draw_counter_ = 1; // continue drawing until this counter is zero
 
     // Camera
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;

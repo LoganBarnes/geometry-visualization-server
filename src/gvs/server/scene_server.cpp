@@ -199,7 +199,7 @@ SceneServer::SceneServer(const std::string& server_address)
                             });
 }
 
-SceneServer::~SceneServer()  = default;
+SceneServer::~SceneServer() = default;
 
 /*
  * See the full table in "scene_server.hpp"
