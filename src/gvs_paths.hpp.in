@@ -50,6 +50,4 @@ inline std::string frag_shader_file() {
 #endif
 }
 
-#cmakedefine OptiX_FOUND
-
 } // namespace gvs

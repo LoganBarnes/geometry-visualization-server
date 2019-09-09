@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,11 @@
 
 #include "gvs/vis-client/scene/general_shader_3d.hpp"
 
-#include <gvs/types.grpc.pb.h>
+#include <types.grpc.pb.h>
 
 #include <Magnum/SceneGraph/Drawable.h>
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {
 public:
@@ -55,5 +54,4 @@ private:
     GeneralShader3D& shader_;
 };
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

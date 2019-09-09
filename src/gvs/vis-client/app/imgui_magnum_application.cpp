@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@
 #include "gvs/vis-client/scene/opengl_scene.hpp"
 
 #include <Corrade/Utility/Resource.h>
-#include <Corrade/Utility/Unicode.h>
 #include <Magnum/GL/Context.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Version.h>
@@ -35,15 +34,13 @@
 #include <Magnum/Math/Matrix4.h>
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/SceneGraph/Camera.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include <imgui.h>
 
 static void initialize_resources() {
     CORRADE_RESOURCE_INITIALIZE(gvs_client_RESOURCES)
 }
 
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 using namespace Magnum;
 
@@ -66,33 +63,16 @@ float intersect_plane(const Ray& ray, Vector3 p, const Vector3& plane_normal) {
 } // namespace
 
 ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const Configuration& configuration)
-    : GlfwApplication(arguments, configuration, GLConfiguration().setSampleCount(4)) {
+    : GlfwApplication(arguments, configuration, GLConfiguration().setSampleCount(4)),
+      imgui_(Vector2{windowSize()} / dpiScaling(), windowSize(), framebufferSize()) {
     initialize_resources();
 
     this->startTextInput(); // allow for text input callbacks
 
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
-    imgui_ = std::shared_ptr<ImGuiContext>(ImGui::CreateContext(), ImGui::DestroyContext);
-
-    ImGuiIO& io = ImGui::GetIO();
-
-    // Use a shared pointer to handle ImGui initialization and destruction via RAII
-    auto init_imgui_gl = [this]() {
-        bool success = true;
-        success &= ImGui_ImplGlfw_InitForOpenGL(this->window(), false);
-        success &= ImGui_ImplOpenGL3_Init();
-        return new bool(success);
-    };
-
-    imgui_gl_ = std::shared_ptr<bool>(init_imgui_gl(), [](const bool* p) {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        delete p;
-    });
 
     // Some fonts are loaded in the theme class but we might also want the default so it's loaded here
-    io.Fonts->AddFontDefault();
     theme_ = std::make_unique<detail::Theme>();
 
     theme_->set_style();
@@ -100,6 +80,13 @@ ImGuiMagnumApplication::ImGuiMagnumApplication(const Arguments& arguments, const
                                  theme_->background.Value.y,
                                  theme_->background.Value.z,
                                  theme_->background.Value.w});
+
+    /* Set up proper blending to be used by ImGui. There's a great chance
+       you'll need this exact behavior for the rest of your scene. If not, set
+       this only for the drawFrame() call. */
+    GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add, GL::Renderer::BlendEquation::Add);
+    GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
+                                   GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
     camera_package_.object.setParent(&camera_scene_).translate(Vector3::zAxis(5.0f));
 
@@ -127,20 +114,29 @@ void ImGuiMagnumApplication::reset_draw_counter() {
 void ImGuiMagnumApplication::drawEvent() {
     update();
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::PushFont(theme_->font);
-    configure_gui();
-    ImGui::PopFont();
-
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color | GL::FramebufferClear::Depth);
 
     render(camera_package_);
 
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    imgui_.newFrame();
+
+    configure_gui();
+
+    /* Set appropriate states. If you only draw imgui UI, it is sufficient to
+       do this once in the constructor. */
+    GL::Renderer::enable(GL::Renderer::Feature::Blending);
+    GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
+    GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
+    GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
+
+    imgui_.drawFrame();
+
+    /* Reset state. Only needed if you want to draw something else with
+       different state next frame. */
+    GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
+    GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
+    GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
+    GL::Renderer::disable(GL::Renderer::Feature::Blending);
 
     swapBuffers();
 
@@ -150,32 +146,26 @@ void ImGuiMagnumApplication::drawEvent() {
 }
 
 void ImGuiMagnumApplication::viewportEvent(ViewportEvent& event) {
+    reset_draw_counter();
     GL::defaultFramebuffer.setViewport({{}, event.windowSize()});
+
+    imgui_.relayout(Vector2{event.windowSize()} / event.dpiScaling(), event.windowSize(), event.framebufferSize());
 
     camera_package_.update_viewport(event.windowSize());
 
     resize(event.windowSize());
-    reset_draw_counter();
 }
 
 void ImGuiMagnumApplication::keyPressEvent(KeyEvent& event) {
-    if (not event.isRepeated()) {
-        ImGui_ImplGlfw_KeyCallback(this->window(),
-                                   static_cast<int>(event.key()),
-                                   -1,
-                                   GLFW_PRESS,
-                                   static_cast<int>(event.modifiers()));
+    reset_draw_counter();
+    if (imgui_.handleKeyPressEvent(event)) {
+        return;
     }
     event.setAccepted(true);
-    reset_draw_counter();
 }
 
 void ImGuiMagnumApplication::keyReleaseEvent(KeyEvent& event) {
-    ImGui_ImplGlfw_KeyCallback(this->window(),
-                               static_cast<int>(event.key()),
-                               -1,
-                               GLFW_RELEASE,
-                               static_cast<int>(event.modifiers()));
+    reset_draw_counter();
 
     using KE = KeyEvent;
 
@@ -184,97 +174,96 @@ void ImGuiMagnumApplication::keyReleaseEvent(KeyEvent& event) {
         and event.key() == KE::Key::Q) {
 
         this->exit();
+        return;
     }
 
-    if (not ImGui::GetIO().WantCaptureKeyboard) {
-        switch (event.key()) {
-
-        case KE::Key::R: {
-            camera_orbit_point_ = {0.f, 0.f, 0.f};
-            update_camera();
-        } break;
-
-        default:
-            break;
-        }
+    if (imgui_.handleKeyReleaseEvent(event)) {
+        return;
     }
-
     event.setAccepted(true);
-    reset_draw_counter();
+
+    switch (event.key()) {
+
+    case KE::Key::R: {
+        camera_orbit_point_ = {0.f, 0.f, 0.f};
+        update_camera();
+    } break;
+
+    default:
+        break;
+    }
 }
 
 void ImGuiMagnumApplication::textInputEvent(TextInputEvent& event) {
-    char32_t codepoint;
-    std::tie(codepoint, std::ignore) = Utility::Unicode::nextChar(event.text(), 0);
-
-    ImGui_ImplGlfw_CharCallback(this->window(), codepoint);
-
-    event.setAccepted(true);
     reset_draw_counter();
+    if (imgui_.handleTextInputEvent(event)) {
+        return;
+    }
+    event.setAccepted(true);
 }
 
 void ImGuiMagnumApplication::mousePressEvent(MouseEvent& event) {
-    ImGui_ImplGlfw_MouseButtonCallback(this->window(),
-                                       static_cast<int>(event.button()),
-                                       GLFW_PRESS,
-                                       static_cast<int>(event.modifiers()));
-    event.setAccepted(true);
     reset_draw_counter();
-
-    if (not ImGui::GetIO().WantCaptureMouse) {
-        previous_position_ = Vector2(event.position());
+    if (imgui_.handleMousePressEvent(event)) {
+        return;
     }
+    event.setAccepted(true);
+
+    previous_position_ = Vector2(event.position());
 }
 
 void ImGuiMagnumApplication::mouseReleaseEvent(MouseEvent& event) {
-    ImGui_ImplGlfw_MouseButtonCallback(this->window(),
-                                       static_cast<int>(event.button()),
-                                       GLFW_RELEASE,
-                                       static_cast<int>(event.modifiers()));
-    event.setAccepted(true);
     reset_draw_counter();
+    if (imgui_.handleMouseReleaseEvent(event)) {
+        return;
+    }
+    event.setAccepted(true);
 }
 
 void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
-
-    event.setAccepted(true);
     reset_draw_counter();
-
-    if (not ImGui::GetIO().WantCaptureMouse) {
-        auto current_position = Vector2(event.position());
-
-        if (event.buttons() & MouseMoveEvent::Button::Left) {
-            camera_yaw_and_pitch_ += (previous_position_ - current_position) * 0.005f;
-
-        } else if (event.buttons() & MouseMoveEvent::Button::Middle) {
-            // pan camera
-
-            auto world_from_mouse_pos = [&](const auto& mouse_pos, float* dist_to_plane) {
-                auto ray = camera_package_.get_camera_ray_from_window_pos(mouse_pos);
-                auto plane_normal = (ray.origin - camera_orbit_point_).normalized();
-
-                *dist_to_plane = intersect_plane(ray, camera_orbit_point_, plane_normal);
-                return ray.origin + ray.direction * (*dist_to_plane);
-            };
-
-            float should_not_be_inf1, should_not_be_inf2;
-
-            auto previous_world_pos = world_from_mouse_pos(previous_position_, &should_not_be_inf1);
-            auto current_world_pos = world_from_mouse_pos(current_position, &should_not_be_inf2);
-
-            if (not std::isinf(should_not_be_inf1) and not std::isinf(should_not_be_inf2)) {
-                auto diff = current_world_pos - previous_world_pos;
-                camera_orbit_point_ -= diff;
-            }
-        }
-
-        previous_position_ = current_position;
-        update_camera();
+    if (imgui_.handleMouseMoveEvent(event)) {
+        return;
     }
+    event.setAccepted(true);
+
+    auto current_position = Vector2(event.position());
+
+    if (event.buttons() & MouseMoveEvent::Button::Left) {
+        camera_yaw_and_pitch_ += (previous_position_ - current_position) * 0.005f;
+
+    } else if (event.buttons() & MouseMoveEvent::Button::Middle) {
+        // pan camera
+
+        auto world_from_mouse_pos = [&](const auto& mouse_pos, float* dist_to_plane) {
+            auto ray = camera_package_.get_camera_ray_from_window_pos(mouse_pos);
+            auto plane_normal = (ray.origin - camera_orbit_point_).normalized();
+
+            *dist_to_plane = intersect_plane(ray, camera_orbit_point_, plane_normal);
+            return ray.origin + ray.direction * (*dist_to_plane);
+        };
+
+        float should_not_be_inf1, should_not_be_inf2;
+
+        auto previous_world_pos = world_from_mouse_pos(previous_position_, &should_not_be_inf1);
+        auto current_world_pos = world_from_mouse_pos(current_position, &should_not_be_inf2);
+
+        if (not std::isinf(should_not_be_inf1) and not std::isinf(should_not_be_inf2)) {
+            auto diff = current_world_pos - previous_world_pos;
+            camera_orbit_point_ -= diff;
+        }
+    }
+
+    previous_position_ = current_position;
+    update_camera();
 }
 
 void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
-    ImGui_ImplGlfw_ScrollCallback(this->window(), event.offset().x(), event.offset().y());
+    reset_draw_counter();
+    if (imgui_.handleMouseScrollEvent(event)) {
+        return;
+    }
+    event.setAccepted(true);
 
     if (event.offset().y() == 0.f) {
         return;
@@ -284,9 +273,6 @@ void ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) {
     camera_orbit_distance_ = std::max(0.f, camera_orbit_distance_);
 
     update_camera();
-
-    event.setAccepted(true);
-    reset_draw_counter();
 }
 
 void ImGuiMagnumApplication::update_camera() {
@@ -298,5 +284,4 @@ void ImGuiMagnumApplication::update_camera() {
     camera_package_.object.setTransformation(camera_package_.transformation);
 }
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis

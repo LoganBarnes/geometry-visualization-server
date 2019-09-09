@@ -22,39 +22,30 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// project
-#include "gvs/net/grpc_async_server.hpp"
-
 // generated
-#include <gvs/scene.grpc.pb.h>
+#include <scene.grpc.pb.h>
 
 // third-party
 #include <crossguid/guid.hpp>
+#include <grpcw/forward_declarations.hpp>
 
-// standard
-#include <thread>
-
-namespace gvs {
-namespace host {
-
-class SceneService;
+namespace gvs::server {
 
 class SceneServer {
 public:
-    explicit SceneServer(std::string server_address = "");
-
-    grpc::Server& server();
+    explicit SceneServer(const std::string& server_address = "");
+    ~SceneServer();
 
 private:
     using Service = proto::Scene::AsyncService;
-    net::GrpcAsyncServer<Service> server_;
+    std::unique_ptr<grpcw::server::GrpcAsyncServer<Service>> server_;
 
     // atomicize these
     proto::SceneItems scene_;
     proto::Messages messages_;
 
-    gvs::net::StreamInterface<proto::Message>* message_stream_;
-    gvs::net::StreamInterface<proto::SceneUpdate>* scene_stream_;
+    grpcw::server::StreamInterface<proto::Message>* message_stream_;
+    grpcw::server::StreamInterface<proto::SceneUpdate>* scene_stream_;
 
     /*
      * How items are handled based on the update request:
@@ -78,8 +69,7 @@ private:
     void remove_item_and_send_update(const proto::SceneItemInfo& info, proto::Errors* errors);
 };
 
-} // namespace host
-} // namespace gvs
+} // namespace gvs::server
 
 // //////////////////////////////////////////////////////////////////////////////////// //
 // ///////////////////////////////////  TESTING  ////////////////////////////////////// //
@@ -130,7 +120,7 @@ public:
     gvs::util::BlockingQueue<gvs::proto::SceneUpdate> updates;
 
 private:
-    gvs::net::GrpcClient<gvs::proto::Scene> grpc_client_;
+    grpcw::client::GrpcClient<gvs::proto::Scene> grpc_client_;
 };
 
 TEST_CASE("[gvs-host] test_no_update_set") {

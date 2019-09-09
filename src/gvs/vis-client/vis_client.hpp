@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,21 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/net/grpc_client_state.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
 #include "gvs/vis-client/app/imgui_magnum_application.hpp"
 
-#include <gvs/scene.grpc.pb.h>
+// generated
+#include <scene.grpc.pb.h>
 
-#include <grpc++/channel.h>
-#include <grpc++/completion_queue.h>
+// third-party
+#include <grpcw/forward_declarations.hpp>
 
-#include <thread>
-
-namespace gvs {
-namespace vis {
+namespace gvs::vis {
 
 class VisClient : public ImGuiMagnumApplication {
 public:
-    explicit VisClient(const std::string& initial_host_address, const Arguments& arguments);
+    explicit VisClient(std::string initial_host_address, const Arguments& arguments);
     ~VisClient() override;
 
 private:
@@ -63,7 +60,7 @@ private:
 
     // Networking
     std::string server_address_input_ = "address:port";
-    std::unique_ptr<net::GrpcClient<proto::Scene>> grpc_client_;
+    std::unique_ptr<grpcw::client::GrpcClient<proto::Scene>> grpc_client_;
 
     // Debugging
     bool run_as_fast_as_possible_ = false;
@@ -79,5 +76,4 @@ private:
     util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
 };
 
-} // namespace vis
-} // namespace gvs
+} // namespace gvs::vis
