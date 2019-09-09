@@ -28,4 +28,4 @@ SceneInitializationInfo make_scene_init_info(const ImColor& background_color, co
     return {{background_color.Value.x, background_color.Value.y, background_color.Value.z}, viewport};
 }
 
-} // namespace gvs
+} // namespace gvs::vis

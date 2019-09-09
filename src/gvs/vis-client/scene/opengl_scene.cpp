@@ -205,4 +205,4 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}
 
-} // namespace gvs
+} // namespace gvs::vis
