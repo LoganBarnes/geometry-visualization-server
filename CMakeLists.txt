@@ -215,9 +215,13 @@ if (NOT ${GVS_LOGGING_ONLY})
     add_executable(gvs_mesh_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test.cpp)
     target_link_libraries(gvs_mesh_test gvs_log_client)
 
+    add_executable(gvs_mesh_test_17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test_17.cpp)
+    target_link_libraries(gvs_mesh_test_17 gvs_log_client)
+
     set_target_properties(
             gvs_log_test
             gvs_mesh_test
+            gvs_mesh_test_17
             PROPERTIES
             CXX_STANDARD 14
             CXX_STANDARD_REQUIRED ON
@@ -227,6 +231,11 @@ if (NOT ${GVS_LOGGING_ONLY})
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    )
+    set_target_properties(
+            gvs_mesh_test_17
+            PROPERTIES
+            CXX_STANDARD 17
     )
 endif (NOT ${GVS_LOGGING_ONLY})
 

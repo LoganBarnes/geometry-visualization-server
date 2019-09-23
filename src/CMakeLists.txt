@@ -189,6 +189,15 @@ if (NOT GVS_LOGGING_ONLY)
     add_executable(gvs_mesh_test exec/logging_examples/mesh_test.cpp)
     target_link_libraries(gvs_mesh_test gvs_log_client)
 
+    add_executable(gvs_mesh_test exec/logging_examples/mesh_test.cpp)
+    target_link_libraries(gvs_mesh_test gvs_log_client)
+    set_target_properties(
+            gvs_mesh_test_17
+            PROPERTIES
+            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    )
+
     ### Clang-Tidy for all ###
     set_target_properties(
             gvs_net
