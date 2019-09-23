@@ -27,7 +27,31 @@
 #include <types.pb.h>
 
 #include <cstdint>
+#include <type_traits>
 #include <vector>
+
+template <typename C>
+struct has_data {
+private:
+    template <typename T>
+    static constexpr auto check(const T* t) -> typename std::is_same<decltype(t->data()), const float*>::type;
+
+    template <typename>
+    static constexpr std::false_type check(...);
+
+    typedef decltype(check<C>(nullptr)) type;
+
+public:
+    static constexpr bool value = type::value;
+};
+
+//template<typename T>
+//constexpr bool has_data_v = has_data<T>::value;
+
+template <typename T, typename = std::enable_if_t<has_data<T>::value>>
+const float* data_ptr(const T& t) {
+    return t.data();
+}
 
 namespace gvs {
 
@@ -110,33 +134,6 @@ inline auto coloring(proto::Coloring data) {
     };
 }
 
-/// \TODO: create a better input type that handles pointers, vectors, matrices, iterators, etc.
-inline auto transformation(std::array<float, 16> data) {
-    return [data](proto::SceneItemInfo* info) {
-        if (info->mutable_display_info()->has_transformation()) {
-            return "transformation";
-        }
-        proto::Mat4* transformation = info->mutable_display_info()->mutable_transformation();
-        *(transformation->mutable_data())
-            = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
-        return "";
-    };
-}
-
-/// \TODO: create a better input type that handles pointers, vectors, iterators, etc.
-inline auto uniform_color(std::array<float, 3> data) {
-    return [data](proto::SceneItemInfo* info) {
-        if (info->mutable_display_info()->has_uniform_color()) {
-            return "uniform_color";
-        }
-        proto::Vec3* uniform_color = info->mutable_display_info()->mutable_uniform_color();
-        uniform_color->set_x(data[0]);
-        uniform_color->set_y(data[1]);
-        uniform_color->set_z(data[2]);
-        return "";
-    };
-}
-
 inline auto parent(std::string data) {
     return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->has_parent()) {
@@ -193,97 +190,83 @@ inline auto shading(LambertianShading data) {
     };
 }
 
-#if __cplusplus >= 201703L
-
-template <template <typename, auto...> class Vec3,
-          auto... Ts,
-          typename = std::enable_if_t<detail::is_vec3<Vec3<float, Ts...>>()>>
-inline auto positions_3d(std::vector<Vec3<float, Ts...>> data) {
+template <typename Vec3 = std::array<float, 3>>
+inline auto positions_3d(std::vector<Vec3> data) {
     return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_positions()) {
             return "positions_3d";
         }
+        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec3>()))>);
         *(info->mutable_geometry_info()->mutable_positions()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
     };
 }
 
-template <template <typename, auto...> class Vec3,
-          auto... Ts,
-          typename = std::enable_if_t<detail::is_vec3<Vec3<float, Ts...>>()>>
-inline auto normals_3d(std::vector<Vec3<float, Ts...>> data) {
+template <typename Vec3 = std::array<float, 3>>
+inline auto normals_3d(std::vector<Vec3> data) {
     return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_normals()) {
             return "normals_3d";
         }
+        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec3>()))>);
         *(info->mutable_geometry_info()->mutable_normals()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
     };
 }
 
-template <template <typename, auto...> class Vec2,
-          auto... Ts,
-          typename = std::enable_if_t<detail::is_vec2<Vec2<float, Ts...>>()>>
-inline auto tex_coords_3d(std::vector<Vec2<float, Ts...>> data) {
+template <typename Vec2 = std::array<float, 2>>
+inline auto tex_coords_3d(std::vector<Vec2> data) {
     return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_tex_coords()) {
             return "tex_coords_3d";
         }
+        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec2>()))>);
         *(info->mutable_geometry_info()->mutable_tex_coords()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
     };
 }
 
-template <template <typename, auto...> class Vec3,
-          auto... Ts,
-          typename = std::enable_if_t<detail::is_vec3<Vec3<float, Ts...>>()>>
-inline auto vertex_colors_3d(std::vector<Vec3<float, Ts...>> data) {
+template <typename Vec3 = std::array<float, 3>>
+inline auto vertex_colors_3d(std::vector<Vec3> data) {
     return [data{std::move(data)}](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_vertex_colors()) {
             return "vertex_colors_3d";
         }
+        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec3>()))>);
         *(info->mutable_geometry_info()->mutable_vertex_colors()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
     };
 }
 
-/// \TODO: create a better input type that handles pointers, vectors, matrices, iterators, etc.
-template <template <typename, auto...> class Mat4,
-          auto... Ts,
-          typename = std::enable_if_t<detail::is_mat4<Mat4<float, Ts...>>()>>
-auto transformation(Mat4<float, Ts...> data) {
+template <typename Mat4 = std::array<float, 16>>
+auto transformation(Mat4 data) {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_transformation()) {
             return "transformation";
         }
         proto::Mat4* transformation = info->mutable_display_info()->mutable_transformation();
-        *(transformation->mutable_data())
-            = {reinterpret_cast<const float*>(data[0]), reinterpret_cast<const float*>(data[0] + 16)};
+        *(transformation->mutable_data()) = {data_ptr(data), data_ptr(data) + 16};
         return "";
     };
 }
 
-/// \TODO: create a better input type that handles pointers, vectors, iterators, etc.
-template <template <typename, auto...> class Vec3,
-          auto... Ts,
-          typename = std::enable_if_t<detail::is_vec3<Vec3<float, Ts...>>()>>
-auto uniform_color(Vec3<float, Ts...> data) {
+template <typename Vec3 = std::array<float, 3>>
+auto uniform_color(Vec3 data) {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_uniform_color()) {
             return "uniform_color";
         }
+        const float* data_start = data_ptr(data);
         proto::Vec3* uniform_color = info->mutable_display_info()->mutable_uniform_color();
-        uniform_color->set_x(data[0]);
-        uniform_color->set_y(data[1]);
-        uniform_color->set_z(data[2]);
+        uniform_color->set_x(data_start[0]);
+        uniform_color->set_y(data_start[1]);
+        uniform_color->set_z(data_start[2]);
         return "";
     };
 }
-
-#endif
 
 } // namespace gvs

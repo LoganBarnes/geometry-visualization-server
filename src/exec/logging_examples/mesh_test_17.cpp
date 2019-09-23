@@ -22,31 +22,29 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "gvs/log/geometry_logger.hpp"
 
-template <typename T, std::size_t N>
-struct Vec;
+namespace wat {
+namespace {
 
-template <typename T, std::size_t N>
-struct Vec {
-    Vec() : data_{0.f, 0.f, 0.f} {}
-    Vec(float x, float y, float z) : data_{x, y, z} {}
-    const float& operator[](unsigned i) const { return data_[i]; }
-    float& operator[](unsigned i) { return data_[i]; }
+struct Vec3 {
+    Vec3() : data_{0.f, 0.f, 0.f} {}
+    Vec3(float x, float y, float z) : data_{x, y, z} {}
+    float& operator[](std::size_t i) { return data_[i]; }
     std::array<float, 3> data_;
 };
-using Vec3 = Vec<float, 3>;
 
-template <typename T, std::size_t N, std::size_t M>
-struct Mat;
+const float* data_ptr(const Vec3& vec) {
+    return vec.data_.data();
+}
 
-template <typename T>
-struct Mat<T, 4, 4> {
-    Mat() : data_{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1} {}
+struct Mat4 {
+    Mat4() : data_{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1} {}
     float* operator[](std::size_t i) { return data_.data() + 4 * i; }
-    const float* operator[](std::size_t i) const { return data_.data() + 4 * i; }
     std::array<float, 16> data_;
 };
 
-using Mat4 = Mat<float, 4, 4>;
+const float* data_ptr(const Mat4& mat) {
+    return mat.data_.data();
+}
 
 struct Mesh {
     std::vector<Vec3> verts;
@@ -54,7 +52,6 @@ struct Mesh {
     std::vector<unsigned> tris;
 };
 
-void make_cube_mesh(Mesh* cube);
 void make_cube_mesh(Mesh* cube) {
     cube->verts.resize(6 * 4); // 6 faces, 4 points each
     cube->norms.resize(6 * 4);
@@ -101,7 +98,6 @@ void make_cube_mesh(Mesh* cube) {
     add_face(5u, 0u, 2u, 1u, 1.f, 1.f, -1.f); // Y
 }
 
-void add_translated_mesh_to_scene(const gvs::log::GeometryLogger& scene, const Mesh& mesh, float x, float y, float z);
 void add_translated_mesh_to_scene(const gvs::log::GeometryLogger& scene, const Mesh& mesh, float x, float y, float z) {
     auto cube_stream = scene.item_stream();
 
@@ -111,9 +107,13 @@ void add_translated_mesh_to_scene(const gvs::log::GeometryLogger& scene, const M
     trans[3][2] = z;
 
     cube_stream << gvs::positions_3d(mesh.verts) << gvs::normals_3d(mesh.norms) << gvs::triangles(mesh.tris)
-                << gvs::transformation(trans) << gvs::shading(gvs::LambertianShading{{-1.f, -2.f, -3.f}}) << gvs::send;
+                << gvs::transformation(trans) << gvs::uniform_color({1.f, 0.5f, 0.1f})
+                << gvs::shading(gvs::LambertianShading{{-1.f, -2.f, -3.f}}) << gvs::send;
     CHECK_WITH_PRINT(cube_stream);
 }
+
+} // namespace
+} // namespace wat
 
 int main(int argc, char* argv[]) {
     std::string server_address = "0.0.0.0:50055";
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
         CHECK_WITH_PRINT(stream);
     }
 
-    Mesh cube_mesh;
+    wat::Mesh cube_mesh;
     make_cube_mesh(&cube_mesh);
 
     add_translated_mesh_to_scene(scene, cube_mesh, -2.1f, 0.f, 0.f);
