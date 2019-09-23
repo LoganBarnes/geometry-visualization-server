@@ -45,9 +45,6 @@ public:
     static constexpr bool value = type::value;
 };
 
-//template<typename T>
-//constexpr bool has_data_v = has_data<T>::value;
-
 template <typename T, typename = std::enable_if_t<has_data<T>::value>>
 const float* data_ptr(const T& t) {
     return t.data();
