@@ -193,7 +193,9 @@ inline auto positions_3d(std::vector<Vec3> data) {
         if (info->mutable_geometry_info()->has_positions()) {
             return "positions_3d";
         }
-        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec3>()))>);
+        static_assert(std::is_same<const float*, decltype(data_ptr(std::declval<Vec3>()))>::value,
+                      "data must be convertible to a const float*");
+
         *(info->mutable_geometry_info()->mutable_positions()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
@@ -206,7 +208,9 @@ inline auto normals_3d(std::vector<Vec3> data) {
         if (info->mutable_geometry_info()->has_normals()) {
             return "normals_3d";
         }
-        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec3>()))>);
+        static_assert(std::is_same<const float*, decltype(data_ptr(std::declval<Vec3>()))>::value,
+                      "data must be convertible to a const float*");
+
         *(info->mutable_geometry_info()->mutable_normals()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
@@ -219,7 +223,9 @@ inline auto tex_coords_3d(std::vector<Vec2> data) {
         if (info->mutable_geometry_info()->has_tex_coords()) {
             return "tex_coords_3d";
         }
-        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec2>()))>);
+        static_assert(std::is_same<const float*, decltype(data_ptr(std::declval<Vec2>()))>::value,
+                      "data must be convertible to a const float*");
+
         *(info->mutable_geometry_info()->mutable_tex_coords()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
@@ -232,7 +238,9 @@ inline auto vertex_colors_3d(std::vector<Vec3> data) {
         if (info->mutable_geometry_info()->has_vertex_colors()) {
             return "vertex_colors_3d";
         }
-        static_assert(std::is_same_v<const float*, decltype(data_ptr(std::declval<Vec3>()))>);
+        static_assert(std::is_same<const float*, decltype(data_ptr(std::declval<Vec3>()))>::value,
+                      "data must be convertible to a const float*");
+
         *(info->mutable_geometry_info()->mutable_vertex_colors()->mutable_value())
             = {reinterpret_cast<const float*>(data.data()), reinterpret_cast<const float*>(data.data() + data.size())};
         return "";
