@@ -20,48 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////////////
-//                                                                           |________|
-//  Copyright (c) 2019 CloudNC Ltd - All Rights Reserved                        |  |
-//                                                                              |__|
-//        ____                                                                .  ||
-//       / __ \                                                               .`~||$$$$
-//      | /  \ \         /$$$$$$  /$$                           /$$ /$$   /$$  /$$$$$$$
-//      \ \ \ \ \       /$$__  $$| $$                          | $$| $$$ | $$ /$$__  $$
-//    / / /  \ \ \     | $$  \__/| $$  /$$$$$$  /$$   /$$  /$$$$$$$| $$$$| $$| $$  \__/
-//   / / /    \ \__    | $$      | $$ /$$__  $$| $$  | $$ /$$__  $$| $$ $$ $$| $$
-//  / / /      \__ \   | $$      | $$| $$  \ $$| $$  | $$| $$  | $$| $$  $$$$| $$
-// | | / ________ \ \  | $$    $$| $$| $$  | $$| $$  | $$| $$  | $$| $$\  $$$| $$    $$
-//  \ \_/ ________/ /  |  $$$$$$/| $$|  $$$$$$/|  $$$$$$/|  $$$$$$$| $$ \  $$|  $$$$$$/
-//   \___/ ________/    \______/ |__/ \______/  \______/  \_______/|__/  \__/ \______/
-//
-// ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 // standard
 #include <string>
 
-///
-/// @brief Macro used to auto-fill line and file information when creating an error.
-///
-/// Example usage:
-///
-/// ```
-///     carpet::Error do_thing_or_give_errors() {
-///
-///         ... do stuff ...
-///
-///         if (bad_thing) {
-///             return MAKE_ERROR("Bad thing happened!");
-///         }
-///         return carpet::Error::no_errors();
-///     }
-/// ```
-///
-#define MAKE_ERROR(msg) ::ddf::dataflow::util::Error({__FILE__, __LINE__}, msg)
+/**
+ * @brief Macro used to auto-fill line and file information when creating an error.
+ *
+ * Example usage:
+ *
+ * ```
+ *     gvs::util::Error do_thing_or_give_errors() {
+ *
+ *         ... do stuff ...
+ *
+ *         if (bad_thing) {
+ *             return MAKE_ERROR("Bad thing happened!");
+ *         }
+ *         return gvs::util::Error::no_errors();
+ *     }
+ * ```
+ */
+#define MAKE_ERROR(msg) gvs::util::Error({__FILE__, __LINE__}, msg)
 
-namespace gvs {
-namespace util {
+namespace gvs::util {
 
 struct SourceLocation {
     std::string filename;
@@ -71,11 +54,11 @@ struct SourceLocation {
     SourceLocation(std::string file, int line);
 };
 
-///
-/// \brief A simple class used to pass error messages around.
-///
-/// This class can be used as a base class for more complicated error types.
-///
+/**
+ * @brief A simple class used to pass error messages around.
+ *
+ * This class can be used as a base class for more complicated error types.
+ */
 class Error {
 public:
     Error() = delete;
@@ -100,5 +83,4 @@ private:
     std::string debug_message_; ///< Error message with file and line number "[file:line] error message"
 };
 
-} // namespace util
-} // namespace gvs
+} // namespace gvs::util

@@ -54,6 +54,8 @@ if (NOT imgui_dl_POPULATED)
 endif ()
 
 ### Corrade ###
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+
 FetchContent_Declare(corrade_dl
         GIT_REPOSITORY https://github.com/mosra/corrade.git
         GIT_TAG v2019.01

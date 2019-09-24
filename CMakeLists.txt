@@ -33,14 +33,8 @@ option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
 include(cmake/ClangTidy.cmake)
 include(cmake/ThirdParty.cmake)
 
-set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-
 if (NOT ${GVS_LOGGING_ONLY})
     include(cmake/ThirdPartyGui.cmake)
-endif ()
-
-if (${GVS_BUILD_TESTS})
-    include(cmake/ThirdPartyTesting.cmake)
 endif ()
 
 if (MSVC)
@@ -60,6 +54,9 @@ if (GVS_USE_DEV_FLAGS)
     endif ()
 endif ()
 
+include(cmake/GVSAddLibrary.cmake)
+include(cmake/GVSAddExecutable.cmake)
+
 # "Glob is terrible/root of all evil" yeah yeah. CONFIGURE_DEPENDS in cmake 3.12
 # helps to fix that and it is super useful when refactoring
 cmake_policy(SET CMP0009 NEW)
@@ -78,47 +75,12 @@ target_compile_options(gvs_protos PRIVATE -w) # ignore warning on generated head
 set_target_properties(
         gvs_protos
         PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-        CXX_EXTENSIONS OFF
-        POSITION_INDEPENDENT_CODE ON
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-)
-
-############
-### Util ###
-############
-file(GLOB_RECURSE GVS_SOURCE_FILES
-        LIST_DIRECTORIES false
-        CONFIGURE_DEPENDS
-        ${CMAKE_CURRENT_LIST_DIR}/src/gvs/util/*
-        )
-
-add_library(gvs_util ${GVS_SOURCE_FILES})
-
-target_link_libraries(gvs_util
-        PUBLIC gvs_protos
-        PUBLIC crossguid
-        PUBLIC expected
-        )
-target_include_directories(gvs_util
-        PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
-        PUBLIC ${CMAKE_BINARY_DIR}/generated
-        )
-
-target_compile_options(gvs_util PUBLIC ${GVS_COMPILE_FLAGS})
-
-set_target_properties(
-        gvs_util
-        PROPERTIES
+        # C++ flags
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
         POSITION_INDEPENDENT_CODE ON
-        CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        # Binary locations
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
@@ -132,23 +94,37 @@ file(GLOB_RECURSE GVS_SOURCE_FILES
         ${CMAKE_CURRENT_LIST_DIR}/src/gvs/log/*
         )
 
-add_library(gvs_log_client ${GVS_SOURCE_FILES})
-target_link_libraries(gvs_log_client PUBLIC gvs_util)
-
-set_target_properties(
-        gvs_log_client
-        PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-        CXX_EXTENSIONS OFF
-        POSITION_INDEPENDENT_CODE ON
-        CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-)
+gvs_add_library(gvs_log_client 11 ${GVS_SOURCE_FILES})
+target_link_libraries(gvs_log_client
+        PUBLIC gvs_protos
+        PUBLIC crossguid
+        )
+target_include_directories(gvs_log_client
+        PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
+        )
 
 if (NOT ${GVS_LOGGING_ONLY})
+    ############
+    ### Util ###
+    ############
+    file(GLOB_RECURSE GVS_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/util/*
+            )
+
+    gvs_add_library(gvs_util 17 ${GVS_SOURCE_FILES})
+
+    target_link_libraries(gvs_util
+            PUBLIC gvs_protos
+            PUBLIC crossguid
+            PUBLIC expected
+            )
+    target_include_directories(gvs_util
+            PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
+            PUBLIC ${CMAKE_BINARY_DIR}/generated
+            )
+
     ##############
     ### Server ###
     ##############
@@ -158,7 +134,7 @@ if (NOT ${GVS_LOGGING_ONLY})
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/server/*
             )
 
-    add_library(gvs_server ${GVS_SOURCE_FILES})
+    gvs_add_library(gvs_server 17 ${GVS_SOURCE_FILES})
     target_link_libraries(gvs_server PUBLIC gvs_util)
 
     ##################
@@ -175,7 +151,7 @@ if (NOT ${GVS_LOGGING_ONLY})
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
             )
 
-    add_library(gvs_vis_client ${GVS_SOURCE_FILES})
+    gvs_add_library(gvs_vis_client 17 ${GVS_SOURCE_FILES})
     target_link_libraries(gvs_vis_client
             PUBLIC vis_client_resources
             PUBLIC gvs_util
@@ -184,115 +160,42 @@ if (NOT ${GVS_LOGGING_ONLY})
     ####################
     #### Executables ###
     ####################
-    add_executable(run_gvs ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
+    gvs_add_executable(run_gvs 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
     target_link_libraries(run_gvs
             PRIVATE gvs_server
             PRIVATE gvs_vis_client
             )
 
-    add_executable(gvs_message_client ${CMAKE_CURRENT_LIST_DIR}/src/exec/message_client.cpp)
-    target_link_libraries(gvs_message_client gvs_log_client)
-
-    set_target_properties(
-            gvs_server
-            gvs_vis_client
-            run_gvs
-            gvs_message_client
-            PROPERTIES
-            CXX_STANDARD 17
-            CXX_STANDARD_REQUIRED ON
-            CXX_EXTENSIONS OFF
-            POSITION_INDEPENDENT_CODE ON
-            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    )
-
-    add_executable(gvs_log_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/log_test.cpp)
-    target_link_libraries(gvs_log_test gvs_log_client)
-
-    add_executable(gvs_mesh_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test.cpp)
-    target_link_libraries(gvs_mesh_test gvs_log_client)
-
-    add_executable(gvs_mesh_test_17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test_17.cpp)
-    target_link_libraries(gvs_mesh_test_17 gvs_log_client)
-
-    set_target_properties(
-            gvs_log_test
-            gvs_mesh_test
-            gvs_mesh_test_17
-            PROPERTIES
-            CXX_STANDARD 14
-            CXX_STANDARD_REQUIRED ON
-            CXX_EXTENSIONS OFF
-            POSITION_INDEPENDENT_CODE ON
-            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    )
-    set_target_properties(
-            gvs_mesh_test_17
-            PROPERTIES
-            CXX_STANDARD 17
-    )
-endif (NOT ${GVS_LOGGING_ONLY})
-
-################
-#### Testing ###
-################
-if (${GVS_BUILD_TESTS})
-    #    file(GLOB_RECURSE GVS_TEST_UTIL_SOURCE_FILES
-    #            LIST_DIRECTORIES false
-    #            CONFIGURE_DEPENDS
-    #            ${CMAKE_CURRENT_LIST_DIR}/testing/util/*
-    #            )
+    # TODO: Create actual tests for these test executables
+    #    add_executable(gvs_message_client ${CMAKE_CURRENT_LIST_DIR}/src/exec/message_client.cpp)
+    #    target_link_libraries(gvs_message_client gvs_log_client)
     #
-    #    add_library(gvs_test_util ${GVS_TEST_UTIL_SOURCE_FILES})
+    #    add_executable(gvs_log_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/log_test.cpp)
+    #    target_link_libraries(gvs_log_test gvs_log_client)
     #
-    #    target_link_libraries(gvs_test_util PUBLIC
-    #            gvs_testing_thirdparty
-    #            testing_protos
-    #            gvs_net
-    #            )
+    #    add_executable(gvs_mesh_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test.cpp)
+    #    target_link_libraries(gvs_mesh_test gvs_log_client)
     #
-    #    target_compile_options(gvs_test_util PUBLIC ${GVS_COMPILE_FLAGS})
+    #    add_executable(gvs_mesh_test_17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test_17.cpp)
+    #    target_link_libraries(gvs_mesh_test_17 gvs_log_client)
     #
-    #    # add test coverage capabilities
-    #    find_program(LCOV_EXE
-    #            NAMES "lcov"
-    #            DOC "Path to lcov executable"
-    #            )
-    #
-    #    if (LCOV_EXE AND CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES "Debug")
-    #        include(CodeCoverage)
-    #        setup_target_for_coverage(gvs_coverage gvs_tests coverage)
-    #        set(PROFILE_FLAGS --coverage -fprofile-arcs -ftest-coverage -fno-inline)
-    #
-    #        target_compile_options(gvs_net PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_server PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_vis_client PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_log_client PUBLIC ${PROFILE_FLAGS})
-    #        target_compile_options(gvs_test_util PUBLIC ${PROFILE_FLAGS})
-    #
-    #        target_link_libraries(gvs_net PUBLIC gcov)
-    #        target_link_libraries(gvs_server PUBLIC gcov)
-    #        target_link_libraries(gvs_vis_client PUBLIC gcov)
-    #        target_link_libraries(gvs_log_client PUBLIC gcov)
-    #        target_link_libraries(gvs_test_util PUBLIC gcov)
-    #    endif ()
-    #
-    #    add_executable(gvs_tests testing/gvs_tests.cpp)
-    #    target_link_libraries(gvs_tests PRIVATE
-    #            gvs_server
-    #            gvs_vis_client
-    #            gvs_log_client
-    #            gvs_test_util
-    #            )
-    #
-    #    set_target_properties(gvs_tests PROPERTIES
+    #    set_target_properties(
+    #            gvs_log_test
+    #            gvs_mesh_test
+    #            gvs_mesh_test_17
+    #            PROPERTIES
+    #            CXX_STANDARD 14
+    #            CXX_STANDARD_REQUIRED ON
+    #            CXX_EXTENSIONS OFF
+    #            POSITION_INDEPENDENT_CODE ON
     #            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-    #            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/tests"
-    #            )
-endif ()
+    #            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    #            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    #            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    #    )
+    #    set_target_properties(
+    #            gvs_mesh_test_17
+    #            PROPERTIES
+    #            CXX_STANDARD 17
+    #    )
+endif (NOT ${GVS_LOGGING_ONLY})
