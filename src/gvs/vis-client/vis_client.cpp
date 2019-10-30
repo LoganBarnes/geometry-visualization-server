@@ -88,27 +88,27 @@ VisClient::VisClient(std::string initial_host_address, const Arguments& argument
       gl_version_str_(GL::Context::current().versionString()),
       gl_renderer_str_(GL::Context::current().rendererString()),
       server_address_input_(std::move(initial_host_address)),
-      grpc_client_(std::make_unique<grpcw::client::GrpcClient<proto::Scene>>()) {
+      grpc_client_(std::make_unique<grpcw::client::GrpcClient<Service>>()) {
 
     scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
 
     grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
 
     // Connect to the stream that delivers message updates
-    grpc_client_->register_stream<proto::Message>(
-        [](std::unique_ptr<proto::Scene::Stub>& stub, grpc::ClientContext* context) {
+    grpc_client_
+        ->register_stream<proto::Message>([](typename Service::Stub& stub, grpc::ClientContext* context) {
             google::protobuf::Empty empty;
-            return stub->MessageUpdates(context, empty);
-        },
-        [this](const proto::Message& msg) { this->process_message_update(msg); });
+            return stub.MessageUpdates(context, empty);
+        })
+        .on_update([this](const proto::Message& msg) { this->process_message_update(msg); });
 
     // Connect to the stream that delivers scene updates
-    grpc_client_->register_stream<proto::SceneUpdate>(
-        [](std::unique_ptr<proto::Scene::Stub>& stub, grpc::ClientContext* context) {
+    grpc_client_
+        ->register_stream<proto::SceneUpdate>([](typename Service::Stub& stub, grpc::ClientContext* context) {
             google::protobuf::Empty empty;
-            return stub->SceneUpdates(context, empty);
-        },
-        [this](const proto::SceneUpdate& update) { this->process_scene_update(update); });
+            return stub.SceneUpdates(context, empty);
+        })
+        .on_update([this](const proto::SceneUpdate& update) { this->process_scene_update(update); });
 }
 
 vis::VisClient::~VisClient() = default;
@@ -277,7 +277,7 @@ void vis::VisClient::configure_gui() {
         if (grpc_client_->use_stub([&](auto& stub) {
                 grpc::ClientContext context;
                 proto::Errors errors;
-                grpc::Status status = stub->SendMessage(&context, message, &errors);
+                grpc::Status status = stub.SendMessage(&context, message, &errors);
 
                 if (not status.ok()) {
                     error_message_ = status.error_message();
@@ -338,11 +338,11 @@ void VisClient::on_state_change() {
 void VisClient::get_message_state(bool redraw) {
     proto::Messages messages;
 
-    if (grpc_client_->use_stub([&](const auto& stub) {
+    if (grpc_client_->use_stub([&](auto& stub) {
             // This lambda is only used if the client is connected
             grpc::ClientContext context;
             google::protobuf::Empty empty;
-            stub->GetAllMessages(&context, empty, &messages);
+            stub.GetAllMessages(&context, empty, &messages);
         })) {
 
         // This is only called if the client is connected
@@ -357,11 +357,11 @@ void VisClient::get_message_state(bool redraw) {
 void VisClient::get_scene_state(bool redraw) {
     proto::SceneItems scene;
 
-    if (grpc_client_->use_stub([&](const auto& stub) {
+    if (grpc_client_->use_stub([&](auto& stub) {
             // This lambda is only used if the client is connected
             grpc::ClientContext context;
             google::protobuf::Empty empty;
-            stub->GetAllItems(&context, empty, &scene);
+            stub.GetAllItems(&context, empty, &scene);
         })) {
 
         // This is only called if the client is connected

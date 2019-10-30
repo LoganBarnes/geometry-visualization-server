@@ -125,11 +125,8 @@ SceneServer::SceneServer(const std::string& server_address)
     /*
      * Streaming calls
      */
-    message_stream_ = server_->register_async_stream(&Service::RequestMessageUpdates,
-                                                     [](const google::protobuf::Empty& /*ignored*/) {});
-
-    scene_stream_ = server_->register_async_stream(&Service::RequestSceneUpdates,
-                                                   [](const google::protobuf::Empty& /*ignored*/) {});
+    message_stream_ = server_->register_async_stream(&Service::RequestMessageUpdates).stream();
+    scene_stream_ = server_->register_async_stream(&Service::RequestSceneUpdates).stream();
 
     /*
      * Getters for current state
@@ -366,12 +363,12 @@ public:
         grpc_client_.change_server(server);
 
         // Connect to the stream that delivers scene updates
-        grpc_client_.register_stream<gvs::proto::SceneUpdate>(
-            [](std::unique_ptr<gvs::proto::Scene::Stub>& stub, grpc::ClientContext* context) {
+        grpc_client_
+            .register_stream<gvs::proto::SceneUpdate>([](gvs::proto::Scene::Stub& stub, grpc::ClientContext* context) {
                 google::protobuf::Empty empty;
-                return stub->SceneUpdates(context, empty);
-            },
-            [this](const gvs::proto::SceneUpdate& update) { updates.push_back(update); });
+                return stub.SceneUpdates(context, empty);
+            })
+            .on_update([this](const gvs::proto::SceneUpdate& update) { updates.push_back(update); });
     }
 
     /**
@@ -382,7 +379,7 @@ public:
 
         bool successfully_sent [[maybe_unused]] = grpc_client_.use_stub([&](auto& stub) {
             grpc::ClientContext context;
-            grpc::Status status = stub->UpdateScene(&context, request, &errors);
+            grpc::Status status = stub.UpdateScene(&context, request, &errors);
 
             REQUIRE(status.ok());
         });
