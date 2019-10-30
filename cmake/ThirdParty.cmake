@@ -26,7 +26,7 @@ include(FetchContent)
 FetchContent_Declare(
         grpcw_dl
         GIT_REPOSITORY https://github.com/LoganBarnes/grpc-wrapper.git
-        GIT_TAG master
+        GIT_TAG v1.0.0
 )
 
 FetchContent_GetProperties(grpcw_dl)
