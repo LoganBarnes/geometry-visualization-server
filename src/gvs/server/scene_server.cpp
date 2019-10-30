@@ -27,6 +27,7 @@
 #include "gvs/util/container_util.hpp"
 
 // external
+#include <doctest/doctest.h>
 #include <grpcw/server/grpc_async_server.hpp>
 
 namespace gvs::server {
@@ -352,7 +353,6 @@ void SceneServer::remove_item_and_send_update(const proto::SceneItemInfo& /*info
 #include "gvs/util/blocking_queue.hpp"
 #include "gvs/util/string.hpp"
 
-#include <doctest/doctest.h>
 #include <grpc++/create_channel.h>
 #include <grpcw/client/grpc_client.hpp>
 

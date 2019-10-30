@@ -24,7 +24,6 @@ function(gvs_add_library target cxx_standard)
     # Add the library with custom compile flags and link the testing library
     add_library(${target} ${ARGN})
     target_compile_options(${target} PRIVATE ${GVS_COMPILE_FLAGS})
-    target_link_libraries(${target} PUBLIC doctest)
 
     if (GVS_BUILD_TESTS) # BUILDING WITH TESTS
         # Create an executable to run the tests
@@ -40,6 +39,7 @@ function(gvs_add_library target cxx_standard)
             # Create a build that generates coverage reports
             setup_target_for_coverage(${test_target}_coverage ${test_target} coverage)
             apply_coverage_dependencies(${target})
+            apply_coverage_dependencies(${test_target})
         endif ()
 
     else () # NOT BUILDING WITH TESTS

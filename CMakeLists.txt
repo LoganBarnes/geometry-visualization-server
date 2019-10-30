@@ -103,7 +103,7 @@ target_include_directories(gvs_log_client
         PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
         )
 
-if (NOT ${GVS_LOGGING_ONLY})
+if (NOT GVS_LOGGING_ONLY)
     ############
     ### Util ###
     ############
@@ -119,6 +119,7 @@ if (NOT ${GVS_LOGGING_ONLY})
             PUBLIC gvs_protos
             PUBLIC crossguid
             PUBLIC expected
+            PUBLIC doctest
             )
     target_include_directories(gvs_util
             PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
@@ -160,11 +161,13 @@ if (NOT ${GVS_LOGGING_ONLY})
     ####################
     #### Executables ###
     ####################
-    gvs_add_executable(run_gvs 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
-    target_link_libraries(run_gvs
-            PRIVATE gvs_server
-            PRIVATE gvs_vis_client
-            )
+    if (NOT GVS_BUILD_TESTS)
+        gvs_add_executable(run_gvs 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
+        target_link_libraries(run_gvs
+                PRIVATE gvs_server
+                PRIVATE gvs_vis_client
+                )
+    endif ()
 
     # TODO: Create actual tests for these test executables
     #    add_executable(gvs_message_client ${CMAKE_CURRENT_LIST_DIR}/src/exec/message_client.cpp)
@@ -198,4 +201,4 @@ if (NOT ${GVS_LOGGING_ONLY})
     #            PROPERTIES
     #            CXX_STANDARD 17
     #    )
-endif (NOT ${GVS_LOGGING_ONLY})
+endif (NOT GVS_LOGGING_ONLY)

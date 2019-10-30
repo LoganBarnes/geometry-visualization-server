@@ -24,7 +24,6 @@ function(gvs_add_executable target cxx_standard)
     # Add the library with custom compile flags and link the testing library
     add_executable(${target} ${ARGN})
     target_compile_options(${target} PRIVATE ${GVS_COMPILE_FLAGS})
-    target_link_libraries(${target} PRIVATE doctest)
 
     if (NOT GVS_BUILD_TESTS) # BUILDING WITHOUT TESTS
         # The testing library is linked but we disable all the test macros
