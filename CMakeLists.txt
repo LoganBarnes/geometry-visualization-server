@@ -161,13 +161,11 @@ if (NOT GVS_LOGGING_ONLY)
     ####################
     #### Executables ###
     ####################
-    if (NOT GVS_BUILD_TESTS)
-        gvs_add_executable(run_gvs 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
-        target_link_libraries(run_gvs
-                PRIVATE gvs_server
-                PRIVATE gvs_vis_client
-                )
-    endif ()
+    gvs_add_executable(run_gvs 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
+    target_link_libraries(run_gvs
+            PRIVATE gvs_server
+            PRIVATE gvs_vis_client
+            )
 
     # TODO: Create actual tests for these test executables
     #    add_executable(gvs_message_client ${CMAKE_CURRENT_LIST_DIR}/src/exec/message_client.cpp)
@@ -191,7 +189,7 @@ if (NOT GVS_LOGGING_ONLY)
     #            CXX_STANDARD_REQUIRED ON
     #            CXX_EXTENSIONS OFF
     #            POSITION_INDEPENDENT_CODE ON
-    #            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+    #            CXX_CLANG_TIDY "${GVS_CLANG_TIDY}"
     #            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     #            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     #            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib

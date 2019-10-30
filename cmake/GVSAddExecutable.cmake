@@ -24,11 +24,7 @@ function(gvs_add_executable target cxx_standard)
     # Add the library with custom compile flags and link the testing library
     add_executable(${target} ${ARGN})
     target_compile_options(${target} PRIVATE ${GVS_COMPILE_FLAGS})
-
-    if (NOT GVS_BUILD_TESTS) # BUILDING WITHOUT TESTS
-        # The testing library is linked but we disable all the test macros
-        target_compile_definitions(${target} PRIVATE -DDOCTEST_CONFIG_DISABLE)
-    endif ()
+    target_compile_definitions(${target} PRIVATE -DDOCTEST_CONFIG_DISABLE)
 
     set_target_properties(
             ${target}
@@ -39,7 +35,7 @@ function(gvs_add_executable target cxx_standard)
             CXX_EXTENSIONS OFF
             POSITION_INDEPENDENT_CODE ON
             # Clang-Tidy
-            CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+            CXX_CLANG_TIDY "${GVS_CLANG_TIDY}"
             # Binary locations
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
