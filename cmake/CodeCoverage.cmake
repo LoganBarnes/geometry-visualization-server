@@ -200,10 +200,10 @@ ENDFUNCTION() # SETUP_TARGET_FOR_COVERAGE_COBERTURA
 FUNCTION(APPLY_COVERAGE_DEPENDENCIES _target)
     target_compile_options(${_target}
             PUBLIC
-            --coverage
-            -fprofile-arcs
-            -ftest-coverage
-            -fno-inline
+            $<$<COMPILE_LANGUAGE:CXX>:--coverage>
+            $<$<COMPILE_LANGUAGE:CXX>:-fprofile-arcs>
+            $<$<COMPILE_LANGUAGE:CXX>:-ftest-coverage>
+            $<$<COMPILE_LANGUAGE:CXX>:-fno-inline>
             )
     target_link_libraries(${_target} PUBLIC gcov)
 ENDFUNCTION()
