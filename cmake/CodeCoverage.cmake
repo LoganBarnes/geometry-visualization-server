@@ -198,6 +198,12 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE_COBERTURA _targetname _testrunner _outputname
 ENDFUNCTION() # SETUP_TARGET_FOR_COVERAGE_COBERTURA
 
 FUNCTION(APPLY_COVERAGE_DEPENDENCIES _target)
-    target_compile_options(${_target} PUBLIC --coverage -fprofile-arcs -ftest-coverage -fno-inline)
+    target_compile_options(${_target}
+            PUBLIC
+            --coverage
+            -fprofile-arcs
+            -ftest-coverage
+            -fno-inline
+            )
     target_link_libraries(${_target} PUBLIC gcov)
 ENDFUNCTION()
