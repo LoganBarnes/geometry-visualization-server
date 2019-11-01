@@ -54,6 +54,8 @@ if (NOT imgui_dl_POPULATED)
 endif ()
 
 ### Corrade ###
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+
 FetchContent_Declare(corrade_dl
         GIT_REPOSITORY https://github.com/mosra/corrade.git
         GIT_TAG v2019.01
@@ -75,8 +77,10 @@ FetchContent_GetProperties(magnum_dl)
 if (NOT magnum_dl_POPULATED)
     FetchContent_Populate(magnum_dl)
 
-    set(WITH_GLFWAPPLICATION ON CACHE BOOL "" FORCE)
     set(BUILD_DEPRECATED OFF CACHE BOOL "" FORCE)
+    set(WITH_EGLCONTEXT ON CACHE BOOL "" FORCE)
+    set(WITH_GLFWAPPLICATION ON CACHE BOOL "" FORCE)
+    set(WITH_WINDOWLESSEGLAPPLICATION ON CACHE BOOL "" FORCE)
 
     add_subdirectory(${magnum_dl_SOURCE_DIR} ${magnum_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
@@ -100,9 +104,8 @@ if (NOT magnum_integration_dl_POPULATED)
     list(APPEND CMAKE_MODULE_PATH ${magnum_integration_dl_SOURCE_DIR}/modules)
 endif ()
 
-find_package(Magnum REQUIRED GL GlfwApplication)
+find_package(Magnum REQUIRED EglContext GL GlfwApplication WindowlessEglApplication)
 find_package(MagnumIntegration REQUIRED ImGui)
-
 
 # Set the include directory as system headers to avoid compiler warnings
 target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${corrade_dl_SOURCE_DIR}/src)
@@ -112,12 +115,14 @@ target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${magnum_dl_SOURC
 target_link_libraries(gvs_gui_thirdparty INTERFACE
         Corrade::Utility
         Magnum::Application
+        Magnum::EglContext
         Magnum::Magnum
         Magnum::MeshTools
         Magnum::Primitives
         Magnum::SceneGraph
         Magnum::Shaders
         Magnum::Trade
+        Magnum::WindowlessEglApplication
         MagnumIntegration::ImGui
         )
 

@@ -22,20 +22,13 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#if __cplusplus == 201703L
-#define NODISCARD [[nodiscard]]
-#else
-#define NODISCARD
-#endif
-
-// gvs
+// project
 #include "gvs/util/error.hpp"
 
-// third-party
+// external
 #include <tl/expected.hpp>
 
-namespace gvs {
-namespace util {
+namespace gvs::util {
 
 /**
  * @brief A type of tl::expected that requires the result to be used.
@@ -44,8 +37,8 @@ namespace util {
  *
  * @code{.cpp}
 
-    // function that returns 'MyType' or 'util::Error'
-    util::Result<MyType> my_function(int non_negative) {
+    // function that returns 'MyType' or 'gvs::util::Error'
+    gvs::util::Result<MyType> my_function(int non_negative) {
         if (non_negative < 0) {
             return tl::make_unexpected(MAKE_ERROR("number is negative"));
         }
@@ -66,10 +59,10 @@ namespace util {
 
         my_function(3).map(...).map_error(...); // OK
 
-        util::ignore(my_function(4)); // OK, but not recommended
+        gvs::util::ignore(my_function(4)); // OK, but not recommended
 
         auto result3 = my_function(5); // OK, but not recommended
-        util::ignore(result3);
+        gvs::util::ignore(result3);
 
         return 0;
     }
@@ -77,16 +70,75 @@ namespace util {
  * @endcode
  *
  */
-template <class T, class E>
+template <typename T, typename E>
 struct __attribute__((warn_unused)) Result;
 
-template <typename T, typename Error = util::Error>
-struct NODISCARD Result : tl::expected<T, Error> {
+template <typename T, typename Error = gvs::util::Error>
+struct [[nodiscard]] Result : tl::expected<T, Error> {
     using tl::expected<T, Error>::expected;
+
+    template <typename F, typename... Args>
+    constexpr auto and_then(F && f, Args && ... args)& {
+        return and_then_impl(*this, std::forward<F>(f), std::forward<Args>(args)...);
+    }
+
+    template <typename F, typename... Args>
+    constexpr auto and_then(F && f, Args && ... args)&& {
+        return and_then_impl(std::move(*this), std::forward<F>(f), std::forward<Args>(args)...);
+    }
+
+    template <typename F, typename... Args>
+    constexpr auto and_then(F && f, Args && ... args) const& {
+        return and_then_impl(*this, std::forward<F>(f), std::forward<Args>(args)...);
+    }
+
+    template <typename F, typename... Args>
+    constexpr auto and_then(F && f, Args && ... args) const&& {
+        return and_then_impl(std::move(*this), std::forward<F>(f), std::forward<Args>(args)...);
+    }
 };
 
 template <typename... Args>
 void ignore(Args&&...) {}
 
-} // namespace util
-} // namespace gvs
+inline Result<void> success() {
+    return {};
+}
+
+} // namespace gvs::util
+
+namespace tl::detail {
+
+// Trait for checking if a type is a gvs::util::Result
+template <class T>
+struct is_result_impl : std::false_type {};
+template <class T, class E>
+struct is_result_impl<gvs::util::Result<T, E>> : std::true_type {};
+template <class T>
+using is_result = is_result_impl<decay_t<T>>;
+
+template <typename Exp,
+          typename F,
+          typename... Args,
+          detail::enable_if_t<!std::is_void<exp_t<Exp>>::value>* = nullptr,
+          typename Ret = decltype(detail::invoke(std::declval<F>(), *std::declval<Exp>(), std::declval<Args>()...))>
+constexpr auto and_then_impl(Exp&& exp, F&& f, Args&&... args) {
+    static_assert(detail::is_result<Ret>::value, "F must return an expected");
+
+    return exp.has_value() ? detail::invoke(std::forward<F>(f), *std::forward<Exp>(exp), std::forward<Args>(args)...)
+                           : Ret(unexpect, std::forward<Exp>(exp).error());
+}
+
+template <typename Exp,
+          typename F,
+          typename... Args,
+          detail::enable_if_t<std::is_void<exp_t<Exp>>::value>* = nullptr,
+          typename Ret = decltype(detail::invoke(std::declval<F>(), std::declval<Args>()...))>
+constexpr auto and_then_impl(Exp&& exp, F&& f, Args&&... args) {
+    static_assert(detail::is_result<Ret>::value, "F must return an expected");
+
+    return exp.has_value() ? detail::invoke(std::forward<F>(f), std::forward<Args>(args)...)
+                           : Ret(unexpect, std::forward<Exp>(exp).error());
+}
+
+} // namespace tl::detail

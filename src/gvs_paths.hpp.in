@@ -29,25 +29,27 @@
 #include <string>
 
 namespace gvs {
+namespace paths {
 
-inline std::string root_path() {
+inline std::string project_root() {
     return "@PROJECT_SOURCE_DIR@/";
 }
 
-inline std::string res_path() {
-    return root_path() + "res/";
+inline std::string resources() {
+    return project_root() + "res/";
 }
 
-inline std::string shader_path() {
-    return root_path() + "src/shaders/";
+inline std::string shaders() {
+    return project_root() + "src/shaders/";
 }
 
 inline std::string frag_shader_file() {
 #ifdef __APPLE__
-    return gvs::shader_path() + "shader_mac.frag";
+    return shaders() + "shader_mac.frag";
 #else
-    return gvs::shader_path() + "shader.frag";
+    return shaders() + "shader.frag";
 #endif
 }
 
+} // namespace paths
 } // namespace gvs
