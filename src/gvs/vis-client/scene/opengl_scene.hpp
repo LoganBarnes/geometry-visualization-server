@@ -30,6 +30,7 @@
 
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Containers/Optional.h>
+#include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Vector3.h>
 #include <Magnum/SceneGraph/Drawable.h>
