@@ -126,21 +126,9 @@ if (NOT GVS_LOGGING_ONLY)
             PUBLIC ${CMAKE_BINARY_DIR}/generated
             )
 
-    ##############
-    ### Server ###
-    ##############
-    file(GLOB_RECURSE GVS_SOURCE_FILES
-            LIST_DIRECTORIES false
-            CONFIGURE_DEPENDS
-            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/server/*
-            )
-
-    gvs_add_library(gvs_server 17 ${GVS_SOURCE_FILES})
-    target_link_libraries(gvs_server PUBLIC gvs_util)
-
-    ##################
-    ### Vis Client ###
-    ##################
+    ###########
+    ### GVS ###
+    ###########
     # Compile resources separately to avoid linting issues on generated code
     corrade_add_resource(gvs_client_RESOURCES ${CMAKE_CURRENT_LIST_DIR}/src/resources.conf)
     add_library(vis_client_resources ${gvs_client_RESOURCES})
@@ -150,10 +138,11 @@ if (NOT GVS_LOGGING_ONLY)
             LIST_DIRECTORIES false
             CONFIGURE_DEPENDS
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/server/*
             )
 
-    gvs_add_library(gvs_vis_client 17 ${GVS_SOURCE_FILES})
-    target_link_libraries(gvs_vis_client
+    gvs_add_executable(gvs 17 ${GVS_SOURCE_FILES} ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
+    target_link_libraries(gvs
             PUBLIC vis_client_resources
             PUBLIC gvs_util
             )
@@ -161,18 +150,13 @@ if (NOT GVS_LOGGING_ONLY)
     ####################
     #### Executables ###
     ####################
-    gvs_add_executable(run_gvs 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
-    target_link_libraries(run_gvs
-            PRIVATE gvs_server
-            PRIVATE gvs_vis_client
-            )
 
     # TODO: Create actual tests for these test executables
-    #    add_executable(gvs_message_client ${CMAKE_CURRENT_LIST_DIR}/src/exec/message_client.cpp)
-    #    target_link_libraries(gvs_message_client gvs_log_client)
+    #        add_executable(gvs_message_client ${CMAKE_CURRENT_LIST_DIR}/src/exec/message_client.cpp)
+    #        target_link_libraries(gvs_message_client gvs_log_client)
     #
-    #    add_executable(gvs_log_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/log_test.cpp)
-    #    target_link_libraries(gvs_log_test gvs_log_client)
+    add_executable(gvs_log_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/log_test.cpp)
+    target_link_libraries(gvs_log_test PRIVATE gvs_log_client)
     #
     #    add_executable(gvs_mesh_test ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test.cpp)
     #    target_link_libraries(gvs_mesh_test gvs_log_client)
@@ -180,23 +164,39 @@ if (NOT GVS_LOGGING_ONLY)
     #    add_executable(gvs_mesh_test_17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/logging_examples/mesh_test_17.cpp)
     #    target_link_libraries(gvs_mesh_test_17 gvs_log_client)
     #
-    #    set_target_properties(
-    #            gvs_log_test
-    #            gvs_mesh_test
-    #            gvs_mesh_test_17
-    #            PROPERTIES
-    #            CXX_STANDARD 14
-    #            CXX_STANDARD_REQUIRED ON
-    #            CXX_EXTENSIONS OFF
-    #            POSITION_INDEPENDENT_CODE ON
-    #            CXX_CLANG_TIDY "${GVS_CLANG_TIDY}"
-    #            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-    #            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    #            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    #    )
+    set_target_properties(
+            gvs_log_test
+            # gvs_mesh_test
+            # gvs_mesh_test_17
+            PROPERTIES
+            CXX_STANDARD 11
+            CXX_STANDARD_REQUIRED ON
+            CXX_EXTENSIONS OFF
+            POSITION_INDEPENDENT_CODE ON
+            CXX_CLANG_TIDY "${GVS_CLANG_TIDY}"
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    )
     #    set_target_properties(
     #            gvs_mesh_test_17
     #            PROPERTIES
     #            CXX_STANDARD 17
     #    )
+
+    #############
+    ### GVS 2 ###
+    #############
+    file(GLOB_RECURSE GVS_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/display/*
+            )
+
+    gvs_add_executable(display 17 ${GVS_SOURCE_FILES} ${CMAKE_CURRENT_LIST_DIR}/src/exec/display.cpp)
+    target_link_libraries(display
+            PUBLIC vis_client_resources
+            PUBLIC gvs_util
+            )
 endif (NOT GVS_LOGGING_ONLY)

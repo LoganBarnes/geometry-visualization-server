@@ -26,15 +26,13 @@
 #include <random>
 
 int main(int argc, char* argv[]) {
-    std::string server_address;
+    std::string server_address = "0.0.0.0:50055";
 
     if (argc > 1) {
         server_address = argv[1];
     }
 
-    using namespace std::chrono_literals;
-
-    gvs::log::GeometryLogger scene(server_address, 3s);
+    gvs::log::GeometryLogger scene(server_address, std::chrono::seconds(3));
 
     scene.clear_all_items();
 
@@ -54,7 +52,7 @@ int main(int argc, char* argv[]) {
     std::vector<float> circle;
     constexpr int max_verts = 50;
     for (int i = 0; i <= max_verts; ++i) {
-        float angle = float(M_PI) * i * 2.f / max_verts;
+        float angle = float(M_PI) * static_cast<float>(i) * 2.f / max_verts;
         circle.emplace_back(std::cos(angle));
         circle.emplace_back(std::sin(angle));
         circle.emplace_back(0.f);

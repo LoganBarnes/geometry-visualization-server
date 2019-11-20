@@ -28,7 +28,7 @@ function(gvs_add_library target cxx_standard)
 
     if (GVS_BUILD_TESTS) # BUILDING WITH TESTS
         # Create an executable to run the tests
-        set(test_target ${target}_tests)
+        set(test_target test_${target})
         add_executable(${test_target} ${ARGN})
 
         target_link_libraries(${test_target}
@@ -37,11 +37,11 @@ function(gvs_add_library target cxx_standard)
                 )
         target_compile_options(${test_target} PRIVATE ${GVS_COMPILE_FLAGS})
 
-        add_test(NAME test_${target} COMMAND ${test_target})
+        add_test(NAME ${target}_tests COMMAND ${test_target})
 
         if (COMMAND SETUP_TARGET_FOR_COVERAGE)
             # Create a build that generates coverage reports
-            setup_target_for_coverage(${test_target}_coverage ${test_target} coverage)
+            setup_target_for_coverage(${test_target}_coverage ${test_target} ${test_target}_coverage)
             apply_coverage_dependencies(${test_target})
         endif ()
     endif ()

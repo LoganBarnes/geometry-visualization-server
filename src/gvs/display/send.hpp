@@ -22,54 +22,12 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <functional>
+#include <gvs/forward_declarations.hpp>
 
 namespace gvs {
-namespace log {
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
-
-} // namespace log
-
-namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-using SceneUpdateFunc = std::function<void(vis::SceneInterface*)>;
-class DisplayWindow;
-
-} // namespace display
+log::GeometryItemStream& send(log::GeometryItemStream& stream);
+log::GeometryItemStream& replace(log::GeometryItemStream& stream);
+log::GeometryItemStream& append(log::GeometryItemStream& stream);
 
 } // namespace gvs

@@ -20,56 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "geometry_display.hpp"
 
-#include <functional>
+// project
+#include "gvs/display/display_window.hpp"
 
-namespace gvs {
-namespace log {
+// third party
+#include <crossguid/guid.hpp>
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
+namespace gvs::display {
 
-} // namespace log
+GeometryDisplay::GeometryDisplay() {
+    display_thread_ = std::thread([this] {
+        display_window_ = std::make_unique<DisplayWindow>(update_queue_);
+        display_window_->exec();
+        display_window_ = nullptr;
+    });
+}
 
-namespace net {
+GeometryDisplay::~GeometryDisplay() {
+    display_thread_.join();
+}
 
-enum class GrpcClientState;
+auto GeometryDisplay::item_stream() const -> log::GeometryItemStream {
+    return item_stream(xg::newGuid().str());
+}
 
-template <typename Service>
-class GrpcClient;
+auto GeometryDisplay::item_stream(const std::string& id) const -> log::GeometryItemStream {
+    return log::GeometryItemStream(id);
+}
 
-class GrpcServer;
+auto GeometryDisplay::clear_all_items() -> void {}
 
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-using SceneUpdateFunc = std::function<void(vis::SceneInterface*)>;
-class DisplayWindow;
-
-} // namespace display
-
-} // namespace gvs
+} // namespace gvs::display

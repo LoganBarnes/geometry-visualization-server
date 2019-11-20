@@ -22,54 +22,20 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <functional>
+// project
+#include "gvs/display/geometry_item_stream.hpp"
 
-namespace gvs {
-namespace log {
+namespace gvs::log {
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
+class GeometryLogger {
+public:
+    virtual ~GeometryLogger() = 0;
 
-} // namespace log
+    virtual auto item_stream() const -> GeometryItemStream = 0;
+    virtual auto item_stream(const std::string& id) const -> GeometryItemStream = 0;
+    virtual auto clear_all_items() -> void = 0;
+};
 
-namespace net {
+inline GeometryLogger::~GeometryLogger() = default;
 
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-using SceneUpdateFunc = std::function<void(vis::SceneInterface*)>;
-class DisplayWindow;
-
-} // namespace display
-
-} // namespace gvs
+} // namespace gvs::log

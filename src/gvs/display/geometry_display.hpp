@@ -22,54 +22,35 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <functional>
+// project
+#include "gvs/display/geometry_logger.hpp"
+#include "gvs/util/blocking_queue.hpp"
 
-namespace gvs {
-namespace log {
+// standard
+#include <thread>
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
+namespace gvs::display {
 
-} // namespace log
+class GeometryDisplay : public log::GeometryLogger {
+public:
+    /// \brief Handles the server connection for geometry streams
+    ///
+    ///        If 'server_address' is an empty string, no connection attempt will be made.
+    ///        Defaults to a maximum 4 second wait time when attempting to connect.
+    ///
+    /// \param server_address - the logger will attempt to connect to this address
+    explicit GeometryDisplay();
+    ~GeometryDisplay() override;
 
-namespace net {
+    auto item_stream() const -> log::GeometryItemStream override;
+    auto item_stream(const std::string& id) const -> log::GeometryItemStream override;
+    auto clear_all_items() -> void override;
 
-enum class GrpcClientState;
+private:
+    std::unique_ptr<DisplayWindow> display_window_;
+    std::thread display_thread_;
 
-template <typename Service>
-class GrpcClient;
+    util::BlockingQueue<SceneUpdateFunc> update_queue_; ///< Used to send scene updates to the main window
+};
 
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-using SceneUpdateFunc = std::function<void(vis::SceneInterface*)>;
-class DisplayWindow;
-
-} // namespace display
-
-} // namespace gvs
+} // namespace gvs::display

@@ -56,6 +56,7 @@ endif (NOT expected_dl_POPULATED)
 
 
 ### crossguid ###
+# TODO: switch to stduuid
 FetchContent_Declare(crossguid_dl
         GIT_REPOSITORY https://github.com/graeme-hill/crossguid.git
         GIT_TAG 0f2753174c914bc561504b14c963d179283fe829

@@ -20,14 +20,43 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ##########################################################################################
-function(gvs_add_executable target cxx_standard)
+function(gvs_add_executable target cxx_standard main_file)
     # Add the library with custom compile flags and link the testing library
-    add_executable(${target} ${ARGN})
+    add_library(${target} ${ARGN})
     target_compile_options(${target} PRIVATE ${GVS_COMPILE_FLAGS})
     target_compile_definitions(${target} PRIVATE -DDOCTEST_CONFIG_DISABLE)
 
+    set(exec_target run_${target})
+    add_executable(${exec_target} ${main_file})
+
+    target_link_libraries(${exec_target} PRIVATE ${target})
+    target_compile_options(${exec_target} PRIVATE ${GVS_COMPILE_FLAGS})
+    target_compile_definitions(${exec_target} PRIVATE -DDOCTEST_CONFIG_DISABLE)
+
+    if (GVS_BUILD_TESTS) # BUILDING WITH TESTS
+        # Create an executable to run the tests
+        set(test_target test_${target})
+        add_executable(${test_target} ${ARGN})
+
+        target_link_libraries(${test_target}
+                PRIVATE doctest_with_main
+                PRIVATE ${target}
+                )
+        target_compile_options(${test_target} PRIVATE ${GVS_COMPILE_FLAGS})
+
+        add_test(NAME ${target}_tests COMMAND ${test_target})
+
+        if (COMMAND SETUP_TARGET_FOR_COVERAGE)
+            # Create a build that generates coverage reports
+            setup_target_for_coverage(${test_target}_coverage ${test_target} ${test_target}_coverage)
+            apply_coverage_dependencies(${test_target})
+        endif ()
+    endif ()
+
     set_target_properties(
             ${target}
+            ${test_target}
+            ${exec_target}
             PROPERTIES
             # C++ flags
             CXX_STANDARD ${cxx_standard}

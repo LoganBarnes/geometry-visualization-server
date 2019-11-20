@@ -20,56 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "send.hpp"
 
-#include <functional>
+#include "gvs/display/geometry_item_stream.hpp"
 
 namespace gvs {
-namespace log {
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
+log::GeometryItemStream& send(log::GeometryItemStream& stream) {
+    stream.send_current_data(log::SendType::safe);
+    return stream;
+}
 
-} // namespace log
+log::GeometryItemStream& replace(log::GeometryItemStream& stream) {
+    stream.send_current_data(log::SendType::replace);
+    return stream;
+}
 
-namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-using SceneUpdateFunc = std::function<void(vis::SceneInterface*)>;
-class DisplayWindow;
-
-} // namespace display
+log::GeometryItemStream& append(log::GeometryItemStream& stream) {
+    stream.send_current_data(log::SendType::append);
+    return stream;
+}
 
 } // namespace gvs
