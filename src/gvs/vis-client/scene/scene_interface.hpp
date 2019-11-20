@@ -55,6 +55,9 @@ public:
     virtual void reset(const proto::SceneItems& items) = 0;
 
     virtual void resize(const Magnum::Vector2i& viewport) = 0;
+
+    virtual std::size_t items() const = 0;
+    virtual bool empty() const = 0;
 };
 
 inline SceneInterface::~SceneInterface() = default;

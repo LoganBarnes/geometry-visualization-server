@@ -212,4 +212,14 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
 
 void OpenGLScene::resize(const Vector2i& /*viewport*/) {}
 
+std::size_t OpenGLScene::items() const {
+    // always contains root item
+    assert(!objects_.empty());
+    return objects_.size() - 1u;
+}
+
+bool OpenGLScene::empty() const {
+    return items() == 0;
+}
+
 } // namespace gvs::vis

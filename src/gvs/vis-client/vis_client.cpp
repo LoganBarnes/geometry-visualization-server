@@ -1,5 +1,3 @@
-#include <utility>
-
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
 // Copyright (c) 2019 Logan Barnes - All Rights Reserved
@@ -144,7 +142,9 @@ void vis::VisClient::update() {
 }
 
 void vis::VisClient::render(const CameraPackage& camera_package) const {
-    scene_->render(camera_package);
+    if (!scene_->empty()) {
+        scene_->render(camera_package);
+    }
 }
 
 void vis::VisClient::configure_gui() {

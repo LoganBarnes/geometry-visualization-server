@@ -40,8 +40,9 @@ using namespace Magnum;
 
 namespace gvs::display {
 namespace {
-int fake_argc = 0;
-char** fake_argv = nullptr;
+int fake_argc = 1;
+char fake_arg[4] = {'t', 'e', 's', 't'};
+char* fake_argv[1] = {fake_arg};
 
 constexpr auto poison_pill = nullptr;
 
@@ -81,7 +82,9 @@ void DisplayWindow::update() {
 }
 
 void DisplayWindow::render(const vis::CameraPackage& camera_package) const {
-    scene_->render(camera_package);
+    if (!scene_->empty()) {
+        scene_->render(camera_package);
+    }
 }
 
 void DisplayWindow::configure_gui() {

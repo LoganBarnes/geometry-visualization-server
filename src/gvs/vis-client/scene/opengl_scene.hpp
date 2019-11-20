@@ -57,6 +57,9 @@ public:
 
     void resize(const Magnum::Vector2i& viewport) override;
 
+    std::size_t items() const override;
+    bool empty() const override;
+
 private:
     using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
