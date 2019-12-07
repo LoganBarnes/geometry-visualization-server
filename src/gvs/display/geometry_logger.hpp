@@ -31,8 +31,8 @@ class GeometryLogger {
 public:
     virtual ~GeometryLogger() = 0;
 
-    virtual auto item_stream() const -> GeometryItemStream = 0;
-    virtual auto item_stream(const std::string& id) const -> GeometryItemStream = 0;
+    virtual auto item_stream() -> GeometryItemStream = 0;
+    virtual auto item_stream(const std::string& id) -> GeometryItemStream = 0;
     virtual auto clear_all_items() -> void = 0;
 };
 

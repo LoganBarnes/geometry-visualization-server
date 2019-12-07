@@ -31,20 +31,18 @@
 
 namespace gvs::display {
 
-class GeometryDisplay : public log::GeometryLogger {
+class GeometryDisplay : public log::GeometryLogger, public log::SceneInfoSender {
 public:
-    /// \brief Handles the server connection for geometry streams
-    ///
-    ///        If 'server_address' is an empty string, no connection attempt will be made.
-    ///        Defaults to a maximum 4 second wait time when attempting to connect.
-    ///
-    /// \param server_address - the logger will attempt to connect to this address
     explicit GeometryDisplay();
     ~GeometryDisplay() override;
 
-    auto item_stream() const -> log::GeometryItemStream override;
-    auto item_stream(const std::string& id) const -> log::GeometryItemStream override;
+    // log::GeometryLogger
+    auto item_stream() -> log::GeometryItemStream override;
+    auto item_stream(const std::string& id) -> log::GeometryItemStream override;
     auto clear_all_items() -> void override;
+
+    // log::SceneInfoSender
+    auto update_scene(const std::shared_ptr<SceneItemInfo>& info, log::SendType type) -> util::Result<void> override;
 
 private:
     std::unique_ptr<DisplayWindow> display_window_;

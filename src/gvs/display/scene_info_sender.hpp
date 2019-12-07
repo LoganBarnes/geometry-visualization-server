@@ -22,55 +22,24 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <functional>
+// project
+#include "gvs/display/types.hpp"
+#include "gvs/util/result.hpp"
 
-namespace gvs {
-namespace log {
+namespace gvs::log {
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
+enum class SendType : uint8_t {
+    Safe,
+    Replace,
+    Append,
+};
 
-} // namespace log
+class SceneInfoSender {
+public:
+    virtual ~SceneInfoSender() = 0;
+    virtual auto update_scene(const std::shared_ptr<SceneItemInfo>& info, SendType type) -> util::Result<void> = 0;
+};
 
-namespace net {
+inline SceneInfoSender::~SceneInfoSender() = default;
 
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-class DisplayWindow;
-class SceneInterface;
-using SceneUpdateFunc = std::function<void(SceneInterface*)>;
-
-} // namespace display
-
-} // namespace gvs
+} // namespace gvs::log

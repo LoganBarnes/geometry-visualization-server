@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,55 +22,38 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <functional>
+// gvs
+#include "gvs/display/types.hpp"
+#include "gvs/vis-client/scene/camera_package.hpp"
 
-namespace gvs {
-namespace log {
+// external
+#include <Magnum/Magnum.h>
+#include <Magnum/Math/Vector3.h>
+#include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/SceneGraph/Object.h>
+#include <imgui.h>
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
+namespace gvs::display {
 
-} // namespace log
+class SceneInterface {
+public:
+    virtual ~SceneInterface() = 0;
 
-namespace net {
+    virtual auto update(Magnum::Vector2i const& viewport) -> void = 0;
+    virtual auto render(vis::CameraPackage const& camera_package) -> void = 0;
 
-enum class GrpcClientState;
+    virtual auto add_item(SceneItemInfo const& info) -> void = 0;
+    virtual auto update_item(SceneItemInfo const& info) -> void = 0;
+    virtual auto reset(SceneItems const& items) -> void = 0;
 
-template <typename Service>
-class GrpcClient;
+    virtual auto resize(Magnum::Vector2i const& viewport) -> void = 0;
 
-class GrpcServer;
+    virtual auto root() const -> SceneItemInfo const& = 0;
 
-} // namespace net
+    virtual auto size() const -> std::size_t = 0;
+    virtual auto empty() const -> bool = 0;
+};
 
-namespace host {
+inline SceneInterface::~SceneInterface() = default;
 
-class scene_service;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-class DisplayWindow;
-class SceneInterface;
-using SceneUpdateFunc = std::function<void(SceneInterface*)>;
-
-} // namespace display
-
-} // namespace gvs
+} // namespace gvs::display

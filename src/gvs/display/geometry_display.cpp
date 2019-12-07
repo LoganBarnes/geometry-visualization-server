@@ -24,6 +24,8 @@
 
 // project
 #include "gvs/display/display_window.hpp"
+#include "gvs/display/geometry_item_stream.hpp"
+#include "gvs/display/scene_interface.hpp"
 
 // third party
 #include <crossguid/guid.hpp>
@@ -42,14 +44,33 @@ GeometryDisplay::~GeometryDisplay() {
     //    display_thread_.join();
 }
 
-auto GeometryDisplay::item_stream() const -> log::GeometryItemStream {
+auto GeometryDisplay::item_stream() -> log::GeometryItemStream {
     return item_stream(xg::newGuid().str());
 }
 
-auto GeometryDisplay::item_stream(const std::string& id) const -> log::GeometryItemStream {
-    return log::GeometryItemStream(id);
+auto GeometryDisplay::item_stream(const std::string& id) -> log::GeometryItemStream {
+    return log::GeometryItemStream(id, *this);
 }
 
 auto GeometryDisplay::clear_all_items() -> void {}
+
+auto GeometryDisplay::update_scene(const std::shared_ptr<SceneItemInfo>& info, log::SendType type)
+    -> util::Result<void> {
+
+    switch (type) {
+
+    case log::SendType::Safe:
+        update_queue_.emplace_back([info](SceneInterface* scene) { scene->add_item(*info); });
+        break;
+
+    case log::SendType::Replace:
+        break;
+
+    case log::SendType::Append:
+        break;
+    }
+
+    return util::success();
+}
 
 } // namespace gvs::display

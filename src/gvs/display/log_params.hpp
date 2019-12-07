@@ -70,7 +70,7 @@ inline auto positions_3d(const std::vector<Vec3>& data) -> std::function<std::st
         return "";
     };
 }
-//
+
 //inline auto normals_3d(const std::vector<float>& data) -> std::function<std::string(SceneItemInfo*)> {
 //    return [data](SceneItemInfo* info) {
 //        if (info->mutable_geometry_info()->has_normals()) {

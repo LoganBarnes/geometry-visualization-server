@@ -24,6 +24,7 @@
 
 // project
 #include "gvs/display/log_params.hpp"
+#include "gvs/display/scene_info_sender.hpp"
 #include "gvs/display/send.hpp"
 
 // standard
@@ -43,16 +44,10 @@ namespace gvs::log {
         std::cerr << "Error (stream " << stream.id() << "): " << stream.error_message() << std::endl;                  \
     }
 
-enum class SendType : uint8_t {
-    safe,
-    replace,
-    append,
-};
-
 /// \brief A single item stream
 class GeometryItemStream {
 public:
-    explicit GeometryItemStream(std::string id);
+    explicit GeometryItemStream(std::string id, SceneInfoSender& sender);
 
     /// \brief Sends all the data currently stored in this stream
     void send_current_data(SendType type);
@@ -150,6 +145,8 @@ private:
     const std::string id_; ///< The id of the stream
     std::shared_ptr<SceneItemInfo> info_; ///< The current state of the stream
 
+    SceneInfoSender& sender_; ///< Updates the scene when requested
+
     std::string error_message_ = ""; ///< error messages for this stream, empty if there are none
 };
 
@@ -168,7 +165,7 @@ GeometryItemStream& GeometryItemStream::send(Functors&&... functors) {
     int dummy[] = {(this->operator<<(std::forward<Functors>(functors)), 0)...};
     (void)dummy; // ignore this necessary but unused variable
 
-    this->send_current_data(SendType::safe);
+    this->send_current_data(SendType::Safe);
     return *this;
 }
 
@@ -178,7 +175,7 @@ GeometryItemStream& GeometryItemStream::replace(Functors&&... functors) {
     int dummy[] = {(this->operator<<(std::forward<Functors>(functors)), 0)...};
     (void)dummy; // ignore this necessary but unused variable
 
-    this->send_current_data(SendType::replace);
+    this->send_current_data(SendType::Replace);
     return *this;
 }
 
@@ -188,7 +185,7 @@ GeometryItemStream& GeometryItemStream::append(Functors&&... functors) {
     int dummy[] = {(this->operator<<(std::forward<Functors>(functors)), 0)...};
     (void)dummy; // ignore this necessary but unused variable
 
-    this->send_current_data(SendType::append);
+    this->send_current_data(SendType::Append);
     return *this;
 }
 

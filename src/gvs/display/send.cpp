@@ -27,17 +27,17 @@
 namespace gvs {
 
 log::GeometryItemStream& send(log::GeometryItemStream& stream) {
-    stream.send_current_data(log::SendType::safe);
+    stream.send_current_data(log::SendType::Safe);
     return stream;
 }
 
 log::GeometryItemStream& replace(log::GeometryItemStream& stream) {
-    stream.send_current_data(log::SendType::replace);
+    stream.send_current_data(log::SendType::Replace);
     return stream;
 }
 
 log::GeometryItemStream& append(log::GeometryItemStream& stream) {
-    stream.send_current_data(log::SendType::append);
+    stream.send_current_data(log::SendType::Append);
     return stream;
 }
 

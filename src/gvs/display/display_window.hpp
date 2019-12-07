@@ -52,7 +52,7 @@ private:
     bool run_as_fast_as_possible_ = false;
 
     // Scene
-    std::unique_ptr<vis::SceneInterface> scene_; // forward declaration
+    // std::unique_ptr<SceneInterface> scene_; // forward declaration
 
     util::BlockingQueue<SceneUpdateFunc>& external_update_queue_;
     std::thread update_thread_;
