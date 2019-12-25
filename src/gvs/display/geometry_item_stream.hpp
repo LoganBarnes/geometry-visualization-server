@@ -133,17 +133,17 @@ public:
     GeometryItemStream& append(Functors&&... functors);
 
     /// \brief Get the stream id
-    const std::string& id() const;
+    [[nodiscard]] auto id() const -> std::string const&;
 
     /// \brief Return true if no errors have occurred while modifying or sending the stream contents
-    bool success() const;
+    [[nodiscard]] auto success() const -> bool;
 
     /// \brief The associated error message if GeometryItemStream::success returns false
-    const std::string& error_message() const;
+    [[nodiscard]] auto error_message() const -> std::string const&;
 
 private:
     const std::string id_; ///< The id of the stream
-    std::shared_ptr<SceneItemInfo> info_; ///< The current state of the stream
+    SceneItemInfo info_; ///< The current state of the stream
 
     SceneInfoSender& sender_; ///< Updates the scene when requested
 
@@ -152,7 +152,7 @@ private:
 
 template <typename Functor>
 GeometryItemStream& GeometryItemStream::operator<<(Functor&& functor) {
-    std::string error_name = functor(info_.get());
+    std::string error_name = functor(&info_);
     if (not error_name.empty()) {
         throw std::invalid_argument(error_name + " is already set");
     }

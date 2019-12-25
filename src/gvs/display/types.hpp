@@ -23,11 +23,11 @@
 #pragma once
 
 // external
-#include <Magnum/Math/Matrix4.h>
-#include <Magnum/Math/Vector3.h>
+//#include <Magnum/Math/Matrix4.h>
+//#include <Magnum/Math/Vector3.h>
 
 // standard
-#include <memory>
+#include <optional>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -71,32 +71,34 @@ struct LambertianShading {
 using Shading = std::variant<UniformColor, LambertianShading>;
 
 struct GeometryInfo {
-    std::unique_ptr<std::vector<vec3>> positions;
-    std::unique_ptr<std::vector<vec3>> normals;
-    std::unique_ptr<std::vector<vec2>> tex_coords;
-    std::unique_ptr<std::vector<vec3>> vertex_colors;
-    std::unique_ptr<std::vector<unsigned>> indices;
+    std::optional<std::vector<vec3>> positions;
+    std::optional<std::vector<vec3>> normals;
+    std::optional<std::vector<vec2>> tex_coords;
+    std::optional<std::vector<vec3>> vertex_colors;
+    std::optional<std::vector<unsigned>> indices;
 };
 
 struct DisplayInfo {
-    std::unique_ptr<std::string> readable_id;
-    std::unique_ptr<GeometryFormat> geometry_format;
-    std::unique_ptr<mat4> transformation;
-    std::unique_ptr<vec3> uniform_color;
-    std::unique_ptr<Coloring> coloring;
-    std::unique_ptr<Shading> shading;
-    std::unique_ptr<bool> visible;
-    std::unique_ptr<float> opacity;
+    std::optional<std::string> readable_id;
+    std::optional<GeometryFormat> geometry_format;
+    std::optional<mat4> transformation;
+    std::optional<vec3> uniform_color;
+    std::optional<Coloring> coloring;
+    std::optional<Shading> shading;
+    std::optional<bool> visible;
+    std::optional<float> opacity;
 };
+
+using SceneID = std::string;
+const std::string nil_id;
 
 struct SceneItemInfo {
-    std::unique_ptr<std::string> id;
-    std::unique_ptr<GeometryInfo> geometry_info;
-    std::unique_ptr<DisplayInfo> display_info;
-    std::unique_ptr<std::string> parent;
-    std::unique_ptr<std::vector<std::string>> children;
+    std::optional<GeometryInfo> geometry_info;
+    std::optional<DisplayInfo> display_info;
+    std::optional<SceneID> parent;
+    std::optional<std::vector<SceneID>> children;
 };
 
-using SceneItems = std::unordered_map<std::string, SceneItemInfo>;
+using SceneItems = std::unordered_map<SceneID, SceneItemInfo>;
 
 } // namespace gvs

@@ -22,11 +22,11 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
 #include "gvs/vis-client/app/imgui_magnum_application.hpp"
 
 // standard
-#include <gvs/util/atomic_data.hpp>
 #include <thread>
 
 namespace gvs::display {

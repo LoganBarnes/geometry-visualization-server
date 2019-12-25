@@ -23,37 +23,25 @@
 #pragma once
 
 // gvs
-#include "gvs/display/types.hpp"
-#include "gvs/vis-client/scene/camera_package.hpp"
+#include "backend_interface.hpp"
 
-// external
-#include <Magnum/Magnum.h>
-#include <Magnum/Math/Vector3.h>
-#include <Magnum/SceneGraph/Camera.h>
-#include <Magnum/SceneGraph/Object.h>
-#include <imgui.h>
+namespace gvs::display::backends {
 
-namespace gvs::display {
-
-class SceneInterface {
+class OpenglBackend : public BackendInterface {
 public:
-    virtual ~SceneInterface() = 0;
+    ~OpenglBackend() override;
 
-    virtual auto update(Magnum::Vector2i const& viewport) -> void = 0;
-    virtual auto render(vis::CameraPackage const& camera_package) -> void = 0;
+    auto render(vis::CameraPackage const& camera_package) -> void override;
 
-    virtual auto add_item(SceneItemInfo const& info) -> void = 0;
-    virtual auto update_item(SceneItemInfo const& info) -> void = 0;
-    virtual auto reset(SceneItems const& items) -> void = 0;
+    auto after_add(SceneID const& item_id, SceneItems const& items) -> void override;
+    auto after_update(SceneID const& item_id, SceneItems const& items) -> void override;
+    auto before_delete(SceneID const& item_id, SceneItems const& items) -> void override;
 
-    virtual auto resize(Magnum::Vector2i const& viewport) -> void = 0;
+    auto reset_items(SceneItems const& items) -> void override;
 
-    virtual auto root() const -> SceneItemInfo const& = 0;
+    auto resize(Magnum::Vector2i const& viewport) -> void override;
 
-    virtual auto size() const -> std::size_t = 0;
-    virtual auto empty() const -> bool = 0;
+private:
 };
 
-inline SceneInterface::~SceneInterface() = default;
-
-} // namespace gvs::display
+} // namespace gvs::display::backends

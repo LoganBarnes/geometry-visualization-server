@@ -24,15 +24,14 @@
 
 namespace gvs::log {
 
-GeometryItemStream::GeometryItemStream(std::string id, SceneInfoSender& sender)
-    : id_(std::move(id)), info_(std::make_shared<SceneItemInfo>()), sender_(sender) {}
+GeometryItemStream::GeometryItemStream(std::string id, SceneInfoSender& sender) : id_(std::move(id)), sender_(sender) {}
 
 void GeometryItemStream::send_current_data(SendType type) {
-    auto result = sender_.update_scene(info_, type);
+    auto result = sender_.update_scene(id_, std::move(info_), type);
     if (!result) {
         error_message_ = result.error().error_message();
     }
-    info_ = std::make_shared<SceneItemInfo>();
+    info_ = {};
 }
 
 GeometryItemStream& GeometryItemStream::operator<<(GeometryItemStream& (*send_func)(GeometryItemStream&)) {

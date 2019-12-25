@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
-
-// project
-#include "gvs/display/geometry_logger.hpp"
-#include "gvs/util/blocking_queue.hpp"
-
-// standard
-#include <thread>
+#include "scene.hpp"
 
 namespace gvs::display {
 
-class GeometryDisplay : public log::GeometryLogger, public log::SceneInfoSender {
-public:
-    explicit GeometryDisplay();
-    ~GeometryDisplay() override;
+Scene::Scene(std::unique_ptr<backends::BackendInterface> backend) : backend_(std::move(backend)) {}
 
-    // log::GeometryLogger
-    auto item_stream() -> log::GeometryItemStream override;
-    auto item_stream(const std::string& id) -> log::GeometryItemStream override;
-    auto clear_all_items() -> void override;
+Scene::~Scene() = default;
 
-    // log::SceneInfoSender
-    auto update_scene(SceneID const& id, SceneItemInfo&& info, log::SendType type) -> util::Result<void> override;
+auto Scene::update() -> void {}
 
-private:
-    std::unique_ptr<DisplayWindow> display_window_;
-    std::thread display_thread_;
+auto Scene::render(vis::CameraPackage const& camera_package) -> void {
+    backend_->render(camera_package);
+}
 
-    util::BlockingQueue<SceneUpdateFunc> update_queue_; ///< Used to send scene updates to the main window
-};
+auto Scene::add_item(SceneID const& item_id, SceneItemInfo&& item) -> void {
+    items_[item_id] = std::move(item);
+    backend_->after_add(item_id, items_);
+}
+
+auto Scene::update_item(SceneID const& item_id, SceneItemInfo&& item) -> void {
+    items_[item_id] = std::move(item);
+    backend_->after_update(item_id, items_);
+}
+
+auto Scene::remove_item(SceneID const& item_id) -> void {
+    backend_->before_delete(item_id, items_);
+    items_.erase(item_id);
+}
+
+auto Scene::clear() -> void {
+    items_.clear();
+}
+
+auto Scene::resize(Magnum::Vector2i const& viewport) -> void {
+    backend_->resize(viewport);
+}
+
+auto Scene::items() const -> SceneItems const& {
+    return items_;
+}
+
+auto Scene::size() const -> std::size_t {
+    return items_.size();
+}
+
+auto Scene::empty() const -> bool {
+    return items_.empty();
+}
 
 } // namespace gvs::display

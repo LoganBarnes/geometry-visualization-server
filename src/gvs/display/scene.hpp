@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,33 +22,40 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// project
-#include "gvs/display/geometry_logger.hpp"
-#include "gvs/util/blocking_queue.hpp"
+// gvs
+#include "backends/backend_interface.hpp"
+#include "log_params.hpp"
 
 // standard
-#include <thread>
+#include <memory>
 
 namespace gvs::display {
 
-class GeometryDisplay : public log::GeometryLogger, public log::SceneInfoSender {
+class Scene {
 public:
-    explicit GeometryDisplay();
-    ~GeometryDisplay() override;
+    explicit Scene(std::unique_ptr<backends::BackendInterface> backend);
+    ~Scene();
 
-    // log::GeometryLogger
-    auto item_stream() -> log::GeometryItemStream override;
-    auto item_stream(const std::string& id) -> log::GeometryItemStream override;
-    auto clear_all_items() -> void override;
+    auto update() -> void;
+    auto render(vis::CameraPackage const& camera_package) -> void;
 
-    // log::SceneInfoSender
-    auto update_scene(SceneID const& id, SceneItemInfo&& info, log::SendType type) -> util::Result<void> override;
+    auto add_item(SceneID const& item_id, SceneItemInfo&& item) -> void;
+    auto update_item(SceneID const& item_id, SceneItemInfo&& item) -> void;
+    auto remove_item(SceneID const& item_id) -> void;
+
+    auto clear() -> void;
+
+    auto resize(Magnum::Vector2i const& viewport) -> void;
+
+    [[nodiscard]] auto items() const -> SceneItems const&;
+
+    [[nodiscard]] auto size() const -> std::size_t;
+    [[nodiscard]] auto empty() const -> bool;
 
 private:
-    std::unique_ptr<DisplayWindow> display_window_;
-    std::thread display_thread_;
+    std::unique_ptr<backends::BackendInterface> backend_;
 
-    util::BlockingQueue<SceneUpdateFunc> update_queue_; ///< Used to send scene updates to the main window
+    SceneItems items_;
 };
 
 } // namespace gvs::display

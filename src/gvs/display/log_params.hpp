@@ -62,11 +62,10 @@ inline auto positions_3d(const std::vector<Vec3>& data) -> std::function<std::st
         static_assert(sizeof(Vec3) == sizeof(float) * 3, "Vec3 type must be unpadded");
 
         if (!info->geometry_info) {
-            info->geometry_info = std::make_unique<GeometryInfo>();
+            info->geometry_info = GeometryInfo{};
         }
-        info->geometry_info->positions
-            = std::make_unique<std::vector<vec3>>(reinterpret_cast<const vec3*>(data.data()),
-                                                  reinterpret_cast<const vec3*>(data.data() + data.size()));
+        info->geometry_info->positions = std::vector<vec3>(reinterpret_cast<const vec3*>(data.data()),
+                                                           reinterpret_cast<const vec3*>(data.data() + data.size()));
         return "";
     };
 }

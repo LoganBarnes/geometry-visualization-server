@@ -68,8 +68,8 @@ class SceneInterface;
 namespace display {
 
 class DisplayWindow;
-class SceneInterface;
-using SceneUpdateFunc = std::function<void(SceneInterface*)>;
+class Scene;
+using SceneUpdateFunc = std::function<void(Scene*)>;
 
 } // namespace display
 

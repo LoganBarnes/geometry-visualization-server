@@ -37,7 +37,7 @@ enum class SendType : uint8_t {
 class SceneInfoSender {
 public:
     virtual ~SceneInfoSender() = 0;
-    virtual auto update_scene(const std::shared_ptr<SceneItemInfo>& info, SendType type) -> util::Result<void> = 0;
+    virtual auto update_scene(SceneID const& id, SceneItemInfo&& info, SendType type) -> util::Result<void> = 0;
 };
 
 inline SceneInfoSender::~SceneInfoSender() = default;

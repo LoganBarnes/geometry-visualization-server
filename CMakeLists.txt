@@ -141,7 +141,7 @@ if (NOT GVS_LOGGING_ONLY)
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/server/*
             )
 
-    gvs_add_executable(gvs 17 ${GVS_SOURCE_FILES} ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp)
+    gvs_add_executable(gvs 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp ${GVS_SOURCE_FILES})
     target_link_libraries(gvs
             PUBLIC vis_client_resources
             PUBLIC gvs_util
@@ -194,7 +194,7 @@ if (NOT GVS_LOGGING_ONLY)
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/display/*
             )
 
-    gvs_add_executable(display 17 ${GVS_SOURCE_FILES} ${CMAKE_CURRENT_LIST_DIR}/src/exec/display.cpp)
+    gvs_add_executable(display 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/display.cpp ${GVS_SOURCE_FILES})
     target_link_libraries(display
             PUBLIC vis_client_resources
             PUBLIC gvs_util

@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "opengl_backend.hpp"
 
-// project
-#include "gvs/display/geometry_logger.hpp"
-#include "gvs/util/blocking_queue.hpp"
+namespace gvs::display::backends {
 
-// standard
-#include <thread>
+OpenglBackend::~OpenglBackend() = default;
 
-namespace gvs::display {
+auto OpenglBackend::render(vis::CameraPackage const & /*camera_package*/) -> void {}
 
-class GeometryDisplay : public log::GeometryLogger, public log::SceneInfoSender {
-public:
-    explicit GeometryDisplay();
-    ~GeometryDisplay() override;
+auto OpenglBackend::after_add(SceneID const& /*item_id*/, SceneItems const & /*items*/) -> void {}
 
-    // log::GeometryLogger
-    auto item_stream() -> log::GeometryItemStream override;
-    auto item_stream(const std::string& id) -> log::GeometryItemStream override;
-    auto clear_all_items() -> void override;
+auto OpenglBackend::after_update(SceneID const& /*item_id*/, SceneItems const & /*items*/) -> void {}
 
-    // log::SceneInfoSender
-    auto update_scene(SceneID const& id, SceneItemInfo&& info, log::SendType type) -> util::Result<void> override;
+auto OpenglBackend::before_delete(SceneID const& /*item_id*/, SceneItems const & /*items*/) -> void {}
 
-private:
-    std::unique_ptr<DisplayWindow> display_window_;
-    std::thread display_thread_;
+auto OpenglBackend::reset_items(SceneItems const & /*items*/) -> void {}
 
-    util::BlockingQueue<SceneUpdateFunc> update_queue_; ///< Used to send scene updates to the main window
-};
+auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
 
-} // namespace gvs::display
+} // namespace gvs::display::backends
