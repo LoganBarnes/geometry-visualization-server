@@ -32,7 +32,7 @@
 
 namespace gvs::display {
 
-GeometryDisplay::GeometryDisplay() {
+SceneLogger::SceneLogger() {
     display_thread_ = std::thread([this] {
         display_window_ = std::make_unique<DisplayWindow>(update_queue_);
         display_window_->exec();
@@ -40,21 +40,21 @@ GeometryDisplay::GeometryDisplay() {
     });
 }
 
-GeometryDisplay::~GeometryDisplay() {
+SceneLogger::~SceneLogger() {
     display_thread_.join();
 }
 
-auto GeometryDisplay::item_stream() -> log::GeometryItemStream {
+auto SceneLogger::item_stream() -> log::GeometryItemStream {
     return item_stream(xg::newGuid().str());
 }
 
-auto GeometryDisplay::item_stream(const std::string& id) -> log::GeometryItemStream {
+auto SceneLogger::item_stream(const std::string& id) -> log::GeometryItemStream {
     return log::GeometryItemStream(id, *this);
 }
 
-auto GeometryDisplay::clear_all_items() -> void {}
+auto SceneLogger::clear_all_items() -> void {}
 
-auto GeometryDisplay::update_scene(SceneID const& id, SceneItemInfo&& info, log::SendType type) -> util::Result<void> {
+auto SceneLogger::update_scene(SceneID const& id, SceneItemInfo&& info, log::SendType type) -> util::Result<void> {
     switch (type) {
 
     case log::SendType::Safe:

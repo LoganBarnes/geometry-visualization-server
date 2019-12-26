@@ -32,10 +32,10 @@
 
 namespace gvs::display {
 
-class GeometryDisplay : public log::GeometryLogger, public log::SceneInfoSender {
+class SceneLogger : public log::GeometryLogger, public log::SceneInfoSender {
 public:
-    explicit GeometryDisplay();
-    ~GeometryDisplay() override;
+    explicit SceneLogger();
+    ~SceneLogger() override;
 
     // log::GeometryLogger
     auto item_stream() -> log::GeometryItemStream override;
