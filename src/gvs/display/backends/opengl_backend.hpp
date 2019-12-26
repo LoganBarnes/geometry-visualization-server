@@ -47,6 +47,7 @@ namespace gvs::display::backends {
 
 class OpenglBackend : public BackendInterface {
 public:
+    explicit OpenglBackend();
     ~OpenglBackend() override;
 
     auto render(vis::CameraPackage const& camera_package) -> void override;
@@ -81,10 +82,10 @@ private:
     std::unordered_map<std::string, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 
     Scene3D scene_;
-    //Object3D* root_object_ = nullptr;
-    //Object3D camera_object_;
-    //Magnum::SceneGraph::Camera3D* camera_;
-    //Magnum::SceneGraph::DrawableGroup3D drawables_;
+    Object3D* root_object_ = nullptr;
+    Object3D camera_object_;
+    Magnum::SceneGraph::Camera3D* camera_;
+    Magnum::SceneGraph::DrawableGroup3D drawables_;
 };
 
 } // namespace gvs::display::backends

@@ -24,9 +24,11 @@
 
 // project
 #include "gvs/util/container_util.hpp"
+#include "gvs/util/result.hpp"
 
 // external
 #include <Corrade/Containers/ArrayViewStl.h>
+#include <Magnum/GL/Renderer.h>
 #include <Magnum/Mesh.h>
 #include <Magnum/MeshTools/CompressIndices.h>
 
@@ -142,12 +144,35 @@ OpenglBackend::ObjectMeshPackage::ObjectMeshPackage(Object3D* obj,
     drawable = new OpaqueDrawable(*object, drawables, mesh, shader);
 }
 
+OpenglBackend::OpenglBackend() {
+    camera_object_.setParent(&scene_);
+    camera_ = new Magnum::SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
+
+    /* Setup renderer and shader defaults */
+    Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::DepthTest);
+    Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::FaceCulling);
+
+    shader_.set_uniform_color({1.f, 0.5f, 0.1f});
+
+    // Add root
+    root_object_ = &scene_.addChild<Object3D>();
+}
+
 OpenglBackend::~OpenglBackend() = default;
 
-auto OpenglBackend::render(vis::CameraPackage const & /*camera_package*/) -> void {}
+auto OpenglBackend::render(vis::CameraPackage const& camera_package) -> void {
+    camera_object_.setTransformation(camera_package.transformation);
+    camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
+    camera_->draw(drawables_);
+}
 
-auto OpenglBackend::after_add(SceneID const& item_id, SceneItems const & /*items*/) -> void {
+auto OpenglBackend::after_add(SceneID const& item_id, SceneItems const& items) -> void {
     std::cout << "Item added: " << item_id << std::endl;
+
+    objects_.emplace(item_id, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
+
+    auto const& item = items.at(item_id);
+    before_update(item_id, item, items);
 }
 
 auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& new_info, SceneItems const& items)
@@ -162,10 +187,12 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
 
         if (new_geom.positions || new_geom.normals || new_geom.tex_coords || new_geom.vertex_colors) {
             update_vbo(&mesh_package, new_geom, old_geom);
+            std::cout << "\tVbo updated: " << mesh_package.mesh.count() << " vertices" << std::endl;
         }
 
         if (new_geom.indices) {
             update_ibo(&mesh_package, new_geom.indices.value());
+            std::cout << "\tIbo updated: " << mesh_package.mesh.count() << " vertices" << std::endl;
         }
     }
 
@@ -179,6 +206,19 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
 
     // TODO: Handle parent and children updates
 
+    if (new_info.parent) {
+        auto const& parent = new_info.parent.value();
+
+        if (!util::has_key(objects_, parent)) {
+            objects_.erase(item_id);
+            throw std::invalid_argument("Parent id '" + parent + "' not found in scene");
+        }
+
+        mesh_package.object->setParent(objects_.at(parent)->object);
+    } else {
+        mesh_package.object->setParent(root_object_);
+    }
+
     if (new_info.display_info) {
         mesh_package.drawable->update_display_info(new_info.display_info.value());
     }
@@ -186,7 +226,27 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
 
 auto OpenglBackend::before_delete(SceneID const& /*item_id*/, SceneItems const & /*items*/) -> void {}
 
-auto OpenglBackend::reset_items(SceneItems const & /*items*/) -> void {}
+auto OpenglBackend::reset_items(SceneItems const& items) -> void {
+    // Remove all items from the scene
+    if (root_object_) {
+        scene_.children().erase(root_object_);
+    }
+    objects_.clear();
+
+    // Add root
+    root_object_ = &scene_.addChild<Object3D>();
+
+    for (auto const& [item_id, item] : items) {
+        util::ignore(item);
+        objects_.emplace(item_id,
+                         std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
+    }
+
+    // Add new items to scene
+    for (auto const& [item_id, item] : items) {
+        before_update(item_id, item, items);
+    }
+}
 
 auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
 
