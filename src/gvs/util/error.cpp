@@ -34,10 +34,10 @@ SourceLocation::SourceLocation(std::string file, int line) : filename(std::move(
 
 namespace {
 
-/**
- * @brief Get the file string relative to the project root dir.
- */
-std::string get_relative_path_string(const std::string& path) {
+///
+/// \brief Get the file string relative to the project root dir.
+///
+auto get_relative_path_string(const std::string& path) -> std::string {
     auto abs_path_start = path.find(paths::project_root());
 
     // Remove the project path if it exists in `path`
@@ -53,10 +53,10 @@ TEST_CASE("[util] get relative path string") {
     CHECK(get_relative_path_string(paths::project_root() + "with/project/root") == "with/project/root");
 }
 
-/**
- * @brief Prepend the file and line number to the message if they were specified.
- */
-std::string create_debug_message(const SourceLocation& source_location, const std::string& error_message) {
+///
+/// \brief Prepend the file and line number to the message if they were specified.
+///
+auto create_debug_message(const SourceLocation& source_location, const std::string& error_message) -> std::string {
     std::string result = "[";
 
     if (!source_location.filename.empty()) {
@@ -75,26 +75,52 @@ std::string create_debug_message(const SourceLocation& source_location, const st
 
 Error::~Error() = default;
 
-Error::Error(const SourceLocation& source_location, std::string error_message)
-    : error_message_(std::move(error_message)), debug_message_(create_debug_message(source_location, error_message_)) {}
+Error::Error(SourceLocation source_location, Severity severity, std::string error_message)
+    : source_location_(std::move(source_location)),
+      severity_(severity),
+      error_message_(std::move(error_message)),
+      debug_message_(create_debug_message(source_location_, error_message_)) {}
 
-const std::string& Error::error_message() const {
+auto Error::severity() const -> Error::Severity const& {
+    return severity_;
+}
+
+auto Error::error_message() const -> std::string const& {
     return error_message_;
 }
 
-const std::string& Error::debug_error_message() const {
+auto Error::debug_error_message() const -> std::string const& {
     return debug_message_;
 }
 
-bool Error::operator==(const Error& other) const {
+auto Error::append_message(const Error& error, const std::string& message) -> Error {
+    return Error(error.source_location_, error.severity_, error.error_message_ + " " + message);
+}
+
+auto Error::operator==(const Error& other) const -> bool {
     return debug_message_ == other.debug_message_;
 }
 
-TEST_CASE("[util] check error helpers") {
-    CHECK(MAKE_ERROR("Error message").error_message() == "Error message");
-    CHECK(MAKE_ERROR("Error message").debug_error_message()
-          == "[src/gvs/util/error.cpp:" + std::to_string(__LINE__) + "] Error message");
-    CHECK(MAKE_ERROR("blarg") == MAKE_ERROR("blarg"));
+auto Error::operator!=(const Error& other) const -> bool {
+    return !(this->operator==(other));
 }
 
 } // namespace gvs::util
+
+TEST_CASE("[util] check error helpers") {
+    CHECK(MAKE_ERROR("Error message").error_message() == "Error message");
+    CHECK(MAKE_ERROR("blarg") == MAKE_ERROR("blarg"));
+    auto error = MAKE_ERROR("Error message");
+    auto expected_message = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
+    CHECK(error.debug_error_message() == expected_message);
+    CHECK(error.severity() == gvs::util::Error::Severity::Error);
+}
+
+TEST_CASE("[util] check warning helpers") {
+    CHECK(MAKE_WARNING("Error message").error_message() == "Error message");
+    CHECK(MAKE_WARNING("blarg") == MAKE_WARNING("blarg"));
+    auto warning = MAKE_WARNING("Error message");
+    auto expected_message = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
+    CHECK(warning.debug_error_message() == expected_message);
+    CHECK(warning.severity() == gvs::util::Error::Severity::Warning);
+}

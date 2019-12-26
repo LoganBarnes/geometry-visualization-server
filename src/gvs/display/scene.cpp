@@ -41,19 +41,28 @@ auto Scene::render(vis::CameraPackage const& camera_package) -> void {
     backend_->render(camera_package);
 }
 
-auto Scene::add_item(SceneID const& item_id, SceneItemInfo&& item) -> void {
+auto Scene::add_item(SceneID const& item_id, SceneItemInfo&& item) -> util::Result<void> {
     items_[item_id] = std::move(item);
     backend_->after_add(item_id, items_);
+    return util::success();
 }
 
-auto Scene::update_item(SceneID const& item_id, SceneItemInfo&& item) -> void {
+auto Scene::update_item(SceneID const& item_id, SceneItemInfo&& item) -> util::Result<void> {
     backend_->before_update(item_id, item, items_);
     items_[item_id] = std::move(item);
+    return util::success();
 }
 
-auto Scene::remove_item(SceneID const& item_id) -> void {
+auto Scene::append_to_item(const SceneID& item_id, SceneItemInfo&& item) -> util::Result<void> {
+    backend_->before_update(item_id, item, items_);
+    items_[item_id] = std::move(item);
+    return util::success();
+}
+
+auto Scene::remove_item(SceneID const& item_id) -> util::Result<void> {
     backend_->before_delete(item_id, items_);
     items_.erase(item_id);
+    return util::success();
 }
 
 auto Scene::clear() -> void {

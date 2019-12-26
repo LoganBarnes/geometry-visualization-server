@@ -76,7 +76,10 @@ DisplayWindow::~DisplayWindow() {
 void DisplayWindow::update() {
     while (!internal_update_queue_.empty()) {
         auto update = internal_update_queue_.pop_front();
-        update(scene_.get());
+        auto result = update(scene_.get());
+        if (!result) {
+            error_message_ += '\n' + result.error().debug_error_message();
+        }
     }
     scene_->update();
 }
@@ -97,10 +100,10 @@ void DisplayWindow::configure_gui() {
         ImGui::Spacing();
     };
 
-    int h = this->windowSize().y();
+    auto height = static_cast<float>(this->windowSize().y());
     ImGui::SetNextWindowPos({0.f, 0.f});
-    ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, h), ImVec2(std::numeric_limits<float>::infinity(), h));
-    ImGui::Begin("Settings", nullptr, ImVec2(350.f, h));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, height), ImVec2(std::numeric_limits<float>::infinity(), height));
+    ImGui::Begin("Settings", nullptr, ImVec2(350.f, height));
 
     ImGui::Text("GL Version:   ");
     ImGui::SameLine();

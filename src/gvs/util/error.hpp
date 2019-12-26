@@ -42,7 +42,8 @@
  *     }
  * ```
  */
-#define MAKE_ERROR(msg) gvs::util::Error({__FILE__, __LINE__}, msg)
+#define MAKE_ERROR(msg) ::gvs::util::Error({__FILE__, __LINE__}, ::gvs::util::Error::Severity::Error, msg)
+#define MAKE_WARNING(msg) ::gvs::util::Error({__FILE__, __LINE__}, ::gvs::util::Error::Severity::Warning, msg)
 
 namespace gvs::util {
 
@@ -61,8 +62,13 @@ struct SourceLocation {
  */
 class Error {
 public:
+    enum class Severity {
+        Error,
+        Warning,
+    };
+
     Error() = delete;
-    explicit Error(const SourceLocation& source_location, std::string error_message);
+    explicit Error(SourceLocation source_location, Severity severity, std::string error_message);
     virtual ~Error();
 
     // default copy
@@ -73,14 +79,39 @@ public:
     Error(Error&&) noexcept = default;
     Error& operator=(Error&&) noexcept = default;
 
-    const std::string& error_message() const;
-    const std::string& debug_error_message() const;
+    [[nodiscard]] auto severity() const -> Severity const&;
+    [[nodiscard]] auto error_message() const -> std::string const&;
+    [[nodiscard]] auto debug_error_message() const -> std::string const&;
 
-    bool operator==(const Error& other) const;
+    static auto append_message(const Error& error, const std::string& message) -> Error;
+
+    auto operator==(const Error& other) const -> bool;
+    auto operator!=(const Error& other) const -> bool;
 
 private:
+    SourceLocation source_location_; ///< File and line number where error was created
+    Severity severity_; ///< The type of error (warning or error)
     std::string error_message_; ///< The error message
     std::string debug_message_; ///< Error message with file and line number "[file:line] error message"
 };
+
+template <typename Context>
+struct ContextError {
+    Error error;
+    Context context;
+
+    auto operator==(const ContextError<Context>& other) const -> bool;
+    auto operator!=(const ContextError<Context>& other) const -> bool;
+};
+
+template <typename Context>
+auto ContextError<Context>::operator==(const ContextError<Context>& other) const -> bool {
+    return error == other.error && context == other.context;
+}
+
+template <typename Context>
+auto ContextError<Context>::operator!=(const ContextError<Context>& other) const -> bool {
+    return !(this->operator==(other));
+}
 
 } // namespace gvs::util

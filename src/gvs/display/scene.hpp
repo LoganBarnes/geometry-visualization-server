@@ -24,6 +24,7 @@
 
 // gvs
 #include "backends/backend_interface.hpp"
+#include "gvs/util/result.hpp"
 #include "log_params.hpp"
 
 // standard
@@ -39,9 +40,10 @@ public:
     auto update() -> void;
     auto render(vis::CameraPackage const& camera_package) -> void;
 
-    auto add_item(SceneID const& item_id, SceneItemInfo&& item) -> void;
-    auto update_item(SceneID const& item_id, SceneItemInfo&& item) -> void;
-    auto remove_item(SceneID const& item_id) -> void;
+    auto add_item(SceneID const& item_id, SceneItemInfo&& item) -> util::Result<void>;
+    auto update_item(SceneID const& item_id, SceneItemInfo&& item) -> util::Result<void>;
+    auto append_to_item(SceneID const& item_id, SceneItemInfo&& item) -> util::Result<void>;
+    auto remove_item(SceneID const& item_id) -> util::Result<void>;
 
     auto clear() -> void;
 

@@ -60,7 +60,7 @@ auto GeometryDisplay::update_scene(SceneID const& id, SceneItemInfo&& info, log:
     case log::SendType::Safe:
     case log::SendType::Replace:
         update_queue_.emplace_back(
-            [id, info = std::move(info)](Scene* scene) mutable { scene->add_item(id, std::move(info)); });
+            [id, info = std::move(info)](Scene* scene) mutable { return scene->add_item(id, std::move(info)); });
         break;
 
     case log::SendType::Append:

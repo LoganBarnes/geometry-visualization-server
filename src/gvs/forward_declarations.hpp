@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,8 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
+
+#include "gvs/util/result.hpp"
 
 #include <functional>
 
@@ -69,7 +71,8 @@ namespace display {
 
 class DisplayWindow;
 class Scene;
-using SceneUpdateFunc = std::function<void(Scene*)>;
+using Return = util::Result<void>;
+using SceneUpdateFunc = std::function<Return(Scene*)>;
 
 } // namespace display
 

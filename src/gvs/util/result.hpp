@@ -28,6 +28,14 @@
 // external
 #include <tl/expected.hpp>
 
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+#define CHECK_RESULT __attribute__((warn_unused))
+#elif defined(_MSC_VER) && (_MSC_VER >= 1700)
+#define CHECK_RESULT _Check_return_
+#else
+#define CHECK_RESULT
+#endif
+
 namespace gvs::util {
 
 /**
@@ -71,9 +79,9 @@ namespace gvs::util {
  *
  */
 template <typename T, typename E>
-struct __attribute__((warn_unused)) Result;
+struct CHECK_RESULT Result;
 
-template <typename T, typename Error = gvs::util::Error>
+template <typename T, typename Error = ::gvs::util::Error>
 struct [[nodiscard]] Result : tl::expected<T, Error> {
     using tl::expected<T, Error>::expected;
 
@@ -105,6 +113,16 @@ inline Result<void> success() {
     return {};
 }
 
+template <typename T1, typename E1, typename T2, typename E2>
+auto operator==(const Result<T1, E1>& lhs, const Result<T2, E2>& rhs) -> bool {
+    return static_cast<const tl::expected<T1, E1>&>(lhs) == static_cast<const tl::expected<T2, E2>&>(rhs);
+}
+
+template <typename T1, typename E1, typename T2, typename E2>
+auto operator!=(const Result<T1, E1>& lhs, const Result<T2, E2>& rhs) -> bool {
+    return !(lhs == rhs);
+}
+
 } // namespace gvs::util
 
 namespace tl::detail {
@@ -113,7 +131,7 @@ namespace tl::detail {
 template <class T>
 struct is_result_impl : std::false_type {};
 template <class T, class E>
-struct is_result_impl<gvs::util::Result<T, E>> : std::true_type {};
+struct is_result_impl<::gvs::util::Result<T, E>> : std::true_type {};
 template <class T>
 using is_result = is_result_impl<decay_t<T>>;
 
