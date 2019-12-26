@@ -30,30 +30,44 @@ option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
 #############################
 ### Project Configuration ###
 #############################
-include(cmake/ClangTidy.cmake)
-include(cmake/ThirdParty.cmake)
-
-if (NOT ${GVS_LOGGING_ONLY})
-    include(cmake/ThirdPartyGui.cmake)
-endif ()
-
 if (MSVC)
     add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS) # silly microsoft
-    set(SYSTEM_FLAGS /experimental:external /external:anglebrackets /external:W0)
 endif ()
 
 if (GVS_USE_DEV_FLAGS)
     if (NOT MSVC)
         set(GVS_COMPILE_FLAGS
-                -Wall -Wextra -Werror -Wpedantic -Wunused -pedantic-errors -Winit-self
-                -Wold-style-cast -Woverloaded-virtual -Wsign-conversion -Wshadow
-                -Wmissing-declarations -Wmissing-include-dirs -Wno-unknown-pragmas
+                $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+                $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wunused>
+                $<$<COMPILE_LANGUAGE:CXX>:-pedantic-errors>
+                $<$<COMPILE_LANGUAGE:CXX>:-Winit-self>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast>
+                $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wshadow>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wmissing-declarations>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wmissing-include-dirs>
+                $<$<COMPILE_LANGUAGE:CXX>:-Wno-unknown-pragmas>
                 )
     else ()
-        set(GVS_COMPILE_FLAGS /WX)
+        set(GVS_COMPILE_FLAGS
+                $<$<COMPILE_LANGUAGE:CXX>:/WX>
+                $<$<COMPILE_LANGUAGE:CXX>:/experimental:external>
+                $<$<COMPILE_LANGUAGE:CXX>:/external:anglebrackets>
+                $<$<COMPILE_LANGUAGE:CXX>:/external:W0>
+                )
     endif ()
 endif ()
 
+include(cmake/CCache.cmake)
+include(cmake/ClangTidy.cmake)
+include(cmake/ThirdParty.cmake)
+if (NOT GVS_LOGGING_ONLY)
+    include(cmake/ThirdPartyGui.cmake)
+endif ()
 include(cmake/GVSAddLibrary.cmake)
 include(cmake/GVSAddExecutable.cmake)
 

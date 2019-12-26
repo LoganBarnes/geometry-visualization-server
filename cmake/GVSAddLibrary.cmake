@@ -55,6 +55,8 @@ function(gvs_add_library target cxx_standard)
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             POSITION_INDEPENDENT_CODE ON
+            # CCache
+            COMPILER_LAUNCHER "${CNC_CCACHE_PROGRAM}"
             # Clang-Tidy
             CXX_CLANG_TIDY "${GVS_CLANG_TIDY}"
             # Binary locations
