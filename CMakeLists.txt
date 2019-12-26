@@ -71,6 +71,10 @@ endif ()
 include(cmake/GVSAddLibrary.cmake)
 include(cmake/GVSAddExecutable.cmake)
 
+if (GVS_BUILD_TESTS)
+    enable_testing()
+endif ()
+
 # "Glob is terrible/root of all evil" yeah yeah. CONFIGURE_DEPENDS in cmake 3.12
 # helps to fix that and it is super useful when refactoring
 cmake_policy(SET CMP0009 NEW)

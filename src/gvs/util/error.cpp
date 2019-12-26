@@ -111,7 +111,7 @@ TEST_CASE("[util] check error helpers") {
     CHECK(MAKE_ERROR("Error message").error_message() == "Error message");
     CHECK(MAKE_ERROR("blarg") == MAKE_ERROR("blarg"));
     auto error = MAKE_ERROR("Error message");
-    auto expected_message = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
+    auto expected_message = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
     CHECK(error.debug_error_message() == expected_message);
     CHECK(error.severity() == gvs::util::Error::Severity::Error);
 }
@@ -120,7 +120,7 @@ TEST_CASE("[util] check warning helpers") {
     CHECK(MAKE_WARNING("Error message").error_message() == "Error message");
     CHECK(MAKE_WARNING("blarg") == MAKE_WARNING("blarg"));
     auto warning = MAKE_WARNING("Error message");
-    auto expected_message = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
+    auto expected_message = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
     CHECK(warning.debug_error_message() == expected_message);
     CHECK(warning.severity() == gvs::util::Error::Severity::Warning);
 }
