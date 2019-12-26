@@ -23,6 +23,7 @@
 #pragma once
 
 // standard
+#include <iostream>
 #include <optional>
 #include <unordered_map>
 #include <variant>
@@ -40,6 +41,38 @@ using vec4 = std::array<float, 4>;
 using mat2 = std::array<float, 4>;
 using mat3 = std::array<float, 9>;
 using mat4 = std::array<float, 16>;
+
+template <std::size_t N>
+struct AttributeVector {
+public:
+    template <typename V = std::array<float, N>>
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    AttributeVector(std::initializer_list<V> data) : AttributeVector(std::vector<V>(std::move(data))) {}
+
+    template <typename V>
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    AttributeVector(std::vector<V> const& data) {
+        std::copy(reinterpret_cast<float const*>(data.data()),
+                  reinterpret_cast<float const*>(data.data() + data.size()),
+                  std::back_inserter(data_));
+    }
+
+    template <typename V>
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    AttributeVector(std::vector<V>&& data) {
+        std::move(reinterpret_cast<float*>(data.data()),
+                  reinterpret_cast<float*>(data.data() + data.size()),
+                  std::back_inserter(data_));
+    }
+
+    auto data() const { return data_.data(); }
+    auto data() { return data_.data(); }
+    auto size() const { return data_.size(); }
+    auto size() { return data_.size(); }
+
+private:
+    std::vector<float> data_;
+};
 
 enum class GeometryFormat {
     Points,
@@ -87,10 +120,10 @@ constexpr auto default_visible = true;
 constexpr auto default_opacity = 1.f;
 
 struct GeometryInfo {
-    std::optional<std::vector<vec3>> positions;
-    std::optional<std::vector<vec3>> normals;
-    std::optional<std::vector<vec2>> tex_coords;
-    std::optional<std::vector<vec3>> vertex_colors;
+    std::optional<AttributeVector<3>> positions;
+    std::optional<AttributeVector<3>> normals;
+    std::optional<AttributeVector<2>> texture_coordinates;
+    std::optional<AttributeVector<3>> vertex_colors;
     std::optional<std::vector<unsigned>> indices;
 };
 

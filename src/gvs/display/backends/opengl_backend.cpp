@@ -59,8 +59,8 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
     auto const& optional_positions = (new_geom.positions ? new_geom.positions : old_geom.positions);
     if (optional_positions) {
         auto attribute_size = update_attribute(optional_positions, GeneralShader3d::Position{});
-        offset += attribute_size * static_cast<int>(sizeof(vec3));
-        mesh_package->vbo_count = attribute_size;
+        offset += attribute_size * static_cast<int>(sizeof(float));
+        mesh_package->vbo_count = attribute_size / 3;
     }
 
     auto const& optional_normals = (new_geom.normals ? new_geom.normals : old_geom.normals);
@@ -69,10 +69,12 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
         offset += attribute_size * static_cast<int>(sizeof(vec3));
     }
 
-    auto const& optional_tex_coords = (new_geom.tex_coords ? new_geom.tex_coords : old_geom.tex_coords);
-    if (optional_tex_coords) {
-        auto attribute_size = update_attribute(optional_tex_coords, GeneralShader3d::TextureCoordinate{});
-        offset += attribute_size * static_cast<int>(sizeof(vec2));
+    auto const& optional_texture_coordinates
+        = (new_geom.texture_coordinates ? new_geom.texture_coordinates : old_geom.texture_coordinates);
+
+    if (optional_texture_coordinates) {
+        auto attribute_size = update_attribute(optional_texture_coordinates, GeneralShader3d::TextureCoordinate{});
+        offset += attribute_size * static_cast<int>(sizeof(float));
     }
 
     auto const& optional_vertex_colors = (new_geom.vertex_colors ? new_geom.vertex_colors : old_geom.vertex_colors);
@@ -148,7 +150,7 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
         GeometryInfo const& new_geom = new_info.geometry_info.value();
         GeometryInfo const& old_geom = old_info.geometry_info.value();
 
-        if (new_geom.positions || new_geom.normals || new_geom.tex_coords || new_geom.vertex_colors) {
+        if (new_geom.positions || new_geom.normals || new_geom.texture_coordinates || new_geom.vertex_colors) {
             update_vbo(&mesh_package, new_geom, old_geom);
         }
 

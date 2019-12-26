@@ -27,259 +27,185 @@
 // standard
 #include <functional>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
-template <typename C>
-struct has_data {
+namespace gvs {
+namespace detail {
+
+/*
+ * The following two classes are intended to only be used as rvalue references inside the
+ * 'StaticScene::add_item', 'StaticScene::update_item', and 'StaticScene::get_item_info` functions.
+ * All the move and copy constructors are deleted so the only way to use these classes is by
+ * creating an instance as part of the function call:
+ *
+ * scene.add_item(loop::SetPositions(positions), loop::SetReadableID("Sphere"));
+ *
+ * where loop::SetPositions and loop::SetReadableID are the "named parameter" classes.
+ *
+ * The SceneSetter and SceneGetter classes are kept generic since they do the same thing for
+ * many different types. To create a new named parameter we add a new class that derives from
+ * SceneSetter or SceneGetter.
+ *
+ * The Curiously Recurring Template Pattern (CRTP) is used to avoid any indirection performance
+ * costs typically associated with base classes. Because of this, each derived class will have
+ * to implement a 'move_data' or 'update_data' function for the SceneSetter and SceneGetter classes
+ * respectively.
+ */
+
+///
+/// \brief A "named parameter" wrapper used to set items in a StaticScene
+///
+template <typename T, std::optional<T> SceneItemInfo::*member>
+struct SceneSetter {
+    explicit SceneSetter(T value = {}) : data_(std::move(value)) {}
+
+    auto operator()(SceneItemInfo* info) -> std::string {
+        if (info->*member) {
+            return "Scene parameter already set.";
+        }
+        info->*member = std::move(data_);
+        return "";
+    }
+
+    SceneSetter(const SceneSetter&) = delete;
+    SceneSetter(SceneSetter&&) noexcept = delete;
+    SceneSetter& operator=(const SceneSetter&) = delete;
+    SceneSetter& operator=(SceneSetter&&) noexcept = delete;
+
 private:
-    template <typename T>
-    static constexpr auto check(const T* t) -> typename std::is_same<decltype(t->data()), float const*>::type;
-
-    template <typename>
-    static constexpr std::false_type check(...);
-
-    typedef decltype(check<C>(nullptr)) type;
-
-public:
-    static constexpr bool value = type::value;
+    T data_;
 };
 
-template <typename T, typename = typename std::enable_if<has_data<T>::value>::type>
-auto data_ptr(const T& t) -> float const* {
-    return t.data();
-}
+///
+/// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
+///
+template <typename T, std::optional<T> GeometryInfo::*member>
+struct SceneGeometrySetter {
+    explicit SceneGeometrySetter(T value = {}) : data_(std::move(value)) {}
 
-namespace gvs {
-
-template <typename Vec3 = ::gvs::vec3>
-inline auto positions_3d(std::vector<Vec3> const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->geometry_info && info->geometry_info->positions) {
-            return "positions_3d";
-        }
-        static_assert(std::is_same<float const*, decltype(data_ptr(std::declval<Vec3>()))>::value,
-                      "data must be convertible to a float const*");
-        static_assert(sizeof(Vec3) == sizeof(float) * 3, "Vec3 type must be unpadded");
-
+    auto operator()(SceneItemInfo* info) -> std::string {
         if (!info->geometry_info) {
             info->geometry_info = GeometryInfo{};
         }
-        info->geometry_info->positions = std::vector<vec3>(reinterpret_cast<const vec3*>(data.data()),
-                                                           reinterpret_cast<const vec3*>(data.data() + data.size()));
-        return "";
-    };
-}
 
-template <typename Vec3 = ::gvs::vec3>
-inline auto normals_3d(std::vector<Vec3> const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->geometry_info && info->geometry_info->normals) {
-            return "normals_3d";
+        auto& geometry_info = info->geometry_info.value();
+        if (geometry_info.*member) {
+            return "Scene parameter already set.";
         }
-        static_assert(std::is_same<float const*, decltype(data_ptr(std::declval<Vec3>()))>::value,
-                      "data must be convertible to a float const*");
-        static_assert(sizeof(Vec3) == sizeof(float) * 3, "Vec3 type must be unpadded");
 
+        geometry_info.*member = std::move(data_);
+        return "";
+    }
+
+    SceneGeometrySetter(const SceneGeometrySetter&) = delete;
+    SceneGeometrySetter(SceneGeometrySetter&&) noexcept = delete;
+    SceneGeometrySetter& operator=(const SceneGeometrySetter&) = delete;
+    SceneGeometrySetter& operator=(SceneGeometrySetter&&) noexcept = delete;
+
+private:
+    T data_;
+};
+
+///
+/// \brief A "named parameter" wrapper used to set geometry indices for items in a StaticScene
+///
+template <gvs::GeometryFormat Format>
+struct SceneIndicesSetter {
+    explicit SceneIndicesSetter(std::vector<unsigned> value = {}) : data_(std::move(value)) {}
+
+    auto operator()(SceneItemInfo* info) -> std::string {
         if (!info->geometry_info) {
             info->geometry_info = GeometryInfo{};
         }
-        info->geometry_info->normals = std::vector<vec3>(reinterpret_cast<const vec3*>(data.data()),
-                                                         reinterpret_cast<const vec3*>(data.data() + data.size()));
-        return "";
-    };
-}
-
-template <typename Vec2 = ::gvs::vec2>
-inline auto tex_coords_3d(std::vector<Vec2> const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->geometry_info && info->geometry_info->tex_coords) {
-            return "tex_coords_3d";
-        }
-        static_assert(std::is_same<float const*, decltype(data_ptr(std::declval<Vec2>()))>::value,
-                      "data must be convertible to a float const*");
-        static_assert(sizeof(Vec2) == sizeof(float) * 2, "Vec2 type must be unpadded");
-
-        if (!info->geometry_info) {
-            info->geometry_info = GeometryInfo{};
-        }
-        info->geometry_info->tex_coords = std::vector<vec2>(reinterpret_cast<const vec2*>(data.data()),
-                                                            reinterpret_cast<const vec2*>(data.data() + data.size()));
-        return "";
-    };
-}
-
-template <typename Vec3 = ::gvs::vec3>
-inline auto vertex_colors_3d(std::vector<Vec3> const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->geometry_info && info->geometry_info->vertex_colors) {
-            return "vertex_colors_3d";
-        }
-        static_assert(std::is_same<float const*, decltype(data_ptr(std::declval<Vec3>()))>::value,
-                      "data must be convertible to a float const*");
-        static_assert(sizeof(Vec3) == sizeof(float) * 3, "Vec3 type must be unpadded");
-
-        if (!info->geometry_info) {
-            info->geometry_info = GeometryInfo{};
-        }
-        info->geometry_info->vertex_colors
-            = std::vector<vec3>(reinterpret_cast<const vec3*>(data.data()),
-                                reinterpret_cast<const vec3*>(data.data() + data.size()));
-        return "";
-    };
-}
-
-template <GeometryFormat Format = GeometryFormat::Points>
-inline auto indices(std::vector<unsigned> const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->geometry_info && info->geometry_info->indices) {
-            return "indices_3d";
-        }
-
-        if (!info->geometry_info) {
-            info->geometry_info = GeometryInfo{};
-        }
-        info->geometry_info->indices = data;
-
         if (!info->display_info) {
             info->display_info = DisplayInfo{};
         }
-        info->display_info->geometry_format = Format;
-        return "";
-    };
-}
 
-constexpr auto points = indices<GeometryFormat::Points>;
-constexpr auto lines = indices<GeometryFormat::Lines>;
-constexpr auto line_strip = indices<GeometryFormat::LineStrip>;
-constexpr auto triangles = indices<GeometryFormat::Triangles>;
-constexpr auto triangle_strip = indices<GeometryFormat::TriangleStrip>;
-constexpr auto triangle_fan = indices<GeometryFormat::TriangleFan>;
+        auto& geometry_info = info->geometry_info.value();
+        auto& display_info = info->display_info.value();
 
-inline auto geometry_format(GeometryFormat const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->geometry_format) {
-            return "geometry_format";
+        if (geometry_info.indices) {
+            return "Scene parameter already set.";
         }
 
+        if (display_info.geometry_format) {
+            return "Scene parameter already set.";
+        }
+
+        geometry_info.indices = std::move(data_);
+        display_info.geometry_format = Format;
+
+        return "";
+    }
+
+    SceneIndicesSetter(const SceneIndicesSetter&) = delete;
+    SceneIndicesSetter(SceneIndicesSetter&&) noexcept = delete;
+    SceneIndicesSetter& operator=(const SceneIndicesSetter&) = delete;
+    SceneIndicesSetter& operator=(SceneIndicesSetter&&) noexcept = delete;
+
+private:
+    std::vector<unsigned> data_;
+};
+
+///
+/// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
+///
+template <typename T, std::optional<T> DisplayInfo::*member>
+struct SceneDisplaySetter {
+    explicit SceneDisplaySetter(T value = {}) : data(std::move(value)) {}
+
+    auto operator()(SceneItemInfo* info) -> std::string {
         if (!info->display_info) {
             info->display_info = DisplayInfo{};
         }
-        info->display_info->geometry_format = data;
+
+        auto& display_info = info->display_info.value();
+        if (display_info.*member) {
+            return "Scene parameter already set.";
+        }
+
+        display_info.*member = std::move(data);
         return "";
-    };
-}
+    }
 
-inline auto readable_id(std::string const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->readable_id) {
-            return "readable_id";
-        }
+    SceneDisplaySetter(const SceneDisplaySetter&) = delete;
+    SceneDisplaySetter(SceneDisplaySetter&&) noexcept = delete;
+    SceneDisplaySetter& operator=(const SceneDisplaySetter&) = delete;
+    SceneDisplaySetter& operator=(SceneDisplaySetter&&) noexcept = delete;
 
-        if (!info->display_info) {
-            info->display_info = DisplayInfo{};
-        }
-        info->display_info->readable_id = data;
-        return "";
-    };
-}
+protected:
+    T data;
+};
 
-template <typename Mat4 = ::gvs::mat4>
-auto transformation(Mat4 const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->transformation) {
-            return "transformation";
-        }
-        static_assert(sizeof(Mat4) == sizeof(float) * 16, "Mat4 type must be unpadded");
+} // namespace detail
 
-        if (!info->display_info) {
-            info->display_info = DisplayInfo{};
-        }
-        info->display_info->transformation = reinterpret_cast<mat4 const&>(data);
-        return "";
-    };
-}
+/*
+ * Setters
+ */
+using SetPositions3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::positions>;
+using SetNormals3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::normals>;
+using SetTextureCoordinates3d = detail::SceneGeometrySetter<AttributeVector<2>, &GeometryInfo::texture_coordinates>;
+using SetVertexColors3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::vertex_colors>;
+using SetIndices = detail::SceneGeometrySetter<std::vector<unsigned>, &GeometryInfo::indices>;
 
-template <typename Vec3 = ::gvs::vec3>
-auto uniform_color(Vec3 const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->uniform_color) {
-            return "uniform_color";
-        }
-        static_assert(sizeof(Vec3) == sizeof(float) * 3, "Vec3 type must be unpadded");
+using SetPoints = detail::SceneIndicesSetter<GeometryFormat::Points>;
+using SetLines = detail::SceneIndicesSetter<GeometryFormat::Lines>;
+using SetLineStrip = detail::SceneIndicesSetter<GeometryFormat::LineStrip>;
+using SetTriangles = detail::SceneIndicesSetter<GeometryFormat::Triangles>;
+using SetTriangleStrip = detail::SceneIndicesSetter<GeometryFormat::TriangleStrip>;
+using SetTriangleFan = detail::SceneIndicesSetter<GeometryFormat::TriangleFan>;
 
-        if (!info->display_info) {
-            info->display_info = DisplayInfo{};
-        }
-        info->display_info->uniform_color = reinterpret_cast<vec3 const&>(data);
-        return "";
-    };
-}
+using SetParent = detail::SceneSetter<SceneID, &SceneItemInfo::parent>;
 
-inline auto coloring(Coloring const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->coloring) {
-            return "coloring";
-        }
-
-        if (!info->display_info) {
-            info->display_info = DisplayInfo{};
-        }
-        info->display_info->coloring = data;
-        return "";
-    };
-}
-
-inline auto shading(Shading const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->shading) {
-            return "shading";
-        }
-
-        if (!info->display_info) {
-            info->display_info = DisplayInfo{};
-        }
-        info->display_info->shading = data;
-        return "";
-    };
-}
-
-inline auto visible(bool const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->visible) {
-            return "visible";
-        }
-
-        if (!info->display_info) {
-            info->display_info = DisplayInfo{};
-        }
-        info->display_info->visible = data;
-        return "";
-    };
-}
-
-inline auto opacity(float const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->display_info && info->display_info->opacity) {
-            return "opacity";
-        }
-
-        if (!info->display_info) {
-            info->display_info = DisplayInfo{};
-        }
-        info->display_info->opacity = data;
-        return "";
-    };
-}
-
-inline auto parent(SceneID const& data) -> std::function<std::string(SceneItemInfo*)> {
-    return [data](SceneItemInfo* info) {
-        if (info->parent) {
-            return "parent";
-        }
-
-        info->parent = data;
-        return "";
-    };
-}
+using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &DisplayInfo::geometry_format>;
+using SetReadableId = detail::SceneDisplaySetter<std::string, &DisplayInfo::readable_id>;
+using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &DisplayInfo::geometry_format>;
+using SetTransformation = detail::SceneDisplaySetter<mat4, &DisplayInfo::transformation>;
+using SetUniformColor = detail::SceneDisplaySetter<vec3, &DisplayInfo::uniform_color>;
+using SetColoring = detail::SceneDisplaySetter<Coloring, &DisplayInfo::coloring>;
+using SetShading = detail::SceneDisplaySetter<Shading, &DisplayInfo::shading>;
+using SetVisible = detail::SceneDisplaySetter<bool, &DisplayInfo::visible>;
+using SetOpacity = detail::SceneDisplaySetter<float, &DisplayInfo::opacity>;
 
 } // namespace gvs
