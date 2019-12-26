@@ -24,6 +24,7 @@
 
 // project
 #include "gvs/display/geometry_logger.hpp"
+#include "gvs/display/scene_update_func.hpp"
 #include "gvs/util/blocking_queue.hpp"
 
 // standard

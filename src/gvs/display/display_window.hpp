@@ -22,8 +22,10 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/display/scene_update_func.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
+#include "gvs/util/result.hpp"
 #include "gvs/vis-client/app/imgui_magnum_application.hpp"
 
 // standard

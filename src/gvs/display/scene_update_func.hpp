@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2019 Logan Barnes - All Rights Reserved
+// Copyright (c) 2018 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,54 +22,15 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// project
+#include "gvs/forward_declarations.hpp"
+#include "gvs/util/result.hpp"
+
 // standard
 #include <functional>
 
-namespace gvs {
-namespace log {
+namespace gvs::display {
 
-class MessageStream;
-class GeometryLogger;
-class GeometryItemStream;
+using SceneUpdateFunc = std::function<util::Result<void>(Scene*)>;
 
-} // namespace log
-
-namespace net {
-
-enum class GrpcClientState;
-
-template <typename Service>
-class GrpcClient;
-
-class GrpcServer;
-
-} // namespace net
-
-namespace host {
-
-class SceneService;
-class SceneServer;
-
-} // namespace host
-
-namespace vis {
-namespace detail {
-
-class Theme;
-
-} // namespace detail
-
-struct CameraPackage;
-class OpaqueDrawable;
-class VisClient;
-class SceneInterface;
-
-} // namespace vis
-
-namespace display {
-
-class DisplayWindow;
-class Scene;
-
-} // namespace display
-} // namespace gvs
+} // namespace gvs::display
