@@ -22,8 +22,10 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// project
 #include "gvs/util/result.hpp"
 
+// standard
 #include <functional>
 
 namespace gvs {
@@ -48,7 +50,7 @@ class GrpcServer;
 
 namespace host {
 
-class scene_service;
+class SceneService;
 class SceneServer;
 
 } // namespace host
