@@ -38,24 +38,6 @@
 namespace gvs::display::backends {
 namespace {
 
-auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive {
-    switch (format) {
-    case GeometryFormat::Points:
-        return Magnum::MeshPrimitive::Points;
-    case GeometryFormat::Lines:
-        return Magnum::MeshPrimitive::Lines;
-    case GeometryFormat::LineStrip:
-        return Magnum::MeshPrimitive::LineStrip;
-    case GeometryFormat::Triangles:
-        return Magnum::MeshPrimitive::Triangles;
-    case GeometryFormat::TriangleStrip:
-        return Magnum::MeshPrimitive::TriangleStrip;
-    case GeometryFormat::TriangleFan:
-        return Magnum::MeshPrimitive::TriangleFan;
-    }
-    throw std::runtime_error("Unreachable code");
-}
-
 auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
                 GeometryInfo const& new_geom,
                 GeometryInfo const& old_geom) -> void {

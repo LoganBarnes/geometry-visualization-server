@@ -44,11 +44,7 @@ OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformati
 auto OpaqueDrawable::update_display_info(DisplayInfo const& display_info) -> void {
 
     if (display_info.transformation) {
-        float const* transform_data = display_info.transformation->data()->data();
-
-        Matrix4 transform{};
-        std::copy(transform_data, transform_data + 16, transform.data());
-        object_.setTransformation(transform);
+        object_.setTransformation(to_magnum(display_info.transformation.value()));
     }
 
     if (display_info.coloring) {

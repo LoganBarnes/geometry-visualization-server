@@ -53,25 +53,30 @@ int main() {
 
     // Snowman
     {
-        auto stream = scene->item_stream("Head") << gvs::positions_3d(circle)
-                                                 << gvs::transformation({
-                                                        gvs::vec4{0.75f, 0.f, 0.f, 0.f},
-                                                        gvs::vec4{0.f, 0.75f, 0.f, 0.f},
-                                                        gvs::vec4{0.f, 0.f, 0.75f, 0.f},
-                                                        gvs::vec4{2.f, 2.f, 1.f, 1.f},
-                                                    })
-                                                 << gvs::uniform_color({1.f, 0.5f, 1.f}) << gvs::line_strip({})
-                                                 << gvs::shading(gvs::UniformColor{}) << gvs::replace;
+        // clang-format off
+        auto transform = gvs::mat4{
+            0.75f, 0.f,   0.f,   0.f,
+            0.f,   0.75f, 0.f,   0.f,
+            0.f,   0.f,   0.75f, 0.f,
+            2.f,   2.f,   1.f,   1.f,
+        };
+        // clang-format on
+
+        auto stream = scene->item_stream("Head")
+            << gvs::positions_3d(circle) << gvs::transformation(transform) << gvs::uniform_color({1.f, 0.5f, 1.f})
+            << gvs::line_strip({}) << gvs::shading(gvs::UniformColor{}) << gvs::replace;
         CHECK_WITH_THROW(stream);
     }
 
     {
+        // clang-format off
         auto scale_trans = gvs::mat4{
-            gvs::vec4{1.3f, 0.f, 0.f, 0.f},
-            gvs::vec4{0.f, 1.3f, 0.f, 0.f},
-            gvs::vec4{0.f, 0.f, 1.3f, 0.f},
-            gvs::vec4{0.f, -2.3f, 0.f, 1},
+            1.3f, 0.f,  0.f,  0.f,
+            0.f,  1.3f, 0.f,  0.f,
+            0.f,  0.f,  1.3f, 0.f,
+            0.f, -2.3f, 0.f,  1.f,
         };
+        // clang-format on
         auto body_stream = scene->item_stream("Body")
             << gvs::parent("Head") << gvs::positions_3d(circle) << gvs::transformation(scale_trans)
             << gvs::uniform_color({1.f, 1.f, 0.5f}) << gvs::line_strip({}) << gvs::replace;
@@ -128,12 +133,14 @@ int main() {
 
     CHECK_WITH_PRINT(scene->item_stream("sphere").send(gvs::positions_3d(sphere),
                                                        gvs::normals_3d(sphere),
+                                                       // clang-format off
                                                        gvs::transformation({
-                                                           gvs::vec4{1, 0, 0, 0},
-                                                           gvs::vec4{0, 1, 0, 0},
-                                                           gvs::vec4{0, 0, 1, 0},
-                                                           gvs::vec4{-2, 2, 2, 1},
+                                                            1, 0, 0, 0,
+                                                            0, 1, 0, 0,
+                                                            0, 0, 1, 0,
+                                                           -2, 2, 2, 1,
                                                        }),
+                                                       // clang-format on
                                                        gvs::shading(gvs::LambertianShading()),
                                                        gvs::coloring(gvs::Coloring::Normals)));
 }

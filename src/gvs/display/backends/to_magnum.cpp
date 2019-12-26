@@ -20,45 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
-
-// project
-#include "backends/to_magnum.hpp"
+#include "to_magnum.hpp"
 
 // external
-#include <Magnum/Magnum.h>
 #include <Magnum/Math/Matrix4.h>
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/Math/Vector3.h>
 
-namespace gvs {
+namespace gvs::display::backends {
 
-//struct GeometryInfo {
-//    std::optional<std::vector<Magnum::Vector3>> positions = {};
-//    std::optional<std::vector<Magnum::Vector3>> normals = {};
-//    std::optional<std::vector<Magnum::Vector2>> tex_coords = {};
-//    std::optional<std::vector<Magnum::Vector3>> vertex_colors = {};
-//    std::optional<std::vector<unsigned>> indices = {};
-//};
-//
-//struct DisplayInfo {
-//    std::string readable_id = default_readable_id;
-//    GeometryFormat geometry_format = default_geometry_format;
-//    Magnum::Matrix4 transformation = display::backends::to_magnum(default_transformation);
-//    Magnum::Vector3 uniform_color = display::backends::to_magnum(default_uniform_color);
-//    Coloring coloring = default_coloring;
-//    Shading shading = default_shading;
-//    bool visible = default_visible;
-//    float opacity = default_opacity;
-//};
-//
-//struct SceneItemInfo {
-//    GeometryInfo geometry_info = {};
-//    DisplayInfo display_info = {};
-//    SceneID parent = nil_id;
-//    std::vector<SceneID> children = {};
-//};
+auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive {
+    switch (format) {
+    case GeometryFormat::Points:
+        return Magnum::MeshPrimitive::Points;
+    case GeometryFormat::Lines:
+        return Magnum::MeshPrimitive::Lines;
+    case GeometryFormat::LineStrip:
+        return Magnum::MeshPrimitive::LineStrip;
+    case GeometryFormat::Triangles:
+        return Magnum::MeshPrimitive::Triangles;
+    case GeometryFormat::TriangleStrip:
+        return Magnum::MeshPrimitive::TriangleStrip;
+    case GeometryFormat::TriangleFan:
+        return Magnum::MeshPrimitive::TriangleFan;
+    }
+    throw std::runtime_error("Unreachable code");
+}
+auto to_magnum(vec2 const& vector) -> Magnum::Vector2 {
+    return {vector[0], vector[1]};
+}
 
-using SceneItems = std::unordered_map<SceneID, SceneItemInfo>;
+auto to_magnum(vec3 const& vector) -> Magnum::Vector3 {
+    return {vector[0], vector[1], vector[2]};
+}
 
-} // namespace gvs
+auto to_magnum(mat4 const& matrix) -> Magnum::Matrix4 {
+    return {Magnum::Math::RectangularMatrix<4, 4, float>::from(&matrix[0])};
+}
+
+} // namespace gvs::display::backends
