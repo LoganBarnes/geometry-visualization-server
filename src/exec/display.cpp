@@ -34,12 +34,12 @@ int main() {
     {
         auto stream = scene->item_stream("Axes")
             << gvs::positions_3d({{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}})
-            //            << gvs::vertex_colors_3d({1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f})
-            //#if 1
-            //            << gvs::coloring(gvs::proto::Coloring::VERTEX_COLORS) << gvs::lines({0, 1, 0, 2, 0, 3})
-            //#else
-            //            << gvs::coloring(gvs::proto::Coloring::GLOBAL_COLOR) << gvs::lines({0, 1, 0, 2, 0, 3})
-            //#endif
+            << gvs::vertex_colors_3d({{1.f, 1.f, 1.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}})
+#if 1
+            << gvs::coloring(gvs::Coloring::VertexColors) << gvs::lines({0, 1, 0, 2, 0, 3})
+#else
+            << gvs::coloring(gvs::Coloring::UniformColor) << gvs::lines({0, 1, 0, 2, 0, 3})
+#endif
             << gvs::send;
         CHECK_WITH_PRINT(stream);
     }
@@ -53,49 +53,51 @@ int main() {
 
     // Snowman
     {
-        auto stream = scene->item_stream("Head")
-            << gvs::positions_3d(circle)
-            //            << gvs::transformation({0.75f, 0, 0, 0, 0, 0.75f, 0, 0, 0, 0, 0.75f, 0, 2, 2, 1, 1})
-            //            << gvs::uniform_color({1.f, 0.5f, 1.f}) << gvs::line_strip({}) << gvs::shading(gvs::UniformColorShading{})
-            << gvs::replace;
+        auto stream = scene->item_stream("Head") << gvs::positions_3d(circle)
+                                                 << gvs::transformation({
+                                                        gvs::vec4{0.75f, 0.f, 0.f, 0.f},
+                                                        gvs::vec4{0.f, 0.75f, 0.f, 0.f},
+                                                        gvs::vec4{0.f, 0.f, 0.75f, 0.f},
+                                                        gvs::vec4{2.f, 2.f, 1.f, 1.f},
+                                                    })
+                                                 << gvs::uniform_color({1.f, 0.5f, 1.f}) << gvs::line_strip({})
+                                                 << gvs::shading(gvs::UniformColor{}) << gvs::replace;
         CHECK_WITH_THROW(stream);
     }
 
     {
+        auto scale_trans = gvs::mat4{
+            gvs::vec4{1.3f, 0.f, 0.f, 0.f},
+            gvs::vec4{0.f, 1.3f, 0.f, 0.f},
+            gvs::vec4{0.f, 0.f, 1.3f, 0.f},
+            gvs::vec4{0.f, -2.3f, 0.f, 1},
+        };
         auto body_stream = scene->item_stream("Body")
-            /*<< gvs::parent("Head")*/
-            << gvs::positions_3d(circle)
-            /*<< gvs::transformation({1.3f, 0, 0, 0, 0, 1.3f, 0, 0, 0, 0, 1.3f, 0, 0, -2.3f, 0, 1})
-            << gvs::uniform_color({1.f, 1.f, 0.5f}) << gvs::line_strip({})*/
-            << gvs::replace;
+            << gvs::parent("Head") << gvs::positions_3d(circle) << gvs::transformation(scale_trans)
+            << gvs::uniform_color({1.f, 1.f, 0.5f}) << gvs::line_strip({}) << gvs::replace;
         CHECK_WITH_THROW(body_stream);
 
         auto feet_stream = scene->item_stream("Feet")
-            /*<< gvs::parent(body_stream.id())*/
-            << gvs::positions_3d(circle)
-            /*<< gvs::transformation({1.3f, 0, 0, 0, 0, 1.3f, 0, 0, 0, 0, 1.3f, 0, 0, -2.3f, 0, 1})
-            << gvs::uniform_color({0.5f, 1.f, 1.f}) << gvs::triangle_fan({})*/
-            << gvs::replace;
+            << gvs::parent(body_stream.id()) << gvs::positions_3d(circle) << gvs::transformation(scale_trans)
+            << gvs::uniform_color({0.5f, 1.f, 1.f}) << gvs::triangle_fan({}) << gvs::replace;
         CHECK_WITH_THROW(feet_stream);
     }
 
     gvs::log::GeometryItemStream triangle = scene->item_stream()
-        /*<< gvs::positions_3d({-1.f, -1.f, 0.f, 1.f, -1.f, 0.f, 0.f, 1.5f, -1.f})
-        << gvs::uniform_color({.5f, 0.25f, 0.05f}) << gvs::triangles({})*/
-        << gvs::send;
+        << gvs::positions_3d({{-1.f, -1.f, 0.f}, {1.f, -1.f, 0.f}, {0.f, 1.5f, -1.f}})
+        << gvs::uniform_color({.5f, 0.25f, 0.05f}) << gvs::triangles({}) << gvs::send;
     CHECK_WITH_PRINT(triangle);
 
     gvs::log::GeometryItemStream stream2 = scene->item_stream()
-        /*<< gvs::positions_3d({-1.f, -1.f, -2.f, 2.f, -1.f, -2.f, -1.f, 2.f, -2.f, 2.f, 2.f, -2.f})
-        << gvs::triangle_strip({})*/
-        << gvs::send;
+        << gvs::positions_3d({{-1.f, -1.f, -2.f}, {2.f, -1.f, -2.f}, {-1.f, 2.f, -2.f}, {2.f, 2.f, -2.f}})
+        << gvs::triangle_strip({}) << gvs::send;
     CHECK_WITH_PRINT(stream2);
 
 #if 0
     gvs::log::GeometryItemStream blah_stream = scene->item_stream("blah") << gvs::positions_3d({});
 
     blah_stream << gvs::positions_3d({}) << gvs::normals_3d({}) << gvs::tex_coords_3d({}) << gvs::vertex_colors_3d({});
-    blah_stream << gvs::indices<gvs::proto::GeometryFormat::TRIANGLE_FAN>({}) << gvs::replace;
+    blah_stream << gvs::indices<GeometryFormat::TRIANGLE_FAN>({}) << gvs::replace;
     CHECK_WITH_PRINT(blah_stream);
 
     blah_stream << gvs::points({}) << gvs::append;
@@ -124,10 +126,14 @@ int main() {
         }
     }
 
-    CHECK_WITH_PRINT(scene->item_stream("sphere").send(gvs::positions_3d(
-        sphere) /*,
-                                          gvs::normals_3d(sphere),
-                                          gvs::transformation({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -2, 2, 2, 1}),
-                                          gvs::shading(gvs::LambertianShading()),
-                                          gvs::coloring(gvs::proto::Coloring::NORMALS)*/));
+    CHECK_WITH_PRINT(scene->item_stream("sphere").send(gvs::positions_3d(sphere),
+                                                       gvs::normals_3d(sphere),
+                                                       gvs::transformation({
+                                                           gvs::vec4{1, 0, 0, 0},
+                                                           gvs::vec4{0, 1, 0, 0},
+                                                           gvs::vec4{0, 0, 1, 0},
+                                                           gvs::vec4{-2, 2, 2, 1},
+                                                       }),
+                                                       gvs::shading(gvs::LambertianShading()),
+                                                       gvs::coloring(gvs::Coloring::Normals)));
 }

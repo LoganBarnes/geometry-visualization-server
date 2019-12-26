@@ -51,7 +51,7 @@ enum class GeometryFormat {
 };
 
 enum class Coloring : int32_t {
-    Positions,
+    Positions = 0,
     Normals,
     TextureCoordinates,
     VertexColors,

@@ -44,8 +44,8 @@ out gl_PerVertex
 
 void main()
 {
-    world_position_out       = vec3(world_from_local * local_position);
-    world_normal_out         = world_from_local_normals * local_normal;
+    world_position_out      = vec3(world_from_local * local_position);
+    world_normal_out        = world_from_local_normals * local_normal;
     texture_coordinates_out = texture_coordinates;
     vertex_color_out        = vertex_color;
 

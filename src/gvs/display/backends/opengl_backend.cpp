@@ -77,20 +77,20 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
     auto const& optional_positions = (new_geom.positions ? new_geom.positions : old_geom.positions);
     if (optional_positions) {
         auto attribute_size = update_attribute(optional_positions, GeneralShader3d::Position{});
-        offset += attribute_size + static_cast<int>(sizeof(vec3));
+        offset += attribute_size * static_cast<int>(sizeof(vec3));
         mesh_package->vbo_count = attribute_size;
     }
 
     auto const& optional_normals = (new_geom.normals ? new_geom.normals : old_geom.normals);
     if (optional_normals) {
         auto attribute_size = update_attribute(optional_normals, GeneralShader3d::Normal{});
-        offset += attribute_size + static_cast<int>(sizeof(vec3));
+        offset += attribute_size * static_cast<int>(sizeof(vec3));
     }
 
     auto const& optional_tex_coords = (new_geom.tex_coords ? new_geom.tex_coords : old_geom.tex_coords);
     if (optional_tex_coords) {
         auto attribute_size = update_attribute(optional_tex_coords, GeneralShader3d::TextureCoordinate{});
-        offset += attribute_size + static_cast<int>(sizeof(vec2));
+        offset += attribute_size * static_cast<int>(sizeof(vec2));
     }
 
     auto const& optional_vertex_colors = (new_geom.vertex_colors ? new_geom.vertex_colors : old_geom.vertex_colors);
@@ -103,14 +103,7 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
 }
 
 auto update_ibo(OpenglBackend::ObjectMeshPackage* mesh_package, std::vector<unsigned> const& indices) {
-
-    if (indices.empty()) {
-        mesh_package->ibo_count = 0;
-
-        mesh_package->mesh.setCount(mesh_package->vbo_count)
-            .setIndexBuffer(Magnum::GL::Buffer{Magnum::NoCreate}, 0, Magnum::MeshIndexType::UnsignedByte);
-
-    } else {
+    if (!indices.empty()) {
         Corrade::Containers::Array<char> index_data;
         Magnum::MeshIndexType index_type;
         Magnum::UnsignedInt index_start, index_end;
