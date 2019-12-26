@@ -33,7 +33,7 @@ namespace gvs::display {
 
 class Scene {
 public:
-    explicit Scene(std::unique_ptr<backends::BackendInterface> backend);
+    explicit Scene(std::unique_ptr<backends::BackendInterface> backend = nullptr);
     ~Scene();
 
     auto update() -> void;

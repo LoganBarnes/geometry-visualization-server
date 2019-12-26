@@ -22,42 +22,45 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/util/atomic_data.hpp"
-#include "gvs/util/blocking_queue.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+// project
+#include "gvs/display/types.hpp"
 
-// standard
-#include <thread>
+// external
+#include <Magnum/GL/AbstractShaderProgram.h>
+#include <Magnum/Math/Color.h>
 
-namespace gvs::display {
+namespace gvs::display::backends {
 
-class DisplayWindow : public vis::ImGuiMagnumApplication {
+class GeneralShader3d : public Magnum::GL::AbstractShaderProgram {
 public:
-    explicit DisplayWindow(util::BlockingQueue<SceneUpdateFunc>& update_queue);
-    ~DisplayWindow() override;
+    typedef Magnum::GL::Attribute<0, Magnum::Vector3> Position;
+    typedef Magnum::GL::Attribute<1, Magnum::Vector3> Normal;
+    typedef Magnum::GL::Attribute<2, Magnum::Vector2> TextureCoordinate;
+    typedef Magnum::GL::Attribute<3, Magnum::Vector3> VertexColor;
+
+    explicit GeneralShader3d();
+
+    GeneralShader3d& set_world_from_local_matrix(const Magnum::Matrix4& view_from_local);
+    GeneralShader3d& set_world_from_local_normal_matrix(const Magnum::Matrix3& view_from_local_normal);
+    GeneralShader3d& set_projection_from_local_matrix(const Magnum::Matrix4& projection_from_local);
+
+    GeneralShader3d& set_coloring(const Coloring& coloring);
+    GeneralShader3d& set_uniform_color(const Magnum::Color3& color);
+
+    GeneralShader3d& set_shading(const Shading& shading);
 
 private:
-    void update() override;
-    void render(const vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+    int projection_from_local_uniform_;
+    int world_from_local_uniform_;
+    int world_from_local_normals_uniform_;
 
-    void resize(const Magnum::Vector2i& viewport) override;
+    int coloring_uniform_;
+    int uniform_color_uniform_;
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
-
-    // Debugging
-    bool run_as_fast_as_possible_ = false;
-
-    // Scene
-    std::unique_ptr<Scene> scene_; // forward declaration
-
-    util::BlockingQueue<SceneUpdateFunc>& external_update_queue_;
-    std::thread update_thread_;
-
-    util::BlockingQueue<SceneUpdateFunc> internal_update_queue_;
+    int shading_uniform_;
+    int light_direction_uniform_;
+    int light_color_uniform_;
+    int ambient_color_uniform_;
 };
 
-} // namespace gvs::display
+} // namespace gvs::display::backends

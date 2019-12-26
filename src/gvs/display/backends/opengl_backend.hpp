@@ -24,6 +24,24 @@
 
 // gvs
 #include "backend_interface.hpp"
+#include "drawables.hpp"
+#include "general_shader_3d.hpp"
+
+// external
+#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/Optional.h>
+#include <Magnum/GL/Buffer.h>
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/Math/Vector3.h>
+#include <Magnum/SceneGraph/Drawable.h>
+#include <Magnum/SceneGraph/FeatureGroup.h>
+#include <Magnum/SceneGraph/MatrixTransformation3D.h>
+#include <Magnum/SceneGraph/Object.h>
+#include <Magnum/SceneGraph/Scene.h>
+#include <Magnum/SceneGraph/SceneGraph.h>
+
+// standard
+#include <memory>
 
 namespace gvs::display::backends {
 
@@ -34,14 +52,39 @@ public:
     auto render(vis::CameraPackage const& camera_package) -> void override;
 
     auto after_add(SceneID const& item_id, SceneItems const& items) -> void override;
-    auto after_update(SceneID const& item_id, SceneItems const& items) -> void override;
+    auto before_update(SceneID const& item_id, SceneItemInfo const& changes, SceneItems const& items) -> void override;
     auto before_delete(SceneID const& item_id, SceneItems const& items) -> void override;
 
     auto reset_items(SceneItems const& items) -> void override;
 
     auto resize(Magnum::Vector2i const& viewport) -> void override;
 
+    using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
+    using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
+
+    struct ObjectMeshPackage {
+        Magnum::GL::Buffer vertex_buffer;
+        int vbo_count = 0;
+        Magnum::GL::Buffer index_buffer;
+        int ibo_count = 0;
+        Magnum::GL::Mesh mesh;
+        Object3D* object = nullptr;
+        OpaqueDrawable* drawable = nullptr;
+
+        explicit ObjectMeshPackage(Object3D* obj,
+                                   Magnum::SceneGraph::DrawableGroup3D* drawables,
+                                   GeneralShader3d& shader);
+    };
+
 private:
+    GeneralShader3d shader_;
+    std::unordered_map<std::string, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
+
+    Scene3D scene_;
+    //Object3D* root_object_ = nullptr;
+    //Object3D camera_object_;
+    //Magnum::SceneGraph::Camera3D* camera_;
+    //Magnum::SceneGraph::DrawableGroup3D drawables_;
 };
 
 } // namespace gvs::display::backends

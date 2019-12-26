@@ -25,9 +25,8 @@
 #include "display_window.hpp"
 
 // project
-#include "gvs/server/scene_server.hpp"
+#include "gvs/display/scene.hpp"
 #include "gvs/vis-client/app/imgui_theme.hpp"
-#include "gvs/vis-client/scene/opengl_scene.hpp"
 
 // third-party
 #include <Magnum/GL/Context.h>
@@ -58,11 +57,12 @@ DisplayWindow::DisplayWindow(util::BlockingQueue<SceneUpdateFunc>& update_queue)
       gl_renderer_str_(GL::Context::current().rendererString()),
       external_update_queue_(update_queue) {
 
-    // scene_ = std::make_unique<vis::OpenGLScene>(vis::make_scene_init_info(theme_->background, this->windowSize()));
+    scene_ = std::make_unique<Scene>();
+    scene_->resize(this->windowSize());
 
     update_thread_ = std::thread([this] {
         while (auto&& update = external_update_queue_.pop_front()) {
-            internal_update_queue_.push_back(std::move(update));
+            internal_update_queue_.emplace_back(std::move(update));
             this->reset_draw_counter();
         }
     });
@@ -74,17 +74,17 @@ DisplayWindow::~DisplayWindow() {
 }
 
 void DisplayWindow::update() {
-    if (!internal_update_queue_.empty()) {
+    while (!internal_update_queue_.empty()) {
         auto update = internal_update_queue_.pop_front();
-        // update(scene_.get());
+        update(scene_.get());
     }
-    // scene_->update(this->windowSize());
+    scene_->update();
 }
 
-void DisplayWindow::render(const vis::CameraPackage& /*camera_package*/) const {
-    // if (!scene_->empty()) {
-    //     scene_->render(camera_package);
-    // }
+void DisplayWindow::render(const vis::CameraPackage& camera_package) const {
+    if (!scene_->empty()) {
+        scene_->render(camera_package);
+    }
 }
 
 void DisplayWindow::configure_gui() {
@@ -140,8 +140,8 @@ void DisplayWindow::configure_gui() {
     }
 }
 
-void DisplayWindow::resize(const Vector2i& /*viewport*/) {
-    // scene_->resize(viewport);
+void DisplayWindow::resize(const Vector2i& viewport) {
+    scene_->resize(viewport);
 }
 
 } // namespace gvs::display

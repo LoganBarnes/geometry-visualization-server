@@ -50,7 +50,7 @@ enum class GeometryFormat {
     TriangleFan,
 };
 
-enum class Coloring {
+enum class Coloring : int32_t {
     Positions,
     Normals,
     TextureCoordinates,
@@ -63,9 +63,9 @@ enum class Coloring {
 struct UniformColor {};
 
 struct LambertianShading {
-    vec3 light_direction;
-    vec3 light_color;
-    vec3 ambient_color;
+    vec3 light_direction = {-1.f, -1.f, -1.f};
+    vec3 light_color = {1.f, 1.f, 1.f};
+    vec3 ambient_color = {0.15f, 0.15f, 0.15f};
 };
 
 using Shading = std::variant<UniformColor, LambertianShading>;

@@ -33,15 +33,15 @@
 namespace gvs::display {
 
 GeometryDisplay::GeometryDisplay() {
-    //    display_thread_ = std::thread([this] {
-    display_window_ = std::make_unique<DisplayWindow>(update_queue_);
-    display_window_->exec();
-    display_window_ = nullptr;
-    //    });
+    display_thread_ = std::thread([this] {
+        display_window_ = std::make_unique<DisplayWindow>(update_queue_);
+        display_window_->exec();
+        display_window_ = nullptr;
+    });
 }
 
 GeometryDisplay::~GeometryDisplay() {
-    //    display_thread_.join();
+    display_thread_.join();
 }
 
 auto GeometryDisplay::item_stream() -> log::GeometryItemStream {
@@ -58,11 +58,9 @@ auto GeometryDisplay::update_scene(SceneID const& id, SceneItemInfo&& info, log:
     switch (type) {
 
     case log::SendType::Safe:
+    case log::SendType::Replace:
         update_queue_.emplace_back(
             [id, info = std::move(info)](Scene* scene) mutable { scene->add_item(id, std::move(info)); });
-        break;
-
-    case log::SendType::Replace:
         break;
 
     case log::SendType::Append:

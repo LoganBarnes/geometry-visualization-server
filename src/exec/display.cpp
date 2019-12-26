@@ -40,7 +40,7 @@ int main() {
             //#else
             //            << gvs::coloring(gvs::proto::Coloring::GLOBAL_COLOR) << gvs::lines({0, 1, 0, 2, 0, 3})
             //#endif
-            << gvs::replace;
+            << gvs::send;
         CHECK_WITH_PRINT(stream);
     }
 

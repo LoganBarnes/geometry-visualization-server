@@ -22,42 +22,31 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/util/atomic_data.hpp"
-#include "gvs/util/blocking_queue.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
-
 // standard
-#include <thread>
+#include <variant>
 
-namespace gvs::display {
+namespace gvs::util {
 
-class DisplayWindow : public vis::ImGuiMagnumApplication {
-public:
-    explicit DisplayWindow(util::BlockingQueue<SceneUpdateFunc>& update_queue);
-    ~DisplayWindow() override;
+/**
+ * Wrapper around std::visit that forces the second parameter to be a std::variant class. This works
+ * with objects implicitly convertible into variants (like classes deriving from std::variant).
+ */
+template <typename Visitor, typename... Variants>
+constexpr decltype(auto) visit(Visitor&& visitor, std::variant<Variants...>& variants) {
+    return std::visit(std::forward<Visitor>(visitor), variants);
+}
 
-private:
-    void update() override;
-    void render(const vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+template <typename Visitor, typename... Variants>
+constexpr decltype(auto) visit(Visitor&& visitor, const std::variant<Variants...>& variants) {
+    return std::visit(std::forward<Visitor>(visitor), variants);
+}
 
-    void resize(const Magnum::Vector2i& viewport) override;
-
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
-
-    // Debugging
-    bool run_as_fast_as_possible_ = false;
-
-    // Scene
-    std::unique_ptr<Scene> scene_; // forward declaration
-
-    util::BlockingQueue<SceneUpdateFunc>& external_update_queue_;
-    std::thread update_thread_;
-
-    util::BlockingQueue<SceneUpdateFunc> internal_update_queue_;
+template <class... Ts>
+struct Visitor : Ts... {
+    using Ts::operator()...;
 };
 
-} // namespace gvs::display
+template <class... Ts>
+Visitor(Ts...)->Visitor<Ts...>;
+
+} // namespace gvs::util

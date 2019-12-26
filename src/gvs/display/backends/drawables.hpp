@@ -22,42 +22,36 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gvs/util/atomic_data.hpp"
-#include "gvs/util/blocking_queue.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "general_shader_3d.hpp"
+#include "gvs/display/types.hpp"
 
-// standard
-#include <thread>
+// external
+#include <Magnum/SceneGraph/Drawable.h>
 
-namespace gvs::display {
+namespace gvs::display::backends {
 
-class DisplayWindow : public vis::ImGuiMagnumApplication {
+class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {
 public:
-    explicit DisplayWindow(util::BlockingQueue<SceneUpdateFunc>& update_queue);
-    ~DisplayWindow() override;
+    explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
+                            Magnum::SceneGraph::DrawableGroup3D* group,
+                            Magnum::GL::Mesh& mesh,
+                            GeneralShader3d& shader);
+
+    ~OpaqueDrawable() override = default;
+
+    auto update_display_info(const DisplayInfo& display_info) -> void;
 
 private:
-    void update() override;
-    void render(const vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+    void draw(Magnum::Matrix4 const& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 
-    void resize(const Magnum::Vector2i& viewport) override;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object_;
+    Magnum::GL::Mesh& mesh_;
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
+    Coloring coloring_ = Coloring::UniformColor;
+    Magnum::Color3 uniform_color_ = {1.f, 0.9f, 0.7f};
+    Shading shading_;
 
-    // Debugging
-    bool run_as_fast_as_possible_ = false;
-
-    // Scene
-    std::unique_ptr<Scene> scene_; // forward declaration
-
-    util::BlockingQueue<SceneUpdateFunc>& external_update_queue_;
-    std::thread update_thread_;
-
-    util::BlockingQueue<SceneUpdateFunc> internal_update_queue_;
+    GeneralShader3d& shader_;
 };
 
-} // namespace gvs::display
+} // namespace gvs::display::backends

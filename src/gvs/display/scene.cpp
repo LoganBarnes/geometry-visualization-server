@@ -22,9 +22,16 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "scene.hpp"
 
+// project
+#include "gvs/display/backends/opengl_backend.hpp"
+
 namespace gvs::display {
 
-Scene::Scene(std::unique_ptr<backends::BackendInterface> backend) : backend_(std::move(backend)) {}
+Scene::Scene(std::unique_ptr<backends::BackendInterface> backend) : backend_(std::move(backend)) {
+    if (!backend_) {
+        backend_ = std::make_unique<backends::OpenglBackend>();
+    }
+}
 
 Scene::~Scene() = default;
 
@@ -40,8 +47,8 @@ auto Scene::add_item(SceneID const& item_id, SceneItemInfo&& item) -> void {
 }
 
 auto Scene::update_item(SceneID const& item_id, SceneItemInfo&& item) -> void {
+    backend_->before_update(item_id, item, items_);
     items_[item_id] = std::move(item);
-    backend_->after_update(item_id, items_);
 }
 
 auto Scene::remove_item(SceneID const& item_id) -> void {

@@ -50,11 +50,12 @@ public:
     virtual auto after_add(SceneID const& item_id, SceneItems const& items) -> void = 0;
 
     /**
-     * @brief Called when a Scene has updated an item.
+     * @brief Called when a Scene is about to update an item.
      * @param item_id - The id of the updated item.
-     * @param items - All items in the scene (including the updated item).
+     * @param items - All items in the scene (including the item before it was updated).
      */
-    virtual auto after_update(SceneID const& item_id, SceneItems const& items) -> void = 0;
+    virtual auto before_update(SceneID const& item_id, SceneItemInfo const& changes, SceneItems const& items) -> void
+        = 0;
 
     /**
      * @brief Called when a scene is about to remove an item.
