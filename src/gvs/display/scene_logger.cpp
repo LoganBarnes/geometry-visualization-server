@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "geometry_display.hpp"
+#include "scene_logger.hpp"
 
 // project
 #include "gvs/display/display_window.hpp"
