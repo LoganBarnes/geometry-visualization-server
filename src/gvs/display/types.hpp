@@ -78,6 +78,19 @@ struct GeometryInfo {
     std::optional<std::vector<unsigned>> indices;
 };
 
+constexpr auto default_geometry_format = GeometryFormat::Points;
+constexpr auto default_transformation = mat4{
+    vec4{1, 0, 0, 0},
+    vec4{0, 1, 0, 0},
+    vec4{0, 0, 1, 0},
+    vec4{0, 0, 0, 1},
+};
+constexpr auto default_uniform_color = vec3{1.f, 0.9f, 0.7f};
+constexpr auto default_coloring = Coloring::UniformColor;
+constexpr auto default_shading = Shading{UniformColor{}};
+//constexpr auto default_visible = true;
+//constexpr auto default_opacity = 1.f;
+
 struct DisplayInfo {
     std::optional<std::string> readable_id;
     std::optional<GeometryFormat> geometry_format;

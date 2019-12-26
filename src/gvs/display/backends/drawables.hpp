@@ -47,9 +47,9 @@ private:
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object_;
     Magnum::GL::Mesh& mesh_;
 
-    Coloring coloring_ = Coloring::UniformColor;
-    Magnum::Color3 uniform_color_ = {1.f, 0.9f, 0.7f};
-    Shading shading_;
+    Coloring coloring_ = default_coloring;
+    Magnum::Color3 uniform_color_ = {default_uniform_color[0], default_uniform_color[1], default_uniform_color[2]};
+    Shading shading_ = default_shading;
 
     GeneralShader3d& shader_;
 };

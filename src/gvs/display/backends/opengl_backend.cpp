@@ -64,48 +64,38 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
     GLintptr offset = 0;
     mesh_package->vbo_count = 0;
 
-    auto const& optional_positions = (new_geom.positions ? new_geom.positions : old_geom.positions);
+    auto update_attribute
+        = [&mesh_package, &offset, &buffer_data](auto const& optional_attribute, auto const& shader_attribute) {
+              const auto& attribute = optional_attribute.value();
+              buffer_data.insert(buffer_data.end(),
+                                 reinterpret_cast<float const*>(attribute.data()),
+                                 reinterpret_cast<float const*>(attribute.data() + attribute.size()));
+              mesh_package->mesh.addVertexBuffer(mesh_package->vertex_buffer, offset, shader_attribute);
+              return static_cast<int>(attribute.size());
+          };
 
+    auto const& optional_positions = (new_geom.positions ? new_geom.positions : old_geom.positions);
     if (optional_positions) {
-        const std::vector<vec3>& positions = optional_positions.value();
-        buffer_data.insert(buffer_data.end(),
-                           reinterpret_cast<float const*>(positions.data()),
-                           reinterpret_cast<float const*>(positions.data() + positions.size()));
-        mesh_package->vbo_count = static_cast<int>(positions.size());
-        mesh_package->mesh.addVertexBuffer(mesh_package->vertex_buffer, offset, GeneralShader3d::Position{});
-        offset += static_cast<int>(positions.size() * sizeof(vec3));
+        auto attribute_size = update_attribute(optional_positions, GeneralShader3d::Position{});
+        offset += attribute_size + static_cast<int>(sizeof(vec3));
+        mesh_package->vbo_count = attribute_size;
     }
 
     auto const& optional_normals = (new_geom.normals ? new_geom.normals : old_geom.normals);
-
     if (optional_normals) {
-        const std::vector<vec3>& normals = optional_normals.value();
-        buffer_data.insert(buffer_data.end(),
-                           reinterpret_cast<float const*>(normals.data()),
-                           reinterpret_cast<float const*>(normals.data() + normals.size()));
-        mesh_package->mesh.addVertexBuffer(mesh_package->vertex_buffer, offset, GeneralShader3d::Normal{});
-        offset += static_cast<int>(normals.size() * sizeof(vec3));
+        auto attribute_size = update_attribute(optional_normals, GeneralShader3d::Normal{});
+        offset += attribute_size + static_cast<int>(sizeof(vec3));
     }
 
     auto const& optional_tex_coords = (new_geom.tex_coords ? new_geom.tex_coords : old_geom.tex_coords);
-
     if (optional_tex_coords) {
-        const std::vector<vec2>& tex_coords = optional_tex_coords.value();
-        buffer_data.insert(buffer_data.end(),
-                           reinterpret_cast<float const*>(tex_coords.data()),
-                           reinterpret_cast<float const*>(tex_coords.data() + tex_coords.size()));
-        mesh_package->mesh.addVertexBuffer(mesh_package->vertex_buffer, offset, GeneralShader3d::TextureCoordinate{});
-        offset += static_cast<int>(tex_coords.size() * sizeof(vec2));
+        auto attribute_size = update_attribute(optional_tex_coords, GeneralShader3d::TextureCoordinate{});
+        offset += attribute_size + static_cast<int>(sizeof(vec2));
     }
 
     auto const& optional_vertex_colors = (new_geom.vertex_colors ? new_geom.vertex_colors : old_geom.vertex_colors);
-
     if (optional_vertex_colors) {
-        const std::vector<vec3>& vertex_colors = optional_vertex_colors.value();
-        buffer_data.insert(buffer_data.end(),
-                           reinterpret_cast<float const*>(vertex_colors.data()),
-                           reinterpret_cast<float const*>(vertex_colors.data() + vertex_colors.size()));
-        mesh_package->mesh.addVertexBuffer(mesh_package->vertex_buffer, offset, GeneralShader3d::VertexColor{});
+        update_attribute(optional_vertex_colors, GeneralShader3d::VertexColor{});
     }
 
     mesh_package->vertex_buffer.setData(buffer_data, Magnum::GL::BufferUsage::StaticDraw);
@@ -140,7 +130,7 @@ OpenglBackend::ObjectMeshPackage::ObjectMeshPackage(Object3D* obj,
                                                     Magnum::SceneGraph::DrawableGroup3D* drawables,
                                                     GeneralShader3d& shader)
     : object(obj) {
-    mesh.setCount(0).setPrimitive(Magnum::MeshPrimitive::Points);
+    mesh.setCount(0).setPrimitive(to_magnum(default_geometry_format));
     drawable = new OpaqueDrawable(*object, drawables, mesh, shader);
 }
 
@@ -167,8 +157,6 @@ auto OpenglBackend::render(vis::CameraPackage const& camera_package) -> void {
 }
 
 auto OpenglBackend::after_add(SceneID const& item_id, SceneItems const& items) -> void {
-    std::cout << "Item added: " << item_id << std::endl;
-
     objects_.emplace(item_id, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
 
     auto const& item = items.at(item_id);
@@ -187,12 +175,10 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
 
         if (new_geom.positions || new_geom.normals || new_geom.tex_coords || new_geom.vertex_colors) {
             update_vbo(&mesh_package, new_geom, old_geom);
-            std::cout << "\tVbo updated: " << mesh_package.mesh.count() << " vertices" << std::endl;
         }
 
         if (new_geom.indices) {
             update_ibo(&mesh_package, new_geom.indices.value());
-            std::cout << "\tIbo updated: " << mesh_package.mesh.count() << " vertices" << std::endl;
         }
     }
 
