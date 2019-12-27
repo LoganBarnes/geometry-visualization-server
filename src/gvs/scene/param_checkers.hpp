@@ -60,7 +60,7 @@ template <typename T, std::optional<T> SceneItemInfo::*member>
 struct SceneChecker {
     explicit SceneChecker(bool* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void { *data_ = (!!(info.*member) || (info.*member)->empty()); }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = (!!(info.*member) && !(info.*member)->empty()); }
 
     SceneChecker(const SceneChecker&)     = delete;
     SceneChecker(SceneChecker&&) noexcept = delete;

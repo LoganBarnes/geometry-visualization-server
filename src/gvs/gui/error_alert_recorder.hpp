@@ -23,33 +23,35 @@
 #pragma once
 
 // project
-#include "gvs/gui/error_alert.hpp"
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "gvs/util/error.hpp"
 
-namespace example {
+// standard
+#include <memory>
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
+namespace gvs::gui {
+
+class ErrorAlert;
+
+///
+/// \brief Wraps an ErrorAlert and only exposes the error writing functions
+///
+class ErrorAlertRecorder {
 public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    ErrorAlertRecorder(std::shared_ptr<ErrorAlert> const& popup);
+
+    ///
+    /// \return true if the error was successfully recorded, false otherwise
+    ///
+    [[nodiscard]] auto record_error(util::Error error) const -> bool;
+
+    ///
+    /// \return true if the warning was successfully recorded, false otherwise
+    ///
+    [[nodiscard]] auto record_warning(util::Error error) const -> bool;
 
 private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
-
-    void resize(const Magnum::Vector2i& viewport) override;
-
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-
-    // Errors
-    gvs::gui::ErrorAlert error_alert_;
-
-    // Scene
-    gvs::scene::LocalScene scene_;
+    std::weak_ptr<ErrorAlert> const error_alert_;
 };
 
-} // namespace example
+} // namespace gvs::gui

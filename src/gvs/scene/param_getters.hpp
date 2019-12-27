@@ -139,5 +139,6 @@ using GetColoring       = detail::SceneDisplayGetter<Coloring, &DisplayInfo::col
 using GetShading        = detail::SceneDisplayGetter<Shading, &DisplayInfo::shading>;
 using IsVisible         = detail::SceneDisplayGetter<bool, &DisplayInfo::visible>;
 using GetOpacity        = detail::SceneDisplayGetter<float, &DisplayInfo::opacity>;
+using IsWireframeOnly   = detail::SceneDisplayGetter<bool, &DisplayInfo::wireframe_only>;
 
 } // namespace gvs

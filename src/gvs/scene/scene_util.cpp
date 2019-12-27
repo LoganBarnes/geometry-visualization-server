@@ -42,6 +42,7 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
     Shading        shading;
     bool           visible;
     float          opacity;
+    bool           wireframe_only;
 
     bool has_geometry;
     bool has_children;
@@ -55,6 +56,7 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
                          GetShading(&shading),
                          IsVisible(&visible),
                          GetOpacity(&opacity),
+                         IsWireframeOnly(&wireframe_only),
                          HasGeometry(&has_geometry),
                          HasChildren(&has_children));
 
@@ -68,7 +70,7 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
     ImGui::SameLine();
 
     if (ImGui::TreeNode(readable_id.c_str())) {
-        ImGui::Indent();
+        imgui::ScopedIndent scoped_indent;
         ImGui::Separator();
 
         if (visible) {
@@ -121,6 +123,11 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
                     imgui::Disable::Guard disable_opacity(true);
                     item_changed |= ImGui::DragFloat("Opacity", &opacity, 0.01f, 0.f, 1.f);
                 }
+
+                {
+                    imgui::Disable::Guard disable_wireframe(true);
+                    item_changed |= ImGui::Checkbox("Wireframe", &wireframe_only);
+                }
             }
 
             if (has_children) {
@@ -136,7 +143,6 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
             }
         }
 
-        ImGui::Unindent();
         ImGui::TreePop();
     }
 
@@ -149,7 +155,8 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
                            SetColoring(coloring),
                            SetShading(shading),
                            SetVisible(visible),
-                           SetOpacity(opacity));
+                           SetOpacity(opacity),
+                           SetWireframeOnly(wireframe_only));
     }
 
     return item_changed | children_changed;

@@ -222,8 +222,9 @@ if (NOT GVS_LOGGING_ONLY)
     file(GLOB_RECURSE GVS_SOURCE_FILES
             LIST_DIRECTORIES false
             CONFIGURE_DEPENDS
-            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/gui/*
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/scene/*
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
             )
 
     gvs_add_library(gvs_scene 17 ${GVS_SOURCE_FILES})

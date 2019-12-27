@@ -23,33 +23,45 @@
 #pragma once
 
 // project
-#include "gvs/gui/error_alert.hpp"
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "gvs/util/error.hpp"
 
-namespace example {
+// standard
+#include <list>
+#include <string>
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
+namespace gvs::gui {
+
+enum class LogToConsole { yes, no };
+
+class ErrorAlert {
 public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+    explicit ErrorAlert(const std::string& unique_label, LogToConsole log_debug_errors_to_console = LogToConsole::yes);
+
+    /**
+     * @brief Display an ImGui window popup with the oldest error message (if one exists)
+     */
+    auto display_next_error() -> void;
+
+    [[nodiscard]] auto should_be_open() const -> bool;
+
+    auto record_error(util::Error error) -> void;
+    auto record_warning(util::Error error) -> void;
 
 private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+    std::string imgui_label_;
+    bool        log_errors_to_console_;
 
-    void resize(const Magnum::Vector2i& viewport) override;
+    enum class Type {
+        error,
+        warning,
+    };
+    struct Message {
+        util::Error error;
+        Type        type = Type::error;
+    };
+    std::list<Message> error_messages_;
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-
-    // Errors
-    gvs::gui::ErrorAlert error_alert_;
-
-    // Scene
-    gvs::scene::LocalScene scene_;
+    auto display(const Type& type, const std::string& error_message) -> bool;
 };
 
-} // namespace example
+} // namespace gvs::gui

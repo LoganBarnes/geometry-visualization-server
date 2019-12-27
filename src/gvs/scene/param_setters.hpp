@@ -206,5 +206,6 @@ using SetColoring       = detail::SceneDisplaySetter<Coloring, &DisplayInfo::col
 using SetShading        = detail::SceneDisplaySetter<Shading, &DisplayInfo::shading>;
 using SetVisible        = detail::SceneDisplaySetter<bool, &DisplayInfo::visible>;
 using SetOpacity        = detail::SceneDisplaySetter<float, &DisplayInfo::opacity>;
+using SetWireframeOnly  = detail::SceneDisplaySetter<bool, &DisplayInfo::wireframe_only>;
 
 } // namespace gvs

@@ -63,6 +63,9 @@ auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void {
     if (!display_info.opacity) {
         display_info.opacity = default_opacity;
     }
+    if (!display_info.wireframe_only) {
+        display_info.wireframe_only = default_wireframe_only;
+    }
 }
 
 auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::Result<void> {
@@ -119,6 +122,7 @@ auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::
         maybe_replace(&DisplayInfo::shading);
         maybe_replace(&DisplayInfo::visible);
         maybe_replace(&DisplayInfo::opacity);
+        maybe_replace(&DisplayInfo::wireframe_only);
     }
 
     return util::success();

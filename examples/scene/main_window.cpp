@@ -47,7 +47,8 @@ MainWindow::MainWindow(const Arguments& arguments)
                                            .setWindowFlags(Configuration::WindowFlag::Resizable)),
       // Device info
       gl_version_str_(GL::Context::current().versionString()),
-      gl_renderer_str_(GL::Context::current().rendererString()) {
+      gl_renderer_str_(GL::Context::current().rendererString()),
+      error_alert_("Error Popup") {
 
     {
         scene_.add_item(gvs::SetReadableId("Axes"),
@@ -129,7 +130,6 @@ void MainWindow::configure_gui() {
         ImGui::Spacing();
     };
 
-    auto width  = static_cast<float>(this->windowSize().x());
     auto height = static_cast<float>(this->windowSize().y());
     ImGui::SetNextWindowPos({0.f, 0.f});
     ImGui::SetNextWindowSizeConstraints({0.f, height}, {std::numeric_limits<float>::infinity(), height});
@@ -149,18 +149,7 @@ void MainWindow::configure_gui() {
 
     ImGui::End();
 
-    if (not error_message_.empty()) {
-        ImGui::SetNextWindowPos({width * 0.5f, 0.f}, 0, {0.5f, 0.f});
-
-        bool open = true;
-        ImGui::Begin("Errors", &open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
-        ImGui::TextColored({1.f, 0.f, 0.f, 1.f}, "%s", error_message_.c_str());
-        ImGui::End();
-
-        if (not open) {
-            error_message_ = "";
-        }
-    }
+    error_alert_.display_next_error();
 }
 
 void MainWindow::resize(const Vector2i& viewport) {

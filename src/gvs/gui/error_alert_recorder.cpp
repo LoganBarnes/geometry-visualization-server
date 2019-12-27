@@ -20,36 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "error_alert_recorder.hpp"
 
 // project
-#include "gvs/gui/error_alert.hpp"
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "error_alert.hpp"
 
-namespace example {
+namespace gvs::gui {
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
-public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+ErrorAlertRecorder::ErrorAlertRecorder(const std::shared_ptr<ErrorAlert>& popup) : error_alert_(popup) {}
 
-private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+auto ErrorAlertRecorder::record_error(util::Error error) const -> bool {
+    if (auto popup = error_alert_.lock()) {
+        popup->record_error(std::move(error));
+        return true;
+    }
+    return false;
+}
 
-    void resize(const Magnum::Vector2i& viewport) override;
+auto ErrorAlertRecorder::record_warning(util::Error error) const -> bool {
+    if (auto popup = error_alert_.lock()) {
+        popup->record_warning(std::move(error));
+        return true;
+    }
+    return false;
+}
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-
-    // Errors
-    gvs::gui::ErrorAlert error_alert_;
-
-    // Scene
-    gvs::scene::LocalScene scene_;
-};
-
-} // namespace example
+} // namespace gvs::gui

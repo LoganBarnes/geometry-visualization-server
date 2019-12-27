@@ -122,11 +122,12 @@ constexpr auto default_transformation = mat4{
     0, 0, 0, 1,
 };
 // clang-format on
-constexpr auto default_uniform_color = vec3{1.f, 0.9f, 0.7f};
-constexpr auto default_coloring      = Coloring::UniformColor;
-constexpr auto default_shading       = Shading::CookTorrance;
-constexpr auto default_visible       = true;
-constexpr auto default_opacity       = 1.f;
+constexpr auto default_uniform_color  = vec3{1.f, 0.9f, 0.7f};
+constexpr auto default_coloring       = Coloring::UniformColor;
+constexpr auto default_shading        = Shading::CookTorrance;
+constexpr auto default_visible        = true;
+constexpr auto default_opacity        = 1.f;
+constexpr auto default_wireframe_only = false;
 
 struct GeometryInfo {
     std::optional<AttributeVector<3>>    positions;
@@ -145,6 +146,7 @@ struct DisplayInfo {
     std::optional<Shading>        shading;
     std::optional<bool>           visible;
     std::optional<float>          opacity;
+    std::optional<bool>           wireframe_only;
 };
 
 struct SceneItemInfo {

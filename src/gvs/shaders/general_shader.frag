@@ -26,7 +26,7 @@
 /*
  * Constants
  */
-const float PI = 3.141592653589793f;
+const float PI  = 3.141592653589793f;
 const float INF = 1.f / 0.f;
 
 const int COLORING_POSITIONS           = 0;
@@ -52,14 +52,14 @@ layout(location = 3) in vec3 vertex_color;
 /*
  * Uniforms
  */
-uniform int coloring       = COLORING_UNIFORM_COLOR;
-uniform vec3 uniform_color = { 1.f, 0.9f, 0.7f };
-uniform float opacity      = 1.f;
+uniform int   coloring      = COLORING_UNIFORM_COLOR;
+uniform vec3  uniform_color = { 1.f, 0.9f, 0.7f };
+uniform float opacity       = 1.f;
 
-uniform int shading          = SHADING_COLOR;
-uniform vec3 light_direction = { -1.f, -1.f, -1.f };
-uniform vec3 light_color     = { +1.f, +1.f, +1.f };
-uniform float ambient_scale  = 0.15f;
+uniform int   shading         = SHADING_COLOR;
+uniform vec3  light_direction = { -1.00f, -0.85f, -0.70f };
+uniform vec3  light_color     = { +1.00f, +1.00f, +1.00f };
+uniform float ambient_scale   = 0.15f;
 
 layout(location = 0) out vec4 out_color;
 
