@@ -101,7 +101,7 @@ void MainWindow::configure_gui() {
 
     add_three_line_separator();
 
-    // SceneGui::configure(&scene_);
+    // SceneUtil::configure_gui(&scene_);
 
     ImGui::End();
 
