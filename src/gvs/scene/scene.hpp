@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,51 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "geometry_logger.hpp"
+#pragma once
 
-#include <grpc++/client_context.h>
+// project
+#include "gvs/display/geometry_item_stream.hpp"
 
-namespace gvs {
-namespace log {
+// external
+#include <uuid.h>
 
-GeometryLogger::GeometryLogger(const std::string& server_address)
-    : GeometryLogger(server_address, std::chrono::seconds(4)) {}
+// standard
+#include <random>
 
-bool GeometryLogger::connected() const {
-    return stub_ != nullptr;
-}
+namespace gvs::scene {
 
-std::string GeometryLogger::generate_uuid() const {
-    return uuids::to_string(uuids::uuid_system_generator{}());
-}
+class Scene {
+public:
+    explicit Scene(std::random_device::result_type seed = std::random_device{}());
+    virtual ~Scene();
 
-std::string GeometryLogger::clear_all_items() {
-    if (stub_) {
-        proto::SceneUpdateRequest update;
-        update.mutable_clear_all();
+    /// \brief Modifies and sends the contents of a stream, updating the server if the stream id does not exist
+    ///
+    ///     ```cpp
+    ///     // Create the scene
+    ///     std::unique_ptr<gvs::scene::Scene> scene = /*Some scene type*/;
+    ///
+    ///     // modify and send stream contents to the server
+    ///     scene->add_item(gvs::SetPositions3d(my_points), gvs::SetLineStrip(), gvs::ReadableID("My Points"));
+    ///     ```
+    template <typename... Functors>
+    auto add_item(Functors&&... functors) -> util::Result<uuid::uuid>;
 
-        grpc::ClientContext context;
-        proto::Errors errors;
+    auto item_stream(const std::string& id) -> GeometryItemStream = 0;
+    auto clear_all_items() -> void = 0;
 
-        grpc::Status status = stub_->UpdateScene(&context, update, &errors);
+private:
+};
 
-        if (not status.ok()) {
-            return status.error_message();
-        }
+inline GeometryLogger::~GeometryLogger() = default;
 
-        if (not errors.error_msg().empty()) {
-            return errors.error_msg();
-        }
-    }
-    return "";
-}
-
-GeometryItemStream GeometryLogger::item_stream(const std::string& id) const {
-    if (id.empty()) {
-        return GeometryItemStream(generate_uuid(), stub_.get());
-    }
-    return GeometryItemStream(id, stub_.get());
-}
-
-} // namespace log
-} // namespace gvs
+} // namespace gvs::scene

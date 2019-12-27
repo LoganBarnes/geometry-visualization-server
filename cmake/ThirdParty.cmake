@@ -22,6 +22,8 @@
 ##########################################################################################
 include(FetchContent)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+
 ### gRPC Wrapper Library ###
 FetchContent_Declare(
         grpcw_dl
@@ -54,17 +56,27 @@ if (NOT expected_dl_POPULATED)
     add_subdirectory(${expected_dl_SOURCE_DIR} ${expected_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif (NOT expected_dl_POPULATED)
 
+### stduuid ###
+FetchContent_Declare(
+        stduuid_dl
+        GIT_REPOSITORY https://github.com/mariusbancila/stduuid.git
+        GIT_TAG 207f06bd56b5d02b8bf4c4305e91f0da8fedbcb4
+)
 
-### crossguid ###
-# TODO: switch to stduuid
-FetchContent_Declare(crossguid_dl
-        GIT_REPOSITORY https://github.com/graeme-hill/crossguid.git
-        GIT_TAG 0f2753174c914bc561504b14c963d179283fe829
-        )
+FetchContent_GetProperties(stduuid_dl)
+if (NOT stduuid_dl_POPULATED)
+    FetchContent_Populate(stduuid_dl)
 
-FetchContent_GetProperties(crossguid_dl)
-if (NOT crossguid_dl_POPULATED)
-    FetchContent_Populate(crossguid_dl)
-    add_subdirectory(${crossguid_dl_SOURCE_DIR} ${crossguid_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
-    target_compile_options(crossguid PRIVATE -w)
-endif ()
+    find_package(Libuuid REQUIRED)
+    if (NOT LIBUUID_FOUND)
+        message(FATAL_ERROR
+                "You might need to run 'sudo apt-get install uuid-dev' or similar")
+    endif ()
+
+    add_library(stduuid INTERFACE)
+    target_include_directories(stduuid SYSTEM
+            INTERFACE ${stduuid_dl_SOURCE_DIR}/include
+            INTERFACE ${LIBUUID_INCLUDE_DIR}
+            )
+    target_link_libraries(stduuid INTERFACE ${LIBUUID_LIBRARY})
+endif (NOT stduuid_dl_POPULATED)

@@ -27,8 +27,8 @@
 #include "gvs/display/geometry_item_stream.hpp"
 #include "gvs/display/scene.hpp"
 
-// third party
-#include <crossguid/guid.hpp>
+// external
+#include <uuid.h>
 
 namespace gvs::display {
 
@@ -45,7 +45,7 @@ GeometryDisplay::~GeometryDisplay() {
 }
 
 auto GeometryDisplay::item_stream() -> log::GeometryItemStream {
-    return item_stream(xg::newGuid().str());
+    return item_stream(uuids::to_string(uuids::uuid_system_generator{}()));
 }
 
 auto GeometryDisplay::item_stream(const std::string& id) -> log::GeometryItemStream {

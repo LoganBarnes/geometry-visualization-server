@@ -25,9 +25,9 @@
 // project
 #include "gvs/log/geometry_item_stream.hpp"
 
-// third party
-#include <crossguid/guid.hpp>
+// external
 #include <grpc++/create_channel.h>
+#include <uuid.h>
 
 namespace gvs {
 namespace log {

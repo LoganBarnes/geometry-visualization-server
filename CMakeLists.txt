@@ -95,7 +95,7 @@ set_target_properties(
         gvs_protos
         PROPERTIES
         # C++ flags
-        CXX_STANDARD 11
+        CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
         POSITION_INDEPENDENT_CODE ON
@@ -113,10 +113,10 @@ file(GLOB_RECURSE GVS_SOURCE_FILES
         ${CMAKE_CURRENT_LIST_DIR}/src/gvs/log/*
         )
 
-gvs_add_library(gvs_log_client 11 ${GVS_SOURCE_FILES})
+gvs_add_library(gvs_log_client 17 ${GVS_SOURCE_FILES})
 target_link_libraries(gvs_log_client
         PUBLIC gvs_protos
-        PUBLIC crossguid
+        PUBLIC stduuid
         )
 target_include_directories(gvs_log_client
         PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
@@ -136,7 +136,7 @@ if (NOT GVS_LOGGING_ONLY)
 
     target_link_libraries(gvs_util
             PUBLIC gvs_protos
-            PUBLIC crossguid
+            PUBLIC stduuid
             PUBLIC expected
             PUBLIC doctest
             )
@@ -188,7 +188,7 @@ if (NOT GVS_LOGGING_ONLY)
             # gvs_mesh_test
             # gvs_mesh_test_17
             PROPERTIES
-            CXX_STANDARD 11
+            CXX_STANDARD 17
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             POSITION_INDEPENDENT_CODE ON

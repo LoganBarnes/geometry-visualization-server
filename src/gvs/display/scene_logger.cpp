@@ -27,7 +27,7 @@
 #include "gvs/display/scene.hpp"
 
 // external
-#include <crossguid/guid.hpp>
+#include <uuid.h>
 
 namespace gvs::display {
 
@@ -44,7 +44,7 @@ auto SceneLogger::resize(const Magnum::Vector2i& viewport) -> void {
 }
 
 auto SceneLogger::item_stream() -> log::GeometryItemStream {
-    return item_stream(xg::newGuid().str());
+    return item_stream(uuids::to_string(uuids::uuid_system_generator{}()));
 }
 
 auto SceneLogger::item_stream(const std::string& id) -> log::GeometryItemStream {

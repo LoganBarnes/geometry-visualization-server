@@ -27,6 +27,8 @@
 
 namespace gvs::display {
 
-auto LoggerUtil::configure_gui(log::GeometryLogger * /*scene*/) -> bool {}
+auto LoggerUtil::configure_gui(log::GeometryLogger * /*scene*/) -> bool {
+    return false;
+}
 
 } // namespace gvs::display

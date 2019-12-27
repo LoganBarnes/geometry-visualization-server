@@ -25,10 +25,10 @@
 // generated
 #include <scene.grpc.pb.h>
 
-// third-party
-#include <crossguid/guid.hpp>
+// external
 #include <grpc++/server.h>
 #include <grpcw/forward_declarations.hpp>
+#include <uuid.h>
 
 namespace gvs::server {
 
