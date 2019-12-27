@@ -27,6 +27,7 @@
 
 #include <gvs/gvs_paths.hpp>
 
+#include <Corrade/Containers/ArrayViewStl.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/MeshTools/CompressIndices.h>
@@ -172,7 +173,7 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
             mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::VertexColor{});
         }
 
-        mesh_package.vertex_buffer.setData(buffer_data);
+        mesh_package.vertex_buffer.setData(buffer_data, GL::BufferUsage::StaticDraw);
 
         if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
             std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
@@ -182,7 +183,7 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
             MeshIndexType index_type;
             UnsignedInt index_start, index_end;
             std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
-            mesh_package.index_buffer.setData(index_data);
+            mesh_package.index_buffer.setData(index_data, GL::BufferUsage::StaticDraw);
 
             mesh_package.mesh.setCount(static_cast<int>(indices.size()))
                 .setIndexBuffer(mesh_package.index_buffer, 0, index_type, index_start, index_end);

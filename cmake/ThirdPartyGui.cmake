@@ -58,7 +58,7 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 FetchContent_Declare(corrade_dl
         GIT_REPOSITORY https://github.com/mosra/corrade.git
-        GIT_TAG v2019.01
+        GIT_TAG v2019.10
         )
 
 FetchContent_GetProperties(corrade_dl)
@@ -70,7 +70,7 @@ endif ()
 ### Magnum ###
 FetchContent_Declare(magnum_dl
         GIT_REPOSITORY https://github.com/mosra/magnum.git
-        GIT_TAG v2019.01
+        GIT_TAG v2019.10
         )
 
 FetchContent_GetProperties(magnum_dl)
@@ -108,8 +108,11 @@ find_package(Magnum REQUIRED EglContext GL GlfwApplication WindowlessEglApplicat
 find_package(MagnumIntegration REQUIRED ImGui)
 
 # Set the include directory as system headers to avoid compiler warnings
-target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${corrade_dl_SOURCE_DIR}/src)
-target_include_directories(gvs_gui_thirdparty SYSTEM INTERFACE ${magnum_dl_SOURCE_DIR}/src)
+target_include_directories(gvs_gui_thirdparty
+        SYSTEM INTERFACE
+        ${corrade_dl_SOURCE_DIR}/src
+        ${magnum_dl_SOURCE_DIR}/src
+        )
 
 # Add the necessary libraries
 target_link_libraries(gvs_gui_thirdparty INTERFACE
