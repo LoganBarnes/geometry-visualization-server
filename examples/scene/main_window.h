@@ -20,54 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "scene_logger.hpp"
-
-// project
-#include "gvs/display/geometry_item_stream.hpp"
-#include "gvs/display/scene.hpp"
+#pragma once
 
 // external
-#include <crossguid/guid.hpp>
+#include <gvs/display/scene_logger.hpp>
+#include <gvs/vis-client/app/imgui_magnum_application.hpp>
 
-namespace gvs::display {
+namespace example {
 
-SceneLogger::SceneLogger() : scene_(std::make_unique<Scene>()) {}
+class MainWindow : public gvs::vis::ImGuiMagnumApplication {
+public:
+    explicit MainWindow(const Arguments& arguments);
+    ~MainWindow() override;
 
-SceneLogger::~SceneLogger() = default;
+private:
+    void update() override;
+    void render(const gvs::vis::CameraPackage& camera_package) const override;
+    void configure_gui() override;
 
-auto SceneLogger::render(const gvs::vis::CameraPackage& camera_package) const -> void {
-    scene_->render(camera_package);
-}
+    void resize(const Magnum::Vector2i& viewport) override;
 
-auto SceneLogger::resize(const Magnum::Vector2i& viewport) -> void {
-    scene_->resize(viewport);
-}
+    // General Info
+    std::string gl_version_str_;
+    std::string gl_renderer_str_;
+    std::string error_message_;
 
-auto SceneLogger::item_stream() -> log::GeometryItemStream {
-    return item_stream(xg::newGuid().str());
-}
+    // Scene
+    gvs::display::SceneLogger scene_;
+};
 
-auto SceneLogger::item_stream(const std::string& id) -> log::GeometryItemStream {
-    return log::GeometryItemStream(id, *this);
-}
-
-auto SceneLogger::clear_all_items() -> void {}
-
-auto SceneLogger::update_scene(SceneID const& id, SceneItemInfo&& info, log::SendType type) -> util::Result<void> {
-
-    auto result = util::success();
-
-    switch (type) {
-    case log::SendType::Safe:
-    case log::SendType::Replace:
-        result = scene_->add_item(id, std::move(info));
-        break;
-
-    case log::SendType::Append:
-        break;
-    }
-
-    return result;
-}
-
-} // namespace gvs::display
+} // namespace example

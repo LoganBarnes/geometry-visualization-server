@@ -25,6 +25,7 @@ project(GeometryVisualizationServer LANGUAGES CXX)
 
 option(GVS_LOGGING_ONLY "Only build the logging library" OFF)
 option(GVS_BUILD_TESTS "Build unit tests" OFF)
+option(GVS_BUILD_EXAMPLES "Build example programs" OFF)
 option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
 
 #############################
@@ -212,9 +213,13 @@ if (NOT GVS_LOGGING_ONLY)
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/display/*
             )
 
-    gvs_add_executable(display 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/display.cpp ${GVS_SOURCE_FILES})
-    target_link_libraries(display
+    gvs_add_executable(gvs_display 17 ${CMAKE_CURRENT_LIST_DIR}/src/exec/display.cpp ${GVS_SOURCE_FILES})
+    target_link_libraries(gvs_display
             PUBLIC vis_client_resources
             PUBLIC gvs_util
             )
 endif (NOT GVS_LOGGING_ONLY)
+
+if (GVS_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif ()

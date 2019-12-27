@@ -64,7 +64,7 @@ function(gvs_add_executable target cxx_standard main_file)
             CXX_EXTENSIONS OFF
             POSITION_INDEPENDENT_CODE ON
             # CCache
-            COMPILER_LAUNCHER "${CNC_CCACHE_PROGRAM}"
+            COMPILER_LAUNCHER "${GVS_CCACHE_PROGRAM}"
             # Clang-Tidy
             CXX_CLANG_TIDY "${GVS_CLANG_TIDY}"
             # Binary locations

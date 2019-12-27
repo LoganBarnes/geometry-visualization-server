@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ##########################################################################################
-find_program(CNC_CCACHE_PROGRAM ccache)
-if (CNC_CCACHE_PROGRAM)
-    message("-- Found CCache: ${CNC_CCACHE_PROGRAM}")
+find_program(GVS_CCACHE_PROGRAM ccache)
+if (GVS_CCACHE_PROGRAM)
+    message("-- Found CCache: ${GVS_CCACHE_PROGRAM}")
 else ()
     message("-- Not Found: CCache")
 endif ()

@@ -20,38 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ##########################################################################################
-function(gvs_add_library target cxx_standard)
-    # Add the library with custom compile flags and link the testing library
-    add_library(${target} ${ARGN})
+function(add_example _directory)
+
+    set(target run_${_directory}_example)
+
+    file(GLOB_RECURSE GVS_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/${_directory}/*
+            )
+
+    add_executable(${target} ${GVS_SOURCE_FILES})
+    target_link_libraries(${target} PUBLIC gvs_display)
+
     target_compile_options(${target} PRIVATE ${GVS_COMPILE_FLAGS})
-    target_compile_definitions(${target} PRIVATE -DDOCTEST_CONFIG_DISABLE)
-
-    if (GVS_BUILD_TESTS) # BUILDING WITH TESTS
-        # Create an executable to run the tests
-        set(test_target test_${target})
-        add_executable(${test_target} ${ARGN})
-
-        target_link_libraries(${test_target}
-                PRIVATE doctest_with_main
-                PRIVATE ${target}
-                )
-        target_compile_options(${test_target} PRIVATE ${GVS_COMPILE_FLAGS})
-
-        add_test(NAME ${target}_tests COMMAND ${test_target})
-
-        if (COMMAND SETUP_TARGET_FOR_COVERAGE)
-            # Create a build that generates coverage reports
-            setup_target_for_coverage(${test_target}_coverage ${test_target} ${test_target}_coverage)
-            apply_coverage_dependencies(${test_target})
-        endif ()
-    endif ()
-
     set_target_properties(
             ${target}
-            ${test_target}
             PROPERTIES
             # C++ flags
-            CXX_STANDARD ${cxx_standard}
+            CXX_STANDARD 17
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             POSITION_INDEPENDENT_CODE ON
@@ -64,4 +51,7 @@ function(gvs_add_library target cxx_standard)
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     )
+
 endfunction()
+
+add_example(scene)

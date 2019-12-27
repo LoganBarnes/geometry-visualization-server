@@ -24,11 +24,10 @@
 
 // project
 #include "gvs/display/geometry_logger.hpp"
-#include "gvs/display/scene_update_func.hpp"
-#include "gvs/util/blocking_queue.hpp"
+#include "gvs/display/scene_info_sender.hpp"
 
 // standard
-#include <thread>
+#include <memory>
 
 namespace gvs::display {
 
@@ -36,6 +35,9 @@ class SceneLogger : public log::GeometryLogger, public log::SceneInfoSender {
 public:
     explicit SceneLogger();
     ~SceneLogger() override;
+
+    auto render(gvs::vis::CameraPackage const& camera_package) const -> void;
+    auto resize(Magnum::Vector2i const& viewport) -> void;
 
     // log::GeometryLogger
     auto item_stream() -> log::GeometryItemStream override;
@@ -46,10 +48,7 @@ public:
     auto update_scene(SceneID const& id, SceneItemInfo&& info, log::SendType type) -> util::Result<void> override;
 
 private:
-    std::unique_ptr<DisplayWindow> display_window_;
-    std::thread display_thread_;
-
-    util::BlockingQueue<SceneUpdateFunc> update_queue_; ///< Used to send scene updates to the main window
+    std::unique_ptr<Scene> scene_;
 };
 
 } // namespace gvs::display
