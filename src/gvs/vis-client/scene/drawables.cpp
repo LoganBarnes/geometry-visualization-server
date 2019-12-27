@@ -35,9 +35,9 @@ using namespace Magnum;
 namespace gvs::vis {
 
 OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
-                               SceneGraph::DrawableGroup3D* group,
-                               GL::Mesh& mesh,
-                               GeneralShader3D& shader)
+                               SceneGraph::DrawableGroup3D*                            group,
+                               GL::Mesh&                                               mesh,
+                               GeneralShader3D&                                        shader)
     : SceneGraph::Drawable3D{object, group}, object_(object), mesh_(mesh), shader_(shader) {}
 
 void OpaqueDrawable::update_display_info(const gvs::proto::DisplayInfo& display_info) {

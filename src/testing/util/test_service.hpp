@@ -33,9 +33,9 @@ namespace test {
 
 class TestService : public gvs::test::proto::Test::Service {
 public:
-    grpc::Status echo(grpc::ServerContext* context,
-                      const gvs::test::proto::TestMessage* request,
-                      gvs::test::proto::TestMessage* response) override;
+    grpc::Status echo(grpc::ServerContext*                 context,
+                      gvs::test::proto::TestMessage const* request,
+                      gvs::test::proto::TestMessage*       response) override;
 };
 
 #ifdef DOCTEST_LIBRARY_INCLUDED

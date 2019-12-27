@@ -26,8 +26,8 @@ namespace gvs {
 namespace test {
 
 grpc::Status TestService::echo(grpc::ServerContext* /*context*/,
-                               const gvs::test::proto::TestMessage* request,
-                               gvs::test::proto::TestMessage* response) {
+                               gvs::test::proto::TestMessage const* request,
+                               gvs::test::proto::TestMessage*       response) {
     response->CopyFrom(*request);
     return grpc::Status::OK;
 }

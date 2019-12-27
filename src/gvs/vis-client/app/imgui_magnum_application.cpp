@@ -236,7 +236,7 @@ void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
         // pan camera
 
         auto world_from_mouse_pos = [&](const auto& mouse_pos, float* dist_to_plane) {
-            auto ray = camera_package_.get_camera_ray_from_window_pos(mouse_pos);
+            auto ray          = camera_package_.get_camera_ray_from_window_pos(mouse_pos);
             auto plane_normal = (ray.origin - camera_orbit_point_).normalized();
 
             *dist_to_plane = intersect_plane(ray, camera_orbit_point_, plane_normal);
@@ -246,7 +246,7 @@ void ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) {
         float should_not_be_inf1, should_not_be_inf2;
 
         auto previous_world_pos = world_from_mouse_pos(previous_position_, &should_not_be_inf1);
-        auto current_world_pos = world_from_mouse_pos(current_position, &should_not_be_inf2);
+        auto current_world_pos  = world_from_mouse_pos(current_position, &should_not_be_inf2);
 
         if (not std::isinf(should_not_be_inf1) and not std::isinf(should_not_be_inf2)) {
             auto diff = current_world_pos - previous_world_pos;

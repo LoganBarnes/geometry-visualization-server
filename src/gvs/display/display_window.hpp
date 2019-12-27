@@ -57,7 +57,7 @@ private:
     std::unique_ptr<Scene> scene_; // forward declaration
 
     util::BlockingQueue<SceneUpdateFunc>& external_update_queue_;
-    std::thread update_thread_;
+    std::thread                           update_thread_;
 
     util::BlockingQueue<SceneUpdateFunc> internal_update_queue_;
 };

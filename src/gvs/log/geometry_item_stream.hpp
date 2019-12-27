@@ -148,8 +148,8 @@ public:
     const std::string& error_message() const;
 
 private:
-    const std::string id_; ///< The id of the stream
-    proto::Scene::Stub* stub_; ///< The RPC stub allowing the stream to send data
+    const std::string    id_; ///< The id of the stream
+    proto::Scene::Stub*  stub_; ///< The RPC stub allowing the stream to send data
     proto::SceneItemInfo info_; ///< The current state of the stream
 
     std::string error_message_ = ""; ///< error messages for this stream, empty if there are none

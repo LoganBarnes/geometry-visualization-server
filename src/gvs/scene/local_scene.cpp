@@ -68,7 +68,7 @@ auto LocalScene::clear() -> void {
 
 auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> {
     auto item_id = uuids::uuid_random_generator{generator_}();
-    auto parent = info.parent;
+    auto parent  = info.parent;
     items_.emplace(item_id, std::move(info));
 
     if (parent) {

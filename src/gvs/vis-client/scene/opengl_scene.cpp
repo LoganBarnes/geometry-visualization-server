@@ -70,9 +70,9 @@ Magnum::MeshPrimitive from_proto(gvs::proto::GeometryFormat format) {
 using namespace Magnum;
 using namespace Math::Literals;
 
-OpenGLScene::ObjectMeshPackage::ObjectMeshPackage(Object3D* obj,
+OpenGLScene::ObjectMeshPackage::ObjectMeshPackage(Object3D*                            obj,
                                                   Magnum::SceneGraph::DrawableGroup3D* drawables,
-                                                  GeneralShader3D& shader)
+                                                  GeneralShader3D&                     shader)
     : object(obj) {
     mesh.setCount(0).setPrimitive(Magnum::MeshPrimitive::Points);
     drawable = new OpaqueDrawable(*object, drawables, mesh, shader);
@@ -142,7 +142,7 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
         const proto::GeometryInfo3D& geometry = info.geometry_info();
 
         std::vector<float> buffer_data;
-        GLintptr offset = 0;
+        GLintptr           offset = 0;
         mesh_package.mesh.setCount(0);
 
         if (geometry.has_positions()) {
@@ -180,8 +180,8 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
                                           info.geometry_info().indices().value().end()};
 
             Containers::Array<char> index_data;
-            MeshIndexType index_type;
-            UnsignedInt index_start, index_end;
+            MeshIndexType           index_type;
+            UnsignedInt             index_start, index_end;
             std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
             mesh_package.index_buffer.setData(index_data, GL::BufferUsage::StaticDraw);
 

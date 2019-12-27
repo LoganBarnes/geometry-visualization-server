@@ -41,7 +41,7 @@ public:
 
 private:
     std::unique_ptr<gvs::net::GrpcServer> server_;
-    std::thread run_thread_;
+    std::thread                           run_thread_;
 };
 
 } // namespace test
@@ -54,12 +54,12 @@ private:
 
 TEST_CASE("[gvs-test-util] run_test_server_and_check_echo_rpc_call") {
     // Create a server and run it in a separate thread
-    std::string server_address = "0.0.0.0:50050";
+    std::string           server_address = "0.0.0.0:50050";
     gvs::test::TestServer server(server_address);
 
     // Create a client to connect to the server
     auto channel = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
-    auto stub = gvs::test::proto::Test::NewStub(channel);
+    auto stub    = gvs::test::proto::Test::NewStub(channel);
 
     // Send a message to the server
     std::string test_msg = "a1, 23kqv9 !F(VMas3982fj!#!#+(*@)(a assdaf;le 1342 asdw32nm";
@@ -67,7 +67,7 @@ TEST_CASE("[gvs-test-util] run_test_server_and_check_echo_rpc_call") {
     gvs::test::proto::TestMessage request = {};
     request.set_msg(test_msg);
 
-    grpc::ClientContext context;
+    grpc::ClientContext           context;
     gvs::test::proto::TestMessage response;
 
     grpc::Status status = stub->echo(&context, request, &response);
@@ -91,7 +91,7 @@ TEST_CASE("[gvs-test-util] run_inprocess_test_server_and_check_echo_rpc_call") {
     gvs::test::proto::TestMessage request = {};
     request.set_msg(test_msg);
 
-    grpc::ClientContext context;
+    grpc::ClientContext           context;
     gvs::test::proto::TestMessage response;
 
     grpc::Status status = stub->echo(&context, request, &response);

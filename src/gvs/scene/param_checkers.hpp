@@ -62,7 +62,7 @@ struct SceneChecker {
 
     auto operator()(SceneItemInfo const& info) -> void { *data_ = (!!(info.*member) || (info.*member)->empty()); }
 
-    SceneChecker(const SceneChecker&) = delete;
+    SceneChecker(const SceneChecker&)     = delete;
     SceneChecker(SceneChecker&&) noexcept = delete;
     SceneChecker& operator=(const SceneChecker&) = delete;
     SceneChecker& operator=(SceneChecker&&) noexcept = delete;
@@ -84,10 +84,10 @@ struct SceneGeometryChecker {
             return;
         }
         auto const& geometry_info = info.geometry_info.value();
-        *data_ = (!!(geometry_info.*member) || (geometry_info.*member)->empty());
+        *data_                    = (!!(geometry_info.*member) || (geometry_info.*member)->empty());
     }
 
-    SceneGeometryChecker(const SceneGeometryChecker&) = delete;
+    SceneGeometryChecker(const SceneGeometryChecker&)     = delete;
     SceneGeometryChecker(SceneGeometryChecker&&) noexcept = delete;
     SceneGeometryChecker& operator=(const SceneGeometryChecker&) = delete;
     SceneGeometryChecker& operator=(SceneGeometryChecker&&) noexcept = delete;
@@ -112,7 +112,7 @@ struct SceneDisplayChecker {
         *data_ = (!!(info.*member));
     }
 
-    SceneDisplayChecker(const SceneDisplayChecker&) = delete;
+    SceneDisplayChecker(const SceneDisplayChecker&)     = delete;
     SceneDisplayChecker(SceneDisplayChecker&&) noexcept = delete;
     SceneDisplayChecker& operator=(const SceneDisplayChecker&) = delete;
     SceneDisplayChecker& operator=(SceneDisplayChecker&&) noexcept = delete;
@@ -126,21 +126,21 @@ protected:
 /*
  * Checkers
  */
-using HasGeometry = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::positions>;
-using HasPositions3d = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::positions>;
-using HasNormals3d = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::normals>;
+using HasGeometry             = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::positions>;
+using HasPositions3d          = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::positions>;
+using HasNormals3d            = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::normals>;
 using HasTextureCoordinates3d = detail::SceneGeometryChecker<AttributeVector<2>, &GeometryInfo::texture_coordinates>;
-using HasVertexColors3d = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::vertex_colors>;
-using HasIndices = detail::SceneGeometryChecker<std::vector<unsigned>, &GeometryInfo::indices>;
+using HasVertexColors3d       = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::vertex_colors>;
+using HasIndices              = detail::SceneGeometryChecker<std::vector<unsigned>, &GeometryInfo::indices>;
 
 using HasChildren = detail::SceneChecker<std::vector<SceneID>, &SceneItemInfo::children>;
 
-using HasReadableId = detail::SceneDisplayChecker<std::string, &DisplayInfo::readable_id>;
+using HasReadableId     = detail::SceneDisplayChecker<std::string, &DisplayInfo::readable_id>;
 using HasGeometryFormat = detail::SceneDisplayChecker<GeometryFormat, &DisplayInfo::geometry_format>;
 using HasTransformation = detail::SceneDisplayChecker<mat4, &DisplayInfo::transformation>;
-using HasUniformColor = detail::SceneDisplayChecker<vec3, &DisplayInfo::uniform_color>;
-using HasColoring = detail::SceneDisplayChecker<Coloring, &DisplayInfo::coloring>;
-using HasShading = detail::SceneDisplayChecker<Shading, &DisplayInfo::shading>;
-using HasOpacity = detail::SceneDisplayChecker<float, &DisplayInfo::opacity>;
+using HasUniformColor   = detail::SceneDisplayChecker<vec3, &DisplayInfo::uniform_color>;
+using HasColoring       = detail::SceneDisplayChecker<Coloring, &DisplayInfo::coloring>;
+using HasShading        = detail::SceneDisplayChecker<Shading, &DisplayInfo::shading>;
+using HasOpacity        = detail::SceneDisplayChecker<float, &DisplayInfo::opacity>;
 
 } // namespace gvs

@@ -77,11 +77,11 @@ public:
     }
 
     [[nodiscard]] auto data() const { return data_.data(); }
-    auto data() { return data_.data(); }
+    auto               data() { return data_.data(); }
     [[nodiscard]] auto size() const { return data_.size(); }
-    auto size() { return data_.size(); }
+    auto               size() { return data_.size(); }
     [[nodiscard]] auto empty() const { return data_.empty(); }
-    auto empty() { return data_.empty(); }
+    auto               empty() { return data_.empty(); }
 
 private:
     std::vector<float> data_;
@@ -110,13 +110,13 @@ struct UniformColor {};
 
 struct LambertianShading {
     vec3 light_direction = {-1.f, -1.f, -1.f};
-    vec3 light_color = {1.f, 1.f, 1.f};
-    vec3 ambient_color = {0.15f, 0.15f, 0.15f};
+    vec3 light_color     = {1.f, 1.f, 1.f};
+    vec3 ambient_color   = {0.15f, 0.15f, 0.15f};
 };
 
 using Shading = std::variant<UniformColor, LambertianShading>;
 
-constexpr auto default_readable_id = "Scene Item";
+constexpr auto default_readable_id     = "Scene Item";
 constexpr auto default_geometry_format = GeometryFormat::Points;
 // clang-format off
 constexpr auto default_transformation = mat4{
@@ -127,34 +127,34 @@ constexpr auto default_transformation = mat4{
 };
 // clang-format on
 constexpr auto default_uniform_color = vec3{1.f, 0.9f, 0.7f};
-constexpr auto default_coloring = Coloring::UniformColor;
-constexpr auto default_shading = Shading{UniformColor{}};
-constexpr auto default_visible = true;
-constexpr auto default_opacity = 1.f;
+constexpr auto default_coloring      = Coloring::UniformColor;
+constexpr auto default_shading       = Shading{UniformColor{}};
+constexpr auto default_visible       = true;
+constexpr auto default_opacity       = 1.f;
 
 struct GeometryInfo {
-    std::optional<AttributeVector<3>> positions;
-    std::optional<AttributeVector<3>> normals;
-    std::optional<AttributeVector<2>> texture_coordinates;
-    std::optional<AttributeVector<3>> vertex_colors;
+    std::optional<AttributeVector<3>>    positions;
+    std::optional<AttributeVector<3>>    normals;
+    std::optional<AttributeVector<2>>    texture_coordinates;
+    std::optional<AttributeVector<3>>    vertex_colors;
     std::optional<std::vector<unsigned>> indices;
 };
 
 struct DisplayInfo {
-    std::optional<std::string> readable_id;
+    std::optional<std::string>    readable_id;
     std::optional<GeometryFormat> geometry_format;
-    std::optional<mat4> transformation;
-    std::optional<vec3> uniform_color;
-    std::optional<Coloring> coloring;
-    std::optional<Shading> shading;
-    std::optional<bool> visible;
-    std::optional<float> opacity;
+    std::optional<mat4>           transformation;
+    std::optional<vec3>           uniform_color;
+    std::optional<Coloring>       coloring;
+    std::optional<Shading>        shading;
+    std::optional<bool>           visible;
+    std::optional<float>          opacity;
 };
 
 struct SceneItemInfo {
-    std::optional<GeometryInfo> geometry_info;
-    std::optional<DisplayInfo> display_info;
-    std::optional<SceneID> parent;
+    std::optional<GeometryInfo>         geometry_info;
+    std::optional<DisplayInfo>          display_info;
+    std::optional<SceneID>              parent;
     std::optional<std::vector<SceneID>> children;
 };
 

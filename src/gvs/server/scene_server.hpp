@@ -45,9 +45,9 @@ private:
 
     // atomicize these
     proto::SceneItems scene_;
-    proto::Messages messages_;
+    proto::Messages   messages_;
 
-    grpcw::server::StreamInterface<proto::Message>* message_stream_;
+    grpcw::server::StreamInterface<proto::Message>*     message_stream_;
     grpcw::server::StreamInterface<proto::SceneUpdate>* scene_stream_;
 
     /*

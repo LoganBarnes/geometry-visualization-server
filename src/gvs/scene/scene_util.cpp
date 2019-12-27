@@ -34,14 +34,14 @@ namespace gvs::scene {
 namespace {
 
 auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
-    std::string readable_id;
+    std::string    readable_id;
     GeometryFormat geometry_format;
-    mat4 transformation;
-    vec3 uniform_color;
-    Coloring coloring;
-    Shading shading;
-    bool visible;
-    float opacity;
+    mat4           transformation;
+    vec3           uniform_color;
+    Coloring       coloring;
+    Shading        shading;
+    bool           visible;
+    float          opacity;
 
     bool has_geometry;
     bool has_children;
@@ -61,13 +61,13 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
         throw std::runtime_error(result.error().debug_error_message());
     }
 
-    auto const id_str = to_string(item_id);
+    auto const      id_str = to_string(item_id);
     imgui::ScopedID scoped_id(id_str.c_str());
 
     ImGui::Checkbox("###visible", &visible);
     ImGui::SameLine();
 
-    bool item_changed = false;
+    bool item_changed     = false;
     bool children_changed = false;
 
     if (ImGui::TreeNode(readable_id.c_str())) {
@@ -88,7 +88,7 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
                                  " White \0"
                                  "\0")) {
                     item_changed = true;
-                    coloring = static_cast<Coloring>(icoloring);
+                    coloring     = static_cast<Coloring>(icoloring);
                 }
 
                 if (coloring == Coloring::UniformColor) {
@@ -142,7 +142,7 @@ auto SceneUtil::configure_gui(Scene* scene) -> bool {
     }
 
     std::optional<std::vector<SceneID>> children;
-    auto result = scene->get_item_info(nil_id, GetChildren(&children));
+    auto                                result = scene->get_item_info(nil_id, GetChildren(&children));
     if (!result) {
         throw std::runtime_error(result.error().debug_error_message());
     }

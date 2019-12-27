@@ -105,12 +105,12 @@ auto indices(const std::vector<unsigned>& data) -> std::function<std::string(pro
     };
 }
 
-constexpr auto points = indices<proto::GeometryFormat::POINTS>;
-constexpr auto lines = indices<proto::GeometryFormat::LINES>;
-constexpr auto line_strip = indices<proto::GeometryFormat::LINE_STRIP>;
-constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
+constexpr auto points         = indices<proto::GeometryFormat::POINTS>;
+constexpr auto lines          = indices<proto::GeometryFormat::LINES>;
+constexpr auto line_strip     = indices<proto::GeometryFormat::LINE_STRIP>;
+constexpr auto triangles      = indices<proto::GeometryFormat::TRIANGLES>;
 constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
-constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
+constexpr auto triangle_fan   = indices<proto::GeometryFormat::TRIANGLE_FAN>;
 
 inline auto geometry_format(const proto::GeometryFormat& data) -> std::function<std::string(proto::SceneItemInfo*)> {
     return [data](proto::SceneItemInfo* info) {
@@ -151,8 +151,8 @@ struct LambertianShading {
     std::array<float, 3> light_color;
     std::array<float, 3> ambient_color;
 
-    explicit LambertianShading(std::array<float, 3> light_dir = {-1.f, -1.f, -1.f},
-                               std::array<float, 3> light_colour = {1.f, 1.f, 1.f},
+    explicit LambertianShading(std::array<float, 3> light_dir      = {-1.f, -1.f, -1.f},
+                               std::array<float, 3> light_colour   = {1.f, 1.f, 1.f},
                                std::array<float, 3> ambient_colour = {0.15f, 0.15f, 0.15f})
         : light_direction(light_dir), light_color(light_colour), ambient_color(ambient_colour) {}
 };
@@ -254,7 +254,7 @@ auto transformation(const Mat4& data) -> std::function<std::string(proto::SceneI
         if (info->mutable_display_info()->has_transformation()) {
             return "transformation";
         }
-        proto::Mat4* transformation = info->mutable_display_info()->mutable_transformation();
+        proto::Mat4* transformation       = info->mutable_display_info()->mutable_transformation();
         *(transformation->mutable_data()) = {data_ptr(data), data_ptr(data) + 16};
         return "";
     };
@@ -266,7 +266,7 @@ auto uniform_color(const Vec3& data) -> std::function<std::string(proto::SceneIt
         if (info->mutable_display_info()->has_uniform_color()) {
             return "uniform_color";
         }
-        const float* data_start = data_ptr(data);
+        const float* data_start    = data_ptr(data);
         proto::Vec3* uniform_color = info->mutable_display_info()->mutable_uniform_color();
         uniform_color->set_x(data_start[0]);
         uniform_color->set_y(data_start[1]);

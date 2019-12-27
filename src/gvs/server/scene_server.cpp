@@ -88,7 +88,7 @@ void set_display_defaults(proto::SceneItemInfo* info) {
 
 void update_display_defaults(proto::SceneItemInfo* old_info, const proto::SceneItemInfo& new_info) {
     if (new_info.has_display_info()) {
-        proto::DisplayInfo* old_display_info = old_info->mutable_display_info();
+        proto::DisplayInfo*       old_display_info = old_info->mutable_display_info();
         const proto::DisplayInfo& new_display_info = new_info.display_info();
 
         if (new_display_info.has_readable_id()) {
@@ -126,7 +126,7 @@ SceneServer::SceneServer(const std::string& server_address)
      * Streaming calls
      */
     message_stream_ = server_->register_async_stream(&Service::RequestMessageUpdates).stream();
-    scene_stream_ = server_->register_async_stream(&Service::RequestSceneUpdates).stream();
+    scene_stream_   = server_->register_async_stream(&Service::RequestSceneUpdates).stream();
 
     /*
      * Getters for current state
@@ -379,7 +379,7 @@ public:
 
         bool successfully_sent [[maybe_unused]] = grpc_client_.use_stub([&](auto& stub) {
             grpc::ClientContext context;
-            grpc::Status status = stub.UpdateScene(&context, request, &errors);
+            grpc::Status        status = stub.UpdateScene(&context, request, &errors);
 
             REQUIRE(status.ok());
         });
@@ -406,7 +406,7 @@ TEST_CASE("[gvs-server] test_no_update_set") {
     SceneTestClient client(server.grpc_server());
 
     gvs::proto::SceneUpdateRequest request;
-    gvs::proto::Errors errors = client.send_request(request);
+    gvs::proto::Errors             errors = client.send_request(request);
     CHECK(errors.error_msg() == "No update set");
 }
 
@@ -421,7 +421,7 @@ TEST_CASE("[gvs-server] test_safe_send") {
 
     SUBCASE("no_update_set") {
         gvs::proto::SceneUpdateRequest request;
-        gvs::proto::Errors errors = client.send_request(request);
+        gvs::proto::Errors             errors = client.send_request(request);
         CHECK(errors.error_msg() == "No update set");
     }
 

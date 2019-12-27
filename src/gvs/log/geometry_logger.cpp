@@ -44,7 +44,7 @@ std::string GeometryLogger::clear_all_items() {
         update.mutable_clear_all();
 
         grpc::ClientContext context;
-        proto::Errors errors;
+        proto::Errors       errors;
 
         grpc::Status status = stub_->UpdateScene(&context, update, &errors);
 

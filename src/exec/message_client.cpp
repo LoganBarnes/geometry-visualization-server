@@ -24,7 +24,7 @@
 
 int main(int argc, char* argv[]) {
     std::string server_address = "0.0.0.0:50055";
-    std::string client_name = "Client";
+    std::string client_name    = "Client";
 
     if (argc > 1) {
         server_address = argv[1];

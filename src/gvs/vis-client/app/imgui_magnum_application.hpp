@@ -50,9 +50,9 @@ protected:
     void reset_draw_counter();
 
 private:
-    virtual void update() = 0;
+    virtual void update()                                          = 0;
     virtual void render(const CameraPackage& camera_package) const = 0;
-    virtual void configure_gui() = 0;
+    virtual void configure_gui()                                   = 0;
 
     virtual void resize(const Magnum::Vector2i& viewport) = 0;
 
@@ -73,16 +73,16 @@ private:
     void update_camera();
 
     Magnum::ImGuiIntegration::Context imgui_{Magnum::NoCreate};
-    int draw_counter_ = 1; // continue drawing until this counter is zero
+    int                               draw_counter_ = 1; // continue drawing until this counter is zero
 
     // Camera
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
-    CameraPackage camera_package_;
+    CameraPackage                                                         camera_package_;
 
-    Magnum::Vector2 previous_position_ = {};
-    Magnum::Vector2 camera_yaw_and_pitch_ = {};
-    float camera_orbit_distance_ = 15.f;
-    Magnum::Vector3 camera_orbit_point_ = {};
+    Magnum::Vector2 previous_position_     = {};
+    Magnum::Vector2 camera_yaw_and_pitch_  = {};
+    float           camera_orbit_distance_ = 15.f;
+    Magnum::Vector3 camera_orbit_point_    = {};
 };
 
 } // namespace gvs::vis

@@ -101,9 +101,9 @@ public:
     }
 
 private:
-    std::mutex mutex_;
+    std::mutex              mutex_;
     std::condition_variable condition_;
-    std::queue<T> queue_;
+    std::queue<T>           queue_;
 };
 
 } // namespace util

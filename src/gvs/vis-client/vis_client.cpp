@@ -179,9 +179,9 @@ void vis::VisClient::configure_gui() {
     ImGui::Text("Server State: ");
     ImGui::SameLine();
 
-    auto state = grpc_client_->get_state();
-    std::string state_text = to_pretty_string(state);
-    ImVec4 state_color = to_pretty_color(state);
+    auto        state       = grpc_client_->get_state();
+    std::string state_text  = to_pretty_string(state);
+    ImVec4      state_color = to_pretty_color(state);
 
     ImGui::TextColored(state_color, "%s\t", state_text.c_str());
 
@@ -239,7 +239,7 @@ void vis::VisClient::configure_gui() {
 
     messages_.use_safely([&](const proto::Messages& messages) {
         float message_input_start_height = h - 100.f;
-        float max_message_window_height = message_input_start_height - ImGui::GetCursorPos().y;
+        float max_message_window_height  = message_input_start_height - ImGui::GetCursorPos().y;
 
         add_three_line_separator();
 
@@ -276,8 +276,8 @@ void vis::VisClient::configure_gui() {
 
         if (grpc_client_->use_stub([&](auto& stub) {
                 grpc::ClientContext context;
-                proto::Errors errors;
-                grpc::Status status = stub.SendMessage(&context, message, &errors);
+                proto::Errors       errors;
+                grpc::Status        status = stub.SendMessage(&context, message, &errors);
 
                 if (not status.ok()) {
                     error_message_ = status.error_message();
@@ -340,7 +340,7 @@ void VisClient::get_message_state(bool redraw) {
 
     if (grpc_client_->use_stub([&](auto& stub) {
             // This lambda is only used if the client is connected
-            grpc::ClientContext context;
+            grpc::ClientContext     context;
             google::protobuf::Empty empty;
             stub.GetAllMessages(&context, empty, &messages);
         })) {
@@ -359,7 +359,7 @@ void VisClient::get_scene_state(bool redraw) {
 
     if (grpc_client_->use_stub([&](auto& stub) {
             // This lambda is only used if the client is connected
-            grpc::ClientContext context;
+            grpc::ClientContext     context;
             google::protobuf::Empty empty;
             stub.GetAllItems(&context, empty, &scene);
         })) {

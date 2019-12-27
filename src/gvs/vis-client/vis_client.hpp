@@ -60,6 +60,7 @@ private:
 
     // Networking
     std::string server_address_input_ = "address:port";
+
     using Service = proto::Scene;
     std::unique_ptr<grpcw::client::GrpcClient<Service>> grpc_client_;
 
@@ -67,13 +68,13 @@ private:
     bool run_as_fast_as_possible_ = false;
 
     // Messages
-    bool wrap_text_ = false;
+    bool                              wrap_text_ = false;
     util::AtomicData<proto::Messages> messages_;
-    std::string message_id_input_;
-    std::string message_content_input_;
+    std::string                       message_id_input_;
+    std::string                       message_content_input_;
 
     // Scene
-    std::unique_ptr<SceneInterface> scene_; // forward declaration
+    std::unique_ptr<SceneInterface>                   scene_; // forward declaration
     util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
 };
 

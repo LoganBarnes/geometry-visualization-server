@@ -75,7 +75,7 @@ public:
 
 private:
     Callback callback_;
-    Tuple args_;
+    Tuple    args_;
 };
 
 template <typename ReturnType, typename Callback, typename Tuple, typename... Args>

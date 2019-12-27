@@ -38,7 +38,7 @@
 namespace gvs::vis {
 
 struct SceneInitializationInfo {
-    Magnum::Vector3 background_color;
+    Magnum::Vector3  background_color;
     Magnum::Vector2i viewport_size;
 };
 
@@ -46,18 +46,18 @@ class SceneInterface {
 public:
     virtual ~SceneInterface() = 0;
 
-    virtual void update(const Magnum::Vector2i& viewport) = 0;
-    virtual void render(const CameraPackage& camera_package) = 0;
+    virtual void update(const Magnum::Vector2i& viewport)        = 0;
+    virtual void render(const CameraPackage& camera_package)     = 0;
     virtual void configure_gui(const Magnum::Vector2i& viewport) = 0;
 
-    virtual void add_item(const proto::SceneItemInfo& info) = 0;
+    virtual void add_item(const proto::SceneItemInfo& info)    = 0;
     virtual void update_item(const proto::SceneItemInfo& info) = 0;
-    virtual void reset(const proto::SceneItems& items) = 0;
+    virtual void reset(const proto::SceneItems& items)         = 0;
 
     virtual void resize(const Magnum::Vector2i& viewport) = 0;
 
     virtual std::size_t items() const = 0;
-    virtual bool empty() const = 0;
+    virtual bool        empty() const = 0;
 };
 
 inline SceneInterface::~SceneInterface() = default;

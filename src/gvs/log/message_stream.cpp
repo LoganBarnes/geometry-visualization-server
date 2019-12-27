@@ -39,8 +39,8 @@ void MessageStream::send() {
         content_stream_.str("");
 
         grpc::ClientContext context;
-        proto::Errors errors;
-        grpc::Status status = stub_->SendMessage(&context, message_, &errors);
+        proto::Errors       errors;
+        grpc::Status        status = stub_->SendMessage(&context, message_, &errors);
 
         if (not status.ok()) {
             std::cerr << "Error sending message: " << status.error_message() << std::endl;

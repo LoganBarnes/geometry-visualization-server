@@ -43,23 +43,23 @@ public:
     explicit GeometryLogger(const std::string& server_address);
 
     template <typename Rep, typename Period>
-    explicit GeometryLogger(const std::string& server_address,
+    explicit GeometryLogger(const std::string&                        server_address,
                             const std::chrono::duration<Rep, Period>& max_connection_wait_duration);
 
     bool connected() const;
 
     std::string generate_uuid() const;
 
-    std::string clear_all_items();
+    std::string        clear_all_items();
     GeometryItemStream item_stream(const std::string& id = "") const;
 
 private:
-    std::shared_ptr<grpc::Channel> channel_;
+    std::shared_ptr<grpc::Channel>      channel_;
     std::unique_ptr<proto::Scene::Stub> stub_;
 };
 
 template <typename Rep, typename Period>
-GeometryLogger::GeometryLogger(const std::string& server_address,
+GeometryLogger::GeometryLogger(const std::string&                        server_address,
                                const std::chrono::duration<Rep, Period>& max_connection_wait_duration) {
 
     if (server_address.empty()) {

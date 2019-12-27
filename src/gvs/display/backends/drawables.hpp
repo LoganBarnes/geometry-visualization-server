@@ -33,9 +33,9 @@ namespace gvs::display::backends {
 class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {
 public:
     explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
-                            Magnum::SceneGraph::DrawableGroup3D* group,
-                            Magnum::GL::Mesh& mesh,
-                            GeneralShader3d& shader);
+                            Magnum::SceneGraph::DrawableGroup3D*                                    group,
+                            Magnum::GL::Mesh&                                                       mesh,
+                            GeneralShader3d&                                                        shader);
 
     ~OpaqueDrawable() override = default;
 
@@ -45,11 +45,11 @@ private:
     void draw(Magnum::Matrix4 const& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object_;
-    Magnum::GL::Mesh& mesh_;
+    Magnum::GL::Mesh&                                                       mesh_;
 
-    Coloring coloring_ = default_coloring;
+    Coloring       coloring_      = default_coloring;
     Magnum::Color3 uniform_color_ = {default_uniform_color[0], default_uniform_color[1], default_uniform_color[2]};
-    Shading shading_ = default_shading;
+    Shading        shading_       = default_shading;
 
     GeneralShader3d& shader_;
 };

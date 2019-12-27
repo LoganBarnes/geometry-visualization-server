@@ -68,7 +68,7 @@ struct SceneSetter {
         return "";
     }
 
-    SceneSetter(const SceneSetter&) = delete;
+    SceneSetter(const SceneSetter&)     = delete;
     SceneSetter(SceneSetter&&) noexcept = delete;
     SceneSetter& operator=(const SceneSetter&) = delete;
     SceneSetter& operator=(SceneSetter&&) noexcept = delete;
@@ -98,7 +98,7 @@ struct SceneGeometrySetter {
         return "";
     }
 
-    SceneGeometrySetter(const SceneGeometrySetter&) = delete;
+    SceneGeometrySetter(const SceneGeometrySetter&)     = delete;
     SceneGeometrySetter(SceneGeometrySetter&&) noexcept = delete;
     SceneGeometrySetter& operator=(const SceneGeometrySetter&) = delete;
     SceneGeometrySetter& operator=(SceneGeometrySetter&&) noexcept = delete;
@@ -123,7 +123,7 @@ struct SceneIndicesSetter {
         }
 
         auto& geometry_info = info->geometry_info.value();
-        auto& display_info = info->display_info.value();
+        auto& display_info  = info->display_info.value();
 
         if (geometry_info.indices) {
             return "Scene parameter already set.";
@@ -133,13 +133,13 @@ struct SceneIndicesSetter {
             return "Scene parameter already set.";
         }
 
-        geometry_info.indices = std::move(data_);
+        geometry_info.indices        = std::move(data_);
         display_info.geometry_format = Format;
 
         return "";
     }
 
-    SceneIndicesSetter(const SceneIndicesSetter&) = delete;
+    SceneIndicesSetter(const SceneIndicesSetter&)     = delete;
     SceneIndicesSetter(SceneIndicesSetter&&) noexcept = delete;
     SceneIndicesSetter& operator=(const SceneIndicesSetter&) = delete;
     SceneIndicesSetter& operator=(SceneIndicesSetter&&) noexcept = delete;
@@ -169,7 +169,7 @@ struct SceneDisplaySetter {
         return "";
     }
 
-    SceneDisplaySetter(const SceneDisplaySetter&) = delete;
+    SceneDisplaySetter(const SceneDisplaySetter&)     = delete;
     SceneDisplaySetter(SceneDisplaySetter&&) noexcept = delete;
     SceneDisplaySetter& operator=(const SceneDisplaySetter&) = delete;
     SceneDisplaySetter& operator=(SceneDisplaySetter&&) noexcept = delete;
@@ -183,28 +183,28 @@ protected:
 /*
  * Setters
  */
-using SetPositions3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::positions>;
-using SetNormals3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::normals>;
+using SetPositions3d          = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::positions>;
+using SetNormals3d            = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::normals>;
 using SetTextureCoordinates3d = detail::SceneGeometrySetter<AttributeVector<2>, &GeometryInfo::texture_coordinates>;
-using SetVertexColors3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::vertex_colors>;
-using SetIndices = detail::SceneGeometrySetter<std::vector<unsigned>, &GeometryInfo::indices>;
+using SetVertexColors3d       = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::vertex_colors>;
+using SetIndices              = detail::SceneGeometrySetter<std::vector<unsigned>, &GeometryInfo::indices>;
 
-using SetPoints = detail::SceneIndicesSetter<GeometryFormat::Points>;
-using SetLines = detail::SceneIndicesSetter<GeometryFormat::Lines>;
-using SetLineStrip = detail::SceneIndicesSetter<GeometryFormat::LineStrip>;
-using SetTriangles = detail::SceneIndicesSetter<GeometryFormat::Triangles>;
+using SetPoints        = detail::SceneIndicesSetter<GeometryFormat::Points>;
+using SetLines         = detail::SceneIndicesSetter<GeometryFormat::Lines>;
+using SetLineStrip     = detail::SceneIndicesSetter<GeometryFormat::LineStrip>;
+using SetTriangles     = detail::SceneIndicesSetter<GeometryFormat::Triangles>;
 using SetTriangleStrip = detail::SceneIndicesSetter<GeometryFormat::TriangleStrip>;
-using SetTriangleFan = detail::SceneIndicesSetter<GeometryFormat::TriangleFan>;
+using SetTriangleFan   = detail::SceneIndicesSetter<GeometryFormat::TriangleFan>;
 
 using SetParent = detail::SceneSetter<SceneID, &SceneItemInfo::parent>;
 
-using SetReadableId = detail::SceneDisplaySetter<std::string, &DisplayInfo::readable_id>;
+using SetReadableId     = detail::SceneDisplaySetter<std::string, &DisplayInfo::readable_id>;
 using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &DisplayInfo::geometry_format>;
 using SetTransformation = detail::SceneDisplaySetter<mat4, &DisplayInfo::transformation>;
-using SetUniformColor = detail::SceneDisplaySetter<vec3, &DisplayInfo::uniform_color>;
-using SetColoring = detail::SceneDisplaySetter<Coloring, &DisplayInfo::coloring>;
-using SetShading = detail::SceneDisplaySetter<Shading, &DisplayInfo::shading>;
-using SetVisible = detail::SceneDisplaySetter<bool, &DisplayInfo::visible>;
-using SetOpacity = detail::SceneDisplaySetter<float, &DisplayInfo::opacity>;
+using SetUniformColor   = detail::SceneDisplaySetter<vec3, &DisplayInfo::uniform_color>;
+using SetColoring       = detail::SceneDisplaySetter<Coloring, &DisplayInfo::coloring>;
+using SetShading        = detail::SceneDisplaySetter<Shading, &DisplayInfo::shading>;
+using SetVisible        = detail::SceneDisplaySetter<bool, &DisplayInfo::visible>;
+using SetOpacity        = detail::SceneDisplaySetter<float, &DisplayInfo::opacity>;
 
 } // namespace gvs

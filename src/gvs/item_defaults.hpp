@@ -27,13 +27,13 @@ namespace gvs {
 /*
  * Item defaults
  */
-constexpr proto::GeometryFormat default_geom_format = proto::GeometryFormat::POINTS;
+constexpr proto::GeometryFormat default_geom_format    = proto::GeometryFormat::POINTS;
 constexpr std::array<float, 16> default_transformation = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-constexpr std::array<float, 3> default_color = {0.9f, 0.8f, 0.7f};
-constexpr proto::Coloring default_coloring = proto::Coloring::UNIFORM_COLOR;
+constexpr std::array<float, 3>  default_color          = {0.9f, 0.8f, 0.7f};
+constexpr proto::Coloring       default_coloring       = proto::Coloring::UNIFORM_COLOR;
 
 constexpr std::array<float, 3> default_light_direction = {-1.f, -2.f, -3.f};
-constexpr std::array<float, 3> default_light_color = {0.85f, 0.85f, 0.85f};
-constexpr std::array<float, 3> default_ambient_color = {0.1f, 0.1f, 0.1f};
+constexpr std::array<float, 3> default_light_color     = {0.85f, 0.85f, 0.85f};
+constexpr std::array<float, 3> default_ambient_color   = {0.1f, 0.1f, 0.1f};
 
 } // namespace gvs

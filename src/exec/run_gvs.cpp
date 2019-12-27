@@ -30,8 +30,8 @@
 namespace {
 
 // Allows the main thread to block until someone sends SIGINT
-bool exit_server = false;
-std::mutex mtx;
+bool                    exit_server = false;
+std::mutex              mtx;
 std::condition_variable block_until_signal;
 
 void signal_handler(int /*signal*/) {
@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
     std::signal(SIGINT, signal_handler);
 
     std::string host_address = "0.0.0.0:50055";
-    bool client_only = false;
-    bool server_only = false;
+    bool        client_only  = false;
+    bool        server_only  = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];

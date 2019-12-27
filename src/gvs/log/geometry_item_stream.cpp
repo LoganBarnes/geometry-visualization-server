@@ -47,7 +47,7 @@ void GeometryItemStream::send_current_data(SendType type) {
         }
 
         grpc::ClientContext context;
-        proto::Errors errors;
+        proto::Errors       errors;
 
         grpc::Status status = stub_->UpdateScene(&context, update, &errors);
 

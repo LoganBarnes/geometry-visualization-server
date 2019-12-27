@@ -39,12 +39,12 @@ namespace gvs::display::backends {
 namespace {
 
 auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
-                GeometryInfo const& new_geom,
-                GeometryInfo const& old_geom) -> void {
+                GeometryInfo const&               new_geom,
+                GeometryInfo const&               old_geom) -> void {
 
     std::vector<float> buffer_data;
-    GLintptr offset = 0;
-    mesh_package->vbo_count = 0;
+    GLintptr           offset = 0;
+    mesh_package->vbo_count   = 0;
 
     auto update_attribute
         = [&mesh_package, &offset, &buffer_data](auto const& optional_attribute, auto const& shader_attribute) {
@@ -89,8 +89,8 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
 auto update_ibo(OpenglBackend::ObjectMeshPackage* mesh_package, std::vector<unsigned> const& indices) {
     if (!indices.empty()) {
         Corrade::Containers::Array<char> index_data;
-        Magnum::MeshIndexType index_type;
-        Magnum::UnsignedInt index_start, index_end;
+        Magnum::MeshIndexType            index_type;
+        Magnum::UnsignedInt              index_start, index_end;
         std::tie(index_data, index_type, index_start, index_end) = Magnum::MeshTools::compressIndices(indices);
         mesh_package->index_buffer.setData(index_data, Magnum::GL::BufferUsage::StaticDraw);
 
@@ -103,9 +103,9 @@ auto update_ibo(OpenglBackend::ObjectMeshPackage* mesh_package, std::vector<unsi
 
 } // namespace
 
-OpenglBackend::ObjectMeshPackage::ObjectMeshPackage(Object3D* obj,
+OpenglBackend::ObjectMeshPackage::ObjectMeshPackage(Object3D*                            obj,
                                                     Magnum::SceneGraph::DrawableGroup3D* drawables,
-                                                    GeneralShader3d& shader)
+                                                    GeneralShader3d&                     shader)
     : object(obj) {
     mesh.setCount(0).setPrimitive(to_magnum(default_geometry_format));
     drawable = new OpaqueDrawable(*object, drawables, mesh, shader);
@@ -144,7 +144,7 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
     -> void {
 
     ObjectMeshPackage& mesh_package = *objects_.at(item_id);
-    auto const& old_info = items.at(item_id);
+    auto const&        old_info     = items.at(item_id);
 
     if (new_info.geometry_info) {
         GeometryInfo const& new_geom = new_info.geometry_info.value();

@@ -143,7 +143,7 @@ public:
 
 private:
     const std::string id_; ///< The id of the stream
-    SceneItemInfo info_; ///< The current state of the stream
+    SceneItemInfo     info_; ///< The current state of the stream
 
     SceneInfoSender& sender_; ///< Updates the scene when requested
 

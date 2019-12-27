@@ -47,7 +47,7 @@ public:
 
 private:
     std::unique_ptr<DisplayWindow> display_window_;
-    std::thread display_thread_;
+    std::thread                    display_thread_;
 
     util::BlockingQueue<SceneUpdateFunc> update_queue_; ///< Used to send scene updates to the main window
 };

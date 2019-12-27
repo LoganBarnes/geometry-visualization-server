@@ -97,13 +97,13 @@ public:
     /**
      * @brief Access the data directly in a non thread safe manner
      */
-    T& unsafe_data();
+    T&       unsafe_data();
     const T& unsafe_data() const;
 
 private:
-    mutable std::mutex lock_; // mutable so it can be used with const functions
+    mutable std::mutex      lock_; // mutable so it can be used with const functions
     std::condition_variable condition_;
-    T data_;
+    T                       data_;
 };
 
 template <typename T>

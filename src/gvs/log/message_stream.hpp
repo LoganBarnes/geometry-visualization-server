@@ -48,9 +48,9 @@ public:
     explicit MessageStream(const std::string& server_address, const std::string& identifier = "Client");
 
     template <typename Rep, typename Period>
-    explicit MessageStream(const std::string& server_address,
+    explicit MessageStream(const std::string&                        server_address,
                            const std::chrono::duration<Rep, Period>& max_connection_wait_duration,
-                           const std::string& identifier = "Client");
+                           const std::string&                        identifier = "Client");
 
     bool connected() const;
 
@@ -62,16 +62,16 @@ public:
     MessageStream& operator<<(const T& data);
 
 private:
-    std::shared_ptr<grpc::Channel> channel_;
+    std::shared_ptr<grpc::Channel>      channel_;
     std::unique_ptr<proto::Scene::Stub> stub_;
-    proto::Message message_;
-    std::stringstream content_stream_;
+    proto::Message                      message_;
+    std::stringstream                   content_stream_;
 };
 
 template <typename Rep, typename Period>
-MessageStream::MessageStream(const std::string& server_address,
+MessageStream::MessageStream(const std::string&                        server_address,
                              const std::chrono::duration<Rep, Period>& max_connection_wait_duration,
-                             const std::string& identifier) {
+                             const std::string&                        identifier) {
 
     grpc::ChannelArguments channel_args;
     channel_args.SetMaxReceiveMessageSize(std::numeric_limits<int>::max());

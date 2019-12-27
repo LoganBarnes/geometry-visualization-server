@@ -33,9 +33,9 @@ namespace gvs::vis {
 class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {
 public:
     explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
-                            Magnum::SceneGraph::DrawableGroup3D* group,
-                            Magnum::GL::Mesh& mesh,
-                            GeneralShader3D& shader);
+                            Magnum::SceneGraph::DrawableGroup3D*                                    group,
+                            Magnum::GL::Mesh&                                                       mesh,
+                            GeneralShader3D&                                                        shader);
 
     void update_display_info(const proto::DisplayInfo& display_info);
 
@@ -45,11 +45,11 @@ private:
     void draw(const Magnum::Matrix4& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object_;
-    Magnum::GL::Mesh& mesh_;
+    Magnum::GL::Mesh&                                                       mesh_;
 
-    proto::Coloring coloring_ = proto::Coloring::UNIFORM_COLOR;
-    Magnum::Color3 uniform_color_ = {1.f, 0.9f, 0.7f};
-    proto::Shading shading_;
+    proto::Coloring coloring_      = proto::Coloring::UNIFORM_COLOR;
+    Magnum::Color3  uniform_color_ = {1.f, 0.9f, 0.7f};
+    proto::Shading  shading_;
 
     GeneralShader3D& shader_;
 };

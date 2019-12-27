@@ -58,10 +58,10 @@ public:
     void resize(const Magnum::Vector2i& viewport) override;
 
     std::size_t items() const override;
-    bool empty() const override;
+    bool        empty() const override;
 
 private:
-    using Scene3D = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
+    using Scene3D  = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
 
     GeneralShader3D shader_;
@@ -69,20 +69,20 @@ private:
     struct ObjectMeshPackage {
         Magnum::GL::Buffer index_buffer;
         Magnum::GL::Buffer vertex_buffer;
-        Magnum::GL::Mesh mesh;
-        Object3D* object = nullptr;
-        OpaqueDrawable* drawable = nullptr;
+        Magnum::GL::Mesh   mesh;
+        Object3D*          object   = nullptr;
+        OpaqueDrawable*    drawable = nullptr;
 
-        explicit ObjectMeshPackage(Object3D* obj,
+        explicit ObjectMeshPackage(Object3D*                            obj,
                                    Magnum::SceneGraph::DrawableGroup3D* drawables,
-                                   GeneralShader3D& shader);
+                                   GeneralShader3D&                     shader);
     };
     std::unordered_map<std::string, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 
-    Scene3D scene_;
-    Object3D* root_object_ = nullptr;
-    Object3D camera_object_;
-    Magnum::SceneGraph::Camera3D* camera_;
+    Scene3D                             scene_;
+    Object3D*                           root_object_ = nullptr;
+    Object3D                            camera_object_;
+    Magnum::SceneGraph::Camera3D*       camera_;
     Magnum::SceneGraph::DrawableGroup3D drawables_;
 };
 

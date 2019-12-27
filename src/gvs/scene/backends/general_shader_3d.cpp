@@ -56,17 +56,17 @@ GeneralShader3d::GeneralShader3d() {
 
     CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 
-    world_from_local_uniform_ = uniformLocation("world_from_local");
+    world_from_local_uniform_         = uniformLocation("world_from_local");
     world_from_local_normals_uniform_ = uniformLocation("world_from_local_normals");
-    projection_from_local_uniform_ = uniformLocation("projection_from_local");
+    projection_from_local_uniform_    = uniformLocation("projection_from_local");
 
-    coloring_uniform_ = uniformLocation("coloring");
+    coloring_uniform_      = uniformLocation("coloring");
     uniform_color_uniform_ = uniformLocation("uniform_color");
 
-    shading_uniform_ = uniformLocation("shading");
+    shading_uniform_         = uniformLocation("shading");
     light_direction_uniform_ = uniformLocation("light_direction");
-    light_color_uniform_ = uniformLocation("light_color");
-    ambient_color_uniform_ = uniformLocation("ambient_color");
+    light_color_uniform_     = uniformLocation("light_color");
+    ambient_color_uniform_   = uniformLocation("ambient_color");
 }
 
 GeneralShader3d& GeneralShader3d::set_world_from_local_matrix(const Magnum::Matrix4& world_from_local) {

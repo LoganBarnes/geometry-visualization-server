@@ -60,8 +60,8 @@ private:
      * End `Scene` functions
      */
 
-    std::mt19937 generator_; ///< Used to generate SceneIDs
-    SceneItems items_; ///< The map of all the items in the scene
+    std::mt19937                                generator_; ///< Used to generate SceneIDs
+    SceneItems                                  items_; ///< The map of all the items in the scene
     std::unique_ptr<backends::BackendInterface> backend_; ///< Used to do the actual rendering of the scene
 };
 

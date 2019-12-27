@@ -36,9 +36,9 @@ using namespace Magnum;
 namespace gvs::display::backends {
 
 OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
-                               SceneGraph::DrawableGroup3D* group,
-                               GL::Mesh& mesh,
-                               GeneralShader3d& shader)
+                               SceneGraph::DrawableGroup3D*                            group,
+                               GL::Mesh&                                               mesh,
+                               GeneralShader3d&                                        shader)
     : SceneGraph::Drawable3D{object, group}, object_(object), mesh_(mesh), shader_(shader) {}
 
 auto OpaqueDrawable::update_display_info(DisplayInfo const& display_info) -> void {
@@ -53,7 +53,7 @@ auto OpaqueDrawable::update_display_info(DisplayInfo const& display_info) -> voi
 
     if (display_info.uniform_color) {
         auto const& uniform_color = display_info.uniform_color.value();
-        uniform_color_ = Magnum::Color3{uniform_color[0], uniform_color[1], uniform_color[2]};
+        uniform_color_            = Magnum::Color3{uniform_color[0], uniform_color[1], uniform_color[2]};
     }
 
     if (display_info.shading) {

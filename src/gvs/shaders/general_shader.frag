@@ -52,61 +52,61 @@ layout(location = 3) in vec3 vertex_color;
  * Uniforms
  */
 uniform int coloring = COLORING_UNIFORM_COLOR;
-uniform vec3 uniform_color = {1.f, 0.9f, 0.7f};
+uniform vec3 uniform_color = { 1.f, 0.9f, 0.7f };
 uniform float opacity = 1.f;
 
 uniform int shading = SHADING_COLOR;
-uniform vec3 light_direction = {-1.f, -1.f, -1.f};
-uniform vec3 light_color = {1.f, 1.f, 1.f};
-uniform vec3 ambient_color = {0.15f, 0.15f, 0.15f};
+uniform vec3 light_direction = { -1.f, -1.f, -1.f };
+uniform vec3 light_color = { 1.f, 1.f, 1.f };
+uniform vec3 ambient_color = { 0.15f, 0.15f, 0.15f };
 
 layout(location = 0) out vec4 out_color;
 
 void main()
 {
-    vec3 shape_color = {1.f, 1.f, 1.f};
+    vec3 shape_color = { 1.f, 1.f, 1.f };
 
     switch (coloring) {
         case COLORING_POSITIONS:
-            shape_color = world_position;
-            break;
+        shape_color = world_position;
+        break;
 
         case COLORING_NORMALS:
-            shape_color = world_normal * 0.5f + 0.5f; // between 0 and 1
-            break;
+        shape_color = world_normal * 0.5f + 0.5f;// between 0 and 1
+        break;
 
         case COLORING_TEXTURE_COORDINATES:
-            shape_color = vec3(texture_coordinates, 1.f);
-            break;
+        shape_color = vec3(texture_coordinates, 1.f);
+        break;
 
         case COLORING_VERTEX_COLORS:
-            shape_color = vertex_color;
-            break;
+        shape_color = vertex_color;
+        break;
 
         case COLORING_UNIFORM_COLOR:
-            shape_color = uniform_color;
-            break;
+        shape_color = uniform_color;
+        break;
 
-        case COLORING_TEXTURE: // TODO
+        case COLORING_TEXTURE:// TODO
         case COLORING_WHITE:
-            break;
+        break;
 
     }
 
-    vec3 final_color = {1.f, 1.f, 1.f};
+    vec3 final_color = { 1.f, 1.f, 1.f };
 
     vec3 surface_normal = normalize(world_normal);
     vec3 direction_to_light = normalize(-light_direction);
 
     switch (shading) {
         case SHADING_COLOR:
-            final_color = shape_color;
-            break;
+        final_color = shape_color;
+        break;
 
         case SHADING_LAMBERTIAN:
-            vec3 diffuse_lighting = max(0.f, dot(surface_normal, direction_to_light)) * light_color;
-            final_color = (diffuse_lighting + ambient_color) * shape_color;
-            break;
+        vec3 diffuse_lighting = max(0.f, dot(surface_normal, direction_to_light)) * light_color;
+        final_color = (diffuse_lighting + ambient_color) * shape_color;
+        break;
     }
 
     out_color = vec4(final_color, opacity);

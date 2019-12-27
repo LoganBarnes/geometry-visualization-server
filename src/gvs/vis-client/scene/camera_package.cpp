@@ -32,9 +32,9 @@ namespace gvs::vis {
 using namespace Magnum;
 using namespace Math::Literals;
 
-constexpr float camera_near_dist = 1.f;
-constexpr float camera_far_dist = 1000.f;
-constexpr Math::Rad<Float> camera_fovy = 35.0_degf;
+constexpr float            camera_near_dist = 1.f;
+constexpr float            camera_far_dist  = 1000.f;
+constexpr Math::Rad<Float> camera_fovy      = 35.0_degf;
 
 void CameraPackage::set_camera(Magnum::SceneGraph::Camera3D* cam, const Vector2i& viewport) {
     camera = cam;
@@ -58,10 +58,10 @@ Ray CameraPackage::get_camera_ray_from_window_pos(const Vector2& mouse_position)
         * Vector2::yScale(-1.0f) * camera->projectionSize();
 
     Vector3 near_point = object.absoluteTransformation().transformPoint({near_pos_xy, -1.f});
-    Vector3 eye_point = object.absoluteTransformation().transformPoint({0.f, 0.f, 0.f});
+    Vector3 eye_point  = object.absoluteTransformation().transformPoint({0.f, 0.f, 0.f});
 
     Vector3 direction = (near_point - eye_point);
-    direction = direction.normalized();
+    direction         = direction.normalized();
 
     return {eye_point, direction};
 }

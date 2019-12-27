@@ -23,8 +23,8 @@
 #include "gvs/log/geometry_logger.hpp"
 
 struct Mesh {
-    std::vector<float> verts;
-    std::vector<float> norms;
+    std::vector<float>    verts;
+    std::vector<float>    norms;
     std::vector<unsigned> tris;
 };
 

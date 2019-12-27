@@ -90,7 +90,7 @@ public:
     [[nodiscard]] auto begin() const -> SceneItems::const_iterator;
     [[nodiscard]] auto end() const -> SceneItems::const_iterator;
 
-    virtual auto clear() -> void = 0;
+    virtual auto clear() -> void                                          = 0;
     virtual auto set_seed(std::random_device::result_type seed) -> Scene& = 0;
 
 private:
@@ -131,7 +131,7 @@ auto apply_functors(SceneItemInfo* info, Functors&&... functors) {
 template <typename... Functors>
 auto Scene::add_item(Functors&&... functors) -> util::Result<uuids::uuid> {
     SceneItemInfo info;
-    auto const& error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
+    auto const&   error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
 
     if (!error_strings.empty()) {
         return tl::make_unexpected(MAKE_ERROR(error_strings));
@@ -150,7 +150,7 @@ auto Scene::update_item(uuids::uuid const& item_id, Functors&&... functors) -> u
     }
 
     SceneItemInfo info;
-    auto const& error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
+    auto const&   error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
 
     if (!error_strings.empty()) {
         return tl::make_unexpected(MAKE_ERROR(error_strings));
@@ -170,7 +170,7 @@ auto Scene::append_to_item(uuids::uuid const& item_id, Functors&&... functors) -
     }
 
     SceneItemInfo info;
-    auto const& error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
+    auto const&   error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
 
     if (!error_strings.empty()) {
         return tl::make_unexpected(MAKE_ERROR(error_strings));
@@ -189,7 +189,7 @@ auto Scene::get_item_info(uuids::uuid const& item_id, Functors&&... functors) ->
         return tl::make_unexpected(MAKE_ERROR("Item does not exist in scene: " + to_string(item_id)));
     }
 
-    auto const& item = items().at(item_id);
+    auto const&          item    = items().at(item_id);
     [[maybe_unused]] int dummy[] = {(functors(item), 0)...};
 
     return util::success();

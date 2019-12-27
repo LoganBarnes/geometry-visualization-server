@@ -28,7 +28,7 @@ namespace {
 struct Vec3 {
     Vec3() : data_{0.f, 0.f, 0.f} {}
     Vec3(float x, float y, float z) : data_{x, y, z} {}
-    float& operator[](std::size_t i) { return data_[i]; }
+    float&               operator[](std::size_t i) { return data_[i]; }
     std::array<float, 3> data_;
 };
 
@@ -38,7 +38,7 @@ const float* data_ptr(const Vec3& vec) {
 
 struct Mat4 {
     Mat4() : data_{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1} {}
-    float* operator[](std::size_t i) { return data_.data() + 4 * i; }
+    float*                operator[](std::size_t i) { return data_.data() + 4 * i; }
     std::array<float, 16> data_;
 };
 
@@ -47,8 +47,8 @@ const float* data_ptr(const Mat4& mat) {
 }
 
 struct Mesh {
-    std::vector<Vec3> verts;
-    std::vector<Vec3> norms;
+    std::vector<Vec3>     verts;
+    std::vector<Vec3>     norms;
     std::vector<unsigned> tris;
 };
 

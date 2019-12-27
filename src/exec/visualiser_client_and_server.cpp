@@ -26,8 +26,8 @@
 #include <thread>
 
 int main(int argc, char** argv) {
-    std::string server_address = "0.0.0.0:50055";
+    std::string              server_address = "0.0.0.0:50055";
     gvs::server::SceneServer server(server_address);
-    gvs::vis::VisClient app(server_address, {argc, argv});
+    gvs::vis::VisClient      app(server_address, {argc, argv});
     return app.exec();
 }

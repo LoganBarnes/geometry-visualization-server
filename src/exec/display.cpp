@@ -45,7 +45,8 @@ int main() {
     }
 
     std::vector<gvs::vec3> circle;
-    constexpr int max_verts = 50;
+    constexpr int          max_verts = 50;
+
     for (int i = 0; i <= max_verts; ++i) {
         float angle = float(M_PI) * static_cast<float>(i) * 2.f / max_verts;
         circle.push_back({std::cos(angle), std::sin(angle), 0.f});
@@ -119,13 +120,16 @@ int main() {
     std::vector<gvs::vec3> sphere;
 
     {
-        float u, theta, coeff;
-        std::mt19937 gen{std::random_device{}()};
+        float u;
+        float theta;
+        float coeff;
+
+        std::mt19937                          gen{std::random_device{}()};
         std::uniform_real_distribution<float> u_dist(-1.f, 1.f);
         std::uniform_real_distribution<float> theta_dist(0.f, 2.f * M_PIf32);
 
         for (int i = 0; i < 5000; ++i) {
-            u = u_dist(gen);
+            u     = u_dist(gen);
             theta = theta_dist(gen);
             coeff = std::sqrt(1.f - u * u);
             sphere.push_back({coeff * std::cos(theta), coeff * std::sin(theta), u});
