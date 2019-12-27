@@ -31,9 +31,13 @@ LocalScene::LocalScene() : generator_(std::random_device{}()), backend_(std::mak
 
 LocalScene::~LocalScene() = default;
 
-auto LocalScene::render(vis::CameraPackage const& /*camera_package*/) const -> void {}
+auto LocalScene::render(vis::CameraPackage const& camera_package) const -> void {
+    backend_->render(camera_package);
+}
 
-auto LocalScene::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
+auto LocalScene::resize(Magnum::Vector2i const& viewport) -> void {
+    backend_->resize(viewport);
+}
 
 auto LocalScene::set_backend(std::unique_ptr<backends::BackendInterface> backend) -> LocalScene& {
     backend_ = std::move(backend);
@@ -50,8 +54,11 @@ auto LocalScene::clear() -> void {
     backend_->reset_items(items_);
 }
 
-auto LocalScene::actually_add_item(SceneItemInfo && /*info*/) -> util::Result<SceneID> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" unimplemented"));
+auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> {
+    auto item_id = uuids::uuid_random_generator{generator_}();
+    items_.emplace(item_id, std::move(info));
+    backend_->after_add(item_id, items_);
+    return item_id;
 }
 
 auto LocalScene::actually_update_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util::Result<void> {

@@ -137,29 +137,46 @@ auto Scene::add_item(Functors&&... functors) -> util::Result<uuids::uuid> {
         return tl::make_unexpected(MAKE_ERROR(error_strings));
     }
 
+    // TODO: error check info
     return actually_add_item(std::move(info));
 }
 
 template <typename... Functors>
 auto Scene::update_item(uuids::uuid const& item_id, Functors&&... functors) -> util::Result<void> {
+    if (!util::has_key(items(), item_id)) {
+        return tl::make_unexpected(MAKE_ERROR("Item does not exist in scene: " + to_string(item_id)));
+    }
+
     SceneItemInfo info;
     auto const& error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
 
     if (!error_strings.empty()) {
         return tl::make_unexpected(MAKE_ERROR(error_strings));
     }
+
+    auto const& item = items().at(item_id);
+    util::ignore(item);
+    // TODO: error check info against current item
 
     return actually_update_item(item_id, std::move(info));
 }
 
 template <typename... Functors>
 auto Scene::append_to_item(uuids::uuid const& item_id, Functors&&... functors) -> util::Result<void> {
+    if (!util::has_key(items(), item_id)) {
+        return tl::make_unexpected(MAKE_ERROR("Item does not exist in scene: " + to_string(item_id)));
+    }
+
     SceneItemInfo info;
     auto const& error_strings = detail::apply_functors(&info, std::forward<Functors>(functors)...);
 
     if (!error_strings.empty()) {
         return tl::make_unexpected(MAKE_ERROR(error_strings));
     }
+
+    auto const& item = items().at(item_id);
+    util::ignore(item);
+    // TODO: error check info against current item
 
     return actually_append_to_item(item_id, std::move(info));
 }
