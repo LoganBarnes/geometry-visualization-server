@@ -104,6 +104,8 @@ struct [[nodiscard]] Result : tl::expected<T, Error> {
     constexpr auto and_then(F && f, Args && ... args) const&& {
         return and_then_impl(std::move(*this), std::forward<F>(f), std::forward<Args>(args)...);
     }
+
+    auto value_or_throw() { return value_or_throw_impl(std::move(*this)); }
 };
 
 template <typename... Args>
@@ -121,6 +123,21 @@ auto operator==(const Result<T1, E1>& lhs, const Result<T2, E2>& rhs) -> bool {
 template <typename T1, typename E1, typename T2, typename E2>
 auto operator!=(const Result<T1, E1>& lhs, const Result<T2, E2>& rhs) -> bool {
     return !(lhs == rhs);
+}
+
+template <typename T, typename E, typename = std::enable_if_t<std::is_same_v<E, Error>>>
+auto value_or_throw_impl(Result<T, E>&& result) -> T {
+    if (!result.has_value()) {
+        throw std::runtime_error(result.error().error_message());
+    }
+    return result.value();
+}
+
+template <typename E, typename = std::enable_if_t<std::is_same_v<E, Error>>>
+auto value_or_throw_impl(Result<void, E>&& result) -> void {
+    if (!result.has_value()) {
+        throw std::runtime_error(result.error().error_message());
+    }
 }
 
 } // namespace gvs::util

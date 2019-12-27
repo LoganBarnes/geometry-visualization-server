@@ -46,29 +46,26 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
     bool has_geometry;
     bool has_children;
 
-    auto result = scene->get_item_info(item_id,
-                                       GetReadableId(&readable_id),
-                                       GetGeometryFormat(&geometry_format),
-                                       GetTransformation(&transformation),
-                                       GetUniformColor(&uniform_color),
-                                       GetColoring(&coloring),
-                                       GetShading(&shading),
-                                       IsVisible(&visible),
-                                       GetOpacity(&opacity),
-                                       HasGeometry(&has_geometry),
-                                       HasChildren(&has_children));
-    if (!result) {
-        throw std::runtime_error(result.error().debug_error_message());
-    }
+    scene->get_item_info(item_id,
+                         GetReadableId(&readable_id),
+                         GetGeometryFormat(&geometry_format),
+                         GetTransformation(&transformation),
+                         GetUniformColor(&uniform_color),
+                         GetColoring(&coloring),
+                         GetShading(&shading),
+                         IsVisible(&visible),
+                         GetOpacity(&opacity),
+                         HasGeometry(&has_geometry),
+                         HasChildren(&has_children));
 
     auto const      id_str = to_string(item_id);
     imgui::ScopedID scoped_id(id_str.c_str());
 
-    ImGui::Checkbox("###visible", &visible);
-    ImGui::SameLine();
-
     bool item_changed     = false;
     bool children_changed = false;
+
+    item_changed |= ImGui::Checkbox("###visible", &visible);
+    ImGui::SameLine();
 
     if (ImGui::TreeNode(readable_id.c_str())) {
         ImGui::Indent();
@@ -98,10 +95,7 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
 
             if (has_children) {
                 std::optional<std::vector<SceneID>> children;
-                result = scene->get_item_info(nil_id, GetChildren(&children));
-                if (!result) {
-                    throw std::runtime_error(result.error().debug_error_message());
-                }
+                scene->get_item_info(nil_id, GetChildren(&children));
 
                 for (auto const& child_id : children.value()) {
                     children_changed |= configure_scene_gui(child_id, scene);
@@ -117,14 +111,11 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
     }
 
     if (item_changed) {
-        result = scene->update_item(item_id,
-                                    SetReadableId(readable_id),
-                                    SetColoring(coloring),
-                                    SetUniformColor(uniform_color),
-                                    SetVisible(visible));
-        if (!result) {
-            throw std::runtime_error(result.error().debug_error_message());
-        }
+        scene->update_item(item_id,
+                           SetReadableId(readable_id),
+                           SetColoring(coloring),
+                           SetUniformColor(uniform_color),
+                           SetVisible(visible));
     }
 
     return item_changed | children_changed;
@@ -142,10 +133,7 @@ auto SceneUtil::configure_gui(Scene* scene) -> bool {
     }
 
     std::optional<std::vector<SceneID>> children;
-    auto                                result = scene->get_item_info(nil_id, GetChildren(&children));
-    if (!result) {
-        throw std::runtime_error(result.error().debug_error_message());
-    }
+    scene->get_item_info(nil_id, GetChildren(&children));
 
     if (!children) {
         return false;

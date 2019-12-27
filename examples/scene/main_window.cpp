@@ -28,6 +28,8 @@
 
 // external
 #include <Magnum/GL/Context.h>
+#include <Magnum/Primitives/Cube.h>
+#include <Magnum/Trade/MeshData3D.h>
 #include <imgui.h>
 
 // standard
@@ -48,31 +50,46 @@ MainWindow::MainWindow(const Arguments& arguments)
       gl_renderer_str_(GL::Context::current().rendererString()) {
 
     {
-        auto id_result
-            = scene_.add_item(gvs::SetReadableId("Axes"),
-                              gvs::SetPositions3d({{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
-                              gvs::SetVertexColors3d(
-                                  {{1.f, 1.f, 1.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
-                              gvs::SetColoring(gvs::Coloring::VertexColors),
-                              gvs::SetLines({0, 1, 0, 2, 0, 3}));
+        scene_.add_item(gvs::SetReadableId("Axes"),
+                        gvs::SetPositions3d({{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
+                        gvs::SetVertexColors3d({{1.f, 1.f, 1.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
+                        gvs::SetColoring(gvs::Coloring::VertexColors),
+                        gvs::SetLines({0, 1, 0, 2, 0, 3}));
+    }
 
-        if (!id_result) {
-            error_message_ += id_result.error().error_message() + '\n';
-        }
+    {
+        Trade::MeshData3D const cube = Primitives::cubeSolid();
+
+        auto scale_transfomation = gvs::mat4();
+        scale_transfomation[0]   = 0.5f;
+        scale_transfomation[5]   = 0.5f;
+        scale_transfomation[10]  = 0.5f;
+        scale_transfomation[15]  = 1.f;
+
+        scene_.add_item(gvs::SetReadableId("Cube"),
+                        gvs::SetPositions3d(cube.positions(0)),
+                        gvs::SetNormals3d(cube.normals(0)),
+                        gvs::SetTriangles(cube.indices()),
+                        gvs::SetTransformation(scale_transfomation),
+                        gvs::SetShading(gvs::LambertianShading{}));
     }
 
     std::vector<gvs::vec3> sphere;
 
     {
-        float                                 u, theta, coeff;
         std::mt19937                          gen{std::random_device{}()};
         std::uniform_real_distribution<float> u_dist(-1.f, 1.f);
         std::uniform_real_distribution<float> theta_dist(0.f, 2.f * M_PIf32);
 
-        for (int i = 0; i < 5000; ++i) {
+        float u;
+        float theta;
+        float coeff;
+
+        for (auto i = 0u; i < 5000u; ++i) {
             u     = u_dist(gen);
             theta = theta_dist(gen);
             coeff = std::sqrt(1.f - u * u);
+
             sphere.push_back({coeff * std::cos(theta), coeff * std::sin(theta), u});
         }
     }
@@ -84,16 +101,12 @@ MainWindow::MainWindow(const Arguments& arguments)
         scale_transfomation[10]  = 2.f;
         scale_transfomation[15]  = 1.f;
 
-        auto id_result = scene_.add_item(gvs::SetReadableId("Sphere"),
-                                         gvs::SetPositions3d(sphere),
-                                         gvs::SetNormals3d(sphere),
-                                         gvs::SetTransformation(scale_transfomation),
-                                         gvs::SetShading(gvs::LambertianShading()),
-                                         gvs::SetColoring(gvs::Coloring::Normals));
-
-        if (!id_result) {
-            error_message_ += id_result.error().error_message() + '\n';
-        }
+        scene_.add_item(gvs::SetReadableId("Sphere"),
+                        gvs::SetPositions3d(sphere),
+                        gvs::SetNormals3d(sphere),
+                        gvs::SetTransformation(scale_transfomation),
+                        gvs::SetShading(gvs::LambertianShading()),
+                        gvs::SetColoring(gvs::Coloring::Normals));
     }
 }
 
