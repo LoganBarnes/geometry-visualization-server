@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ##########################################################################################
-function(add_example _directory)
+function(add_example _directory _cpp17_enabled)
     set(target run_${_directory}_example)
 
     file(GLOB_RECURSE GVS_SOURCE_FILES
@@ -30,14 +30,21 @@ function(add_example _directory)
             )
 
     add_executable(${target} ${GVS_SOURCE_FILES})
-    target_link_libraries(${target} PUBLIC gvs_scene)
+
+    if (_cpp17_enabled)
+        set(CPP_STANDARD 17)
+        target_link_libraries(${target} PUBLIC gvs_display)
+    else ()
+        set(CPP_STANDARD 11)
+        target_link_libraries(${target} PUBLIC gvs_scene_client)
+    endif ()
 
     target_compile_options(${target} PRIVATE ${GVS_COMPILE_FLAGS})
     set_target_properties(
             ${target}
             PROPERTIES
             # C++ flags
-            CXX_STANDARD 17
+            CXX_STANDARD ${CPP_STANDARD}
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             POSITION_INDEPENDENT_CODE ON
@@ -53,5 +60,5 @@ function(add_example _directory)
 
 endfunction()
 
-add_example(scene)
-add_example(cpp11_client)
+add_example(scene TRUE)
+add_example(cpp11_client FALSE)

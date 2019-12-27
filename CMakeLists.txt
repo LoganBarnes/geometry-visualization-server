@@ -104,9 +104,9 @@ set_target_properties(
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-##################
+####################
 ### Scene Client ###
-##################
+####################
 file(GLOB_RECURSE GVS_SOURCE_FILES
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS

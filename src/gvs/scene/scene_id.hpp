@@ -20,28 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "scene.hpp"
+#pragma once
+
+// external
+#include <boost/uuid/uuid.hpp>
+
+// standard
+#include <iostream>
 
 namespace gvs {
-namespace scene {
 
-Scene::~Scene() = default;
+using SceneID = boost::uuids::uuid;
 
-auto Scene::size() const -> std::size_t {
-    return items().size();
-}
+auto nil_id() -> SceneID;
 
-auto Scene::empty() const -> bool {
-    return size() == 1u;
-}
+auto to_string(SceneID const& id) -> std::string;
 
-auto Scene::begin() const -> SceneItems::const_iterator {
-    return items().begin();
-}
+std::ostream& operator<<(std::ostream& os, SceneID const& id);
 
-auto Scene::end() const -> SceneItems::const_iterator {
-    return items().begin();
-}
-
-} // namespace scene
 } // namespace gvs
+
+namespace std {
+
+template <>
+struct hash<gvs::SceneID> {
+    size_t operator()(gvs::SceneID const& id) const { return boost::uuids::hash_value(id); }
+};
+
+} // namespace std

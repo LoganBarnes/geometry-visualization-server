@@ -25,7 +25,8 @@
 // project
 #include "scene.hpp"
 
-namespace gvs::scene {
+namespace gvs {
+namespace scene {
 
 class ClientScene : public Scene {
 public:
@@ -39,9 +40,9 @@ public:
     auto clear() -> void override;
 
 private:
-    auto actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> override;
-    auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
-    auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
+    auto actually_add_item(SceneItemInfo&& info) -> SceneID override;
+    auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> void override;
+    auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> void override;
 
     auto items() const -> SceneItems const& override;
     /*
@@ -53,4 +54,5 @@ private:
     // Client client_; ///< The client used to send and receive scene updates
 };
 
-} // namespace gvs::scene
+} // namespace scene
+} // namespace gvs

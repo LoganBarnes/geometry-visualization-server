@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/scene/scene_client.hpp"
+#include "gvs/scene/client_scene.hpp"
 
-//
+// standard
 #include <cmath>
 #include <random>
 

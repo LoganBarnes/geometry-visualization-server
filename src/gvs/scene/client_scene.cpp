@@ -22,37 +22,39 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "client_scene.hpp"
 
-namespace gvs::scene {
+namespace gvs {
+namespace scene {
 
-LocalScene::LocalScene() : generator_(std::random_device{}()) {
+ClientScene::ClientScene() : generator_(std::random_device{}()) {
     // TODO: Setup client stuff
 }
 
-LocalScene::~LocalScene() = default;
+ClientScene::~ClientScene() = default;
 
-auto LocalScene::set_seed(std::random_device::result_type seed) -> LocalScene& {
+auto ClientScene::set_seed(std::random_device::result_type seed) -> ClientScene& {
     generator_ = std::mt19937(seed);
     return *this;
 }
 
-auto LocalScene::clear() -> void {
+auto ClientScene::clear() -> void {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> {
+auto ClientScene::actually_add_item(SceneItemInfo && /*info*/) -> SceneID {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> {
+auto ClientScene::actually_update_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> void {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util::Result<void> {
+auto ClientScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> void {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto LocalScene::items() const -> SceneItems const& {
+auto ClientScene::items() const -> SceneItems const& {
     return items_;
 }
 
-} // namespace gvs::scene
+} // namespace scene
+} // namespace gvs

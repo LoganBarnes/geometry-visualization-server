@@ -22,28 +22,17 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// external
-#include <uuid.h>
+// project
+#include "gvs/util/make_unique.hpp"
+#include "scene_id.hpp"
 
 // standard
-#include <iostream>
-#include <optional>
+#include <array>
+#include <memory>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 namespace gvs {
-
-using SceneID = uuids::uuid;
-constexpr uuids::uuid nil_id;
-
-inline auto to_string(SceneID const& id) -> std::string {
-    return uuids::to_string(id);
-}
-
-inline std::ostream& operator<<(std::ostream& os, SceneID const& id) {
-    return os << uuids::to_string(id);
-}
 
 // TODO: make vec and matrix types that can be implicitly converted from other common library types
 using vec2 = std::array<float, 2>;
@@ -76,12 +65,12 @@ public:
                   std::back_inserter(data_));
     }
 
-    [[nodiscard]] auto data() const { return data_.data(); }
-    auto               data() { return data_.data(); }
-    [[nodiscard]] auto size() const { return data_.size(); }
-    auto               size() { return data_.size(); }
-    [[nodiscard]] auto empty() const { return data_.empty(); }
-    auto               empty() { return data_.empty(); }
+    auto data() const -> float const* { return data_.data(); }
+    auto data() -> float* { return data_.data(); }
+    auto size() const -> std::vector<float>::size_type { return data_.size(); }
+    auto size() -> std::vector<float>::size_type { return data_.size(); }
+    auto empty() const -> bool { return data_.empty(); }
+    auto empty() -> bool { return data_.empty(); }
 
 private:
     std::vector<float> data_;
@@ -130,30 +119,30 @@ constexpr auto default_opacity        = 1.f;
 constexpr auto default_wireframe_only = false;
 
 struct GeometryInfo {
-    std::optional<AttributeVector<3>>    positions;
-    std::optional<AttributeVector<3>>    normals;
-    std::optional<AttributeVector<2>>    texture_coordinates;
-    std::optional<AttributeVector<3>>    vertex_colors;
-    std::optional<std::vector<unsigned>> indices;
+    std::unique_ptr<AttributeVector<3>>    positions;
+    std::unique_ptr<AttributeVector<3>>    normals;
+    std::unique_ptr<AttributeVector<2>>    texture_coordinates;
+    std::unique_ptr<AttributeVector<3>>    vertex_colors;
+    std::unique_ptr<std::vector<unsigned>> indices;
 };
 
 struct DisplayInfo {
-    std::optional<std::string>    readable_id;
-    std::optional<GeometryFormat> geometry_format;
-    std::optional<mat4>           transformation;
-    std::optional<vec3>           uniform_color;
-    std::optional<Coloring>       coloring;
-    std::optional<Shading>        shading;
-    std::optional<bool>           visible;
-    std::optional<float>          opacity;
-    std::optional<bool>           wireframe_only;
+    std::unique_ptr<std::string>    readable_id;
+    std::unique_ptr<GeometryFormat> geometry_format;
+    std::unique_ptr<mat4>           transformation;
+    std::unique_ptr<vec3>           uniform_color;
+    std::unique_ptr<Coloring>       coloring;
+    std::unique_ptr<Shading>        shading;
+    std::unique_ptr<bool>           visible;
+    std::unique_ptr<float>          opacity;
+    std::unique_ptr<bool>           wireframe_only;
 };
 
 struct SceneItemInfo {
-    std::optional<GeometryInfo>         geometry_info;
-    std::optional<DisplayInfo>          display_info;
-    std::optional<SceneID>              parent;
-    std::optional<std::vector<SceneID>> children;
+    std::unique_ptr<GeometryInfo>         geometry_info;
+    std::unique_ptr<DisplayInfo>          display_info;
+    std::unique_ptr<SceneID>              parent;
+    std::unique_ptr<std::vector<SceneID>> children;
 };
 
 using SceneItems = std::unordered_map<SceneID, SceneItemInfo>;

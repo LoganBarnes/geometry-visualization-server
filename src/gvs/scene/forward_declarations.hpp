@@ -22,11 +22,11 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-namespace gvs::scene {
+namespace gvs {
+namespace scene {
 
 class Scene;
-class SceneDisplay;
+class ClientScene;
 
-class LocalScene;
-
-} // namespace gvs::scene
+} // namespace scene
+} // namespace gvs
