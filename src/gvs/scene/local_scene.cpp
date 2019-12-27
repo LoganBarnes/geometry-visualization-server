@@ -68,19 +68,30 @@ auto LocalScene::clear() -> void {
 
 auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> {
     auto item_id = uuids::uuid_random_generator{generator_}();
-    auto parent  = info.parent;
-    items_.emplace(item_id, std::move(info));
 
-    if (parent) {
-        items_.at(parent.value()).children->emplace_back(item_id);
+    if (info.parent) {
+        items_.at(info.parent.value()).children->emplace_back(item_id);
     }
 
+    items_.emplace(item_id, std::move(info));
     backend_->after_add(item_id, items_);
     return item_id;
 }
 
-auto LocalScene::actually_update_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util::Result<void> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> {
+    backend_->before_update(item_id, info, items_);
+
+    auto& item = items_.at(item_id);
+
+    if (info.parent && info.parent.value() != item.parent.value()) {
+        // Remove item from the current parent's list of children
+        util::remove_all_by_value(items_.at(item.parent.value()).children.value(), item_id);
+
+        // Add the item to the new parent's list of children
+        items_.at(info.parent.value()).children->emplace_back(item_id);
+    }
+
+    return replace_if_present(&item, std::forward<SceneItemInfo>(info));
 }
 
 auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util::Result<void> {

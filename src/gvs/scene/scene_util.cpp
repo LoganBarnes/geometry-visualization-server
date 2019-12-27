@@ -88,6 +88,20 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
                     coloring     = static_cast<Coloring>(icoloring);
                 }
 
+                auto igeometry_format = std::underlying_type_t<GeometryFormat>(geometry_format);
+                if (ImGui::Combo("Geometry Format",
+                                 &igeometry_format,
+                                 " Points \0"
+                                 " Lines \0"
+                                 " Line Strip \0"
+                                 " Triangles \0"
+                                 " Triangle Strip \0"
+                                 " Triangle Fan \0"
+                                 "\0")) {
+                    item_changed    = true;
+                    geometry_format = static_cast<GeometryFormat>(igeometry_format);
+                }
+
                 if (coloring == Coloring::UniformColor) {
                     item_changed |= ImGui::ColorEdit3("Global Color", uniform_color.data());
                 }
@@ -95,7 +109,7 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
 
             if (has_children) {
                 std::optional<std::vector<SceneID>> children;
-                scene->get_item_info(nil_id, GetChildren(&children));
+                scene->get_item_info(item_id, GetChildren(&children));
 
                 for (auto const& child_id : children.value()) {
                     children_changed |= configure_scene_gui(child_id, scene);
@@ -113,9 +127,13 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
     if (item_changed) {
         scene->update_item(item_id,
                            SetReadableId(readable_id),
-                           SetColoring(coloring),
+                           SetGeometryFormat(geometry_format),
+                           SetTransformation(transformation),
                            SetUniformColor(uniform_color),
-                           SetVisible(visible));
+                           SetColoring(coloring),
+                           SetShading(shading),
+                           SetVisible(visible),
+                           SetOpacity(opacity));
     }
 
     return item_changed | children_changed;

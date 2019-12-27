@@ -66,7 +66,7 @@ GeneralShader3d::GeneralShader3d() {
     shading_uniform_         = uniformLocation("shading");
     light_direction_uniform_ = uniformLocation("light_direction");
     light_color_uniform_     = uniformLocation("light_color");
-    ambient_color_uniform_   = uniformLocation("ambient_color");
+    ambient_scale_uniform_   = uniformLocation("ambient_scale");
 }
 
 GeneralShader3d& GeneralShader3d::set_world_from_local_matrix(const Magnum::Matrix4& world_from_local) {
@@ -85,7 +85,7 @@ GeneralShader3d& GeneralShader3d::set_projection_from_local_matrix(const Magnum:
 }
 
 GeneralShader3d& GeneralShader3d::set_coloring(const Coloring& coloring) {
-    setUniform(coloring_uniform_, static_cast<std::underlying_type_t<Coloring>>(coloring));
+    setUniform(coloring_uniform_, std::underlying_type_t<Coloring>(coloring));
     return *this;
 }
 
@@ -95,28 +95,7 @@ GeneralShader3d& GeneralShader3d::set_uniform_color(const Magnum::Color3& color)
 }
 
 GeneralShader3d& GeneralShader3d::set_shading(const Shading& shading) {
-    setUniform(shading_uniform_, static_cast<int>(shading.index()));
-
-    util::visit(util::Visitor{
-                    [](UniformColor const&) {},
-                    [this](LambertianShading const& lambertian) {
-                        Magnum::Vector3 light_direction{lambertian.light_direction[0],
-                                                        lambertian.light_direction[1],
-                                                        lambertian.light_direction[2]};
-                        Magnum::Vector3 light_color{lambertian.light_color[0],
-                                                    lambertian.light_color[1],
-                                                    lambertian.light_color[2]};
-                        Magnum::Vector3 ambient_color{lambertian.ambient_color[0],
-                                                      lambertian.ambient_color[1],
-                                                      lambertian.ambient_color[2]};
-
-                        setUniform(light_direction_uniform_, light_direction);
-                        setUniform(light_color_uniform_, light_color);
-                        setUniform(ambient_color_uniform_, ambient_color);
-                    },
-                },
-                shading);
-
+    setUniform(shading_uniform_, std::underlying_type_t<Shading>(shading));
     return *this;
 }
 

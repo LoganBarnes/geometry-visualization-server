@@ -22,36 +22,14 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// standard
-#include <algorithm>
-#include <list>
-#include <map>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+// project
+#include "gvs/util/result.hpp"
+#include "settable_types.hpp"
 
-namespace gvs::util {
+namespace gvs {
 
-template <typename Map, typename Key>
-auto has_key(const Map& map, const Key& key) {
-    return map.find(key) != map.end();
-}
+auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void;
 
-template <typename V, typename T>
-auto has_item(V& v, const T& item) {
-    return std::find(std::begin(v), std::end(v), item) != std::end(v);
-}
+auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::Result<void>;
 
-template <typename V, typename T>
-auto remove_all_by_value(V& v, const T& value) {
-    return v.erase(std::remove(std::begin(v), std::end(v), value), std::end(v));
-}
-
-template <typename V, typename Pred>
-auto remove_all_by_predicate(V& v, Pred&& pred) {
-    return v.erase(std::remove_if(std::begin(v), std::end(v), std::forward<Pred>(pred)), std::end(v));
-}
-
-} // namespace gvs::util
+} // namespace gvs

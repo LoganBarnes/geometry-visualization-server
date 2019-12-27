@@ -87,8 +87,8 @@ private:
     std::vector<float> data_;
 };
 
-enum class GeometryFormat {
-    Points,
+enum class GeometryFormat : int32_t {
+    Points = 0,
     Lines,
     LineStrip,
     Triangles,
@@ -106,15 +106,11 @@ enum class Coloring : int32_t {
     White,
 };
 
-struct UniformColor {};
-
-struct LambertianShading {
-    vec3 light_direction = {-1.f, -1.f, -1.f};
-    vec3 light_color     = {1.f, 1.f, 1.f};
-    vec3 ambient_color   = {0.15f, 0.15f, 0.15f};
+enum class Shading : int32_t {
+    UniformColor = 0,
+    Lambertian,
+    CookTorrance,
 };
-
-using Shading = std::variant<UniformColor, LambertianShading>;
 
 constexpr auto default_readable_id     = "Scene Item";
 constexpr auto default_geometry_format = GeometryFormat::Points;
@@ -128,7 +124,7 @@ constexpr auto default_transformation = mat4{
 // clang-format on
 constexpr auto default_uniform_color = vec3{1.f, 0.9f, 0.7f};
 constexpr auto default_coloring      = Coloring::UniformColor;
-constexpr auto default_shading       = Shading{UniformColor{}};
+constexpr auto default_shading       = Shading::CookTorrance;
 constexpr auto default_visible       = true;
 constexpr auto default_opacity       = 1.f;
 
@@ -159,7 +155,5 @@ struct SceneItemInfo {
 };
 
 using SceneItems = std::unordered_map<SceneID, SceneItemInfo>;
-
-auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void;
 
 } // namespace gvs

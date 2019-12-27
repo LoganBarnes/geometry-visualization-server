@@ -60,7 +60,7 @@ private:
     int shading_uniform_;
     int light_direction_uniform_;
     int light_color_uniform_;
-    int ambient_color_uniform_;
+    int ambient_scale_uniform_;
 };
 
 } // namespace gvs::scene::backends

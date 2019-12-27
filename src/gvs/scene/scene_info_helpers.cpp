@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "settable_types.hpp"
+#include "scene_info_helpers.hpp"
 
 namespace gvs {
 
@@ -63,6 +63,65 @@ auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void {
     if (!display_info.opacity) {
         display_info.opacity = default_opacity;
     }
+}
+
+auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::Result<void> {
+
+    if (new_info.geometry_info) {
+        auto& geometry_info     = info->geometry_info.value();
+        auto& new_geometry_info = new_info.geometry_info.value();
+
+        if (new_geometry_info.positions) {
+            geometry_info.positions = new_geometry_info.positions.value();
+        }
+
+        auto positions_size = geometry_info.positions->size();
+
+        auto maybe_replace = [&](auto member, std::string const& name) -> util::Result<void> {
+            if (new_geometry_info.*member) {
+                geometry_info.*member = (new_geometry_info.*member).value();
+            }
+
+            bool non_empty = (geometry_info.*member && !(geometry_info.*member)->empty());
+            if (non_empty && (geometry_info.*member)->size() != positions_size) {
+                return tl::make_unexpected(
+                    MAKE_ERROR(name + " is non-empty and positions.size() != " + name + ".size()"));
+            }
+            return util::success();
+        };
+
+        auto result = maybe_replace(&GeometryInfo::positions, "positions")
+                          .and_then(maybe_replace, &GeometryInfo::normals, "normals")
+                          .and_then(maybe_replace, &GeometryInfo::texture_coordinates, "texture_coordinates")
+                          .and_then(maybe_replace, &GeometryInfo::vertex_colors, "vertex_colors")
+                          .and_then(maybe_replace, &GeometryInfo::indices, "indices");
+
+        if (!result) {
+            return result;
+        }
+    }
+
+    if (new_info.display_info) {
+        auto& display_info     = info->display_info.value();
+        auto& new_display_info = new_info.display_info.value();
+
+        auto maybe_replace = [&](auto member) {
+            if (new_display_info.*member) {
+                display_info.*member = (new_display_info.*member).value();
+            }
+        };
+
+        maybe_replace(&DisplayInfo::readable_id);
+        maybe_replace(&DisplayInfo::geometry_format);
+        maybe_replace(&DisplayInfo::transformation);
+        maybe_replace(&DisplayInfo::uniform_color);
+        maybe_replace(&DisplayInfo::coloring);
+        maybe_replace(&DisplayInfo::shading);
+        maybe_replace(&DisplayInfo::visible);
+        maybe_replace(&DisplayInfo::opacity);
+    }
+
+    return util::success();
 }
 
 } // namespace gvs

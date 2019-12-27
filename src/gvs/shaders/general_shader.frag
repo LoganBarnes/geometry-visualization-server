@@ -29,16 +29,17 @@
 const float PI = 3.141592653589793f;
 const float INF = 1.f / 0.f;
 
-const int COLORING_POSITIONS = 0;
-const int COLORING_NORMALS = 1;
+const int COLORING_POSITIONS           = 0;
+const int COLORING_NORMALS             = 1;
 const int COLORING_TEXTURE_COORDINATES = 2;
-const int COLORING_VERTEX_COLORS = 3;
-const int COLORING_UNIFORM_COLOR = 4;
-const int COLORING_TEXTURE = 5;
-const int COLORING_WHITE = 6;
+const int COLORING_VERTEX_COLORS       = 3;
+const int COLORING_UNIFORM_COLOR       = 4;
+const int COLORING_TEXTURE             = 5;
+const int COLORING_WHITE               = 6;
 
-const int SHADING_COLOR = 0;
-const int SHADING_LAMBERTIAN = 1;
+const int SHADING_COLOR         = 0;
+const int SHADING_LAMBERTIAN    = 1;
+const int SHADING_COOK_TORRANCE = 2;
 
 /*
  * Inputs
@@ -51,14 +52,14 @@ layout(location = 3) in vec3 vertex_color;
 /*
  * Uniforms
  */
-uniform int coloring = COLORING_UNIFORM_COLOR;
+uniform int coloring       = COLORING_UNIFORM_COLOR;
 uniform vec3 uniform_color = { 1.f, 0.9f, 0.7f };
-uniform float opacity = 1.f;
+uniform float opacity      = 1.f;
 
-uniform int shading = SHADING_COLOR;
+uniform int shading          = SHADING_COLOR;
 uniform vec3 light_direction = { -1.f, -1.f, -1.f };
-uniform vec3 light_color = { 1.f, 1.f, 1.f };
-uniform vec3 ambient_color = { 0.15f, 0.15f, 0.15f };
+uniform vec3 light_color     = { +1.f, +1.f, +1.f };
+uniform float ambient_scale  = 0.15f;
 
 layout(location = 0) out vec4 out_color;
 
@@ -91,7 +92,7 @@ void main()
         case COLORING_WHITE:
         break;
 
-    }
+    }// end switch(coloring)
 
     vec3 final_color = { 1.f, 1.f, 1.f };
 
@@ -103,11 +104,13 @@ void main()
         final_color = shape_color;
         break;
 
+        case SHADING_COOK_TORRANCE:// TODO
         case SHADING_LAMBERTIAN:
         vec3 diffuse_lighting = max(0.f, dot(surface_normal, direction_to_light)) * light_color;
-        final_color = (diffuse_lighting + ambient_color) * shape_color;
+        final_color = diffuse_lighting * shape_color + ambient_scale * shape_color;
         break;
-    }
+
+    }// end switch(shading)
 
     out_color = vec4(final_color, opacity);
 }

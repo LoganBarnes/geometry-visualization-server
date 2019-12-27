@@ -24,7 +24,7 @@
 
 // project
 #include "gvs/util/result.hpp"
-#include "settable_types.hpp"
+#include "scene_info_helpers.hpp"
 
 // standard
 #include <gvs/util/container_util.hpp>
@@ -84,15 +84,19 @@ public:
     template <typename... Functors>
     auto safe_get_item_info(uuids::uuid const& item_id, Functors&&... functors) -> util::Result<void>;
 
+    /// \brief Same as safe_add_item except it throws on error instead of returning an invalid result
     template <typename... Functors>
     auto add_item(Functors&&... functors) -> uuids::uuid;
 
+    /// \brief Same as safe_update_item except it throws on error instead of returning an invalid result
     template <typename... Functors>
     auto update_item(uuids::uuid const& item_id, Functors&&... functors) -> void;
 
+    /// \brief Same as safe_append_to_item except it throws on error instead of returning an invalid result
     template <typename... Functors>
     auto append_to_item(uuids::uuid const& item_id, Functors&&... functors) -> void;
 
+    /// \brief Same as safe_get_item_info except it throws on error instead of returning an invalid result
     template <typename... Functors>
     auto get_item_info(uuids::uuid const& item_id, Functors&&... functors) -> void;
 

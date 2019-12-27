@@ -71,7 +71,7 @@ MainWindow::MainWindow(const Arguments& arguments)
                         gvs::SetNormals3d(cube.normals(0)),
                         gvs::SetTriangles(cube.indices()),
                         gvs::SetTransformation(scale_transfomation),
-                        gvs::SetShading(gvs::LambertianShading{}));
+                        gvs::SetShading(gvs::Shading::Lambertian));
     }
 
     std::vector<gvs::vec3> sphere;
@@ -105,7 +105,7 @@ MainWindow::MainWindow(const Arguments& arguments)
                         gvs::SetPositions3d(sphere),
                         gvs::SetNormals3d(sphere),
                         gvs::SetTransformation(scale_transfomation),
-                        gvs::SetShading(gvs::LambertianShading()),
+                        gvs::SetShading(gvs::Shading::Lambertian),
                         gvs::SetColoring(gvs::Coloring::Normals));
     }
 }
