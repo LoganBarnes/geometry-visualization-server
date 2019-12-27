@@ -22,33 +22,16 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <string>
+#include "forward_declarations.hpp"
 
-namespace imgui {
+namespace gvs::scene {
 
-struct Disable {
-    class Guard {
-    public:
-        explicit Guard(bool disable);
-        ~Guard();
-
-    private:
-        bool disable_;
-    };
-
-    static void disable_push();
-    static void disable_pop();
-};
-
-bool configure_gui(const std::string& label, std::string* data);
-
-class ScopedID {
+class SceneUtil {
 public:
-    explicit ScopedID(const char* str_id);
-    explicit ScopedID(const char* str_id_begin, const char* str_id_end);
-    explicit ScopedID(const void* ptr_id);
-    explicit ScopedID(int int_id);
-    ~ScopedID();
+    /// \brief Displays an ImGui based GUI for the given scene.
+    /// \param scene - The scene used to display the GUI
+    /// \return true if the scene has changed, false otherwise
+    static auto configure_gui(Scene* scene) -> bool;
 };
 
-} // namespace imgui
+} // namespace gvs::scene

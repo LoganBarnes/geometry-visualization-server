@@ -20,35 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "settable_types.hpp"
 
-#include <string>
+namespace gvs {
 
-namespace imgui {
+auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void {
+    if (!info->parent) {
+        info->parent = nil_id;
+    }
 
-struct Disable {
-    class Guard {
-    public:
-        explicit Guard(bool disable);
-        ~Guard();
+    if (!info->children) {
+        info->children = std::vector<SceneID>{};
+    }
 
-    private:
-        bool disable_;
-    };
+    if (!info->display_info) {
+        info->display_info = DisplayInfo{};
+    }
 
-    static void disable_push();
-    static void disable_pop();
-};
+    auto& display_info = info->display_info.value();
 
-bool configure_gui(const std::string& label, std::string* data);
+    if (!display_info.readable_id) {
+        display_info.readable_id = default_readable_id;
+    }
+    if (!display_info.geometry_format) {
+        display_info.geometry_format = default_geometry_format;
+    }
+    if (!display_info.transformation) {
+        display_info.transformation = default_transformation;
+    }
+    if (!display_info.uniform_color) {
+        display_info.uniform_color = default_uniform_color;
+    }
+    if (!display_info.coloring) {
+        display_info.coloring = default_coloring;
+    }
+    if (!display_info.shading) {
+        display_info.shading = default_shading;
+    }
+    if (!display_info.visible) {
+        display_info.visible = default_visible;
+    }
+    if (!display_info.opacity) {
+        display_info.opacity = default_opacity;
+    }
+}
 
-class ScopedID {
-public:
-    explicit ScopedID(const char* str_id);
-    explicit ScopedID(const char* str_id_begin, const char* str_id_end);
-    explicit ScopedID(const void* ptr_id);
-    explicit ScopedID(int int_id);
-    ~ScopedID();
-};
-
-} // namespace imgui
+} // namespace gvs

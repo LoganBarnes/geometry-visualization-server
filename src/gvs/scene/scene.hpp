@@ -109,8 +109,8 @@ private:
 
 namespace detail {
 
-template <typename Info, typename... Functors>
-auto apply_functors(Info&& info, Functors&&... functors) {
+template <typename... Functors>
+auto apply_functors(SceneItemInfo* info, Functors&&... functors) {
     // iterate over all functors and apply them to a new SceneItemInfo
     std::string error_strings;
 
@@ -138,6 +138,8 @@ auto Scene::add_item(Functors&&... functors) -> util::Result<uuids::uuid> {
     }
 
     // TODO: error check info
+
+    set_defaults_on_empty_fields(&info);
     return actually_add_item(std::move(info));
 }
 
@@ -188,11 +190,7 @@ auto Scene::get_item_info(uuids::uuid const& item_id, Functors&&... functors) ->
     }
 
     auto const& item = items().at(item_id);
-    auto const& error_strings = detail::apply_functors(item, std::forward<Functors>(functors)...);
-
-    if (!error_strings.empty()) {
-        return tl::make_unexpected(MAKE_ERROR(error_strings));
-    }
+    [[maybe_unused]] int dummy[] = {(functors(item), 0)...};
 
     return util::success();
 }

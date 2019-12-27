@@ -22,33 +22,11 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <string>
+namespace gvs::scene {
 
-namespace imgui {
+class Scene;
+class SceneDisplay;
 
-struct Disable {
-    class Guard {
-    public:
-        explicit Guard(bool disable);
-        ~Guard();
+class LocalScene;
 
-    private:
-        bool disable_;
-    };
-
-    static void disable_push();
-    static void disable_pop();
-};
-
-bool configure_gui(const std::string& label, std::string* data);
-
-class ScopedID {
-public:
-    explicit ScopedID(const char* str_id);
-    explicit ScopedID(const char* str_id_begin, const char* str_id_end);
-    explicit ScopedID(const void* ptr_id);
-    explicit ScopedID(int int_id);
-    ~ScopedID();
-};
-
-} // namespace imgui
+} // namespace gvs::scene

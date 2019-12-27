@@ -60,7 +60,7 @@ template <typename T, std::optional<T> SceneItemInfo::*member>
 struct SceneChecker {
     explicit SceneChecker(bool* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void { *data_ = (!!(info.*member) || info.*member.empty()); }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = (!!(info.*member) || (info.*member)->empty()); }
 
     SceneChecker(const SceneChecker&) = delete;
     SceneChecker(SceneChecker&&) noexcept = delete;
@@ -83,8 +83,8 @@ struct SceneGeometryChecker {
             *data_ = false;
             return;
         }
-
-        *data_ = (!!(info.*member) || info.*member.empty());
+        auto const& geometry_info = info.geometry_info.value();
+        *data_ = (!!(geometry_info.*member) || (geometry_info.*member)->empty());
     }
 
     SceneGeometryChecker(const SceneGeometryChecker&) = delete;
@@ -133,7 +133,6 @@ using HasTextureCoordinates3d = detail::SceneGeometryChecker<AttributeVector<2>,
 using HasVertexColors3d = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::vertex_colors>;
 using HasIndices = detail::SceneGeometryChecker<std::vector<unsigned>, &GeometryInfo::indices>;
 
-using HasParent = detail::SceneChecker<SceneID, &SceneItemInfo::parent>;
 using HasChildren = detail::SceneChecker<std::vector<SceneID>, &SceneItemInfo::children>;
 
 using HasReadableId = detail::SceneDisplayChecker<std::string, &DisplayInfo::readable_id>;

@@ -76,11 +76,11 @@ public:
                   std::back_inserter(data_));
     }
 
-    auto data() const { return data_.data(); }
+    [[nodiscard]] auto data() const { return data_.data(); }
     auto data() { return data_.data(); }
-    auto size() const { return data_.size(); }
+    [[nodiscard]] auto size() const { return data_.size(); }
     auto size() { return data_.size(); }
-    auto empty() const { return data_.empty(); }
+    [[nodiscard]] auto empty() const { return data_.empty(); }
     auto empty() { return data_.empty(); }
 
 private:
@@ -159,5 +159,7 @@ struct SceneItemInfo {
 };
 
 using SceneItems = std::unordered_map<SceneID, SceneItemInfo>;
+
+auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void;
 
 } // namespace gvs

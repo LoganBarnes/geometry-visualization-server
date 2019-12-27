@@ -31,7 +31,7 @@ auto Scene::size() const -> std::size_t {
 }
 
 auto Scene::empty() const -> bool {
-    return items().empty();
+    return size() == 1u;
 }
 
 auto Scene::begin() const -> SceneItems::const_iterator {

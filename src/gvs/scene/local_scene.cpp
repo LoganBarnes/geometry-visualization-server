@@ -27,7 +27,14 @@
 
 namespace gvs::scene {
 
-LocalScene::LocalScene() : generator_(std::random_device{}()), backend_(std::make_unique<backends::OpenglBackend>()) {}
+LocalScene::LocalScene() : generator_(std::random_device{}()), backend_(std::make_unique<backends::OpenglBackend>()) {
+    {
+        SceneItemInfo root;
+        set_defaults_on_empty_fields(&root);
+        items_.emplace(nil_id, std::move(root));
+    }
+    backend_->reset_items(items_);
+}
 
 LocalScene::~LocalScene() = default;
 
@@ -51,12 +58,23 @@ auto LocalScene::set_seed(std::random_device::result_type seed) -> LocalScene& {
 
 auto LocalScene::clear() -> void {
     items_.clear();
+    {
+        SceneItemInfo root;
+        set_defaults_on_empty_fields(&root);
+        items_.emplace(nil_id, std::move(root));
+    }
     backend_->reset_items(items_);
 }
 
 auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> {
     auto item_id = uuids::uuid_random_generator{generator_}();
+    auto parent = info.parent;
     items_.emplace(item_id, std::move(info));
+
+    if (parent) {
+        items_.at(parent.value()).children->emplace_back(item_id);
+    }
+
     backend_->after_add(item_id, items_);
     return item_id;
 }

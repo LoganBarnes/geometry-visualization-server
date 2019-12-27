@@ -101,15 +101,11 @@ private:
 ///
 template <typename T, std::optional<T> DisplayInfo::*member>
 struct SceneDisplayGetter {
-    explicit SceneDisplayGetter(std::optional<T>* value) : data_(value) {}
+    explicit SceneDisplayGetter(T* value) : data_(value) {}
 
     auto operator()(SceneItemInfo const& info) -> void {
-        if (!info.display_info) {
-            *data_ = std::nullopt;
-            return;
-        }
-
-        *data_ = info.display_info->*member;
+        auto const& display_info = info.display_info.value();
+        *data_ = (display_info.*member).value();
     }
 
     SceneDisplayGetter(const SceneDisplayGetter&) = delete;
@@ -118,7 +114,7 @@ struct SceneDisplayGetter {
     SceneDisplayGetter& operator=(SceneDisplayGetter&&) noexcept = delete;
 
 protected:
-    std::optional<T>* data_;
+    T* data_;
 };
 
 } // namespace detail
