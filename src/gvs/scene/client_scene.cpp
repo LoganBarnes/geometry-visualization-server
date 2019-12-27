@@ -1,6 +1,6 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 // Geometry Visualization Server
-// Copyright (c) 2018 Logan Barnes - All Rights Reserved
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,51 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "geometry_logger.hpp"
+#include "client_scene.hpp"
 
-#include <grpc++/client_context.h>
+namespace gvs::scene {
 
-namespace gvs {
-namespace log {
-
-GeometryLogger::GeometryLogger(const std::string& server_address)
-    : GeometryLogger(server_address, std::chrono::seconds(4)) {}
-
-bool GeometryLogger::connected() const {
-    return stub_ != nullptr;
+LocalScene::LocalScene() : generator_(std::random_device{}()) {
+    // TODO: Setup client stuff
 }
 
-std::string GeometryLogger::generate_uuid() const {
-    return uuids::to_string(uuids::uuid_system_generator{}());
+LocalScene::~LocalScene() = default;
+
+auto LocalScene::set_seed(std::random_device::result_type seed) -> LocalScene& {
+    generator_ = std::mt19937(seed);
+    return *this;
 }
 
-std::string GeometryLogger::clear_all_items() {
-    if (stub_) {
-        proto::SceneUpdateRequest update;
-        update.mutable_clear_all();
-
-        grpc::ClientContext context;
-        proto::Errors       errors;
-
-        grpc::Status status = stub_->UpdateScene(&context, update, &errors);
-
-        if (not status.ok()) {
-            return status.error_message();
-        }
-
-        if (not errors.error_msg().empty()) {
-            return errors.error_msg();
-        }
-    }
-    return "";
+auto LocalScene::clear() -> void {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-GeometryItemStream GeometryLogger::item_stream(const std::string& id) const {
-    if (id.empty()) {
-        return GeometryItemStream(generate_uuid(), stub_.get());
-    }
-    return GeometryItemStream(id, stub_.get());
+auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-} // namespace log
-} // namespace gvs
+auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
+
+auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util::Result<void> {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
+
+auto LocalScene::items() const -> SceneItems const& {
+    return items_;
+}
+
+} // namespace gvs::scene

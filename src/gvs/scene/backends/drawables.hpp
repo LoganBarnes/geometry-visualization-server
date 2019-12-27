@@ -22,8 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "../settable_types.hpp"
 #include "general_shader_3d.hpp"
+#include "gvs/scene/types.hpp"
 
 // external
 #include <Magnum/SceneGraph/Drawable.h>

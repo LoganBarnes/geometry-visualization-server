@@ -20,34 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "geometry_item_stream.hpp"
+#pragma once
 
-namespace gvs::log {
+// project
+#include "scene.hpp"
 
-GeometryItemStream::GeometryItemStream(std::string id, SceneInfoSender& sender) : id_(std::move(id)), sender_(sender) {}
+namespace gvs::scene {
 
-void GeometryItemStream::send_current_data(SendType type) {
-    auto result = sender_.update_scene(id_, std::move(info_), type);
-    if (!result) {
-        error_message_ = result.error().error_message();
-    }
-    info_ = {};
-}
+class ClientScene : public Scene {
+public:
+    explicit ClientScene();
+    ~ClientScene() override;
 
-GeometryItemStream& GeometryItemStream::operator<<(GeometryItemStream& (*send_func)(GeometryItemStream&)) {
-    return send_func(*this);
-}
+    /*
+     * Start `Scene` functions
+     */
+    auto set_seed(std::random_device::result_type seed) -> ClientScene& override;
+    auto clear() -> void override;
 
-const std::string& GeometryItemStream::id() const {
-    return id_;
-}
+private:
+    auto actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> override;
+    auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
+    auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
 
-bool GeometryItemStream::success() const {
-    return error_message_.empty();
-}
+    auto items() const -> SceneItems const& override;
+    /*
+     * End `Scene` functions
+     */
 
-const std::string& GeometryItemStream::error_message() const {
-    return error_message_;
-}
+    std::mt19937 generator_; ///< Used to generate SceneIDs
+    SceneItems   items_; ///< The map of all the items in the scene
+    // Client client_; ///< The client used to send and receive scene updates
+};
 
-} // namespace gvs::log
+} // namespace gvs::scene

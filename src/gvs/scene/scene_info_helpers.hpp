@@ -24,7 +24,7 @@
 
 // project
 #include "gvs/util/result.hpp"
-#include "settable_types.hpp"
+#include "types.hpp"
 
 namespace gvs {
 

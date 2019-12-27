@@ -23,7 +23,7 @@
 #pragma once
 
 // project
-#include "../settable_types.hpp"
+#include "gvs/scene/types.hpp"
 #include "gvs/vis-client/scene/camera_package.hpp"
 
 // external

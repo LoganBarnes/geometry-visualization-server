@@ -54,3 +54,4 @@ function(add_example _directory)
 endfunction()
 
 add_example(scene)
+add_example(cpp11_client)

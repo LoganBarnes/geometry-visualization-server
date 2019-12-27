@@ -58,25 +58,15 @@ endif (NOT expected_dl_POPULATED)
 
 ### stduuid ###
 FetchContent_Declare(
-        stduuid_dl
-        GIT_REPOSITORY https://github.com/mariusbancila/stduuid.git
-        GIT_TAG 207f06bd56b5d02b8bf4c4305e91f0da8fedbcb4
+        boost_uuid_dl
+        GIT_REPOSITORY https://github.com/boostorg/uuid.git
+        GIT_TAG boost-1.72.0
 )
 
-FetchContent_GetProperties(stduuid_dl)
-if (NOT stduuid_dl_POPULATED)
-    FetchContent_Populate(stduuid_dl)
+FetchContent_GetProperties(boost_uuid_dl)
+if (NOT boost_uuid_dl_POPULATED)
+    FetchContent_Populate(boost_uuid_dl)
 
-    find_package(Libuuid REQUIRED)
-    if (NOT LIBUUID_FOUND)
-        message(FATAL_ERROR
-                "You might need to run 'sudo apt-get install uuid-dev' or similar")
-    endif ()
-
-    add_library(stduuid INTERFACE)
-    target_include_directories(stduuid SYSTEM
-            INTERFACE ${stduuid_dl_SOURCE_DIR}/include
-            INTERFACE ${LIBUUID_INCLUDE_DIR}
-            )
-    target_link_libraries(stduuid INTERFACE ${LIBUUID_LIBRARY})
-endif (NOT stduuid_dl_POPULATED)
+    add_library(boostuuid INTERFACE)
+    target_include_directories(boostuuid SYSTEM INTERFACE "$<BUILD_INTERFACE:${boost_uuid_dl_SOURCE_DIR}/include>")
+endif (NOT boost_uuid_dl_POPULATED)
