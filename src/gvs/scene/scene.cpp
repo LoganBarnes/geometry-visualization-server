@@ -20,33 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "scene.hpp"
 
-// project
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+namespace gvs::scene {
 
-namespace example {
+Scene::~Scene() = default;
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
-public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+auto Scene::size() const -> std::size_t {
+    return items().size();
+}
 
-private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+auto Scene::empty() const -> bool {
+    return items().empty();
+}
 
-    void resize(const Magnum::Vector2i& viewport) override;
+auto Scene::begin() const -> SceneItems::const_iterator {
+    return items().begin();
+}
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
+auto Scene::end() const -> SceneItems::const_iterator {
+    return items().begin();
+}
 
-    // Scene
-    gvs::scene::LocalScene scene_;
-};
-
-} // namespace example
+} // namespace gvs::scene

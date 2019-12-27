@@ -23,30 +23,46 @@
 #pragma once
 
 // project
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "scene.hpp"
+#include "scene_display.hpp"
 
-namespace example {
+namespace gvs::scene {
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
+class LocalScene : public Scene, public SceneDisplay {
 public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+    explicit LocalScene();
+    ~LocalScene() override;
+
+    /*
+     * Start `SceneDisplay` functions
+     */
+    auto render(vis::CameraPackage const& camera_package) const -> void override;
+    auto resize(Magnum::Vector2i const& viewport) -> void override;
+
+    auto set_backend(std::unique_ptr<backends::BackendInterface> backend) -> LocalScene& override;
+    /*
+     * End `SceneDisplay` functions
+     */
+
+    /*
+     * Start `Scene` functions
+     */
+    auto set_seed(std::random_device::result_type seed) -> LocalScene& override;
+    auto clear() -> void override;
 
 private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+    auto actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> override;
+    auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
+    auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
 
-    void resize(const Magnum::Vector2i& viewport) override;
+    auto items() const -> SceneItems const& override;
+    /*
+     * End `Scene` functions
+     */
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
-
-    // Scene
-    gvs::scene::LocalScene scene_;
+    std::mt19937 generator_; ///< Used to generate SceneIDs
+    SceneItems items_; ///< The map of all the items in the scene
+    std::unique_ptr<backends::BackendInterface> backend_; ///< Used to do the actual rendering of the scene
 };
 
-} // namespace example
+} // namespace gvs::scene

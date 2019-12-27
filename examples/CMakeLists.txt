@@ -21,7 +21,6 @@
 # SOFTWARE.
 ##########################################################################################
 function(add_example _directory)
-
     set(target run_${_directory}_example)
 
     file(GLOB_RECURSE GVS_SOURCE_FILES
@@ -31,7 +30,7 @@ function(add_example _directory)
             )
 
     add_executable(${target} ${GVS_SOURCE_FILES})
-    target_link_libraries(${target} PUBLIC gvs_display)
+    target_link_libraries(${target} PUBLIC gvs_scene)
 
     target_compile_options(${target} PRIVATE ${GVS_COMPILE_FLAGS})
     set_target_properties(

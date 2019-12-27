@@ -22,31 +22,36 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// project
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "../settable_types.hpp"
+#include "general_shader_3d.hpp"
 
-namespace example {
+// external
+#include <Magnum/SceneGraph/Drawable.h>
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
+namespace gvs::scene::backends {
+
+class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {
 public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+    explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
+                            Magnum::SceneGraph::DrawableGroup3D* group,
+                            Magnum::GL::Mesh& mesh,
+                            GeneralShader3d& shader);
+
+    ~OpaqueDrawable() override = default;
+
+    auto update_display_info(const DisplayInfo& display_info) -> void;
 
 private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+    void draw(Magnum::Matrix4 const& transformation_matrix, Magnum::SceneGraph::Camera3D& camera) override;
 
-    void resize(const Magnum::Vector2i& viewport) override;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object_;
+    Magnum::GL::Mesh& mesh_;
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
+    Coloring coloring_ = default_coloring;
+    Magnum::Color3 uniform_color_ = {default_uniform_color[0], default_uniform_color[1], default_uniform_color[2]};
+    Shading shading_ = default_shading;
 
-    // Scene
-    gvs::scene::LocalScene scene_;
+    GeneralShader3d& shader_;
 };
 
-} // namespace example
+} // namespace gvs::scene::backends

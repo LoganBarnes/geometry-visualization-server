@@ -20,33 +20,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "to_magnum.hpp"
 
-// project
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+// external
+#include <Magnum/Math/Matrix4.h>
+#include <Magnum/Math/Vector2.h>
+#include <Magnum/Math/Vector3.h>
 
-namespace example {
+namespace gvs::scene::backends {
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
-public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive {
+    switch (format) {
+    case GeometryFormat::Points:
+        return Magnum::MeshPrimitive::Points;
+    case GeometryFormat::Lines:
+        return Magnum::MeshPrimitive::Lines;
+    case GeometryFormat::LineStrip:
+        return Magnum::MeshPrimitive::LineStrip;
+    case GeometryFormat::Triangles:
+        return Magnum::MeshPrimitive::Triangles;
+    case GeometryFormat::TriangleStrip:
+        return Magnum::MeshPrimitive::TriangleStrip;
+    case GeometryFormat::TriangleFan:
+        return Magnum::MeshPrimitive::TriangleFan;
+    }
+    throw std::runtime_error("Unreachable code");
+}
+auto to_magnum(vec2 const& vector) -> Magnum::Vector2 {
+    return {vector[0], vector[1]};
+}
 
-private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+auto to_magnum(vec3 const& vector) -> Magnum::Vector3 {
+    return {vector[0], vector[1], vector[2]};
+}
 
-    void resize(const Magnum::Vector2i& viewport) override;
+auto to_magnum(mat4 const& matrix) -> Magnum::Matrix4 {
+    return {Magnum::Math::RectangularMatrix<4, 4, float>::from(&matrix[0])};
+}
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
-
-    // Scene
-    gvs::scene::LocalScene scene_;
-};
-
-} // namespace example
+} // namespace gvs::scene::backends

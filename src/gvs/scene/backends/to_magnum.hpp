@@ -23,30 +23,17 @@
 #pragma once
 
 // project
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "../settable_types.hpp"
 
-namespace example {
+// external
+#include <Magnum/Magnum.h>
+#include <Magnum/Mesh.h>
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
-public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+namespace gvs::scene::backends {
 
-private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive;
+auto to_magnum(vec2 const& vector) -> Magnum::Vector2;
+auto to_magnum(vec3 const& vector) -> Magnum::Vector3;
+auto to_magnum(mat4 const& matric) -> Magnum::Matrix4;
 
-    void resize(const Magnum::Vector2i& viewport) override;
-
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
-
-    // Scene
-    gvs::scene::LocalScene scene_;
-};
-
-} // namespace example
+} // namespace gvs::scene::backends

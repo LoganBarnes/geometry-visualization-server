@@ -22,9 +22,11 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "main_window.h"
 
+// project
+#include "gvs/scene/log_params.hpp"
+
 // external
 #include <Magnum/GL/Context.h>
-//#include <gvs/vis-client/imgui_utils.hpp>
 #include <imgui.h>
 
 // standard
@@ -61,13 +63,13 @@ MainWindow::MainWindow(const Arguments& arguments)
     }
 
     {
-        auto stream = scene_.item_stream("sphere").send(gvs::SetPositions3d(sphere),
-                                                        gvs::SetNormals3d(sphere),
-                                                        gvs::SetShading(gvs::LambertianShading()),
-                                                        gvs::SetColoring(gvs::Coloring::Normals));
+        auto id_result = scene_.add_item(gvs::SetPositions3d(sphere),
+                                         gvs::SetNormals3d(sphere),
+                                         gvs::SetShading(gvs::LambertianShading()),
+                                         gvs::SetColoring(gvs::Coloring::Normals));
 
-        if (!stream.success()) {
-            error_message_ += stream.error_message();
+        if (!id_result) {
+            error_message_ += id_result.error().error_message() + '\n';
         }
     }
 }

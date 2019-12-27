@@ -23,30 +23,28 @@
 #pragma once
 
 // project
-#include "gvs/scene/local_scene.hpp"
-#include "gvs/vis-client/app/imgui_magnum_application.hpp"
+#include "backends/backend_interface.hpp"
 
-namespace example {
+// standard
+#include <memory>
 
-class MainWindow : public gvs::vis::ImGuiMagnumApplication {
+namespace gvs::scene {
+
+class SceneDisplay {
 public:
-    explicit MainWindow(const Arguments& arguments);
-    ~MainWindow() override;
+    virtual ~SceneDisplay() = 0;
 
-private:
-    void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
-    void configure_gui() override;
+    /// \brief Renders all the visible items in the scene.
+    virtual auto render(vis::CameraPackage const& camera_package) const -> void = 0;
 
-    void resize(const Magnum::Vector2i& viewport) override;
+    /// \brief Called when a scene's viewport has changed.
+    /// \param viewport - The new viewport dimensions.
+    virtual auto resize(Magnum::Vector2i const& viewport) -> void = 0;
 
-    // General Info
-    std::string gl_version_str_;
-    std::string gl_renderer_str_;
-    std::string error_message_;
-
-    // Scene
-    gvs::scene::LocalScene scene_;
+    /// \brief Sets the backend used to display the rendering of the items
+    virtual auto set_backend(std::unique_ptr<backends::BackendInterface> backend) -> SceneDisplay& = 0;
 };
 
-} // namespace example
+inline SceneDisplay::~SceneDisplay() = default;
+
+} // namespace gvs::scene

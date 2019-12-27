@@ -218,6 +218,19 @@ if (NOT GVS_LOGGING_ONLY)
             PUBLIC vis_client_resources
             PUBLIC gvs_util
             )
+
+    file(GLOB_RECURSE GVS_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/scene/*
+            )
+
+    gvs_add_library(gvs_scene 17 ${GVS_SOURCE_FILES})
+    target_link_libraries(gvs_scene
+            PUBLIC vis_client_resources
+            PUBLIC gvs_util
+            )
 endif (NOT GVS_LOGGING_ONLY)
 
 if (GVS_BUILD_EXAMPLES)
