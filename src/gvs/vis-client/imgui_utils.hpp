@@ -22,6 +22,13 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// project
+#include "gvs/util/generic_guard.hpp"
+
+// external
+#include <imgui.h>
+
+// standard
 #include <string>
 
 namespace imgui {
@@ -41,6 +48,15 @@ struct Disable {
 };
 
 bool configure_gui(const std::string& label, std::string* data);
+
+class ScopedIndent {
+public:
+    explicit ScopedIndent(float indent_w = 0.f)
+        : guard_(gvs::util::make_guard(&ImGui::Indent, &ImGui::Unindent, indent_w)) {}
+
+private:
+    gvs::util::GenericGuard<decltype(&ImGui::Indent), decltype(&ImGui::Unindent), float&> guard_;
+};
 
 class ScopedID {
 public:

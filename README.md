@@ -6,12 +6,16 @@ Geometry Visualization Server
 [![Docs][docs-badge]][docs-link]
 
 ### TODO BEFORE MERGE WITH MASTER:
-* Create setters and getter types `gvs::SetPositions`, `gvs::GetPositions`, `gvs::HasChildren`, etc.
+* ~~Create setters and getter types `gvs::SetPositions`, `gvs::GetPositions`, `gvs::HasChildren`, etc.~~
 * Clean up magnum scene class
 * Create implicitly convertible vector and matrix classes for use with setters and getters
 * Move display namespace types to their proper location
 * Use display interfaces in relevant parts of gvs
 * Add tests after new architecture is finalized
+* Add global scene traits (like lights)
+* Add primitive setters `gvs::Cube()`, `gvs::Sphere`, etc.
+* Add Renderable interface
+* Add documentation
 
 A tool for visually debugging geometric applications. Built on a 
 [Protobuf][protobuf-link]/[gRPC][grpc-link] service and a 

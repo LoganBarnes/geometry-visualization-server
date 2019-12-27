@@ -102,8 +102,24 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
                     geometry_format = static_cast<GeometryFormat>(igeometry_format);
                 }
 
+                auto ishading = std::underlying_type_t<Shading>(shading);
+                if (ImGui::Combo("Shading",
+                                 &ishading,
+                                 " Uniform Color \0"
+                                 " Lambertian \0"
+                                 " Cook-Torrance \0"
+                                 "\0")) {
+                    item_changed = true;
+                    shading      = static_cast<Shading>(ishading);
+                }
+
                 if (coloring == Coloring::UniformColor) {
                     item_changed |= ImGui::ColorEdit3("Global Color", uniform_color.data());
+                }
+
+                {
+                    imgui::Disable::Guard disable_opacity(true);
+                    item_changed |= ImGui::DragFloat("Opacity", &opacity, 0.01f, 0.f, 1.f);
                 }
             }
 
