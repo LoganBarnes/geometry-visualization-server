@@ -67,58 +67,67 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
     ImGui::Checkbox("###visible", &visible);
     ImGui::SameLine();
 
+    bool item_changed = false;
+    bool children_changed = false;
+
     if (ImGui::TreeNode(readable_id.c_str())) {
         ImGui::Indent();
         ImGui::Separator();
 
-        //        if (visible) {
-        //            if (has_geometry) {
-        //                auto display_mode = static_cast<int>(shader_display_mode);
-        //                if (ImGui::Combo("Display Mode",
-        //                                 &display_mode,
-        //                                 " POSITION \0"
-        //                                 " NORMALS \0"
-        //                                 " TEX_COORDS \0"
-        //                                 " COLOR \0"
-        //                                 " TEXTURE \0"
-        //                                 " SIMPLE_SHADING \0"
-        //                                 " ADVANCED_SHADING \0"
-        //                                 " WHITE \0"
-        //                                 "\0")) {
-        //                    shader_display_mode = static_cast<DisplayMode>(display_mode);
-        //                }
-        //
-        //                switch (shader_display_mode) {
-        //                case DisplayMode::COLOR:
-        //                case DisplayMode::SIMPLE_SHADING:
-        //                case DisplayMode::ADVANCED_SHADING:
-        //                    ImGui::ColorEdit3("Global Color", glm::value_ptr(global_color));
-        //                    break;
-        //                default:
-        //                    break;
-        //                }
-        //            }
-        //
-        //            for (const uid& child : children) {
-        //                configure_scene_gui(scene, child);
-        //            }
-        //            if (children.empty()) {
-        //                ImGui::TextColored(ImVec4(1.f, 1.f, 0.1f, 1.f), "No Children");
-        //            }
-        //        }
-        //
+        if (visible) {
+            if (has_geometry) {
+                auto icoloring = std::underlying_type_t<Coloring>(coloring);
+                if (ImGui::Combo("Display Mode",
+                                 &icoloring,
+                                 " Positions \0"
+                                 " Normals \0"
+                                 " Texture Coordinates \0"
+                                 " Vertex Colors \0"
+                                 " Uniform Color \0"
+                                 " Texture \0"
+                                 " White \0"
+                                 "\0")) {
+                    item_changed = true;
+                    coloring = static_cast<Coloring>(icoloring);
+                }
+
+                if (coloring == Coloring::UniformColor) {
+                    item_changed |= ImGui::ColorEdit3("Global Color", uniform_color.data());
+                }
+            }
+
+            if (has_children) {
+                std::optional<std::vector<SceneID>> children;
+                result = scene->get_item_info(nil_id, GetChildren(&children));
+                if (!result) {
+                    throw std::runtime_error(result.error().debug_error_message());
+                }
+
+                for (auto const& child_id : children.value()) {
+                    children_changed |= configure_scene_gui(child_id, scene);
+                }
+
+            } else {
+                ImGui::TextColored(ImVec4(1.f, 1.f, 0.1f, 1.f), "No Children");
+            }
+        }
+
         ImGui::Unindent();
         ImGui::TreePop();
     }
 
-    //    scene.update_item(id,
-    //                      DisplayType(shader_display_mode),
-    //                      Transform(transform),
-    //                      ReadableID(readable_id),
-    //                      Visible(visible),
-    //                      GlobalColor(global_color));
+    if (item_changed) {
+        result = scene->update_item(item_id,
+                                    SetReadableId(readable_id),
+                                    SetColoring(coloring),
+                                    SetUniformColor(uniform_color),
+                                    SetVisible(visible));
+        if (!result) {
+            throw std::runtime_error(result.error().debug_error_message());
+        }
+    }
 
-    return false;
+    return item_changed | children_changed;
 }
 
 } // namespace
@@ -144,7 +153,7 @@ auto SceneUtil::configure_gui(Scene* scene) -> bool {
 
     bool scene_changed = false;
 
-    for (SceneID const& child_id : children.value()) {
+    for (auto const& child_id : children.value()) {
         scene_changed |= configure_scene_gui(child_id, scene);
     }
 

@@ -80,11 +80,11 @@ auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID
 }
 
 auto LocalScene::actually_update_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util::Result<void> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" unimplemented"));
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
 auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util::Result<void> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" unimplemented"));
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
 auto LocalScene::items() const -> SceneItems const& {
