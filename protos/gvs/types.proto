@@ -22,21 +22,12 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 syntax = "proto3";
 
-package gvs.proto;
+package gvs.net;
 
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/empty.proto";
+import "primitive_types.proto";
 
-message Message {
-    string identifier = 1;
-    string contents = 2;
-}
-
-message Messages {
-    repeated Message messages = 1;
-}
-
-message ID {
+message SceneId {
     string value = 1;
 }
 
@@ -50,43 +41,40 @@ message Mat4 {
     repeated float data = 1;
 }
 
-enum GeometryFormat {
-    POINTS = 0;
-    LINES = 1;
-    LINE_STRIP = 2;
-    TRIANGLES = 3;
-    TRIANGLE_STRIP = 4;
-    TRIANGLE_FAN = 5;
+message GeometryFormat {
+    Type type = 1;
+
+    enum Type {
+        POINTS = 0;
+        LINES = 1;
+        LINE_STRIP = 2;
+        TRIANGLES = 3;
+        TRIANGLE_STRIP = 4;
+        TRIANGLE_FAN = 5;
+    }
 }
 
-message GeometryFormatValue {
-    GeometryFormat value = 1;
-}
+message Coloring {
+    Type type = 1;
 
-enum Coloring {
-    POSITIONS = 0;
-    NORMALS = 1;
-    TEXTURE_COORDINATES = 2;
-    VERTEX_COLORS = 3;
-    UNIFORM_COLOR = 4;
-    TEXTURE = 5;
-    WHITE = 6;
-}
-
-message ColoringValue {
-    Coloring value = 1;
-}
-
-message LambertianShading {
-    Vec3 light_direction = 1;
-    Vec3 light_color = 2;
-    Vec3 ambient_color = 3;
+    enum Type {
+        POSITIONS = 0;
+        NORMALS = 1;
+        TEXTURE_COORDINATES = 2;
+        VERTEX_COLORS = 3;
+        UNIFORM_COLOR = 4;
+        TEXTURE = 5;
+        WHITE = 6;
+    }
 }
 
 message Shading {
-    oneof value {
-        google.protobuf.Empty uniform_color = 1;
-        LambertianShading lambertian = 2;
+    Type type = 1;
+
+    enum Type {
+        UNIFORM_COLOR = 0;
+        LAMBERTIAN = 1;
+        COOK_TORRANCE = 2;
     }
 }
 
@@ -98,7 +86,11 @@ message UIntList {
     repeated uint32 value = 1;
 }
 
-message GeometryInfo3D {
+message SceneIDList {
+    repeated SceneId value = 1;
+}
+
+message GeometryInfo3d {
     FloatList positions = 1;
     FloatList normals = 2;
     FloatList tex_coords = 3;
@@ -108,23 +100,36 @@ message GeometryInfo3D {
 
 message DisplayInfo {
     google.protobuf.StringValue readable_id = 1;
-    GeometryFormatValue geometry_format = 2;
+    GeometryFormat geometry_format = 2;
     Mat4 transformation = 3;
     Vec3 uniform_color = 4;
-    ColoringValue coloring = 5;
+    Coloring coloring = 5;
     Shading shading = 6;
-    // google.protobuf.BoolValue visible = 7;
-    // google.protobuf.FloatValue opacity = 8;
+    google.protobuf.BoolValue visible = 7;
+    google.protobuf.FloatValue opacity = 8;
+    google.protobuf.BoolValue wireframe_only = 9;
+}
+
+message Geometry {
+    oneof type {
+        GeometryInfo3d info = 1;
+        Primitive primitive = 2;
+    }
 }
 
 message SceneItemInfo {
-    ID id = 1;
-    GeometryInfo3D geometry_info = 2;
-    DisplayInfo display_info = 3;
-    ID parent = 4;
-    // repeated ID children = 5;
+    Geometry geometry = 1;
+    DisplayInfo display_info = 2;
+    SceneId parent = 3;
+    SceneIDList children = 4;
 }
 
 message SceneItems {
+    // SceneId to SceneItemInfo
     map<string, SceneItemInfo> items = 1;
+}
+
+message SceneItemInfoWithId {
+    SceneId id = 1;
+    SceneItemInfo info = 2;
 }

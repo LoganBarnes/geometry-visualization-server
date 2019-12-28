@@ -115,8 +115,10 @@ file(GLOB_RECURSE GVS_SOURCE_FILES
 
 gvs_add_library(gvs_scene_client 11 ${GVS_SOURCE_FILES})
 target_link_libraries(gvs_scene_client
-        PUBLIC gvs_protos
-        PUBLIC boostuuid
+        PUBLIC
+        gvs_protos
+        boostuuid
+        mapbox
         )
 target_include_directories(gvs_scene_client
         PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"

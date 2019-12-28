@@ -24,35 +24,43 @@ syntax = "proto3";
 
 package gvs.net;
 
-import "google/protobuf/empty.proto";
-import "types.proto";
-
-service Scene {
-    rpc AddItem (SceneItemInfo) returns (SceneIdResult);
-    rpc UpdateItem (SceneItemInfoWithId) returns (Result);
-    rpc AppendToItem (SceneItemInfoWithId) returns (Result);
-    rpc GetItemInfo (SceneId) returns (SceneItemInfo);
-
-    rpc Clear (google.protobuf.Empty) returns (google.protobuf.Empty);
+message Cone {
+    float height = 1;
+    float base_diameter = 2;
 }
 
-message SceneIdResult {
-    oneof result {
-        SceneId value = 1;
-        Errors errors = 2;
+message Cube {
+    float width = 1;
+}
+
+message Cylinder {
+    float height = 1;
+    float diameter = 2;
+}
+
+message Sphere {
+    float diameter = 1;
+}
+
+message Torus {
+    float major_diameter = 1; // Diameter of ring through center of doughnut
+    float minor_diameter = 2; // Thickness of the doughnut
+}
+
+message Quad {
+    float width = 1;
+}
+
+message Primitive {
+    oneof type {
+        Cone cone = 1;
+        Cube cube = 2;
+        Cylinder cylinder = 3;
+        Sphere sphere = 4;
+        Torus torus = 5;
+        Quad quad = 6;
     }
-}
 
-message Success {
-}
-
-message Result {
-    oneof result {
-        Success value = 1;
-        Errors errors = 2;
-    }
-}
-
-message Errors {
-    string error_msg = 1; // empty if rpc was successful
+    int32 u_tessellation = 7;
+    int32 v_tessellation = 8;
 }

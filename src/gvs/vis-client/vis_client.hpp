@@ -33,6 +33,7 @@
 
 // external
 #include <grpcw/forward_declarations.hpp>
+#include <gvs/gui/error_alert.hpp>
 
 namespace gvs::vis {
 
@@ -48,36 +49,26 @@ private:
 
     void resize(const Magnum::Vector2i& viewport) override;
 
-    void process_message_update(const proto::Message& message);
-    void process_scene_update(const proto::SceneUpdate& message);
-
     void on_state_change();
-    void get_message_state(bool redraw = true);
-    void get_scene_state(bool redraw = true);
 
     // General Info
     std::string gl_version_str_;
     std::string gl_renderer_str_;
-    std::string error_message_;
+
+    // Errors
+    gui::ErrorAlert error_alert_;
 
     // Networking
     std::string server_address_input_ = "address:port";
 
-    using Service = proto::Scene;
+    using Service = net::Scene;
     std::unique_ptr<grpcw::client::GrpcClient<Service>> grpc_client_;
 
     // Debugging
     bool run_as_fast_as_possible_ = false;
 
-    // Messages
-    bool                              wrap_text_ = false;
-    util::AtomicData<proto::Messages> messages_;
-    std::string                       message_id_input_;
-    std::string                       message_content_input_;
-
     // Scene
-    std::unique_ptr<display::LocalScene>              scene_; // forward declaration
-    util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
+    std::unique_ptr<display::LocalScene> scene_; // forward declaration
 };
 
 } // namespace gvs::vis

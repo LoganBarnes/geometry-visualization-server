@@ -24,7 +24,11 @@
 
 // project
 #include "gvs/util/make_unique.hpp"
+#include "primitive_types.hpp"
 #include "scene_id.hpp"
+
+// external
+#include <mapbox/variant.hpp> // C++11 variant
 
 // standard
 #include <array>
@@ -118,14 +122,6 @@ constexpr auto default_visible        = true;
 constexpr auto default_opacity        = 1.f;
 constexpr auto default_wireframe_only = false;
 
-struct GeometryInfo {
-    std::unique_ptr<AttributeVector<3>>    positions;
-    std::unique_ptr<AttributeVector<3>>    normals;
-    std::unique_ptr<AttributeVector<2>>    texture_coordinates;
-    std::unique_ptr<AttributeVector<3>>    vertex_colors;
-    std::unique_ptr<std::vector<unsigned>> indices;
-};
-
 struct DisplayInfo {
     std::unique_ptr<std::string>    readable_id;
     std::unique_ptr<GeometryFormat> geometry_format;
@@ -137,6 +133,22 @@ struct DisplayInfo {
     std::unique_ptr<float>          opacity;
     std::unique_ptr<bool>           wireframe_only;
 };
+
+struct GeometryInfo {
+    std::unique_ptr<AttributeVector<3>>    positions;
+    std::unique_ptr<AttributeVector<3>>    normals;
+    std::unique_ptr<AttributeVector<2>>    texture_coordinates;
+    std::unique_ptr<AttributeVector<3>>    vertex_colors;
+    std::unique_ptr<std::vector<unsigned>> indices;
+};
+
+//namespace detail {
+//using GeometryBase = mapbox::util::variant<GeometryInfo, Primitive>;
+//}
+//
+//struct Geometry : detail::GeometryBase {
+//    using detail::GeometryBase::variant;
+//};
 
 struct SceneItemInfo {
     std::unique_ptr<GeometryInfo>         geometry_info;

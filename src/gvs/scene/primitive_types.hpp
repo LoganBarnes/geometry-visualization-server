@@ -20,39 +20,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-syntax = "proto3";
+#pragma once
 
-package gvs.net;
+// external
+#include <mapbox/variant.hpp> // C++11 variant
 
-import "google/protobuf/empty.proto";
-import "types.proto";
+namespace gvs {
 
-service Scene {
-    rpc AddItem (SceneItemInfo) returns (SceneIdResult);
-    rpc UpdateItem (SceneItemInfoWithId) returns (Result);
-    rpc AppendToItem (SceneItemInfoWithId) returns (Result);
-    rpc GetItemInfo (SceneId) returns (SceneItemInfo);
+struct Cone {
+    float height        = 1.f;
+    float base_diameter = 1.f;
+};
 
-    rpc Clear (google.protobuf.Empty) returns (google.protobuf.Empty);
+struct Cube {
+    float width = 1.f;
+};
+
+struct Cylinder {
+    float height   = 1.f;
+    float diameter = 1.f;
+};
+
+struct Sphere {
+    float diameter = 1.f;
+};
+
+struct Torus {
+    float major_diameter = 1.0f; ///< Diameter of ring through center of doughnut
+    float minor_diameter = 0.5f; ///< Thickness of the doughnut
+};
+
+struct Quad {
+    float width = 1.f;
+};
+
+namespace detail {
+using PrimitiveBase = mapbox::util::variant<Cone, Cube, Cylinder, Sphere, Torus, Quad>;
 }
 
-message SceneIdResult {
-    oneof result {
-        SceneId value = 1;
-        Errors errors = 2;
-    }
-}
+struct Primitive : detail::PrimitiveBase {
+    using detail::PrimitiveBase::variant;
 
-message Success {
-}
+    int u_tessellation = 25;
+    int v_tessellation = 25;
+};
 
-message Result {
-    oneof result {
-        Success value = 1;
-        Errors errors = 2;
-    }
-}
-
-message Errors {
-    string error_msg = 1; // empty if rpc was successful
-}
+} // namespace gvs

@@ -56,7 +56,7 @@ if (NOT expected_dl_POPULATED)
     add_subdirectory(${expected_dl_SOURCE_DIR} ${expected_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif (NOT expected_dl_POPULATED)
 
-### stduuid ###
+### boost UUID ###
 FetchContent_Declare(
         boost_uuid_dl
         GIT_REPOSITORY https://github.com/boostorg/uuid.git
@@ -70,3 +70,18 @@ if (NOT boost_uuid_dl_POPULATED)
     add_library(boostuuid INTERFACE)
     target_include_directories(boostuuid SYSTEM INTERFACE "$<BUILD_INTERFACE:${boost_uuid_dl_SOURCE_DIR}/include>")
 endif (NOT boost_uuid_dl_POPULATED)
+
+### mapbox variant ###
+FetchContent_Declare(
+        mapbox_dl
+        GIT_REPOSITORY https://github.com/mapbox/variant.git
+        GIT_TAG v1.1.6
+)
+
+FetchContent_GetProperties(mapbox_dl)
+if (NOT mapbox_dl_POPULATED)
+    FetchContent_Populate(mapbox_dl)
+
+    add_library(mapbox INTERFACE)
+    target_include_directories(mapbox SYSTEM INTERFACE "$<BUILD_INTERFACE:${mapbox_dl_SOURCE_DIR}/include>")
+endif (NOT mapbox_dl_POPULATED)

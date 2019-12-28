@@ -83,60 +83,19 @@ VisClient::VisClient(std::string initial_host_address, const Arguments& argument
                                  .setWindowFlags(Configuration::WindowFlag::Resizable)),
       gl_version_str_(GL::Context::current().versionString()),
       gl_renderer_str_(GL::Context::current().rendererString()),
+      error_alert_("Vis Client Errors"),
       server_address_input_(std::move(initial_host_address)),
       grpc_client_(std::make_unique<grpcw::client::GrpcClient<Service>>()) {
 
     scene_ = std::make_unique<display::LocalScene>();
 
     grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
-
-    // Connect to the stream that delivers message updates
-    grpc_client_
-        ->register_stream<proto::Message>([](typename Service::Stub& stub, grpc::ClientContext* context) {
-            google::protobuf::Empty empty;
-            return stub.MessageUpdates(context, empty);
-        })
-        .on_update([this](const proto::Message& msg) { this->process_message_update(msg); });
-
-    // Connect to the stream that delivers scene updates
-    grpc_client_
-        ->register_stream<proto::SceneUpdate>([](typename Service::Stub& stub, grpc::ClientContext* context) {
-            google::protobuf::Empty empty;
-            return stub.SceneUpdates(context, empty);
-        })
-        .on_update([this](const proto::SceneUpdate& update) { this->process_scene_update(update); });
 }
 
 vis::VisClient::~VisClient() = default;
 
 void vis::VisClient::update() {
-    scene_updates_.use_safely([/*this*/](std::vector<proto::SceneUpdate>& updates) {
-        for (const proto::SceneUpdate& update : updates) {
-
-            switch (update.update_case()) {
-            case proto::SceneUpdate::kAddItem:
-                // scene_->add_item(update.add_item());
-                break;
-
-            case proto::SceneUpdate::kUpdateItem:
-                // scene_->update_item(update.update_item());
-                break;
-
-            case proto::SceneUpdate::kResetAllItems:
-                // scene_->reset(update.reset_all_items());
-                break;
-
-            case proto::SceneUpdate::kRemoveItem:
-                break;
-
-            case proto::SceneUpdate::UPDATE_NOT_SET:
-                break;
-            }
-        }
-        updates.clear();
-    });
-
-    //scene_->update(this->windowSize());
+    //scene_->update();
 }
 
 void vis::VisClient::render(const display::CameraPackage& camera_package) const {
@@ -232,143 +191,17 @@ void vis::VisClient::configure_gui() {
 
     gui::configure_gui(scene_.get());
 
-    messages_.use_safely([&](const proto::Messages& messages) {
-        float message_input_start_height = h - 100.f;
-        float max_message_window_height  = message_input_start_height - ImGui::GetCursorPos().y;
-
-        add_three_line_separator();
-
-        ImGui::BeginChild("Messages", {ImGui::GetWindowSize().x, max_message_window_height});
-
-        auto text_func = (wrap_text_ ? &ImGui::TextWrapped : &ImGui::Text);
-
-        for (const auto& message : messages.messages()) {
-            ImGui::TextColored({0.7f, 0.7f, 0.7f, 1.f}, "%s: ", message.identifier().c_str());
-            ImGui::SameLine();
-            text_func("%s", message.contents().c_str());
-        }
-        ImGui::SetScrollY(ImGui::GetScrollMaxY());
-        ImGui::EndChild();
-
-        add_three_line_separator();
-    });
-
-    bool send_message = false;
-
-    send_message |= gui::configure_gui("Name", &message_id_input_);
-    send_message |= gui::configure_gui("Contents", &message_content_input_);
-
-    send_message |= ImGui::Button("Send");
-
-    ImGui::SameLine();
-    ImGui::Checkbox("Wrap Text", &wrap_text_);
-
-    if (send_message) {
-        ImGui::SetKeyboardFocusHere(-1);
-        proto::Message message;
-        message.set_identifier(message_id_input_);
-        message.set_contents(message_content_input_);
-
-        if (grpc_client_->use_stub([&](auto& stub) {
-                grpc::ClientContext context;
-                proto::Errors       errors;
-                grpc::Status        status = stub.SendMessage(&context, message, &errors);
-
-                if (not status.ok()) {
-                    error_message_ = status.error_message();
-
-                } else if (not errors.error_msg().empty()) {
-                    error_message_ = errors.error_msg();
-                }
-            })) {
-            message_content_input_ = "";
-
-        } else {
-            error_message_ = "Not connected";
-        }
-    }
-
     ImGui::End();
 
-    if (not error_message_.empty()) {
-        int w = this->windowSize().x();
-        ImGui::SetNextWindowPos({w * 0.5f, 0.f}, 0, {0.5f, 0.f});
-
-        bool open = true;
-        ImGui::Begin("Errors", &open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
-        ImGui::TextColored({1.f, 0.f, 0.f, 1.f}, "%s", error_message_.c_str());
-        ImGui::End();
-
-        if (not open) {
-            error_message_ = "";
-        }
-    }
+    error_alert_.display_next_error();
 }
 
 void VisClient::resize(const Vector2i& viewport) {
     scene_->resize(viewport);
 }
 
-void VisClient::process_message_update(const proto::Message& message) {
-    messages_.use_safely([&](proto::Messages& messages) { messages.add_messages()->CopyFrom(message); });
-    reset_draw_counter();
-}
-
-void VisClient::process_scene_update(const proto::SceneUpdate& update) {
-    scene_updates_.use_safely([&](std::vector<proto::SceneUpdate>& updates) { updates.emplace_back(update); });
-    reset_draw_counter();
-}
-
 void VisClient::on_state_change() {
-
-    // Load all the messages when the client first connects.
-    get_message_state(false);
-
-    // Load the current scene when the client first connects.
-    get_scene_state(false);
-
     reset_draw_counter();
-}
-
-void VisClient::get_message_state(bool redraw) {
-    proto::Messages messages;
-
-    if (grpc_client_->use_stub([&](auto& stub) {
-            // This lambda is only used if the client is connected
-            grpc::ClientContext     context;
-            google::protobuf::Empty empty;
-            stub.GetAllMessages(&context, empty, &messages);
-        })) {
-
-        // This is only called if the client is connected
-        messages_.use_safely([&](proto::Messages& msgs) { msgs.CopyFrom(messages); });
-    }
-
-    if (redraw) {
-        reset_draw_counter();
-    }
-}
-
-void VisClient::get_scene_state(bool redraw) {
-    proto::SceneItems scene;
-
-    if (grpc_client_->use_stub([&](auto& stub) {
-            // This lambda is only used if the client is connected
-            grpc::ClientContext     context;
-            google::protobuf::Empty empty;
-            stub.GetAllItems(&context, empty, &scene);
-        })) {
-
-        // This is only called if the client is connected
-        scene_updates_.use_safely([&](std::vector<proto::SceneUpdate>& updates) {
-            updates.emplace_back();
-            updates.back().mutable_reset_all_items()->CopyFrom(scene);
-        });
-    }
-
-    if (redraw) {
-        reset_draw_counter();
-    }
 }
 
 } // namespace gvs::vis
