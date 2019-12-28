@@ -86,7 +86,7 @@ auto LocalScene::actually_add_item(SceneItemInfoSetter&& new_info) -> util11::Re
 }
 
 auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error {
-    backend_->after_update(item_id, backends::UpdatedInfo{info}, items_);
+    backends::UpdatedInfo updated{info};
 
     auto& item = items_.at(item_id);
 
@@ -98,10 +98,12 @@ auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfoSette
         items_.at(*info.parent).children.emplace_back(item_id);
     }
 
-    auto result = replace_if_present(&item, std::forward<SceneItemInfoSetter>(info));
+    auto result = replace_if_present(&item, std::move(info));
     if (!result) {
         return {result.error().error_message()};
     }
+
+    backend_->after_update(item_id, updated, items_);
 
     return util11::success();
 }

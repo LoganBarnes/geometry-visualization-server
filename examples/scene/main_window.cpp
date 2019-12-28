@@ -23,8 +23,8 @@
 #include "main_window.hpp"
 
 // project
-#include "gvs/scene/log_params.hpp"
 #include "gvs/gui/scene_gui.hpp"
+#include "gvs/scene/log_params.hpp"
 
 // external
 #include <Magnum/GL/Context.h>
@@ -55,6 +55,7 @@ MainWindow::MainWindow(const Arguments& arguments)
                         gvs::SetPositions3d({{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
                         gvs::SetVertexColors3d({{1.f, 1.f, 1.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
                         gvs::SetColoring(gvs::Coloring::VertexColors),
+                        gvs::SetShading(gvs::Shading::UniformColor),
                         gvs::SetLines({0, 1, 0, 2, 0, 3}));
     }
 
