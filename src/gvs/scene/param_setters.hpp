@@ -193,7 +193,7 @@ struct SetPrimitive {
     explicit SetPrimitive(Primitive value = {}) : data_(std::move(value)) {}
 
     auto operator()(SceneItemInfoSetter* info) -> std::string {
-        if (!info->geometry) {
+        if (info->geometry) {
             return "Geometry already specified";
         }
 

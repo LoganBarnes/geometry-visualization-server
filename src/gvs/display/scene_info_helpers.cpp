@@ -22,6 +22,9 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "scene_info_helpers.hpp"
 
+// project
+#include "make_primitive.hpp"
+
 namespace gvs {
 
 auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> util::Result<void> {
@@ -34,7 +37,8 @@ auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> 
         auto& geometry_info = info->geometry_info;
 
         if (new_info.geometry->is<Primitive>()) {
-            // update_info_for_primitive(info, new_info.geometry->get<Primitive>());
+            display::make_primitive(info, new_info.geometry->get<Primitive>());
+
         } else {
             assert(new_info.geometry->is<GeometryInfoSetter>());
 

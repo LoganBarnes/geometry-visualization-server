@@ -31,11 +31,6 @@
 #include <Magnum/GL/Context.h>
 #include <Magnum/Math/Color.h>
 #include <Magnum/Primitives/Axis.h>
-#include <Magnum/Primitives/Cone.h>
-#include <Magnum/Primitives/Cube.h>
-#include <Magnum/Primitives/Cylinder.h>
-#include <Magnum/Primitives/Plane.h>
-#include <Magnum/Primitives/UVSphere.h>
 #include <Magnum/Trade/MeshData3D.h>
 #include <imgui.h>
 
@@ -289,53 +284,24 @@ auto MainWindow::reset_axes() -> void {
 }
 
 auto MainWindow::reset_cone() -> void {
-    Trade::MeshData3D const cone = Primitives::coneSolid(cone_.rings, cone_.segments, cone_.half_length);
-
-    scene_.update_item(cone_.scene_id,
-                       gvs::SetPositions3d(cone.positions(0)),
-                       gvs::SetNormals3d(cone.normals(0)),
-                       gvs::SetIndices(cone.indices()),
-                       gvs::SetGeometryFormat(gvs::display::from_magnum(cone.primitive())));
+    scene_.update_item(cone_.scene_id, gvs::SetPrimitive(gvs::Cone{cone_.half_length, cone_.rings, cone_.segments}));
 }
 
 auto MainWindow::reset_cube() -> void {
-    Trade::MeshData3D const cube = Primitives::cubeSolid();
-
-    scene_.update_item(cube_.scene_id,
-                       gvs::SetPositions3d(cube.positions(0)),
-                       gvs::SetNormals3d(cube.normals(0)),
-                       gvs::SetIndices(cube.indices()),
-                       gvs::SetGeometryFormat(gvs::display::from_magnum(cube.primitive())));
+    scene_.update_item(cube_.scene_id, gvs::SetPrimitive(gvs::Cube{}));
 }
 
 auto MainWindow::reset_cylinder() -> void {
-    Trade::MeshData3D const cylinder
-        = Primitives::cylinderSolid(cylinder_.rings, cylinder_.segments, cylinder_.half_length);
-
     scene_.update_item(cylinder_.scene_id,
-                       gvs::SetPositions3d(cylinder.positions(0)),
-                       gvs::SetNormals3d(cylinder.normals(0)),
-                       gvs::SetIndices(cylinder.indices()),
-                       gvs::SetGeometryFormat(gvs::display::from_magnum(cylinder.primitive())));
+                       gvs::SetPrimitive(gvs::Cylinder{cylinder_.half_length, cylinder_.rings, cylinder_.segments}));
 }
 
 auto MainWindow::reset_plane() -> void {
-    Trade::MeshData3D const plane = Primitives::planeSolid();
-
-    scene_.update_item(plane_.scene_id,
-                       gvs::SetPositions3d(plane.positions(0)),
-                       gvs::SetNormals3d(plane.normals(0)),
-                       gvs::SetGeometryFormat(gvs::display::from_magnum(plane.primitive())));
+    scene_.update_item(plane_.scene_id, gvs::SetPrimitive(gvs::Plane{}));
 }
 
 auto MainWindow::reset_sphere() -> void {
-    Trade::MeshData3D const sphere = Primitives::uvSphereSolid(sphere_.rings, sphere_.segments);
-
-    scene_.update_item(sphere_.scene_id,
-                       gvs::SetPositions3d(sphere.positions(0)),
-                       gvs::SetNormals3d(sphere.normals(0)),
-                       gvs::SetIndices(sphere.indices()),
-                       gvs::SetGeometryFormat(gvs::display::from_magnum(sphere.primitive())));
+    scene_.update_item(sphere_.scene_id, gvs::SetPrimitive(gvs::Sphere{sphere_.rings, sphere_.segments}));
 }
 
 } // namespace example
