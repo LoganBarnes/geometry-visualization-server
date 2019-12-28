@@ -69,10 +69,18 @@ public:
                   std::back_inserter(data_));
     }
 
+    auto begin() const -> std::vector<float>::const_iterator { return data_.begin(); }
+    auto begin() -> std::vector<float>::iterator { return data_.begin(); }
+
+    auto end() const -> std::vector<float>::const_iterator { return data_.end(); }
+    auto end() -> std::vector<float>::iterator { return data_.end(); }
+
     auto data() const -> float const* { return data_.data(); }
     auto data() -> float* { return data_.data(); }
+
     auto size() const -> std::vector<float>::size_type { return data_.size(); }
     auto size() -> std::vector<float>::size_type { return data_.size(); }
+
     auto empty() const -> bool { return data_.empty(); }
     auto empty() -> bool { return data_.empty(); }
 

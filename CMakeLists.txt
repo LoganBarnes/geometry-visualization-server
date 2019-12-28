@@ -113,14 +113,13 @@ file(GLOB_RECURSE GVS_SOURCE_FILES
         ${CMAKE_CURRENT_LIST_DIR}/src/gvs/scene/*
         )
 
-gvs_add_library(gvs_scene_client 11 ${GVS_SOURCE_FILES})
-target_link_libraries(gvs_scene_client
+gvs_add_library(gvs_scene 11 ${GVS_SOURCE_FILES})
+target_link_libraries(gvs_scene
         PUBLIC
-        gvs_protos
         boostuuid
         mapbox
         )
-target_include_directories(gvs_scene_client
+target_include_directories(gvs_scene
         PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"
         )
 
@@ -158,6 +157,20 @@ if (NOT GVS_NO_DISPLAY)
     #############
     ### GVS 2 ###
     #############
+    ### Client ###
+    file(GLOB_RECURSE GVS_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/net/*
+            )
+
+    gvs_add_library(gvs_scene_client 11 ${GVS_SOURCE_FILES})
+    target_link_libraries(gvs_scene_client
+            PUBLIC gvs_protos
+            PUBLIC gvs_scene
+            )
+
+    ### Display ###
     file(GLOB_RECURSE GVS_SOURCE_FILES
             LIST_DIRECTORIES false
             CONFIGURE_DEPENDS
@@ -170,7 +183,7 @@ if (NOT GVS_NO_DISPLAY)
     target_link_libraries(gvs_scene_display
             PUBLIC vis_client_resources
             PUBLIC gvs_util
-            PUBLIC gvs_scene_client
+            PUBLIC gvs_scene
             )
 endif (NOT GVS_NO_DISPLAY)
 

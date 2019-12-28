@@ -20,33 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
-
-// external
-#include <boost/uuid/uuid.hpp>
-
-// standard
-#include <iostream>
+#include "client_scene.hpp"
 
 namespace gvs {
+namespace net {
 
-using SceneID = boost::uuids::uuid;
+ClientScene::ClientScene(std::string const& server_address) : ClientScene(server_address, std::chrono::seconds(5)) {}
 
-auto nil_id() -> SceneID;
+ClientScene::~ClientScene() = default;
 
-auto to_string(SceneID const& id) -> std::string;
+auto ClientScene::set_seed(std::random_device::result_type seed) -> ClientScene& {
+    generator_ = std::mt19937(seed);
+    return *this;
+}
 
-auto from_string(std::string const& id) -> SceneID;
+auto ClientScene::clear() -> void {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
 
-std::ostream& operator<<(std::ostream& os, SceneID const& id);
+auto ClientScene::actually_add_item(SceneItemInfoSetter && /*info*/) -> util11::Result<SceneID> {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
 
+auto ClientScene::actually_update_item(SceneID const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
+
+auto ClientScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfoSetter && /*info*/)
+    -> util11::Error {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
+
+auto ClientScene::items() const -> gvs::SceneItems const& {
+    return items_;
+}
+
+} // namespace net
 } // namespace gvs
-
-namespace std {
-
-template <>
-struct hash<gvs::SceneID> {
-    size_t operator()(gvs::SceneID const& id) const { return boost::uuids::hash_value(id); }
-};
-
-} // namespace std

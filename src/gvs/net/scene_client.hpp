@@ -22,31 +22,43 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// project
+#include "gvs/scene/scene.hpp"
+
+// generated
+#include <scene.grpc.pb.h>
+
 // external
-#include <boost/uuid/uuid.hpp>
+#include <grpcpp/channel.h>
 
 // standard
-#include <iostream>
+#include <chrono>
 
 namespace gvs {
+namespace net {
 
-using SceneID = boost::uuids::uuid;
+class SceneClient : public scene::Scene {
+public:
+    ~SceneClient() override;
 
-auto nil_id() -> SceneID;
+    /*
+     * Start `Scene` functions
+     */
+    auto set_seed(std::random_device::result_type seed) -> SceneClient& override;
+    auto clear() -> void override;
 
-auto to_string(SceneID const& id) -> std::string;
+    auto actually_add_item(SceneItemInfoSetter&& info) -> util11::Result<SceneID> override;
+    auto actually_update_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error override;
+    auto actually_append_to_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error override;
 
-auto from_string(std::string const& id) -> SceneID;
+    auto items() const -> gvs::SceneItems const& override;
+    /*
+     * End `Scene` functions
+     */
 
-std::ostream& operator<<(std::ostream& os, SceneID const& id);
-
-} // namespace gvs
-
-namespace std {
-
-template <>
-struct hash<gvs::SceneID> {
-    size_t operator()(gvs::SceneID const& id) const { return boost::uuids::hash_value(id); }
+    std::shared_ptr<grpc::Channel>    channel_;
+    std::unique_ptr<net::Scene::Stub> stub_;
 };
 
-} // namespace std
+} // namespace net
+} // namespace gvs

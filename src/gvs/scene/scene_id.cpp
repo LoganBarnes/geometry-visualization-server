@@ -23,6 +23,7 @@
 #include "scene_id.hpp"
 
 // external
+#include <boost/lexical_cast.hpp>
 #include <boost/uuid/nil_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -34,6 +35,10 @@ auto nil_id() -> SceneID {
 
 auto to_string(SceneID const& id) -> std::string {
     return boost::uuids::to_string(id);
+}
+
+auto from_string(std::string const& id) -> SceneID {
+    return boost::lexical_cast<SceneID>(id);
 }
 
 std::ostream& operator<<(std::ostream& os, SceneID const& id) {

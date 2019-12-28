@@ -86,14 +86,14 @@ message UIntList {
     repeated uint32 value = 1;
 }
 
-message SceneIDList {
+message SceneIdList {
     repeated SceneId value = 1;
 }
 
 message GeometryInfo3d {
     FloatList positions = 1;
     FloatList normals = 2;
-    FloatList tex_coords = 3;
+    FloatList texture_coordinates = 3;
     FloatList vertex_colors = 4;
     UIntList indices = 5;
 }
@@ -121,7 +121,7 @@ message SceneItemInfo {
     Geometry geometry = 1;
     DisplayInfo display_info = 2;
     SceneId parent = 3;
-    SceneIDList children = 4;
+    SceneIdList children = 4;
 }
 
 message SceneItems {
