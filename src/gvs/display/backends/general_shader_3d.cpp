@@ -34,7 +34,7 @@
 #include <Magnum/Math/Matrix3.h>
 #include <Magnum/Math/Matrix4.h>
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 
 GeneralShader3d::GeneralShader3d() {
     MAGNUM_ASSERT_GL_VERSION_SUPPORTED(Magnum::GL::Version::GL450);
@@ -99,4 +99,4 @@ GeneralShader3d& GeneralShader3d::set_shading(const Shading& shading) {
     return *this;
 }
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

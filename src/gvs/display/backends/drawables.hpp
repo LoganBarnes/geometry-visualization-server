@@ -28,7 +28,7 @@
 // external
 #include <Magnum/SceneGraph/Drawable.h>
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 
 class OpaqueDrawable : public Magnum::SceneGraph::Drawable3D {
 public:
@@ -54,4 +54,4 @@ private:
     GeneralShader3d& shader_;
 };
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

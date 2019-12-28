@@ -49,7 +49,7 @@ private:
     gvs::gui::ErrorAlert error_alert_;
 
     // Scene
-    gvs::scene::LocalScene scene_;
+    gvs::display::LocalScene scene_;
 };
 
 } // namespace example

@@ -25,14 +25,14 @@
 #include "forward_declarations.hpp"
 #include "gvs/scene/forward_declarations.hpp"
 
-namespace gvs::scene {
+namespace gvs::display {
 
 class SceneUtil {
 public:
     /// \brief Displays an ImGui based GUI for the given scene.
     /// \param scene - The scene used to display the GUI
     /// \return true if the scene has changed, false otherwise
-    static auto configure_gui(Scene* scene) -> bool;
+    static auto configure_gui(scene::Scene* scene) -> bool;
 };
 
-} // namespace gvs::scene
+} // namespace gvs::display

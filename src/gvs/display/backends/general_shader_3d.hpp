@@ -29,7 +29,7 @@
 #include <Magnum/GL/AbstractShaderProgram.h>
 #include <Magnum/Math/Color.h>
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 
 class GeneralShader3d : public Magnum::GL::AbstractShaderProgram {
 public:
@@ -63,4 +63,4 @@ private:
     int ambient_scale_uniform_;
 };
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

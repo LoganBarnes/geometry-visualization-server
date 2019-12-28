@@ -31,7 +31,7 @@
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/SceneGraph/Camera.h>
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 
 class BackendInterface {
 public:
@@ -79,4 +79,4 @@ public:
 
 inline BackendInterface::~BackendInterface() = default;
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

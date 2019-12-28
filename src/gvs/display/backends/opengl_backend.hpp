@@ -43,7 +43,7 @@
 // standard
 #include <memory>
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 
 class OpenglBackend : public BackendInterface {
 public:
@@ -88,4 +88,4 @@ private:
     Magnum::SceneGraph::DrawableGroup3D drawables_;
 };
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

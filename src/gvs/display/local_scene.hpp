@@ -26,9 +26,9 @@
 #include "gvs/scene/scene.hpp"
 #include "scene_display.hpp"
 
-namespace gvs::scene {
+namespace gvs::display {
 
-class LocalScene : public Scene, public SceneDisplay {
+class LocalScene : public scene::Scene, public SceneDisplay {
 public:
     explicit LocalScene();
     ~LocalScene() override;
@@ -39,7 +39,7 @@ public:
     auto render(vis::CameraPackage const& camera_package) const -> void override;
     auto resize(Magnum::Vector2i const& viewport) -> void override;
 
-    auto set_backend(std::unique_ptr<backends::BackendInterface> backend) -> LocalScene& override;
+    auto set_backend(std::unique_ptr<display::backends::BackendInterface> backend) -> LocalScene& override;
     /*
      * End `SceneDisplay` functions
      */
@@ -65,4 +65,4 @@ private:
     std::unique_ptr<backends::BackendInterface> backend_; ///< Used to do the actual rendering of the scene
 };
 
-} // namespace gvs::scene
+} // namespace gvs::display

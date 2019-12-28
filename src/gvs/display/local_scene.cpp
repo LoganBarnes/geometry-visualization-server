@@ -30,7 +30,7 @@
 // external
 #include <boost/uuid/random_generator.hpp>
 
-namespace gvs::scene {
+namespace gvs::display {
 
 LocalScene::LocalScene() : generator_(std::random_device{}()), backend_(std::make_unique<backends::OpenglBackend>()) {
     {
@@ -109,4 +109,4 @@ auto LocalScene::items() const -> SceneItems const& {
     return items_;
 }
 
-} // namespace gvs::scene
+} // namespace gvs::display

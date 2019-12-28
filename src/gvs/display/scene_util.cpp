@@ -30,10 +30,10 @@
 #include <gvs/vis-client/imgui_utils.hpp>
 #include <imgui.h>
 
-namespace gvs::scene {
+namespace gvs::display {
 namespace {
 
-auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
+auto configure_scene_gui(SceneID const& item_id, scene::Scene* scene) -> bool {
     std::string    readable_id;
     GeometryFormat geometry_format;
     mat4           transformation;
@@ -164,7 +164,7 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
 
 } // namespace
 
-auto SceneUtil::configure_gui(Scene* scene) -> bool {
+auto SceneUtil::configure_gui(scene::Scene* scene) -> bool {
     ImGui::Text("Scene Items:");
 
     if (scene->empty()) {
@@ -185,4 +185,4 @@ auto SceneUtil::configure_gui(Scene* scene) -> bool {
     return scene_changed;
 }
 
-} // namespace gvs::scene
+} // namespace gvs::display

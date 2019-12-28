@@ -27,7 +27,7 @@
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/Math/Vector3.h>
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 
 auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive {
     switch (format) {
@@ -58,4 +58,4 @@ auto to_magnum(mat4 const& matrix) -> Magnum::Matrix4 {
     return {Magnum::Math::RectangularMatrix<4, 4, float>::from(&matrix[0])};
 }
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

@@ -36,7 +36,7 @@
 // standard
 #include <iostream>
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 namespace {
 
 auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
@@ -214,4 +214,4 @@ auto OpenglBackend::reset_items(SceneItems const& items) -> void {
 
 auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

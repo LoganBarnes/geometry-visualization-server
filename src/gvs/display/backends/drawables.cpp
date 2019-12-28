@@ -36,7 +36,7 @@
 
 using namespace Magnum;
 
-namespace gvs::scene::backends {
+namespace gvs::display::backends {
 
 OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
                                SceneGraph::DrawableGroup3D*                            group,
@@ -80,4 +80,4 @@ auto OpaqueDrawable::draw(Matrix4 const& transformation_matrix, SceneGraph::Came
     mesh_.draw(shader_);
 }
 
-} // namespace gvs::scene::backends
+} // namespace gvs::display::backends

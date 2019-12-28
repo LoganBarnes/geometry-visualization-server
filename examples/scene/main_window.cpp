@@ -145,7 +145,7 @@ void MainWindow::configure_gui() {
 
     add_three_line_separator();
 
-    gvs::scene::SceneUtil::configure_gui(&scene_);
+    gvs::display::SceneUtil::configure_gui(&scene_);
 
     ImGui::End();
 
