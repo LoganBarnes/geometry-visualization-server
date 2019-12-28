@@ -61,5 +61,6 @@ function(add_example _directory _cpp17_enabled)
 
 endfunction()
 
-add_example(scene TRUE)
 add_example(cpp11_client FALSE)
+add_example(primitives TRUE)
+add_example(scene TRUE)

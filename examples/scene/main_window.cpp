@@ -26,6 +26,8 @@
 #include "../common/test_scene.hpp"
 #include "gvs/gui/scene_gui.hpp"
 #include "gvs/scene/log_params.hpp"
+#include "../primitives/main_window.hpp"
+
 
 // external
 #include <Magnum/GL/Context.h>

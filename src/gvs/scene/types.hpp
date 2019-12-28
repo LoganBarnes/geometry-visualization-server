@@ -46,6 +46,8 @@ using mat2 = std::array<float, 4>;
 using mat3 = std::array<float, 9>;
 using mat4 = std::array<float, 16>;
 
+constexpr mat4 identity_mat4 = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
 template <std::size_t N>
 struct AttributeVector {
 public:

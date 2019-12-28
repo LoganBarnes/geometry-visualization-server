@@ -29,8 +29,11 @@
 #include <Magnum/Magnum.h>
 #include <Magnum/Mesh.h>
 
-namespace gvs::display::backends {
+namespace gvs::display {
 
+/*
+ * To Magnum
+ */
 auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive;
 
 auto to_magnum(mat4 const& matric) -> Magnum::Matrix4;
@@ -39,4 +42,9 @@ auto to_magnum(vec2 const& vector) -> Magnum::Vector2;
 template <typename T = Magnum::Vector3>
 auto to_magnum(vec3 const& vector) -> T;
 
-} // namespace gvs::display::backends
+/*
+ * From Magnum
+ */
+auto from_magnum(Magnum::MeshPrimitive const& format) -> GeometryFormat;
+
+} // namespace gvs::display

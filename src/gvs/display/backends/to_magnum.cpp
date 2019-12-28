@@ -28,20 +28,28 @@
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/Math/Vector3.h>
 
-namespace gvs::display::backends {
+namespace gvs::display {
 
+/*
+ * To Magnum
+ */
 auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive {
     switch (format) {
     case GeometryFormat::Points:
         return Magnum::MeshPrimitive::Points;
+
     case GeometryFormat::Lines:
         return Magnum::MeshPrimitive::Lines;
+
     case GeometryFormat::LineStrip:
         return Magnum::MeshPrimitive::LineStrip;
+
     case GeometryFormat::Triangles:
         return Magnum::MeshPrimitive::Triangles;
+
     case GeometryFormat::TriangleStrip:
         return Magnum::MeshPrimitive::TriangleStrip;
+
     case GeometryFormat::TriangleFan:
         return Magnum::MeshPrimitive::TriangleFan;
     }
@@ -64,4 +72,31 @@ auto to_magnum(vec3 const& vector) -> T {
 template auto to_magnum<Magnum::Vector3>(vec3 const& vector) -> Magnum::Vector3;
 template auto to_magnum<Magnum::Color3>(vec3 const& vector) -> Magnum::Color3;
 
-} // namespace gvs::display::backends
+/*
+ * From Magnum
+ */
+auto from_magnum(Magnum::MeshPrimitive const& format) -> GeometryFormat {
+    switch (format) {
+    case Magnum::MeshPrimitive::Points:
+        return GeometryFormat::Points;
+
+    case Magnum::MeshPrimitive::Lines:
+        return GeometryFormat::Lines;
+
+    case Magnum::MeshPrimitive::LineLoop: // Does this just work?
+    case Magnum::MeshPrimitive::LineStrip:
+        return GeometryFormat::LineStrip;
+
+    case Magnum::MeshPrimitive::Triangles:
+        return GeometryFormat::Triangles;
+
+    case Magnum::MeshPrimitive::TriangleStrip:
+        return GeometryFormat::TriangleStrip;
+
+    case Magnum::MeshPrimitive::TriangleFan:
+        return GeometryFormat::TriangleFan;
+    }
+    throw std::runtime_error("Unreachable code");
+}
+
+} // namespace gvs::display
