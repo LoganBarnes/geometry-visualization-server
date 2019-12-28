@@ -27,7 +27,7 @@
 #include "gvs/scene/scene.hpp"
 
 // external
-#include <gvs/vis-client/imgui_utils.hpp>
+#include <gvs/gui/imgui_utils.hpp>
 #include <imgui.h>
 
 namespace gvs::display {
@@ -60,8 +60,8 @@ auto configure_scene_gui(SceneID const& item_id, scene::Scene* scene) -> bool {
                          HasGeometry(&has_geometry),
                          HasChildren(&has_children));
 
-    auto const      id_str = to_string(item_id);
-    imgui::ScopedID scoped_id(id_str.c_str());
+    auto const    id_str = to_string(item_id);
+    gui::ScopedID scoped_id(id_str.c_str());
 
     bool item_changed     = false;
     bool children_changed = false;
@@ -70,7 +70,7 @@ auto configure_scene_gui(SceneID const& item_id, scene::Scene* scene) -> bool {
     ImGui::SameLine();
 
     if (ImGui::TreeNode(readable_id.c_str())) {
-        imgui::ScopedIndent scoped_indent;
+        gui::ScopedIndent scoped_indent;
         ImGui::Separator();
 
         if (visible) {
@@ -120,12 +120,12 @@ auto configure_scene_gui(SceneID const& item_id, scene::Scene* scene) -> bool {
                 }
 
                 {
-                    imgui::Disable::Guard disable_opacity(true);
+                    gui::Disable::Guard disable_opacity(true);
                     item_changed |= ImGui::DragFloat("Opacity", &opacity, 0.01f, 0.f, 1.f);
                 }
 
                 {
-                    imgui::Disable::Guard disable_wireframe(true);
+                    gui::Disable::Guard disable_wireframe(true);
                     item_changed |= ImGui::Checkbox("Wireframe", &wireframe_only);
                 }
             }

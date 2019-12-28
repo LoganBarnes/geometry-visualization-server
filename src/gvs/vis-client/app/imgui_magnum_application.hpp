@@ -22,8 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "gvs/display/camera_package.hpp"
 #include "gvs/forward_declarations.hpp"
-#include "gvs/vis-client/scene/camera_package.hpp"
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/ImGuiIntegration/Context.hpp>
@@ -50,9 +50,9 @@ protected:
     void reset_draw_counter();
 
 private:
-    virtual void update()                                          = 0;
-    virtual void render(const CameraPackage& camera_package) const = 0;
-    virtual void configure_gui()                                   = 0;
+    virtual void update()                                                   = 0;
+    virtual void render(const display::CameraPackage& camera_package) const = 0;
+    virtual void configure_gui()                                            = 0;
 
     virtual void resize(const Magnum::Vector2i& viewport) = 0;
 
@@ -77,7 +77,7 @@ private:
 
     // Camera
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
-    CameraPackage                                                         camera_package_;
+    display::CameraPackage                                                camera_package_;
 
     Magnum::Vector2 previous_position_     = {};
     Magnum::Vector2 camera_yaw_and_pitch_  = {};

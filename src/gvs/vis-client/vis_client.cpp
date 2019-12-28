@@ -23,14 +23,15 @@
 #include "vis_client.hpp"
 
 // project
+#include "gvs/display/local_scene.hpp"
+#include "gvs/display/scene_util.hpp"
+#include "gvs/gui/imgui_utils.hpp"
 #include "gvs/vis-client/app/imgui_theme.hpp"
-#include "gvs/vis-client/imgui_utils.hpp"
-#include "gvs/vis-client/scene/opengl_scene.hpp"
 
 // generated
 #include "gvs/gvs_paths.hpp"
 
-// third-party
+// external
 #include <Magnum/GL/Context.h>
 #include <grpcw/client/grpc_client.hpp>
 #include <imgui.h>
@@ -85,7 +86,7 @@ VisClient::VisClient(std::string initial_host_address, const Arguments& argument
       server_address_input_(std::move(initial_host_address)),
       grpc_client_(std::make_unique<grpcw::client::GrpcClient<Service>>()) {
 
-    scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
+    scene_ = std::make_unique<display::LocalScene>();
 
     grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
 
@@ -109,20 +110,20 @@ VisClient::VisClient(std::string initial_host_address, const Arguments& argument
 vis::VisClient::~VisClient() = default;
 
 void vis::VisClient::update() {
-    scene_updates_.use_safely([this](std::vector<proto::SceneUpdate>& updates) {
+    scene_updates_.use_safely([/*this*/](std::vector<proto::SceneUpdate>& updates) {
         for (const proto::SceneUpdate& update : updates) {
 
             switch (update.update_case()) {
             case proto::SceneUpdate::kAddItem:
-                scene_->add_item(update.add_item());
+                // scene_->add_item(update.add_item());
                 break;
 
             case proto::SceneUpdate::kUpdateItem:
-                scene_->update_item(update.update_item());
+                // scene_->update_item(update.update_item());
                 break;
 
             case proto::SceneUpdate::kResetAllItems:
-                scene_->reset(update.reset_all_items());
+                // scene_->reset(update.reset_all_items());
                 break;
 
             case proto::SceneUpdate::kRemoveItem:
@@ -135,10 +136,10 @@ void vis::VisClient::update() {
         updates.clear();
     });
 
-    scene_->update(this->windowSize());
+    //scene_->update(this->windowSize());
 }
 
-void vis::VisClient::render(const CameraPackage& camera_package) const {
+void vis::VisClient::render(const display::CameraPackage& camera_package) const {
     if (!scene_->empty()) {
         scene_->render(camera_package);
     }
@@ -184,10 +185,10 @@ void vis::VisClient::configure_gui() {
 
     if (ImGui::TreeNode("Server Settings")) {
 
-        bool value_changed = imgui::configure_gui("Change Server", &server_address_input_);
+        bool value_changed = gui::configure_gui("Change Server", &server_address_input_);
         {
-            imgui::Disable::Guard disable(server_address_input_ == grpc_client_->get_server_address()
-                                          and state != grpcw::client::GrpcClientState::connected);
+            gui::Disable::Guard disable(server_address_input_ == grpc_client_->get_server_address()
+                                        and state != grpcw::client::GrpcClientState::connected);
             value_changed |= (ImGui::Button("Connect"));
         }
 
@@ -221,18 +222,15 @@ void vis::VisClient::configure_gui() {
     bool using_optix = (dynamic_cast<OptiXScene*>(scene_.get()) != nullptr);
     if (ImGui::Checkbox("Use OptiX for rendering", &using_optix)) {
         if (using_optix) {
-            scene_ = std::make_unique<OptiXScene>(make_scene_init_info(theme_->background, this->windowSize()));
+            scene_->set_backend(std::make_unique<OptixBackend>());
 
         } else {
-            scene_ = std::make_unique<OpenGLScene>(make_scene_init_info(theme_->background, this->windowSize()));
+            scene_->set_backend(std::make_unique<OpenglBackend>());
         }
-
-        resize(this->windowSize());
-        on_state_change(); // Get state if client is connected
     }
 #endif
 
-    scene_->configure_gui(this->windowSize());
+    display::SceneUtil::configure_gui(scene_.get());
 
     messages_.use_safely([&](const proto::Messages& messages) {
         float message_input_start_height = h - 100.f;
@@ -257,8 +255,8 @@ void vis::VisClient::configure_gui() {
 
     bool send_message = false;
 
-    send_message |= imgui::configure_gui("Name", &message_id_input_);
-    send_message |= imgui::configure_gui("Contents", &message_content_input_);
+    send_message |= gui::configure_gui("Name", &message_id_input_);
+    send_message |= gui::configure_gui("Contents", &message_content_input_);
 
     send_message |= ImGui::Button("Send");
 

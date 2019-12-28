@@ -22,12 +22,12 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "camera_package.hpp"
 
+// external
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/Math/Functions.h>
-#include <Magnum/Math/Math.h>
 #include <Magnum/SceneGraph/MatrixTransformation3D.h>
 
-namespace gvs::vis {
+namespace gvs::display {
 
 using namespace Magnum;
 using namespace Math::Literals;
@@ -66,4 +66,4 @@ Ray CameraPackage::get_camera_ray_from_window_pos(const Vector2& mouse_position)
     return {eye_point, direction};
 }
 
-} // namespace gvs::vis
+} // namespace gvs::display

@@ -23,8 +23,8 @@
 #pragma once
 
 // project
+#include "gvs/display/camera_package.hpp"
 #include "gvs/scene/types.hpp"
-#include "gvs/vis-client/scene/camera_package.hpp"
 
 // external
 #include <Magnum/Magnum.h>
@@ -40,7 +40,7 @@ public:
     /**
      * @brief Renders all the visible items in the scene.
      */
-    virtual auto render(vis::CameraPackage const& camera_package) -> void = 0;
+    virtual auto render(CameraPackage const& camera_package) -> void = 0;
 
     /**
      * @brief Called when a Scene has added a new item.

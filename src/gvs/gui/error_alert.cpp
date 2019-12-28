@@ -23,7 +23,7 @@
 #include "error_alert.hpp"
 
 // project
-#include "gvs/vis-client/imgui_utils.hpp"
+#include "imgui_utils.hpp"
 
 // standard
 #include <iostream>
@@ -68,7 +68,7 @@ auto ErrorAlert::display(const gvs::gui::ErrorAlert::Type& type, const std::stri
     const auto red    = ImVec4{1.f, 0.f, 0.f, 1.f};
     const auto yellow = ImVec4{1.f, 1.f, 0.f, 1.f};
 
-    imgui::ScopedID id(imgui_label_.c_str());
+    ScopedID id(imgui_label_.c_str());
 
     bool popup_closed = false;
 

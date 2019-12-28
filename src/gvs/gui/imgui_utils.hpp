@@ -20,12 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/vis-client/scene/scene_interface.hpp"
+#pragma once
 
-namespace gvs::vis {
+// project
+#include "gvs/util/generic_guard.hpp"
 
-SceneInitializationInfo make_scene_init_info(const ImColor& background_color, const Magnum::Vector2i& viewport) {
-    return {{background_color.Value.x, background_color.Value.y, background_color.Value.z}, viewport};
-}
+// external
+#include <imgui.h>
 
-} // namespace gvs::vis
+// standard
+#include <string>
+
+namespace gvs::gui {
+
+struct Disable {
+    class Guard {
+    public:
+        explicit Guard(bool disable);
+        ~Guard();
+
+    private:
+        bool disable_;
+    };
+
+    static void disable_push();
+    static void disable_pop();
+};
+
+bool configure_gui(const std::string& label, std::string* data);
+
+class ScopedIndent {
+public:
+    explicit ScopedIndent(float indent_w = 0.f)
+        : guard_(gvs::util::make_guard(&ImGui::Indent, &ImGui::Unindent, indent_w)) {}
+
+private:
+    gvs::util::GenericGuard<decltype(&ImGui::Indent), decltype(&ImGui::Unindent), float&> guard_;
+};
+
+class ScopedID {
+public:
+    explicit ScopedID(const char* str_id);
+    explicit ScopedID(const char* str_id_begin, const char* str_id_end);
+    explicit ScopedID(const void* ptr_id);
+    explicit ScopedID(int int_id);
+    ~ScopedID();
+};
+
+} // namespace gvs::gui

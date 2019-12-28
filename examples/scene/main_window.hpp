@@ -36,7 +36,7 @@ public:
 
 private:
     void update() override;
-    void render(const gvs::vis::CameraPackage& camera_package) const override;
+    void render(const gvs::display::CameraPackage& camera_package) const override;
     void configure_gui() override;
 
     void resize(const Magnum::Vector2i& viewport) override;

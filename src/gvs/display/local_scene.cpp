@@ -43,7 +43,7 @@ LocalScene::LocalScene() : generator_(std::random_device{}()), backend_(std::mak
 
 LocalScene::~LocalScene() = default;
 
-auto LocalScene::render(vis::CameraPackage const& camera_package) const -> void {
+auto LocalScene::render(CameraPackage const& camera_package) const -> void {
     backend_->render(camera_package);
 }
 

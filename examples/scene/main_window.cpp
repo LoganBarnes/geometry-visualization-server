@@ -117,7 +117,7 @@ void MainWindow::update() {
     // Nothing to do
 }
 
-void MainWindow::render(const gvs::vis::CameraPackage& camera_package) const {
+void MainWindow::render(const gvs::display::CameraPackage& camera_package) const {
     scene_.render(camera_package);
 }
 

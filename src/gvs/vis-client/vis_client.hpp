@@ -22,6 +22,8 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// project
+#include "gvs/display/forward_declarations.hpp"
 #include "gvs/util/atomic_data.hpp"
 #include "gvs/util/blocking_queue.hpp"
 #include "gvs/vis-client/app/imgui_magnum_application.hpp"
@@ -29,7 +31,7 @@
 // generated
 #include <scene.grpc.pb.h>
 
-// third-party
+// external
 #include <grpcw/forward_declarations.hpp>
 
 namespace gvs::vis {
@@ -41,7 +43,7 @@ public:
 
 private:
     void update() override;
-    void render(const CameraPackage& camera_package) const override;
+    void render(const display::CameraPackage& camera_package) const override;
     void configure_gui() override;
 
     void resize(const Magnum::Vector2i& viewport) override;
@@ -74,7 +76,7 @@ private:
     std::string                       message_content_input_;
 
     // Scene
-    std::unique_ptr<SceneInterface>                   scene_; // forward declaration
+    std::unique_ptr<display::LocalScene>              scene_; // forward declaration
     util::AtomicData<std::vector<proto::SceneUpdate>> scene_updates_;
 };
 

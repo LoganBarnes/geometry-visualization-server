@@ -35,7 +35,7 @@ public:
     virtual ~SceneDisplay() = 0;
 
     /// \brief Renders all the visible items in the scene.
-    virtual auto render(vis::CameraPackage const& camera_package) const -> void = 0;
+    virtual auto render(CameraPackage const& camera_package) const -> void = 0;
 
     /// \brief Called when a scene's viewport has changed.
     /// \param viewport - The new viewport dimensions.

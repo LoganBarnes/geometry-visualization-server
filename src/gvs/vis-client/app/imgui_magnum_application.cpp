@@ -23,7 +23,6 @@
 #include "imgui_magnum_application.hpp"
 
 #include "gvs/vis-client/app/imgui_theme.hpp"
-#include "gvs/vis-client/scene/opengl_scene.hpp"
 
 #include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/Context.h>
@@ -47,7 +46,7 @@ using namespace Magnum;
 namespace {
 
 // 'p' is a point on a plane
-float intersect_plane(const Ray& ray, Vector3 p, const Vector3& plane_normal) {
+float intersect_plane(const display::Ray& ray, Vector3 p, const Vector3& plane_normal) {
     // plane ray intersection
     const float denom = Math::dot(ray.direction, plane_normal);
 

@@ -50,7 +50,7 @@ public:
     explicit OpenglBackend();
     ~OpenglBackend() override;
 
-    auto render(vis::CameraPackage const& camera_package) -> void override;
+    auto render(CameraPackage const& camera_package) -> void override;
 
     auto after_add(SceneID const& item_id, SceneItems const& items) -> void override;
     auto before_update(SceneID const& item_id, SceneItemInfo const& changes, SceneItems const& items) -> void override;

@@ -22,43 +22,28 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <types.pb.h>
+// external
+#include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/SceneGraph/MatrixTransformation3D.h>
+#include <Magnum/SceneGraph/Object.h>
 
-#include <Magnum/GL/AbstractShaderProgram.h>
-#include <Magnum/Math/Color.h>
+namespace gvs::display {
 
-namespace gvs::vis {
-
-class GeneralShader3D : public Magnum::GL::AbstractShaderProgram {
-public:
-    typedef Magnum::GL::Attribute<0, Magnum::Vector3> Position;
-    typedef Magnum::GL::Attribute<1, Magnum::Vector3> Normal;
-    typedef Magnum::GL::Attribute<2, Magnum::Vector2> TextureCoordinate;
-    typedef Magnum::GL::Attribute<3, Magnum::Vector3> VertexColor;
-
-    explicit GeneralShader3D();
-
-    GeneralShader3D& set_world_from_local_matrix(const Magnum::Matrix4& view_from_local);
-    GeneralShader3D& set_world_from_local_normal_matrix(const Magnum::Matrix3& view_from_local_normal);
-    GeneralShader3D& set_projection_from_local_matrix(const Magnum::Matrix4& projection_from_local);
-
-    GeneralShader3D& set_coloring(const proto::Coloring& coloring);
-    GeneralShader3D& set_uniform_color(const Magnum::Color3& color);
-
-    GeneralShader3D& set_shading(const proto::Shading& shading);
-
-private:
-    int projection_from_local_uniform_;
-    int world_from_local_uniform_;
-    int world_from_local_normals_uniform_;
-
-    int coloring_uniform_;
-    int uniform_color_uniform_;
-
-    int shading_uniform_;
-    int light_direction_uniform_;
-    int light_color_uniform_;
-    int ambient_color_uniform_;
+struct Ray {
+    Magnum::Vector3 origin;
+    Magnum::Vector3 direction;
 };
 
-} // namespace gvs::vis
+struct CameraPackage {
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> object;
+    Magnum::Matrix4                                                        transformation = {};
+    Magnum::SceneGraph::Camera3D*                                          camera         = nullptr;
+
+    void set_camera(Magnum::SceneGraph::Camera3D* cam, const Magnum::Vector2i& viewport);
+
+    void update_viewport(const Magnum::Vector2i& viewport);
+
+    Ray get_camera_ray_from_window_pos(const Magnum::Vector2& mouse_position);
+};
+
+} // namespace gvs::display

@@ -128,7 +128,7 @@ OpenglBackend::OpenglBackend() {
 
 OpenglBackend::~OpenglBackend() = default;
 
-auto OpenglBackend::render(vis::CameraPackage const& camera_package) -> void {
+auto OpenglBackend::render(CameraPackage const& camera_package) -> void {
     camera_object_.setTransformation(camera_package.transformation);
     camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
     camera_->draw(drawables_);
