@@ -27,12 +27,9 @@
 
 namespace gvs::display {
 
+/// \brief Helpers for common scene functionality like adding lights or meshes
 class SceneUtil {
 public:
-    /// \brief Displays an ImGui based GUI for the given scene.
-    /// \param scene - The scene used to display the GUI
-    /// \return true if the scene has changed, false otherwise
-    static auto configure_gui(scene::Scene* scene) -> bool;
 };
 
 } // namespace gvs::display

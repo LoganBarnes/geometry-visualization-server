@@ -24,8 +24,8 @@
 
 // project
 #include "gvs/display/local_scene.hpp"
-#include "gvs/display/scene_util.hpp"
 #include "gvs/gui/imgui_utils.hpp"
+#include "gvs/gui/scene_gui.hpp"
 #include "gvs/vis-client/app/imgui_theme.hpp"
 
 // generated
@@ -230,7 +230,7 @@ void vis::VisClient::configure_gui() {
     }
 #endif
 
-    display::SceneUtil::configure_gui(scene_.get());
+    gui::configure_gui(scene_.get());
 
     messages_.use_safely([&](const proto::Messages& messages) {
         float message_input_start_height = h - 100.f;

@@ -20,6 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "scene_util.hpp"
+#pragma once
 
-namespace gvs::display {} // namespace gvs::display
+#include "gvs/scene/forward_declarations.hpp"
+
+namespace gvs::gui {
+
+/// \brief Displays an ImGui based GUI for the given scene.
+/// \param scene - The scene used to display the GUI
+/// \return true if the scene has changed, false otherwise
+auto configure_gui(scene::Scene* scene) -> bool;
+
+} // namespace gvs::gui

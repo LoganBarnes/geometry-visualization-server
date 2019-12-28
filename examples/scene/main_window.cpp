@@ -24,7 +24,7 @@
 
 // project
 #include "gvs/scene/log_params.hpp"
-#include "gvs/display/scene_util.hpp"
+#include "gvs/gui/scene_gui.hpp"
 
 // external
 #include <Magnum/GL/Context.h>
@@ -145,7 +145,7 @@ void MainWindow::configure_gui() {
 
     add_three_line_separator();
 
-    gvs::display::SceneUtil::configure_gui(&scene_);
+    gvs::gui::configure_gui(&scene_);
 
     ImGui::End();
 
