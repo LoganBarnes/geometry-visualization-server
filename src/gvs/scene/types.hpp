@@ -46,7 +46,14 @@ using mat2 = std::array<float, 4>;
 using mat3 = std::array<float, 9>;
 using mat4 = std::array<float, 16>;
 
-constexpr mat4 identity_mat4 = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+// clang-format off
+constexpr auto identity_mat4 = mat4{
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+};
+// clang-format on
 
 template <std::size_t N>
 struct AttributeVector {
@@ -152,20 +159,13 @@ struct SceneItemInfoSetter {
 
 constexpr auto default_readable_id     = "Scene Item";
 constexpr auto default_geometry_format = GeometryFormat::Points;
-// clang-format off
-constexpr auto default_transformation = mat4{
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-};
-// clang-format on
-constexpr auto default_uniform_color  = vec3{1.f, 0.9f, 0.7f};
-constexpr auto default_coloring       = Coloring::UniformColor;
-constexpr auto default_shading        = Shading::CookTorrance;
-constexpr auto default_visible        = true;
-constexpr auto default_opacity        = 1.f;
-constexpr auto default_wireframe_only = false;
+constexpr auto default_transformation  = identity_mat4;
+constexpr auto default_uniform_color   = vec3{1.f, 0.9f, 0.7f};
+constexpr auto default_coloring        = Coloring::UniformColor;
+constexpr auto default_shading         = Shading::CookTorrance;
+constexpr auto default_visible         = true;
+constexpr auto default_opacity         = 1.f;
+constexpr auto default_wireframe_only  = false;
 
 struct DisplayInfo {
     std::string    readable_id     = default_readable_id;

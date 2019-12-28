@@ -26,8 +26,6 @@
 #include "../common/test_scene.hpp"
 #include "gvs/gui/scene_gui.hpp"
 #include "gvs/scene/log_params.hpp"
-#include "../primitives/main_window.hpp"
-
 
 // external
 #include <Magnum/GL/Context.h>
@@ -114,8 +112,7 @@ MainWindow::MainWindow(const Arguments& arguments)
                         gvs::SetColoring(gvs::Coloring::Normals));
     }
 
-    auto test_scene_root = scene_.add_item(gvs::SetReadableId("Test Scene"),
-                    gvs::SetVisible(false));
+    auto test_scene_root = scene_.add_item(gvs::SetReadableId("Test Scene"), gvs::SetVisible(false));
     build_test_scene(&scene_, test_scene_root);
 }
 
