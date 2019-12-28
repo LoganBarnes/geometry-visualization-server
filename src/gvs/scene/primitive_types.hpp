@@ -27,42 +27,40 @@
 
 namespace gvs {
 
+/// \brief A cone of with a base radius of 1.
+///        The center is at the origin and the rotational axis is along Y.
 struct Cone {
-    float height        = 1.f;
-    float base_diameter = 1.f;
+    float    half_height = 1.f;
+    unsigned rings       = 35u;
+    unsigned segments    = 35u;
 };
 
-struct Cube {
-    float width = 1.f;
-};
+/// \brief A 2x2x2 cube centered at the origin.
+struct Cube {};
 
+/// \brief A cylinder with a radius of 1.
+///        The center is at the origin and the rotational axis is along Y.
 struct Cylinder {
-    float height   = 1.f;
-    float diameter = 1.f;
+    float    half_height = 1.f;
+    unsigned rings       = 35u;
+    unsigned segments    = 35u;
 };
 
+/// \brief A 2x2 plane in the XY plane centered at the origin.
+struct Plane {};
+
+/// \brief A unit sphere (radius 1) centered at the origin.
 struct Sphere {
-    float diameter = 1.f;
-};
-
-struct Torus {
-    float major_diameter = 1.0f; ///< Diameter of ring through center of doughnut
-    float minor_diameter = 0.5f; ///< Thickness of the doughnut
-};
-
-struct Quad {
-    float width = 1.f;
+    unsigned rings    = 35u;
+    unsigned segments = 35u;
 };
 
 namespace detail {
-using PrimitiveBase = mapbox::util::variant<Cone, Cube, Cylinder, Sphere, Torus, Quad>;
+using PrimitiveBase = mapbox::util::variant<Cone, Cube, Cylinder, Plane, Sphere>;
 }
 
 struct Primitive : detail::PrimitiveBase {
     using detail::PrimitiveBase::variant;
-
-    int u_tessellation = 25;
-    int v_tessellation = 25;
 };
 
 } // namespace gvs
