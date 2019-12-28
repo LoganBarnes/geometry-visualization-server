@@ -42,12 +42,22 @@ struct UpdatedInfo {
     bool parent                  = false;
 
     explicit UpdatedInfo(SceneItemInfoSetter const& info) {
-        if (info.geometry_info) {
-            auto const& geom = info.geometry_info;
+        if (info.geometry) {
+            auto const& geom = *info.geometry;
 
-            geometry          = true;
-            geometry_vertices = (geom->positions || geom->normals || geom->texture_coordinates || geom->vertex_colors);
-            geometry_indices  = (!!geom->indices);
+            geometry = true;
+
+            if (geom.is<Primitive>()) {
+                geometry_vertices = true;
+                geometry_indices  = true;
+            } else {
+                assert(geom.is<GeometryInfoSetter>());
+                auto const& geometry_info = geom.get<GeometryInfoSetter>();
+
+                geometry_vertices = (geometry_info.positions || geometry_info.normals
+                                     || geometry_info.texture_coordinates || geometry_info.vertex_colors);
+                geometry_indices  = (!!geometry_info.indices);
+            }
         }
 
         if (info.display_info) {

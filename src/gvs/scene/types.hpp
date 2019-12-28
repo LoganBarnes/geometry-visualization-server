@@ -142,16 +142,16 @@ struct GeometryInfoSetter {
     std::unique_ptr<std::vector<unsigned>> indices;
 };
 
-//namespace detail {
-//using GeometryBase = mapbox::util::variant<GeometryInfo, Primitive>;
-//}
-//
-//struct Geometry : detail::GeometryBase {
-//    using detail::GeometryBase::variant;
-//};
+namespace detail {
+using GeometryBase = mapbox::util::variant<GeometryInfoSetter, Primitive>;
+}
+
+struct Geometry : detail::GeometryBase {
+    using detail::GeometryBase::variant;
+};
 
 struct SceneItemInfoSetter {
-    std::unique_ptr<GeometryInfoSetter>   geometry_info;
+    std::unique_ptr<Geometry>             geometry;
     std::unique_ptr<DisplayInfoSetter>    display_info;
     std::unique_ptr<SceneID>              parent;
     std::unique_ptr<std::vector<SceneID>> children;

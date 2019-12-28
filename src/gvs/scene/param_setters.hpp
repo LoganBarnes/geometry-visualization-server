@@ -85,11 +85,13 @@ struct SceneGeometrySetter {
     explicit SceneGeometrySetter(T value = {}) : data_(std::move(value)) {}
 
     auto operator()(SceneItemInfoSetter* info) -> std::string {
-        if (!info->geometry_info) {
-            info->geometry_info = std::make_unique<GeometryInfoSetter>();
+        if (!info->geometry) {
+            info->geometry = std::make_unique<Geometry>(GeometryInfoSetter{});
+        } else if (info->geometry->is<Primitive>()) {
+            return "Scene Geometry already specified as a primitive";
         }
 
-        auto& geometry_info = *info->geometry_info;
+        auto& geometry_info = info->geometry->get<GeometryInfoSetter>();
 
         if (geometry_info.*member) {
             return "Scene parameter already set.";
@@ -116,22 +118,24 @@ struct SceneIndicesSetter {
     explicit SceneIndicesSetter(std::vector<unsigned> value = {}) : data_(std::move(value)) {}
 
     auto operator()(SceneItemInfoSetter* info) -> std::string {
-        if (!info->geometry_info) {
-            info->geometry_info = std::make_unique<GeometryInfoSetter>();
-        }
         if (!info->display_info) {
             info->display_info = std::make_unique<DisplayInfoSetter>();
         }
-
-        auto& geometry_info = *info->geometry_info;
-        auto& display_info  = *info->display_info;
-
-        if (geometry_info.indices) {
-            return "Scene parameter already set.";
+        if (!info->geometry) {
+            info->geometry = std::make_unique<Geometry>(GeometryInfoSetter{});
+        } else if (info->geometry->is<Primitive>()) {
+            return "Scene Geometry already specified as a primitive";
         }
 
+        auto& display_info  = *info->display_info;
+        auto& geometry_info = info->geometry->get<GeometryInfoSetter>();
+
         if (display_info.geometry_format) {
-            return "Scene parameter already set.";
+            return "geometry_format already set.";
+        }
+
+        if (geometry_info.indices) {
+            return "indices already set.";
         }
 
         geometry_info.indices        = std::make_unique<std::vector<unsigned>>(std::move(data_));
@@ -181,6 +185,30 @@ protected:
 };
 
 } // namespace detail
+
+///
+/// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
+///
+struct SetPrimitive {
+    explicit SetPrimitive(Primitive value = {}) : data_(std::move(value)) {}
+
+    auto operator()(SceneItemInfoSetter* info) -> std::string {
+        if (!info->geometry) {
+            return "Geometry already specified";
+        }
+
+        info->geometry = std::make_unique<Geometry>(std::move(data_));
+        return "";
+    }
+
+    SetPrimitive(const SetPrimitive&)     = delete;
+    SetPrimitive(SetPrimitive&&) noexcept = delete;
+    SetPrimitive& operator=(const SetPrimitive&) = delete;
+    SetPrimitive& operator=(SetPrimitive&&) noexcept = delete;
+
+private:
+    Primitive data_;
+};
 
 /*
  * Setters

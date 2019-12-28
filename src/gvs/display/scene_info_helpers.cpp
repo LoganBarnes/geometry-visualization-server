@@ -30,46 +30,53 @@ auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> 
         info->parent = *new_info.parent;
     }
 
-    if (new_info.geometry_info) {
-        auto& geometry_info     = info->geometry_info;
-        auto& new_geometry_info = *new_info.geometry_info;
+    if (new_info.geometry) {
+        auto& geometry_info = info->geometry_info;
 
-        if (new_geometry_info.positions) {
-            geometry_info.positions = std::move(*new_geometry_info.positions);
-        }
+        if (new_info.geometry->is<Primitive>()) {
+            // update_info_for_primitive(info, new_info.geometry->get<Primitive>());
+        } else {
+            assert(new_info.geometry->is<GeometryInfoSetter>());
 
-        auto positions_size = geometry_info.positions.size();
+            auto& new_geometry_info = new_info.geometry->get<GeometryInfoSetter>();
 
-        auto maybe_replace
-            = [positions_size](auto& data, auto&& new_data, std::string const& name) -> util::Result<void> {
-            if (new_data) {
-                data = std::move(*(new_data));
+            if (new_geometry_info.positions) {
+                geometry_info.positions = std::move(*new_geometry_info.positions);
             }
 
-            if (!data.empty() && data.size() != positions_size) {
-                return tl::make_unexpected(
-                    MAKE_ERROR(name + " is non-empty and positions.size() != " + name + ".size()"));
+            auto positions_size = geometry_info.positions.size();
+
+            auto maybe_replace
+                = [positions_size](auto& data, auto&& new_data, std::string const& name) -> util::Result<void> {
+                if (new_data) {
+                    data = std::move(*(new_data));
+                }
+
+                if (!data.empty() && data.size() != positions_size) {
+                    return tl::make_unexpected(
+                        MAKE_ERROR(name + " is non-empty and positions.size() != " + name + ".size()"));
+                }
+                return util::success();
+            };
+
+            auto result = maybe_replace(geometry_info.normals, std::move(new_geometry_info.normals), "normals")
+                              .and_then(maybe_replace,
+                                        geometry_info.texture_coordinates,
+                                        std::move(new_geometry_info.texture_coordinates),
+                                        "texture_coordinates")
+                              .and_then(maybe_replace,
+                                        geometry_info.vertex_colors,
+                                        std::move(new_geometry_info.vertex_colors),
+                                        "vertex_colors");
+
+            if (!result) {
+                return result;
             }
-            return util::success();
-        };
 
-        auto result = maybe_replace(geometry_info.normals, std::move(new_geometry_info.normals), "normals")
-                          .and_then(maybe_replace,
-                                    geometry_info.texture_coordinates,
-                                    std::move(new_geometry_info.texture_coordinates),
-                                    "texture_coordinates")
-                          .and_then(maybe_replace,
-                                    geometry_info.vertex_colors,
-                                    std::move(new_geometry_info.vertex_colors),
-                                    "vertex_colors");
-
-        if (!result) {
-            return result;
-        }
-
-        // indices are handled separately because the size doesn't matter so no validation needs to be performed
-        if (new_geometry_info.indices) {
-            geometry_info.indices = std::move(*new_geometry_info.indices);
+            // indices are handled separately because the size doesn't matter so no validation needs to be performed
+            if (new_geometry_info.indices) {
+                geometry_info.indices = std::move(*new_geometry_info.indices);
+            }
         }
     }
 
