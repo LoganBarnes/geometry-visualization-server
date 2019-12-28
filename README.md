@@ -60,32 +60,104 @@ Required packages for visualization:
 sudo apt install xorg-dev libgl1-mesa-dev uuid-dev
 ```
 
-Logging
--------
+Scene
+-----
+
+### Types
+
+| Name                       | Description                                                          |
+| -------------------------- | -------------------------------------------------------------------- |
+| `gvs::scene::ClientScene`  | Sends items to an external server for viewing                        |
+| `gvs::scene::DisplayScene` | Displays scene items in a window tied to the current process         |
+| `gvs::scene::LocalScene`   | Stores items that must be explicitly rendered by the current process |
+
+| Name                       | Use cases                                                                              |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| `gvs::scene::ClientScene`  | Repeatedly writing geometry to the same scene during multiple runs of the same process |
+| `gvs::scene::DisplayScene` | Quickly displaying geometry that is only relevant within the scope a single process    |
+| `gvs::scene::LocalScene`   | For integrating scenes into existing GUI applications                                  |
+
+### Named Parameters
+
+### Required Parameters
+
+All scene items require some form of geometry to be specified.
+
+This can be either a list of positions 
+
+```cpp
+    scene.add_item(gvs::SetPositions({{-1, -1, 0}, {1, -1, 0}, {0, 1, 0}}));
+```
+
+a predefined primitive
+
+```cpp
+    scene.add_item(gvs::SetPrimitive(gvs::Primitive::Cube{}));
+```
+
+or a custom renderable (Only available when using `gvs::scene::LocalScene`).
+
+```cpp
+    scene.add_item(gvs::SetRenderable(std::make_shared<MySpecialRenderable>()));
+```
+
+Providing more or less than one of these items will cause an error. "Geometry-less" items 
+can be added by leaving the positions parameter empty:
+
+```cpp
+    auto root_item = scene.add_item(gvs::SetPositions(), gvs::SetReadableId("Root"));
+```
+
 
 ### Item Options
+
+#### Primitives
+
+| Name                           | Data type               |
+| ------------------------------ | ----------------------- |
+| `gvs::SetPositions3d`          | `std::vector<Vec3>`     |
+| `gvs::SetNormals3d`            | `std::vector<Vec3>`     |
+| `gvs::SetTextureCoordinates3d` | `std::vector<Vec2>`     |
+| `gvs::SetVertexColors`         | `std::vector<Vec3>`     |
+| `gvs::SetIndices`              | `std::vector<unsigned>` |
 
 #### Geometry
 
 | Name                           | Data type               |
 | ------------------------------ | ----------------------- |
-| `gvs::positions_3d`            | `std::vector<float>`    |
-| `gvs::normals_3d`              | `std::vector<float>`    |
-| `gvs::tex_coords_3d`           | `std::vector<float>`    |
-| `gvs::vertex_colors_3d`        | `std::vector<float>`    |
-| `gvs::vertex_colors_3d`        | `std::vector<float>`    |
-| `gvs::indices<GeometryFormat>` | `std::vector<unsigned>` |
+| `gvs::SetPositions3d`          | `std::vector<Vec3>`     |
+| `gvs::SetNormals3d`            | `std::vector<Vec3>`     |
+| `gvs::SetTextureCoordinates3d` | `std::vector<Vec2>`     |
+| `gvs::SetVertexColors`         | `std::vector<Vec3>`     |
+| `gvs::SetIndices`              | `std::vector<unsigned>` |
+
+OR
+
+| Name                           | Data type               |
+| ------------------------------ | ----------------------- |
+| `gvs::UsePrimitive`            | `gvs::PrimitiveType`    |
+
+where `gvs::PrimitiveType` is one of
+
+| Name                           | Dimensions      |
+| ------------------------------ | --------------- |
+| `gvs::PrimitiveType::Cone`     |   `1 x 1 x 1`   |
+| `gvs::PrimitiveType::Cube`     |   `1 x 1 x 1`   |
+| `gvs::PrimitiveType::Cylinder` |   `1 x 1 x 1`   |
+| `gvs::PrimitiveType::Sphere`   |   `1 x 1 x 1`   |
+| `gvs::PrimitiveType::Torus`    |   `1 x 1 x 1`   |
+| `gvs::PrimitiveType::Quad`     |   `1 x 1 x 1`   |
 
 #### Indices Aliases
 
-| Name                  | Index type                                     |
-| --------------------- | ---------------------------------------------- |
-| `gvs::points`         | `gvs::incices<GeometryFormat::POINTS>`         |
-| `gvs::lines`          | `gvs::incices<GeometryFormat::LINES>`          |
-| `gvs::line_strip`     | `gvs::incices<GeometryFormat::LINE_STRIP>`     |
-| `gvs::triangles`      | `gvs::incices<GeometryFormat::TRIANGLES>`      |
-| `gvs::triangle_strip` | `gvs::incices<GeometryFormat::TRIANGLE_STRIP>` |
-| `gvs::triangle_fan`   | `gvs::incices<GeometryFormat::TRIANGLE_FAN>`   |
+| Name                    | Geometry Format                      |
+| ----------------------- | ------------------------------------ |
+| `gvs::SetPoints`        | `gvs::GeometryFormat::Points`        |
+| `gvs::SetLines`         | `gvs::GeometryFormat::Lines`         |
+| `gvs::SetLineStrip`     | `gvs::GeometryFormat::LineStrip`     |
+| `gvs::SetTriangles`     | `gvs::GeometryFormat::Triangles`     |
+| `gvs::SetTriangleStrip` | `gvs::GeometryFormat::TriangleStrip` |
+| `gvs::SetTriangleFan`   | `gvs::GeometryFormat::TriangleFan`   |
 
 #### Display
 
