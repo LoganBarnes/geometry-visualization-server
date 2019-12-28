@@ -32,8 +32,11 @@
 namespace gvs::display::backends {
 
 auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive;
-auto to_magnum(vec2 const& vector) -> Magnum::Vector2;
-auto to_magnum(vec3 const& vector) -> Magnum::Vector3;
+
 auto to_magnum(mat4 const& matric) -> Magnum::Matrix4;
+auto to_magnum(vec2 const& vector) -> Magnum::Vector2;
+
+template <typename T = Magnum::Vector3>
+auto to_magnum(vec3 const& vector) -> T;
 
 } // namespace gvs::display::backends

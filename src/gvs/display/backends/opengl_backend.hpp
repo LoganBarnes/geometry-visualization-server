@@ -53,7 +53,7 @@ public:
     auto render(CameraPackage const& camera_package) -> void override;
 
     auto after_add(SceneID const& item_id, SceneItems const& items) -> void override;
-    auto before_update(SceneID const& item_id, SceneItemInfo const& changes, SceneItems const& items) -> void override;
+    auto after_update(SceneID const& item_id, UpdatedInfo const& updated, SceneItems const& items) -> void override;
     auto before_delete(SceneID const& item_id, SceneItems const& items) -> void override;
 
     auto reset_items(SceneItems const& items) -> void override;

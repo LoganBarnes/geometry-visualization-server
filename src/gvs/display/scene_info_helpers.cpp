@@ -24,105 +24,70 @@
 
 namespace gvs {
 
-auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void {
-    if (!info->parent) {
-        info->parent = std::make_unique<SceneID>(nil_id());
-    }
-
-    if (!info->children) {
-        info->children = std::make_unique<std::vector<SceneID>>();
-    }
-
-    if (!info->display_info) {
-        info->display_info = std::make_unique<DisplayInfo>();
-    }
-
-    auto& display_info = *info->display_info;
-
-    if (!display_info.readable_id) {
-        display_info.readable_id = std::make_unique<std::string>(default_readable_id);
-    }
-    if (!display_info.geometry_format) {
-        display_info.geometry_format = std::make_unique<GeometryFormat>(default_geometry_format);
-    }
-    if (!display_info.transformation) {
-        display_info.transformation = std::make_unique<mat4>(default_transformation);
-    }
-    if (!display_info.uniform_color) {
-        display_info.uniform_color = std::make_unique<vec3>(default_uniform_color);
-    }
-    if (!display_info.coloring) {
-        display_info.coloring = std::make_unique<Coloring>(default_coloring);
-    }
-    if (!display_info.shading) {
-        display_info.shading = std::make_unique<Shading>(default_shading);
-    }
-    if (!display_info.visible) {
-        display_info.visible = std::make_unique<bool>(default_visible);
-    }
-    if (!display_info.opacity) {
-        display_info.opacity = std::make_unique<float>(default_opacity);
-    }
-    if (!display_info.wireframe_only) {
-        display_info.wireframe_only = std::make_unique<bool>(default_wireframe_only);
-    }
-}
-
-auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::Result<void> {
+auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> util::Result<void> {
 
     if (new_info.geometry_info) {
-        auto& geometry_info     = *info->geometry_info;
+        auto& geometry_info     = info->geometry_info;
         auto& new_geometry_info = *new_info.geometry_info;
 
         if (new_geometry_info.positions) {
-            geometry_info.positions = std::move(new_geometry_info.positions);
+            geometry_info.positions = std::move(*new_geometry_info.positions);
         }
 
-        auto positions_size = geometry_info.positions->size();
+        auto positions_size = geometry_info.positions.size();
 
-        auto maybe_replace = [&](auto member, std::string const& name) -> util::Result<void> {
-            if (new_geometry_info.*member) {
-                geometry_info.*member = std::move(new_geometry_info.*member);
+        auto maybe_replace = [&](auto member, auto new_member, std::string const& name) -> util::Result<void> {
+            if (new_geometry_info.*new_member) {
+                geometry_info.*member = std::move(*(new_geometry_info.*new_member));
             }
 
-            bool non_empty = (geometry_info.*member && !(geometry_info.*member)->empty());
-            if (non_empty && (geometry_info.*member)->size() != positions_size) {
+            if (!(geometry_info.*member).empty() && (geometry_info.*member).size() != positions_size) {
                 return tl::make_unexpected(
                     MAKE_ERROR(name + " is non-empty and positions.size() != " + name + ".size()"));
             }
             return util::success();
         };
 
-        auto result = maybe_replace(&GeometryInfo::positions, "positions")
-                          .and_then(maybe_replace, &GeometryInfo::normals, "normals")
-                          .and_then(maybe_replace, &GeometryInfo::texture_coordinates, "texture_coordinates")
-                          .and_then(maybe_replace, &GeometryInfo::vertex_colors, "vertex_colors")
-                          .and_then(maybe_replace, &GeometryInfo::indices, "indices");
+        auto result = maybe_replace(&GeometryInfo::positions, &GeometryInfoSetter::positions, "positions")
+                          .and_then(maybe_replace, &GeometryInfo::normals, &GeometryInfoSetter::normals, "normals")
+                          .and_then(maybe_replace,
+                                    &GeometryInfo::texture_coordinates,
+                                    &GeometryInfoSetter::texture_coordinates,
+                                    "texture_coordinates")
+                          .and_then(maybe_replace,
+                                    &GeometryInfo::vertex_colors,
+                                    &GeometryInfoSetter::vertex_colors,
+                                    "vertex_colors");
 
         if (!result) {
             return result;
         }
+
+        // indices are handled separately because the size doesn't matter so no validation needs to be performed
+        if (new_geometry_info.indices) {
+            geometry_info.indices = std::move(*(new_geometry_info.indices));
+        }
     }
 
     if (new_info.display_info) {
-        auto& display_info     = *info->display_info;
+        auto& display_info     = info->display_info;
         auto& new_display_info = *new_info.display_info;
 
-        auto maybe_replace = [&](auto member) {
-            if (new_display_info.*member) {
-                display_info.*member = std::move(new_display_info.*member);
+        auto maybe_replace = [&](auto member, auto new_member) {
+            if (new_display_info.*new_member) {
+                display_info.*member = std::move(*(new_display_info.*new_member));
             }
         };
 
-        maybe_replace(&DisplayInfo::readable_id);
-        maybe_replace(&DisplayInfo::geometry_format);
-        maybe_replace(&DisplayInfo::transformation);
-        maybe_replace(&DisplayInfo::uniform_color);
-        maybe_replace(&DisplayInfo::coloring);
-        maybe_replace(&DisplayInfo::shading);
-        maybe_replace(&DisplayInfo::visible);
-        maybe_replace(&DisplayInfo::opacity);
-        maybe_replace(&DisplayInfo::wireframe_only);
+        maybe_replace(&DisplayInfo::readable_id, &DisplayInfoSetter::readable_id);
+        maybe_replace(&DisplayInfo::geometry_format, &DisplayInfoSetter::geometry_format);
+        maybe_replace(&DisplayInfo::transformation, &DisplayInfoSetter::transformation);
+        maybe_replace(&DisplayInfo::uniform_color, &DisplayInfoSetter::uniform_color);
+        maybe_replace(&DisplayInfo::coloring, &DisplayInfoSetter::coloring);
+        maybe_replace(&DisplayInfo::shading, &DisplayInfoSetter::shading);
+        maybe_replace(&DisplayInfo::visible, &DisplayInfoSetter::visible);
+        maybe_replace(&DisplayInfo::opacity, &DisplayInfoSetter::opacity);
+        maybe_replace(&DisplayInfo::wireframe_only, &DisplayInfoSetter::wireframe_only);
     }
 
     return util::success();

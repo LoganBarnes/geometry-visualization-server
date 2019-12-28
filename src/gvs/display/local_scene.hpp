@@ -51,9 +51,9 @@ public:
     auto clear() -> void override;
 
 private:
-    auto actually_add_item(SceneItemInfo&& info) -> util11::Result<SceneID> override;
-    auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error override;
-    auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error override;
+    auto actually_add_item(SceneItemInfoSetter&& info) -> util11::Result<SceneID> override;
+    auto actually_update_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error override;
+    auto actually_append_to_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error override;
 
     auto items() const -> SceneItems const& override;
     /*

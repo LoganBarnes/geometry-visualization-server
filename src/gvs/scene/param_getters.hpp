@@ -34,33 +34,24 @@ namespace gvs {
 namespace detail {
 
 /*
- * The following two classes are intended to only be used as rvalue references inside the
- * 'StaticScene::add_item', 'StaticScene::update_item', and 'StaticScene::get_item_info` functions.
- * All the move and copy constructors are deleted so the only way to use these classes is by
- * creating an instance as part of the function call:
+ * The following classes are intended to only be used as rvalue references inside the 'Scene::add_item',
+ * 'Scene::update_item', 'Scene::append_to_item', and 'StaticScene::get_item_info` functions. All the
+ * move and copy constructors are deleted so the only way to use these classes is by creating an instance
+ * as part of the function call:
  *
  * scene.add_item(loop::SetPositions(positions), loop::SetReadableID("Sphere"));
  *
  * where loop::SetPositions and loop::SetReadableID are the "named parameter" classes.
- *
- * The SceneGetter and SceneGetter classes are kept generic since they do the same thing for
- * many different types. To create a new named parameter we add a new class that derives from
- * SceneGetter or SceneGetter.
- *
- * The Curiously Recurring Template Pattern (CRTP) is used to avoid any indirection performance
- * costs typically associated with base classes. Because of this, each derived class will have
- * to implement a 'move_data' or 'update_data' function for the SceneGetter and SceneGetter classes
- * respectively.
  */
 
 ///
 /// \brief A "named parameter" wrapper used to set items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> SceneItemInfo::*member>
+template <typename T, T SceneItemInfo::*member>
 struct SceneGetter {
     explicit SceneGetter(T* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void { *data_ = *(info.*member); }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = info.*member; }
 
     SceneGetter(const SceneGetter&)     = delete;
     SceneGetter(SceneGetter&&) noexcept = delete;
@@ -74,18 +65,11 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> GeometryInfo::*member>
+template <typename T, T GeometryInfo::*member>
 struct SceneGeometryGetter {
     explicit SceneGeometryGetter(T* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void {
-        if (!info.geometry_info) {
-            *data_ = {};
-            return;
-        }
-
-        *data_ = *(info.geometry_info.*member);
-    }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = info.geometry_info.*member; }
 
     SceneGeometryGetter(const SceneGeometryGetter&)     = delete;
     SceneGeometryGetter(SceneGeometryGetter&&) noexcept = delete;
@@ -99,15 +83,11 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> DisplayInfo::*member>
+template <typename T, T DisplayInfo::*member>
 struct SceneDisplayGetter {
     explicit SceneDisplayGetter(T* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void {
-        auto const& display_info = *info.display_info;
-
-        *data_ = *(display_info.*member);
-    }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = info.display_info.*member; }
 
     SceneDisplayGetter(const SceneDisplayGetter&)     = delete;
     SceneDisplayGetter(SceneDisplayGetter&&) noexcept = delete;

@@ -35,7 +35,6 @@ namespace gvs::display {
 LocalScene::LocalScene() : generator_(std::random_device{}()), backend_(std::make_unique<backends::OpenglBackend>()) {
     {
         SceneItemInfo root;
-        set_defaults_on_empty_fields(&root);
         items_.emplace(nil_id(), std::move(root));
     }
     backend_->reset_items(items_);
@@ -65,40 +64,41 @@ auto LocalScene::clear() -> void {
     items_.clear();
     {
         SceneItemInfo root;
-        set_defaults_on_empty_fields(&root);
         items_.emplace(nil_id(), std::move(root));
     }
     backend_->reset_items(items_);
 }
 
-auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util11::Result<SceneID> {
-    set_defaults_on_empty_fields(&info);
-
+auto LocalScene::actually_add_item(SceneItemInfoSetter&& new_info) -> util11::Result<SceneID> {
     auto item_id = boost::uuids::basic_random_generator{generator_}();
 
-    if (info.parent) {
-        items_.at(*info.parent).children->emplace_back(item_id);
+    SceneItemInfo info;
+    auto          result = replace_if_present(&info, std::move(new_info));
+    if (!result) {
+        return util11::Error{result.error().error_message()};
     }
+
+    items_.at(info.parent).children.emplace_back(item_id);
 
     items_.emplace(item_id, std::move(info));
     backend_->after_add(item_id, items_);
     return item_id;
 }
 
-auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error {
-    backend_->before_update(item_id, info, items_);
+auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error {
+    backend_->after_update(item_id, backends::UpdatedInfo{info}, items_);
 
     auto& item = items_.at(item_id);
 
-    if (info.parent && *info.parent != *item.parent) {
+    if (info.parent && *info.parent != item.parent) {
         // Remove item from the current parent's list of children
-        util::remove_all_by_value(*items_.at(*item.parent).children, item_id);
+        util::remove_all_by_value(items_.at(item.parent).children, item_id);
 
         // Add the item to the new parent's list of children
-        items_.at(*info.parent).children->emplace_back(item_id);
+        items_.at(*info.parent).children.emplace_back(item_id);
     }
 
-    auto result = replace_if_present(&item, std::forward<SceneItemInfo>(info));
+    auto result = replace_if_present(&item, std::forward<SceneItemInfoSetter>(info));
     if (!result) {
         return {result.error().error_message()};
     }
@@ -106,7 +106,7 @@ auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& in
     return util11::success();
 }
 
-auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util11::Error {
+auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 

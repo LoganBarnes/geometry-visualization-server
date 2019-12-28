@@ -33,6 +33,46 @@
 
 namespace gvs::display::backends {
 
+struct UpdatedInfo {
+    bool geometry                = false;
+    bool geometry_vertices       = false;
+    bool geometry_indices        = false;
+    bool display                 = false;
+    bool display_geometry_format = false;
+    bool parent                  = false;
+
+    explicit UpdatedInfo(SceneItemInfoSetter const& info) {
+        if (info.geometry_info) {
+            auto const& geom = info.geometry_info;
+
+            geometry          = true;
+            geometry_vertices = (geom->positions || geom->normals || geom->texture_coordinates || geom->vertex_colors);
+            geometry_indices  = (!!geom->indices);
+        }
+
+        if (info.display_info) {
+            display                 = true;
+            display_geometry_format = (!!info.display_info->geometry_format);
+        }
+
+        parent = (!!info.parent);
+    }
+
+    static auto everything() -> UpdatedInfo {
+        UpdatedInfo info;
+        info.geometry                = true;
+        info.geometry_vertices       = true;
+        info.geometry_indices        = true;
+        info.display                 = true;
+        info.display_geometry_format = true;
+        info.parent                  = true;
+        return info;
+    }
+
+private:
+    UpdatedInfo() = default;
+};
+
 class BackendInterface {
 public:
     virtual ~BackendInterface() = 0;
@@ -54,8 +94,7 @@ public:
      * @param item_id - The id of the updated item.
      * @param items - All items in the scene (including the item before it was updated).
      */
-    virtual auto before_update(SceneID const& item_id, SceneItemInfo const& changes, SceneItems const& items) -> void
-        = 0;
+    virtual auto after_update(SceneID const& item_id, UpdatedInfo const& updated, SceneItems const& items) -> void = 0;
 
     /**
      * @brief Called when a scene is about to remove an item.

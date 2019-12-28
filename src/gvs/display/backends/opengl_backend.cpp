@@ -39,48 +39,37 @@
 namespace gvs::display::backends {
 namespace {
 
-auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
-                GeometryInfo const&               new_geom,
-                GeometryInfo const&               old_geom) -> void {
+auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package, GeometryInfo const& geometry_info) -> void {
 
     std::vector<float> buffer_data;
     GLintptr           offset = 0;
     mesh_package->vbo_count   = 0;
 
     auto update_attribute
-        = [&mesh_package, &offset, &buffer_data](auto const& optional_attribute, auto const& shader_attribute) {
-              const auto& attribute = *optional_attribute;
-              buffer_data.insert(buffer_data.end(),
-                                 reinterpret_cast<float const*>(attribute.data()),
-                                 reinterpret_cast<float const*>(attribute.data() + attribute.size()));
+        = [&mesh_package, &offset, &buffer_data](auto const& attribute, auto const& shader_attribute) {
+              buffer_data.insert(buffer_data.end(), attribute.data(), (attribute.data() + attribute.size()));
               mesh_package->mesh.addVertexBuffer(mesh_package->vertex_buffer, offset, shader_attribute);
-              return static_cast<int>(attribute.size());
+
+              auto isize = static_cast<int>(attribute.size());
+              offset += isize * static_cast<int>(sizeof(float));
+              return isize;
           };
 
-    auto const& optional_positions = (new_geom.positions ? new_geom.positions : old_geom.positions);
-    if (optional_positions) {
-        auto attribute_size = update_attribute(optional_positions, GeneralShader3d::Position{});
-        offset += attribute_size * static_cast<int>(sizeof(float));
+    if (!geometry_info.positions.empty()) {
+        auto attribute_size     = update_attribute(geometry_info.positions, GeneralShader3d::Position{});
         mesh_package->vbo_count = attribute_size / 3;
     }
 
-    auto const& optional_normals = (new_geom.normals ? new_geom.normals : old_geom.normals);
-    if (optional_normals) {
-        auto attribute_size = update_attribute(optional_normals, GeneralShader3d::Normal{});
-        offset += attribute_size * static_cast<int>(sizeof(vec3));
+    if (!geometry_info.normals.empty()) {
+        update_attribute(geometry_info.normals, GeneralShader3d::Normal{});
     }
 
-    auto const& optional_texture_coordinates
-        = (new_geom.texture_coordinates ? new_geom.texture_coordinates : old_geom.texture_coordinates);
-
-    if (optional_texture_coordinates) {
-        auto attribute_size = update_attribute(optional_texture_coordinates, GeneralShader3d::TextureCoordinate{});
-        offset += attribute_size * static_cast<int>(sizeof(float));
+    if (!geometry_info.texture_coordinates.empty()) {
+        update_attribute(geometry_info.texture_coordinates, GeneralShader3d::TextureCoordinate{});
     }
 
-    auto const& optional_vertex_colors = (new_geom.vertex_colors ? new_geom.vertex_colors : old_geom.vertex_colors);
-    if (optional_vertex_colors) {
-        update_attribute(optional_vertex_colors, GeneralShader3d::VertexColor{});
+    if (!geometry_info.vertex_colors.empty()) {
+        update_attribute(geometry_info.vertex_colors, GeneralShader3d::VertexColor{});
     }
 
     mesh_package->vertex_buffer.setData(buffer_data, Magnum::GL::BufferUsage::StaticDraw);
@@ -136,55 +125,49 @@ auto OpenglBackend::render(CameraPackage const& camera_package) -> void {
 
 auto OpenglBackend::after_add(SceneID const& item_id, SceneItems const& items) -> void {
     objects_.emplace(item_id, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
-
-    auto const& item = items.at(item_id);
-    before_update(item_id, item, items);
+    after_update(item_id, UpdatedInfo::everything(), items);
 }
 
-auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& new_info, SceneItems const& items)
-    -> void {
-
+auto OpenglBackend::after_update(SceneID const& item_id, UpdatedInfo const& updated, SceneItems const& items) -> void {
     ObjectMeshPackage& mesh_package = *objects_.at(item_id);
-    auto const&        old_info     = items.at(item_id);
+    auto const&        item         = items.at(item_id);
 
-    if (new_info.geometry_info) {
-        GeometryInfo const& new_geom = *new_info.geometry_info;
-        GeometryInfo const& old_geom = *old_info.geometry_info;
+    if (updated.geometry) {
+        auto const& geometry_info = item.geometry_info;
 
-        if (new_geom.positions || new_geom.normals || new_geom.texture_coordinates || new_geom.vertex_colors) {
-            update_vbo(&mesh_package, new_geom, old_geom);
+        if (updated.geometry_vertices) {
+            update_vbo(&mesh_package, geometry_info);
         }
 
-        if (new_geom.indices) {
-            update_ibo(&mesh_package, *new_geom.indices);
-        }
-    }
-
-    if (new_info.display_info) {
-        const DisplayInfo& display = *new_info.display_info;
-
-        if (display.geometry_format) {
-            mesh_package.mesh.setPrimitive(to_magnum(*display.geometry_format));
+        if (updated.geometry_indices) {
+            update_ibo(&mesh_package, geometry_info.indices);
         }
     }
 
-    // TODO: Handle parent and children updates
-
-    if (new_info.parent) {
-        auto const& parent = *new_info.parent;
-
-        if (!util::has_key(objects_, parent)) {
-            objects_.erase(item_id);
-            throw std::invalid_argument("Parent id '" + to_string(parent) + "' not found in scene");
-        }
-
-        mesh_package.object->setParent(objects_.at(parent)->object);
-    } else {
-        mesh_package.object->setParent(root_object_);
+    if (updated.display_geometry_format) {
+        mesh_package.mesh.setPrimitive(to_magnum(item.display_info.geometry_format));
     }
 
-    if (new_info.display_info) {
-        mesh_package.drawable->update_display_info(*new_info.display_info);
+    // TODO: Handle parent and children updates properly
+
+    if (updated.parent) {
+        auto const& parent = item.parent;
+
+        if (item.parent == nil_id()) {
+            mesh_package.object->setParent(root_object_);
+
+        } else {
+            if (!util::has_key(objects_, parent)) {
+                objects_.erase(item_id);
+                throw std::invalid_argument("Parent id '" + to_string(parent) + "' not found in scene");
+            }
+
+            mesh_package.object->setParent(objects_.at(parent)->object);
+        }
+    }
+
+    if (updated.display) {
+        mesh_package.drawable->update_display_info(item.display_info);
     }
 }
 
@@ -208,7 +191,8 @@ auto OpenglBackend::reset_items(SceneItems const& items) -> void {
 
     // Add new items to scene
     for (auto const& [item_id, item] : items) {
-        before_update(item_id, item, items);
+        util::ignore(item);
+        after_update(item_id, UpdatedInfo::everything(), items);
     }
 }
 

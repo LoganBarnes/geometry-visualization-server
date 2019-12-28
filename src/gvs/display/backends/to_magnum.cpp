@@ -23,6 +23,7 @@
 #include "to_magnum.hpp"
 
 // external
+#include <Magnum/Math/Color.h>
 #include <Magnum/Math/Matrix4.h>
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/Math/Vector3.h>
@@ -46,16 +47,21 @@ auto to_magnum(GeometryFormat const& format) -> Magnum::MeshPrimitive {
     }
     throw std::runtime_error("Unreachable code");
 }
-auto to_magnum(vec2 const& vector) -> Magnum::Vector2 {
-    return {vector[0], vector[1]};
-}
-
-auto to_magnum(vec3 const& vector) -> Magnum::Vector3 {
-    return {vector[0], vector[1], vector[2]};
-}
 
 auto to_magnum(mat4 const& matrix) -> Magnum::Matrix4 {
     return {Magnum::Math::RectangularMatrix<4, 4, float>::from(&matrix[0])};
 }
+
+auto to_magnum(vec2 const& vector) -> Magnum::Vector2 {
+    return {vector[0], vector[1]};
+}
+
+template <typename T>
+auto to_magnum(vec3 const& vector) -> T {
+    return {vector[0], vector[1], vector[2]};
+}
+
+template auto to_magnum<Magnum::Vector3>(vec3 const& vector) -> Magnum::Vector3;
+template auto to_magnum<Magnum::Color3>(vec3 const& vector) -> Magnum::Color3;
 
 } // namespace gvs::display::backends

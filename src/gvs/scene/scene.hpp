@@ -107,13 +107,13 @@ public:
 
 private:
     /// \brief Adds the new item to the scene
-    virtual auto actually_add_item(SceneItemInfo&& info) -> util11::Result<SceneID> = 0;
+    virtual auto actually_add_item(SceneItemInfoSetter&& info) -> util11::Result<SceneID> = 0;
 
     /// \brief Updates the specified item by replacing existing fields with the new ones
-    virtual auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error = 0;
+    virtual auto actually_update_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error = 0;
 
     /// \brief Updates the specified item by appending all new geometry
-    virtual auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error = 0;
+    virtual auto actually_append_to_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error = 0;
 
     /// \brief The map of all items in the scene
     virtual auto items() const -> SceneItems const& = 0;
@@ -122,7 +122,7 @@ private:
 namespace detail {
 
 template <typename Functor>
-auto apply_functor(SceneItemInfo* info, std::string* error_strings, Functor&& functor) -> void {
+auto apply_functor(SceneItemInfoSetter* info, std::string* error_strings, Functor&& functor) -> void {
     auto error_string = functor(info);
     if (!error_string.empty()) {
         *error_strings += error_string + '\n';
@@ -130,9 +130,9 @@ auto apply_functor(SceneItemInfo* info, std::string* error_strings, Functor&& fu
 }
 
 template <typename... Functors>
-auto get_scene_info(Functors&&... functors) -> SceneItemInfo {
-    SceneItemInfo info;
-    std::string   error_strings;
+auto get_scene_info(Functors&&... functors) -> SceneItemInfoSetter {
+    SceneItemInfoSetter info;
+    std::string         error_strings;
     // iterate over all functors and apply them to a new SceneItemInfo
     int dummy[] = {(apply_functor(&info, &error_strings, std::forward<Functors>(functors)), 0)...};
     (void)dummy;

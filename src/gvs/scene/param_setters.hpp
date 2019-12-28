@@ -56,11 +56,11 @@ namespace detail {
 ///
 /// \brief A "named parameter" wrapper used to set items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> SceneItemInfo::*member>
+template <typename T, std::unique_ptr<T> SceneItemInfoSetter::*member>
 struct SceneSetter {
     explicit SceneSetter(T value = {}) : data_(std::move(value)) {}
 
-    auto operator()(SceneItemInfo* info) -> std::string {
+    auto operator()(SceneItemInfoSetter* info) -> std::string {
         if (info->*member) {
             return "Scene parameter already set.";
         }
@@ -80,13 +80,13 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> GeometryInfo::*member>
+template <typename T, std::unique_ptr<T> GeometryInfoSetter::*member>
 struct SceneGeometrySetter {
     explicit SceneGeometrySetter(T value = {}) : data_(std::move(value)) {}
 
-    auto operator()(SceneItemInfo* info) -> std::string {
+    auto operator()(SceneItemInfoSetter* info) -> std::string {
         if (!info->geometry_info) {
-            info->geometry_info = std::make_unique<GeometryInfo>();
+            info->geometry_info = std::make_unique<GeometryInfoSetter>();
         }
 
         auto& geometry_info = *info->geometry_info;
@@ -115,12 +115,12 @@ template <gvs::GeometryFormat Format>
 struct SceneIndicesSetter {
     explicit SceneIndicesSetter(std::vector<unsigned> value = {}) : data_(std::move(value)) {}
 
-    auto operator()(SceneItemInfo* info) -> std::string {
+    auto operator()(SceneItemInfoSetter* info) -> std::string {
         if (!info->geometry_info) {
-            info->geometry_info = std::make_unique<GeometryInfo>();
+            info->geometry_info = std::make_unique<GeometryInfoSetter>();
         }
         if (!info->display_info) {
-            info->display_info = std::make_unique<DisplayInfo>();
+            info->display_info = std::make_unique<DisplayInfoSetter>();
         }
 
         auto& geometry_info = *info->geometry_info;
@@ -152,13 +152,13 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> DisplayInfo::*member>
+template <typename T, std::unique_ptr<T> DisplayInfoSetter::*member>
 struct SceneDisplaySetter {
     explicit SceneDisplaySetter(T value = {}) : data(std::move(value)) {}
 
-    auto operator()(SceneItemInfo* info) -> std::string {
+    auto operator()(SceneItemInfoSetter* info) -> std::string {
         if (!info->display_info) {
-            info->display_info = std::make_unique<DisplayInfo>();
+            info->display_info = std::make_unique<DisplayInfoSetter>();
         }
 
         auto& display_info = *info->display_info;
@@ -185,11 +185,12 @@ protected:
 /*
  * Setters
  */
-using SetPositions3d          = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::positions>;
-using SetNormals3d            = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::normals>;
-using SetTextureCoordinates3d = detail::SceneGeometrySetter<AttributeVector<2>, &GeometryInfo::texture_coordinates>;
-using SetVertexColors3d       = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfo::vertex_colors>;
-using SetIndices              = detail::SceneGeometrySetter<std::vector<unsigned>, &GeometryInfo::indices>;
+using SetPositions3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfoSetter::positions>;
+using SetNormals3d   = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfoSetter::normals>;
+using SetTextureCoordinates3d
+    = detail::SceneGeometrySetter<AttributeVector<2>, &GeometryInfoSetter::texture_coordinates>;
+using SetVertexColors3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfoSetter::vertex_colors>;
+using SetIndices        = detail::SceneGeometrySetter<std::vector<unsigned>, &GeometryInfoSetter::indices>;
 
 using SetPoints        = detail::SceneIndicesSetter<GeometryFormat::Points>;
 using SetLines         = detail::SceneIndicesSetter<GeometryFormat::Lines>;
@@ -198,16 +199,16 @@ using SetTriangles     = detail::SceneIndicesSetter<GeometryFormat::Triangles>;
 using SetTriangleStrip = detail::SceneIndicesSetter<GeometryFormat::TriangleStrip>;
 using SetTriangleFan   = detail::SceneIndicesSetter<GeometryFormat::TriangleFan>;
 
-using SetParent = detail::SceneSetter<SceneID, &SceneItemInfo::parent>;
+using SetParent = detail::SceneSetter<SceneID, &SceneItemInfoSetter::parent>;
 
-using SetReadableId     = detail::SceneDisplaySetter<std::string, &DisplayInfo::readable_id>;
-using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &DisplayInfo::geometry_format>;
-using SetTransformation = detail::SceneDisplaySetter<mat4, &DisplayInfo::transformation>;
-using SetUniformColor   = detail::SceneDisplaySetter<vec3, &DisplayInfo::uniform_color>;
-using SetColoring       = detail::SceneDisplaySetter<Coloring, &DisplayInfo::coloring>;
-using SetShading        = detail::SceneDisplaySetter<Shading, &DisplayInfo::shading>;
-using SetVisible        = detail::SceneDisplaySetter<bool, &DisplayInfo::visible>;
-using SetOpacity        = detail::SceneDisplaySetter<float, &DisplayInfo::opacity>;
-using SetWireframeOnly  = detail::SceneDisplaySetter<bool, &DisplayInfo::wireframe_only>;
+using SetReadableId     = detail::SceneDisplaySetter<std::string, &DisplayInfoSetter::readable_id>;
+using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &DisplayInfoSetter::geometry_format>;
+using SetTransformation = detail::SceneDisplaySetter<mat4, &DisplayInfoSetter::transformation>;
+using SetUniformColor   = detail::SceneDisplaySetter<vec3, &DisplayInfoSetter::uniform_color>;
+using SetColoring       = detail::SceneDisplaySetter<Coloring, &DisplayInfoSetter::coloring>;
+using SetShading        = detail::SceneDisplaySetter<Shading, &DisplayInfoSetter::shading>;
+using SetVisible        = detail::SceneDisplaySetter<bool, &DisplayInfoSetter::visible>;
+using SetOpacity        = detail::SceneDisplaySetter<float, &DisplayInfoSetter::opacity>;
+using SetWireframeOnly  = detail::SceneDisplaySetter<bool, &DisplayInfoSetter::wireframe_only>;
 
 } // namespace gvs

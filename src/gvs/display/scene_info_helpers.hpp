@@ -28,8 +28,6 @@
 
 namespace gvs {
 
-auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void;
-
-auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::Result<void>;
+auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> util::Result<void>;
 
 } // namespace gvs

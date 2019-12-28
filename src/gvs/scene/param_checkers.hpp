@@ -56,11 +56,11 @@ namespace detail {
 ///
 /// \brief A "named parameter" wrapper used to set items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> SceneItemInfo::*member>
+template <typename T, T SceneItemInfo::*member>
 struct SceneChecker {
     explicit SceneChecker(bool* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void { *data_ = (!!(info.*member) && !(info.*member)->empty()); }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = !(info.*member).empty(); }
 
     SceneChecker(const SceneChecker&)     = delete;
     SceneChecker(SceneChecker&&) noexcept = delete;
@@ -74,20 +74,11 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> GeometryInfo::*member>
+template <typename T, T GeometryInfo::*member>
 struct SceneGeometryChecker {
     explicit SceneGeometryChecker(bool* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void {
-        if (!info.geometry_info) {
-            *data_ = false;
-            return;
-        }
-
-        auto const& geometry_info = *info.geometry_info;
-
-        *data_ = (!!(geometry_info.*member) || (geometry_info.*member)->empty());
-    }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = !(info.geometry_info.*member).empty(); }
 
     SceneGeometryChecker(const SceneGeometryChecker&)     = delete;
     SceneGeometryChecker(SceneGeometryChecker&&) noexcept = delete;
@@ -95,31 +86,6 @@ struct SceneGeometryChecker {
     SceneGeometryChecker& operator=(SceneGeometryChecker&&) noexcept = delete;
 
 private:
-    bool* data_;
-};
-
-///
-/// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
-///
-template <typename T, std::unique_ptr<T> DisplayInfo::*member>
-struct SceneDisplayChecker {
-    explicit SceneDisplayChecker(bool* value) : data_(value) {}
-
-    auto operator()(SceneItemInfo const& info) -> void {
-        if (!info.display_info) {
-            *data_ = false;
-            return;
-        }
-
-        *data_ = (!!(info.*member));
-    }
-
-    SceneDisplayChecker(const SceneDisplayChecker&)     = delete;
-    SceneDisplayChecker(SceneDisplayChecker&&) noexcept = delete;
-    SceneDisplayChecker& operator=(const SceneDisplayChecker&) = delete;
-    SceneDisplayChecker& operator=(SceneDisplayChecker&&) noexcept = delete;
-
-protected:
     bool* data_;
 };
 
@@ -136,13 +102,5 @@ using HasVertexColors3d       = detail::SceneGeometryChecker<AttributeVector<3>,
 using HasIndices              = detail::SceneGeometryChecker<std::vector<unsigned>, &GeometryInfo::indices>;
 
 using HasChildren = detail::SceneChecker<std::vector<SceneID>, &SceneItemInfo::children>;
-
-using HasReadableId     = detail::SceneDisplayChecker<std::string, &DisplayInfo::readable_id>;
-using HasGeometryFormat = detail::SceneDisplayChecker<GeometryFormat, &DisplayInfo::geometry_format>;
-using HasTransformation = detail::SceneDisplayChecker<mat4, &DisplayInfo::transformation>;
-using HasUniformColor   = detail::SceneDisplayChecker<vec3, &DisplayInfo::uniform_color>;
-using HasColoring       = detail::SceneDisplayChecker<Coloring, &DisplayInfo::coloring>;
-using HasShading        = detail::SceneDisplayChecker<Shading, &DisplayInfo::shading>;
-using HasOpacity        = detail::SceneDisplayChecker<float, &DisplayInfo::opacity>;
 
 } // namespace gvs

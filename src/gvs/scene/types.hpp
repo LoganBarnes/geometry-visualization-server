@@ -105,6 +105,41 @@ enum class Shading : int32_t {
     CookTorrance,
 };
 
+struct DisplayInfoSetter {
+    std::unique_ptr<std::string>    readable_id;
+    std::unique_ptr<GeometryFormat> geometry_format;
+    std::unique_ptr<mat4>           transformation;
+    std::unique_ptr<vec3>           uniform_color;
+    std::unique_ptr<Coloring>       coloring;
+    std::unique_ptr<Shading>        shading;
+    std::unique_ptr<bool>           visible;
+    std::unique_ptr<float>          opacity;
+    std::unique_ptr<bool>           wireframe_only;
+};
+
+struct GeometryInfoSetter {
+    std::unique_ptr<AttributeVector<3>>    positions;
+    std::unique_ptr<AttributeVector<3>>    normals;
+    std::unique_ptr<AttributeVector<2>>    texture_coordinates;
+    std::unique_ptr<AttributeVector<3>>    vertex_colors;
+    std::unique_ptr<std::vector<unsigned>> indices;
+};
+
+//namespace detail {
+//using GeometryBase = mapbox::util::variant<GeometryInfo, Primitive>;
+//}
+//
+//struct Geometry : detail::GeometryBase {
+//    using detail::GeometryBase::variant;
+//};
+
+struct SceneItemInfoSetter {
+    std::unique_ptr<GeometryInfoSetter>   geometry_info;
+    std::unique_ptr<DisplayInfoSetter>    display_info;
+    std::unique_ptr<SceneID>              parent;
+    std::unique_ptr<std::vector<SceneID>> children;
+};
+
 constexpr auto default_readable_id     = "Scene Item";
 constexpr auto default_geometry_format = GeometryFormat::Points;
 // clang-format off
@@ -123,38 +158,30 @@ constexpr auto default_opacity        = 1.f;
 constexpr auto default_wireframe_only = false;
 
 struct DisplayInfo {
-    std::unique_ptr<std::string>    readable_id;
-    std::unique_ptr<GeometryFormat> geometry_format;
-    std::unique_ptr<mat4>           transformation;
-    std::unique_ptr<vec3>           uniform_color;
-    std::unique_ptr<Coloring>       coloring;
-    std::unique_ptr<Shading>        shading;
-    std::unique_ptr<bool>           visible;
-    std::unique_ptr<float>          opacity;
-    std::unique_ptr<bool>           wireframe_only;
+    std::string    readable_id     = default_readable_id;
+    GeometryFormat geometry_format = default_geometry_format;
+    mat4           transformation  = default_transformation;
+    vec3           uniform_color   = default_uniform_color;
+    Coloring       coloring        = default_coloring;
+    Shading        shading         = default_shading;
+    bool           visible         = default_visible;
+    float          opacity         = default_opacity;
+    bool           wireframe_only  = default_wireframe_only;
 };
 
 struct GeometryInfo {
-    std::unique_ptr<AttributeVector<3>>    positions;
-    std::unique_ptr<AttributeVector<3>>    normals;
-    std::unique_ptr<AttributeVector<2>>    texture_coordinates;
-    std::unique_ptr<AttributeVector<3>>    vertex_colors;
-    std::unique_ptr<std::vector<unsigned>> indices;
+    AttributeVector<3>    positions           = {};
+    AttributeVector<3>    normals             = {};
+    AttributeVector<2>    texture_coordinates = {};
+    AttributeVector<3>    vertex_colors       = {};
+    std::vector<unsigned> indices             = {};
 };
 
-//namespace detail {
-//using GeometryBase = mapbox::util::variant<GeometryInfo, Primitive>;
-//}
-//
-//struct Geometry : detail::GeometryBase {
-//    using detail::GeometryBase::variant;
-//};
-
 struct SceneItemInfo {
-    std::unique_ptr<GeometryInfo>         geometry_info;
-    std::unique_ptr<DisplayInfo>          display_info;
-    std::unique_ptr<SceneID>              parent;
-    std::unique_ptr<std::vector<SceneID>> children;
+    GeometryInfo         geometry_info = {};
+    DisplayInfo          display_info  = {};
+    SceneID              parent        = nil_id();
+    std::vector<SceneID> children      = {};
 };
 
 using SceneItems = std::unordered_map<SceneID, SceneItemInfo>;
