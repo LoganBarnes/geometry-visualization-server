@@ -56,7 +56,7 @@ namespace detail {
 ///
 /// \brief A "named parameter" wrapper used to set items in a StaticScene
 ///
-template <typename T, std::optional<T> SceneItemInfo::*member>
+template <typename T, std::unique_ptr<T> SceneItemInfo::*member>
 struct SceneSetter {
     explicit SceneSetter(T value = {}) : data_(std::move(value)) {}
 
@@ -64,7 +64,7 @@ struct SceneSetter {
         if (info->*member) {
             return "Scene parameter already set.";
         }
-        info->*member = std::move(data_);
+        info->*member = std::make_unique<T>(std::move(data_));
         return "";
     }
 
@@ -80,21 +80,22 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
-template <typename T, std::optional<T> GeometryInfo::*member>
+template <typename T, std::unique_ptr<T> GeometryInfo::*member>
 struct SceneGeometrySetter {
     explicit SceneGeometrySetter(T value = {}) : data_(std::move(value)) {}
 
     auto operator()(SceneItemInfo* info) -> std::string {
         if (!info->geometry_info) {
-            info->geometry_info = GeometryInfo{};
+            info->geometry_info = std::make_unique<GeometryInfo>();
         }
 
-        auto& geometry_info = info->geometry_info.value();
+        auto& geometry_info = *info->geometry_info;
+
         if (geometry_info.*member) {
             return "Scene parameter already set.";
         }
 
-        geometry_info.*member = std::move(data_);
+        geometry_info.*member = std::make_unique<T>(std::move(data_));
         return "";
     }
 
@@ -116,14 +117,14 @@ struct SceneIndicesSetter {
 
     auto operator()(SceneItemInfo* info) -> std::string {
         if (!info->geometry_info) {
-            info->geometry_info = GeometryInfo{};
+            info->geometry_info = std::make_unique<GeometryInfo>();
         }
         if (!info->display_info) {
-            info->display_info = DisplayInfo{};
+            info->display_info = std::make_unique<DisplayInfo>();
         }
 
-        auto& geometry_info = info->geometry_info.value();
-        auto& display_info  = info->display_info.value();
+        auto& geometry_info = *info->geometry_info;
+        auto& display_info  = *info->display_info;
 
         if (geometry_info.indices) {
             return "Scene parameter already set.";
@@ -133,8 +134,8 @@ struct SceneIndicesSetter {
             return "Scene parameter already set.";
         }
 
-        geometry_info.indices        = std::move(data_);
-        display_info.geometry_format = Format;
+        geometry_info.indices        = std::make_unique<std::vector<unsigned>>(std::move(data_));
+        display_info.geometry_format = std::make_unique<GeometryFormat>(Format);
 
         return "";
     }
@@ -151,21 +152,22 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
 ///
-template <typename T, std::optional<T> DisplayInfo::*member>
+template <typename T, std::unique_ptr<T> DisplayInfo::*member>
 struct SceneDisplaySetter {
     explicit SceneDisplaySetter(T value = {}) : data(std::move(value)) {}
 
     auto operator()(SceneItemInfo* info) -> std::string {
         if (!info->display_info) {
-            info->display_info = DisplayInfo{};
+            info->display_info = std::make_unique<DisplayInfo>();
         }
 
-        auto& display_info = info->display_info.value();
+        auto& display_info = *info->display_info;
+
         if (display_info.*member) {
             return "Scene parameter already set.";
         }
 
-        display_info.*member = std::move(data);
+        display_info.*member = std::make_unique<T>(std::move(data));
         return "";
     }
 

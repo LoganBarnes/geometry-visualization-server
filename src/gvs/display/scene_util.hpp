@@ -23,6 +23,7 @@
 #pragma once
 
 #include "forward_declarations.hpp"
+#include "gvs/scene/forward_declarations.hpp"
 
 namespace gvs::scene {
 

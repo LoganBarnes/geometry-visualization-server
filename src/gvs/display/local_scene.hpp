@@ -23,7 +23,7 @@
 #pragma once
 
 // project
-#include "scene.hpp"
+#include "gvs/scene/scene.hpp"
 #include "scene_display.hpp"
 
 namespace gvs::scene {
@@ -51,9 +51,9 @@ public:
     auto clear() -> void override;
 
 private:
-    auto actually_add_item(SceneItemInfo&& info) -> util::Result<SceneID> override;
-    auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
-    auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> util::Result<void> override;
+    auto actually_add_item(SceneItemInfo&& info) -> SceneID override;
+    auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> void override;
+    auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> void override;
 
     auto items() const -> SceneItems const& override;
     /*

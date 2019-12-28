@@ -121,31 +121,33 @@ auto get_scene_info(Functors&&... functors) -> SceneItemInfo {
     SceneItemInfo info;
     std::string   error_strings;
     // iterate over all functors and apply them to a new SceneItemInfo
-    int dummy[] = {(detail::apply_functor(info, error_strings, std::forward<Functors>(functors)), 0)...};
+    int dummy[] = {(apply_functor(&info, &error_strings, std::forward<Functors>(functors)), 0)...};
     (void)dummy;
 
     if (!error_strings.empty()) {
         throw std::runtime_error(error_strings);
     }
+
+    return info;
 }
 
 } // namespace detail
 
 template <typename... Functors>
 auto Scene::add_item(Functors&&... functors) -> SceneID {
-    auto info = get_scene_info(std::forward<Functors>(functors)...);
+    auto info = detail::get_scene_info(std::forward<Functors>(functors)...);
     return actually_add_item(std::move(info));
 }
 
 template <typename... Functors>
 auto Scene::update_item(SceneID const& item_id, Functors&&... functors) -> void {
-    auto info = get_scene_info(std::forward<Functors>(functors)...);
+    auto info = detail::get_scene_info(std::forward<Functors>(functors)...);
     return actually_update_item(item_id, std::move(info));
 }
 
 template <typename... Functors>
 auto Scene::append_to_item(SceneID const& item_id, Functors&&... functors) -> void {
-    auto info = get_scene_info(std::forward<Functors>(functors)...);
+    auto info = detail::get_scene_info(std::forward<Functors>(functors)...);
     return actually_append_to_item(item_id, std::move(info));
 }
 

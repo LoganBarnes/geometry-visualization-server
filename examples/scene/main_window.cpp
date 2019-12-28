@@ -24,7 +24,7 @@
 
 // project
 #include "gvs/scene/log_params.hpp"
-#include "gvs/scene/scene_util.hpp"
+#include "gvs/display/scene_util.hpp"
 
 // external
 #include <Magnum/GL/Context.h>

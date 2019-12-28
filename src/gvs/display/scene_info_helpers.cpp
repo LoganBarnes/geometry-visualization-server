@@ -26,63 +26,63 @@ namespace gvs {
 
 auto set_defaults_on_empty_fields(SceneItemInfo* info) -> void {
     if (!info->parent) {
-        info->parent = nil_id;
+        info->parent = std::make_unique<SceneID>(nil_id());
     }
 
     if (!info->children) {
-        info->children = std::vector<SceneID>{};
+        info->children = std::make_unique<std::vector<SceneID>>();
     }
 
     if (!info->display_info) {
-        info->display_info = DisplayInfo{};
+        info->display_info = std::make_unique<DisplayInfo>();
     }
 
-    auto& display_info = info->display_info.value();
+    auto& display_info = *info->display_info;
 
     if (!display_info.readable_id) {
-        display_info.readable_id = default_readable_id;
+        display_info.readable_id = std::make_unique<std::string>(default_readable_id);
     }
     if (!display_info.geometry_format) {
-        display_info.geometry_format = default_geometry_format;
+        display_info.geometry_format = std::make_unique<GeometryFormat>(default_geometry_format);
     }
     if (!display_info.transformation) {
-        display_info.transformation = default_transformation;
+        display_info.transformation = std::make_unique<mat4>(default_transformation);
     }
     if (!display_info.uniform_color) {
-        display_info.uniform_color = default_uniform_color;
+        display_info.uniform_color = std::make_unique<vec3>(default_uniform_color);
     }
     if (!display_info.coloring) {
-        display_info.coloring = default_coloring;
+        display_info.coloring = std::make_unique<Coloring>(default_coloring);
     }
     if (!display_info.shading) {
-        display_info.shading = default_shading;
+        display_info.shading = std::make_unique<Shading>(default_shading);
     }
     if (!display_info.visible) {
-        display_info.visible = default_visible;
+        display_info.visible = std::make_unique<bool>(default_visible);
     }
     if (!display_info.opacity) {
-        display_info.opacity = default_opacity;
+        display_info.opacity = std::make_unique<float>(default_opacity);
     }
     if (!display_info.wireframe_only) {
-        display_info.wireframe_only = default_wireframe_only;
+        display_info.wireframe_only = std::make_unique<bool>(default_wireframe_only);
     }
 }
 
 auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::Result<void> {
 
     if (new_info.geometry_info) {
-        auto& geometry_info     = info->geometry_info.value();
-        auto& new_geometry_info = new_info.geometry_info.value();
+        auto& geometry_info     = *info->geometry_info;
+        auto& new_geometry_info = *new_info.geometry_info;
 
         if (new_geometry_info.positions) {
-            geometry_info.positions = new_geometry_info.positions.value();
+            geometry_info.positions = std::move(new_geometry_info.positions);
         }
 
         auto positions_size = geometry_info.positions->size();
 
         auto maybe_replace = [&](auto member, std::string const& name) -> util::Result<void> {
             if (new_geometry_info.*member) {
-                geometry_info.*member = (new_geometry_info.*member).value();
+                geometry_info.*member = std::move(new_geometry_info.*member);
             }
 
             bool non_empty = (geometry_info.*member && !(geometry_info.*member)->empty());
@@ -105,12 +105,12 @@ auto replace_if_present(SceneItemInfo* info, SceneItemInfo&& new_info) -> util::
     }
 
     if (new_info.display_info) {
-        auto& display_info     = info->display_info.value();
-        auto& new_display_info = new_info.display_info.value();
+        auto& display_info     = *info->display_info;
+        auto& new_display_info = *new_info.display_info;
 
         auto maybe_replace = [&](auto member) {
             if (new_display_info.*member) {
-                display_info.*member = (new_display_info.*member).value();
+                display_info.*member = std::move(new_display_info.*member);
             }
         };
 

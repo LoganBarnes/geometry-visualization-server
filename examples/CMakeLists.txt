@@ -33,7 +33,7 @@ function(add_example _directory _cpp17_enabled)
 
     if (_cpp17_enabled)
         set(CPP_STANDARD 17)
-        target_link_libraries(${target} PUBLIC gvs_display)
+        target_link_libraries(${target} PUBLIC gvs_scene_display)
     else ()
         set(CPP_STANDARD 11)
         target_link_libraries(${target} PUBLIC gvs_scene_client)

@@ -25,9 +25,7 @@
 namespace gvs {
 namespace scene {
 
-ClientScene::ClientScene() : generator_(std::random_device{}()) {
-    // TODO: Setup client stuff
-}
+ClientScene::ClientScene(std::string const& server_address) : ClientScene(server_address, std::chrono::seconds(5)) {}
 
 ClientScene::~ClientScene() = default;
 

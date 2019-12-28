@@ -164,10 +164,11 @@ if (NOT GVS_NO_DISPLAY)
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
             )
 
-    gvs_add_library(gvs_display 17 ${GVS_SOURCE_FILES})
-    target_link_libraries(gvs_display
+    gvs_add_library(gvs_scene_display 17 ${GVS_SOURCE_FILES})
+    target_link_libraries(gvs_scene_display
             PUBLIC vis_client_resources
             PUBLIC gvs_util
+            PUBLIC gvs_scene_client
             )
 endif (NOT GVS_NO_DISPLAY)
 

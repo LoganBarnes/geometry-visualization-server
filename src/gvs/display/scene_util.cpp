@@ -23,8 +23,8 @@
 #include "scene_util.hpp"
 
 // project
-#include "log_params.hpp"
-#include "scene.hpp"
+#include "gvs/scene/log_params.hpp"
+#include "gvs/scene/scene.hpp"
 
 // external
 #include <gvs/vis-client/imgui_utils.hpp>
@@ -131,10 +131,10 @@ auto configure_scene_gui(SceneID const& item_id, Scene* scene) -> bool {
             }
 
             if (has_children) {
-                std::optional<std::vector<SceneID>> children;
+                std::vector<SceneID> children;
                 scene->get_item_info(item_id, GetChildren(&children));
 
-                for (auto const& child_id : children.value()) {
+                for (auto const& child_id : children) {
                     children_changed |= configure_scene_gui(child_id, scene);
                 }
 
@@ -169,20 +169,16 @@ auto SceneUtil::configure_gui(Scene* scene) -> bool {
 
     if (scene->empty()) {
         ImGui::SameLine();
-        ImGui::Text(" (empty)");
+        ImGui::TextColored({0.5f, 0.5f, 0.5f, 1.f}, " (empty)");
         return false;
     }
 
-    std::optional<std::vector<SceneID>> children;
-    scene->get_item_info(nil_id, GetChildren(&children));
-
-    if (!children) {
-        return false;
-    }
+    std::vector<SceneID> children;
+    scene->get_item_info(nil_id(), GetChildren(&children));
 
     bool scene_changed = false;
 
-    for (auto const& child_id : children.value()) {
+    for (auto const& child_id : children) {
         scene_changed |= configure_scene_gui(child_id, scene);
     }
 

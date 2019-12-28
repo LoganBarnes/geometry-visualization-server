@@ -23,8 +23,8 @@
 #pragma once
 
 // project
+#include "gvs/scene/types.hpp"
 #include "gvs/util/result.hpp"
-#include "types.hpp"
 
 namespace gvs {
 

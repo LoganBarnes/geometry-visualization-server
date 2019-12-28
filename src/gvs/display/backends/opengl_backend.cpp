@@ -49,7 +49,7 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package,
 
     auto update_attribute
         = [&mesh_package, &offset, &buffer_data](auto const& optional_attribute, auto const& shader_attribute) {
-              const auto& attribute = optional_attribute.value();
+              const auto& attribute = *optional_attribute;
               buffer_data.insert(buffer_data.end(),
                                  reinterpret_cast<float const*>(attribute.data()),
                                  reinterpret_cast<float const*>(attribute.data() + attribute.size()));
@@ -148,30 +148,30 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
     auto const&        old_info     = items.at(item_id);
 
     if (new_info.geometry_info) {
-        GeometryInfo const& new_geom = new_info.geometry_info.value();
-        GeometryInfo const& old_geom = old_info.geometry_info.value();
+        GeometryInfo const& new_geom = *new_info.geometry_info;
+        GeometryInfo const& old_geom = *old_info.geometry_info;
 
         if (new_geom.positions || new_geom.normals || new_geom.texture_coordinates || new_geom.vertex_colors) {
             update_vbo(&mesh_package, new_geom, old_geom);
         }
 
         if (new_geom.indices) {
-            update_ibo(&mesh_package, new_geom.indices.value());
+            update_ibo(&mesh_package, *new_geom.indices);
         }
     }
 
     if (new_info.display_info) {
-        const DisplayInfo& display = new_info.display_info.value();
+        const DisplayInfo& display = *new_info.display_info;
 
         if (display.geometry_format) {
-            mesh_package.mesh.setPrimitive(to_magnum(display.geometry_format.value()));
+            mesh_package.mesh.setPrimitive(to_magnum(*display.geometry_format));
         }
     }
 
     // TODO: Handle parent and children updates
 
     if (new_info.parent) {
-        auto const& parent = new_info.parent.value();
+        auto const& parent = *new_info.parent;
 
         if (!util::has_key(objects_, parent)) {
             objects_.erase(item_id);
@@ -184,7 +184,7 @@ auto OpenglBackend::before_update(SceneID const& item_id, SceneItemInfo const& n
     }
 
     if (new_info.display_info) {
-        mesh_package.drawable->update_display_info(new_info.display_info.value());
+        mesh_package.drawable->update_display_info(*new_info.display_info);
     }
 }
 

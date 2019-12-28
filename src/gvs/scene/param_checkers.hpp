@@ -56,7 +56,7 @@ namespace detail {
 ///
 /// \brief A "named parameter" wrapper used to set items in a StaticScene
 ///
-template <typename T, std::optional<T> SceneItemInfo::*member>
+template <typename T, std::unique_ptr<T> SceneItemInfo::*member>
 struct SceneChecker {
     explicit SceneChecker(bool* value) : data_(value) {}
 
@@ -74,7 +74,7 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
-template <typename T, std::optional<T> GeometryInfo::*member>
+template <typename T, std::unique_ptr<T> GeometryInfo::*member>
 struct SceneGeometryChecker {
     explicit SceneGeometryChecker(bool* value) : data_(value) {}
 
@@ -83,8 +83,10 @@ struct SceneGeometryChecker {
             *data_ = false;
             return;
         }
-        auto const& geometry_info = info.geometry_info.value();
-        *data_                    = (!!(geometry_info.*member) || (geometry_info.*member)->empty());
+
+        auto const& geometry_info = *info.geometry_info;
+
+        *data_ = (!!(geometry_info.*member) || (geometry_info.*member)->empty());
     }
 
     SceneGeometryChecker(const SceneGeometryChecker&)     = delete;
@@ -99,7 +101,7 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
 ///
-template <typename T, std::optional<T> DisplayInfo::*member>
+template <typename T, std::unique_ptr<T> DisplayInfo::*member>
 struct SceneDisplayChecker {
     explicit SceneDisplayChecker(bool* value) : data_(value) {}
 

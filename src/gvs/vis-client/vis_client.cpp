@@ -20,16 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/vis-client/vis_client.hpp"
+#include "vis_client.hpp"
 
-#include "gvs/server/scene_server.hpp"
+// project
 #include "gvs/vis-client/app/imgui_theme.hpp"
 #include "gvs/vis-client/imgui_utils.hpp"
 #include "gvs/vis-client/scene/opengl_scene.hpp"
-#include "vis_client.hpp"
 
 // generated
-#include <gvs/gvs_paths.hpp>
+#include "gvs/gvs_paths.hpp"
 
 // third-party
 #include <Magnum/GL/Context.h>
@@ -37,9 +36,7 @@
 #include <imgui.h>
 
 // standard
-#include <chrono>
 #include <limits>
-#include <sstream>
 
 using namespace Magnum;
 

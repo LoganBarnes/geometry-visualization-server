@@ -56,11 +56,11 @@ namespace detail {
 ///
 /// \brief A "named parameter" wrapper used to set items in a StaticScene
 ///
-template <typename T, std::optional<T> SceneItemInfo::*member>
+template <typename T, std::unique_ptr<T> SceneItemInfo::*member>
 struct SceneGetter {
-    explicit SceneGetter(std::optional<T>* value) : data_(value) {}
+    explicit SceneGetter(T* value) : data_(value) {}
 
-    auto operator()(SceneItemInfo const& info) -> void { *data_ = info.*member; }
+    auto operator()(SceneItemInfo const& info) -> void { *data_ = *(info.*member); }
 
     SceneGetter(const SceneGetter&)     = delete;
     SceneGetter(SceneGetter&&) noexcept = delete;
@@ -68,23 +68,23 @@ struct SceneGetter {
     SceneGetter& operator=(SceneGetter&&) noexcept = delete;
 
 private:
-    std::optional<T>* data_;
+    T* data_;
 };
 
 ///
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
-template <typename T, std::optional<T> GeometryInfo::*member>
+template <typename T, std::unique_ptr<T> GeometryInfo::*member>
 struct SceneGeometryGetter {
-    explicit SceneGeometryGetter(std::optional<T>* value) : data_(value) {}
+    explicit SceneGeometryGetter(T* value) : data_(value) {}
 
     auto operator()(SceneItemInfo const& info) -> void {
         if (!info.geometry_info) {
-            *data_ = std::nullopt;
+            *data_ = {};
             return;
         }
 
-        *data_ = info.geometry_info->*member;
+        *data_ = *(info.geometry_info.*member);
     }
 
     SceneGeometryGetter(const SceneGeometryGetter&)     = delete;
@@ -93,19 +93,20 @@ struct SceneGeometryGetter {
     SceneGeometryGetter& operator=(SceneGeometryGetter&&) noexcept = delete;
 
 private:
-    std::optional<T>* data_;
+    T* data_;
 };
 
 ///
 /// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
 ///
-template <typename T, std::optional<T> DisplayInfo::*member>
+template <typename T, std::unique_ptr<T> DisplayInfo::*member>
 struct SceneDisplayGetter {
     explicit SceneDisplayGetter(T* value) : data_(value) {}
 
     auto operator()(SceneItemInfo const& info) -> void {
-        auto const& display_info = info.display_info.value();
-        *data_                   = (display_info.*member).value();
+        auto const& display_info = *info.display_info;
+
+        *data_ = *(display_info.*member);
     }
 
     SceneDisplayGetter(const SceneDisplayGetter&)     = delete;

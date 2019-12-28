@@ -47,20 +47,20 @@ OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformati
 auto OpaqueDrawable::update_display_info(DisplayInfo const& display_info) -> void {
 
     if (display_info.transformation) {
-        object_.setTransformation(to_magnum(display_info.transformation.value()));
+        object_.setTransformation(to_magnum(*display_info.transformation));
     }
 
     if (display_info.coloring) {
-        coloring_ = display_info.coloring.value();
+        coloring_ = *display_info.coloring;
     }
 
     if (display_info.uniform_color) {
-        auto const& uniform_color = display_info.uniform_color.value();
+        auto const& uniform_color = *display_info.uniform_color;
         uniform_color_            = Magnum::Color3{uniform_color[0], uniform_color[1], uniform_color[2]};
     }
 
     if (display_info.shading) {
-        shading_ = display_info.shading.value();
+        shading_ = *display_info.shading;
     }
 }
 

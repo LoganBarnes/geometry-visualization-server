@@ -25,12 +25,26 @@
 // project
 #include "scene.hpp"
 
+// standard
+#include <chrono>
+
 namespace gvs {
 namespace scene {
 
 class ClientScene : public Scene {
 public:
-    explicit ClientScene();
+    /// \brief Handles the server connection for geometry streams
+    ///
+    ///        If 'server_address' is an empty string, no connection attempt will be made.
+    ///        Defaults to a maximum 5 second wait time when attempting to connect.
+    ///
+    /// \param server_address - the logger will attempt to connect to this address
+    explicit ClientScene(const std::string& server_address);
+
+    template <typename Rep, typename Period>
+    explicit ClientScene(const std::string&                        server_address,
+                         const std::chrono::duration<Rep, Period>& max_connection_wait_duration);
+
     ~ClientScene() override;
 
     /*
@@ -53,6 +67,30 @@ private:
     SceneItems   items_; ///< The map of all the items in the scene
     // Client client_; ///< The client used to send and receive scene updates
 };
+
+template <typename Rep, typename Period>
+ClientScene::ClientScene(const std::string& server_address,
+                         const std::chrono::duration<Rep, Period>& /*max_connection_wait_duration*/)
+    : generator_(std::random_device{}()) {
+
+    if (server_address.empty()) {
+        std::cout << "No server address provided. Ignoring scene updates." << std::endl;
+
+    } else {
+        //        grpc::ChannelArguments channel_args;
+        //        channel_args.SetMaxReceiveMessageSize(std::numeric_limits<int>::max());
+        //
+        //        channel_ = grpc::CreateCustomChannel(server_address, grpc::InsecureChannelCredentials(), channel_args);
+        //
+        //        if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
+        //            stub_ = proto::Scene::NewStub(channel_);
+        //
+        //        } else {
+        //            channel_ = nullptr;
+        //            std::cerr << "Failed to connect to " << server_address << ". Scene updates will be ignored." << std::endl;
+        //        }
+    }
+}
 
 } // namespace scene
 } // namespace gvs
