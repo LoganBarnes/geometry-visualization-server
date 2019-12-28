@@ -26,6 +26,10 @@ namespace gvs {
 
 auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> util::Result<void> {
 
+    if (new_info.parent) {
+        info->parent = *new_info.parent;
+    }
+
     if (new_info.geometry_info) {
         auto& geometry_info     = info->geometry_info;
         auto& new_geometry_info = *new_info.geometry_info;

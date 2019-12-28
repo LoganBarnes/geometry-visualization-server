@@ -23,6 +23,7 @@
 #include "main_window.hpp"
 
 // project
+#include "../common/test_scene.hpp"
 #include "gvs/gui/scene_gui.hpp"
 #include "gvs/scene/log_params.hpp"
 
@@ -110,6 +111,10 @@ MainWindow::MainWindow(const Arguments& arguments)
                         gvs::SetShading(gvs::Shading::Lambertian),
                         gvs::SetColoring(gvs::Coloring::Normals));
     }
+
+    auto test_scene_root = scene_.add_item(gvs::SetReadableId("Test Scene"),
+                    gvs::SetVisible(false));
+    build_test_scene(&scene_, test_scene_root);
 }
 
 MainWindow::~MainWindow() = default;

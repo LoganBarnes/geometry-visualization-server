@@ -26,6 +26,7 @@ function(add_example _directory _cpp17_enabled)
     file(GLOB_RECURSE GVS_SOURCE_FILES
             LIST_DIRECTORIES false
             CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/common/*
             ${CMAKE_CURRENT_LIST_DIR}/${_directory}/*
             )
 

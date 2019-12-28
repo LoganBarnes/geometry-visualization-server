@@ -20,21 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/scene/client_scene.hpp"
+#pragma once
 
 // project
-#include "../common/test_scene.hpp"
+#include "gvs/scene/forward_declarations.hpp"
+#include "gvs/scene/scene_id.hpp"
 
-int main(int argc, char* argv[]) {
-    std::string server_address = "0.0.0.0:50055";
+namespace example {
 
-    if (argc > 1) {
-        server_address = argv[1];
-    }
+auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneID const& root_id = gvs::nil_id()) -> void;
 
-    gvs::scene::ClientScene scene(server_address, std::chrono::seconds(3));
-
-    example::build_test_scene(&scene);
-
-    return 0;
 }

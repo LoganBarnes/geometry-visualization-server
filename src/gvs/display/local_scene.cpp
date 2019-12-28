@@ -73,7 +73,8 @@ auto LocalScene::actually_add_item(SceneItemInfoSetter&& new_info) -> util11::Re
     auto item_id = boost::uuids::basic_random_generator{generator_}();
 
     SceneItemInfo info;
-    auto          result = replace_if_present(&info, std::move(new_info));
+
+    auto result = replace_if_present(&info, std::move(new_info));
     if (!result) {
         return util11::Error{result.error().error_message()};
     }
