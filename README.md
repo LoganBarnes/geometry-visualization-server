@@ -5,6 +5,8 @@ Geometry Visualization Server
 [![MIT License][license-badge]][license-link]
 [![Docs][docs-badge]][docs-link]
 
+**[Source][source-code-link]** | **[Documentation][documentation-link]**
+
 ### TODO BEFORE MERGE WITH MASTER:
 * ~~Create setters and getter types `gvs::SetPositions`, `gvs::GetPositions`, `gvs::HasChildren`, etc.~~
 * Clean up magnum scene class
@@ -224,6 +226,9 @@ will return an error. If no error is thrown the non-geometry info will also be u
 [protobuf-link]: https://developers.google.com/protocol-buffers/
 [grpc-link]: https://grpc.io/
 [magnum-link]: https://magnum.graphics/
+
+[source-code-link]: https://github.com/LoganBarnes/geometry-visualization-server
+[documentation-link]: https://codedocs.xyz/LoganBarnes/geometry-visualization-server/index.html
 
 [view-geometry-gif]: https://raw.githubusercontent.com/LoganBarnes/geometry-visualization-server-docs/master/img/view-geometry.gif
 
