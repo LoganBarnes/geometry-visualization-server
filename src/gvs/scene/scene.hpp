@@ -23,6 +23,7 @@
 #pragma once
 
 // project
+#include "gvs/util/result_11.hpp"
 #include "types.hpp"
 
 // standard
@@ -83,6 +84,18 @@ public:
     template <typename... Functors>
     auto get_item_info(SceneID const& item_id, Functors&&... functors) -> void;
 
+    template <typename... Functors>
+    auto safe_add_item(Functors&&... functors) -> util11::Result<SceneID>;
+
+    template <typename... Functors>
+    auto safe_update_item(SceneID const& item_id, Functors&&... functors) -> util11::Error;
+
+    template <typename... Functors>
+    auto safe_append_to_item(SceneID const& item_id, Functors&&... functors) -> util11::Error;
+
+    template <typename... Functors>
+    auto safe_get_item_info(SceneID const& item_id, Functors&&... functors) -> util11::Error;
+
     auto size() const -> std::size_t;
     auto empty() const -> bool;
 
@@ -94,13 +107,13 @@ public:
 
 private:
     /// \brief Adds the new item to the scene
-    virtual auto actually_add_item(SceneItemInfo&& info) -> SceneID = 0;
+    virtual auto actually_add_item(SceneItemInfo&& info) -> util11::Result<SceneID> = 0;
 
     /// \brief Updates the specified item by replacing existing fields with the new ones
-    virtual auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> void = 0;
+    virtual auto actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error = 0;
 
     /// \brief Updates the specified item by appending all new geometry
-    virtual auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> void = 0;
+    virtual auto actually_append_to_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error = 0;
 
     /// \brief The map of all items in the scene
     virtual auto items() const -> SceneItems const& = 0;
@@ -135,27 +148,49 @@ auto get_scene_info(Functors&&... functors) -> SceneItemInfo {
 
 template <typename... Functors>
 auto Scene::add_item(Functors&&... functors) -> SceneID {
+    return safe_add_item(std::forward<Functors>(functors)...).value_or_throw();
+}
+
+template <typename... Functors>
+auto Scene::update_item(SceneID const& item_id, Functors&&... functors) -> void {
+    safe_update_item(item_id, std::forward<Functors>(functors)...).throw_if_error();
+}
+
+template <typename... Functors>
+auto Scene::append_to_item(SceneID const& item_id, Functors&&... functors) -> void {
+    safe_append_to_item(item_id, std::forward<Functors>(functors)...).throw_if_error();
+}
+
+template <typename... Functors>
+auto Scene::get_item_info(SceneID const& item_id, Functors&&... functors) -> void {
+    safe_get_item_info(item_id, std::forward<Functors>(functors)...).throw_if_error();
+}
+
+template <typename... Functors>
+auto Scene::safe_add_item(Functors&&... functors) -> util11::Result<SceneID> {
     auto info = detail::get_scene_info(std::forward<Functors>(functors)...);
     return actually_add_item(std::move(info));
 }
 
 template <typename... Functors>
-auto Scene::update_item(SceneID const& item_id, Functors&&... functors) -> void {
+auto Scene::safe_update_item(SceneID const& item_id, Functors&&... functors) -> util11::Error {
     auto info = detail::get_scene_info(std::forward<Functors>(functors)...);
     return actually_update_item(item_id, std::move(info));
 }
 
 template <typename... Functors>
-auto Scene::append_to_item(SceneID const& item_id, Functors&&... functors) -> void {
+auto Scene::safe_append_to_item(SceneID const& item_id, Functors&&... functors) -> util11::Error {
     auto info = detail::get_scene_info(std::forward<Functors>(functors)...);
     return actually_append_to_item(item_id, std::move(info));
 }
 
 template <typename... Functors>
-auto Scene::get_item_info(SceneID const& item_id, Functors&&... functors) -> void {
+auto Scene::safe_get_item_info(SceneID const& item_id, Functors&&... functors) -> util11::Error {
     auto const& item    = items().at(item_id);
     int         dummy[] = {(functors(item), 0)...};
     (void)dummy;
+
+    return util11::success();
 }
 
 } // namespace scene

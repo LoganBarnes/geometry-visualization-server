@@ -71,7 +71,7 @@ auto LocalScene::clear() -> void {
     backend_->reset_items(items_);
 }
 
-auto LocalScene::actually_add_item(SceneItemInfo&& info) -> SceneID {
+auto LocalScene::actually_add_item(SceneItemInfo&& info) -> util11::Result<SceneID> {
     set_defaults_on_empty_fields(&info);
 
     auto item_id = boost::uuids::basic_random_generator{generator_}();
@@ -85,7 +85,7 @@ auto LocalScene::actually_add_item(SceneItemInfo&& info) -> SceneID {
     return item_id;
 }
 
-auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> void {
+auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& info) -> util11::Error {
     backend_->before_update(item_id, info, items_);
 
     auto& item = items_.at(item_id);
@@ -98,10 +98,15 @@ auto LocalScene::actually_update_item(SceneID const& item_id, SceneItemInfo&& in
         items_.at(*info.parent).children->emplace_back(item_id);
     }
 
-    replace_if_present(&item, std::forward<SceneItemInfo>(info)).value_or_throw();
+    auto result = replace_if_present(&item, std::forward<SceneItemInfo>(info));
+    if (!result) {
+        return {result.error().error_message()};
+    }
+
+    return util11::success();
 }
 
-auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> void {
+auto LocalScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfo && /*info*/) -> util11::Error {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
