@@ -319,6 +319,15 @@ auto MainWindow::reset_cylinder() -> void {
                        gvs::SetGeometryFormat(gvs::display::from_magnum(cylinder.primitive())));
 }
 
+auto MainWindow::reset_plane() -> void {
+    Trade::MeshData3D const plane = Primitives::planeSolid();
+
+    scene_.update_item(plane_.scene_id,
+                       gvs::SetPositions3d(plane.positions(0)),
+                       gvs::SetNormals3d(plane.normals(0)),
+                       gvs::SetGeometryFormat(gvs::display::from_magnum(plane.primitive())));
+}
+
 auto MainWindow::reset_sphere() -> void {
     Trade::MeshData3D const sphere = Primitives::uvSphereSolid(sphere_.rings, sphere_.segments);
 
@@ -327,15 +336,6 @@ auto MainWindow::reset_sphere() -> void {
                        gvs::SetNormals3d(sphere.normals(0)),
                        gvs::SetIndices(sphere.indices()),
                        gvs::SetGeometryFormat(gvs::display::from_magnum(sphere.primitive())));
-}
-
-auto MainWindow::reset_plane() -> void {
-    Trade::MeshData3D const plane = Primitives::planeSolid();
-
-    scene_.update_item(plane_.scene_id,
-                       gvs::SetPositions3d(plane.positions(0)),
-                       gvs::SetNormals3d(plane.normals(0)),
-                       gvs::SetGeometryFormat(gvs::display::from_magnum(plane.primitive())));
 }
 
 } // namespace example

@@ -22,45 +22,12 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// external
-#include <mapbox/variant.hpp> // C++11 variant
+// project
+#include "gvs/scene/primitive_types.hpp"
+#include "gvs/scene/types.hpp"
 
-namespace gvs {
+namespace gvs::display {
 
-/// \brief A cone of with a base radius of 1.
-///        The center is at the origin and the rotational axis is along Y.
-struct Cone {
-    float    half_length = 1.f;
-    unsigned rings       = 35u;
-    unsigned segments    = 35u;
-};
+auto make_primitive(SceneItemInfo* info, Primitive const& primitive) -> void;
 
-/// \brief A 2x2x2 cube centered at the origin.
-struct Cube {};
-
-/// \brief A cylinder with a radius of 1.
-///        The center is at the origin and the rotational axis is along Y.
-struct Cylinder {
-    float    half_length = 1.f;
-    unsigned rings       = 35u;
-    unsigned segments    = 35u;
-};
-
-/// \brief A 2x2 plane in the XY plane centered at the origin.
-struct Plane {};
-
-/// \brief A unit sphere (radius 1) centered at the origin.
-struct Sphere {
-    unsigned rings    = 35u;
-    unsigned segments = 35u;
-};
-
-namespace detail {
-using PrimitiveBase = mapbox::util::variant<Cone, Cube, Cylinder, Plane, Sphere>;
-}
-
-struct Primitive : detail::PrimitiveBase {
-    using detail::PrimitiveBase::variant;
-};
-
-} // namespace gvs
+} // namespace gvs::display

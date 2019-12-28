@@ -93,8 +93,8 @@ private:
     auto reset_cone() -> void;
     auto reset_cube() -> void;
     auto reset_cylinder() -> void;
-    auto reset_sphere() -> void;
     auto reset_plane() -> void;
+    auto reset_sphere() -> void;
 };
 
 } // namespace example
