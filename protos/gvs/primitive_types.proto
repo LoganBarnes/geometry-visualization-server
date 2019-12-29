@@ -25,30 +25,26 @@ syntax = "proto3";
 package gvs.net;
 
 message Cone {
-    float height = 1;
-    float base_diameter = 2;
+    float half_length = 1;
+    uint32 rings = 2;
+    uint32 segments = 3;
 }
 
 message Cube {
-    float width = 1;
 }
 
 message Cylinder {
-    float height = 1;
-    float diameter = 2;
+    float half_length = 1;
+    uint32 rings = 2;
+    uint32 segments = 3;
+}
+
+message Plane {
 }
 
 message Sphere {
-    float diameter = 1;
-}
-
-message Torus {
-    float major_diameter = 1; // Diameter of ring through center of doughnut
-    float minor_diameter = 2; // Thickness of the doughnut
-}
-
-message Quad {
-    float width = 1;
+    uint32 rings = 1;
+    uint32 segments = 2;
 }
 
 message Primitive {
@@ -56,11 +52,7 @@ message Primitive {
         Cone cone = 1;
         Cube cube = 2;
         Cylinder cylinder = 3;
-        Sphere sphere = 4;
-        Torus torus = 5;
-        Quad quad = 6;
+        Plane plane = 4;
+        Sphere sphere = 5;
     }
-
-    int32 u_tessellation = 7;
-    int32 v_tessellation = 8;
 }

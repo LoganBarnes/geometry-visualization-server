@@ -51,8 +51,12 @@ auto to_proto(AttributeVector<N> const& value) -> net::FloatList;
 auto to_proto(std::vector<unsigned> const& value) -> net::UIntList;
 auto to_proto(std::vector<SceneID> const& value) -> net::SceneIdList;
 
+auto to_proto(Primitive const& value) -> net::Primitive;
 auto to_proto(GeometryInfoSetter const& value) -> net::GeometryInfo3d;
 auto to_proto(DisplayInfoSetter const& value) -> net::DisplayInfo;
+auto to_proto(Geometry const& value) -> net::Geometry;
+
+auto to_proto(SceneItemInfoSetter const& value) -> net::SceneItemInfo;
 
 /*
  * From proto
@@ -75,7 +79,11 @@ auto from_proto(net::FloatList const& proto) -> AttributeVector<N>;
 auto from_proto(net::UIntList const& proto) -> std::vector<unsigned>;
 auto from_proto(net::SceneIdList const& proto) -> std::vector<SceneID>;
 
+auto from_proto(net::Primitive const& proto) -> Primitive;
 auto from_proto(net::GeometryInfo3d const& proto) -> GeometryInfoSetter;
 auto from_proto(net::DisplayInfo const& proto) -> DisplayInfoSetter;
+auto from_proto(net::Geometry const& proto) -> Geometry;
+
+auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfoSetter;
 
 } // namespace gvs

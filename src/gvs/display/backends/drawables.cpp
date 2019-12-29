@@ -23,7 +23,7 @@
 #include "drawables.hpp"
 
 // project
-#include "to_magnum.hpp"
+#include "gvs/display/magnum_conversions.hpp"
 
 // external
 #include <Magnum/GL/Mesh.h>

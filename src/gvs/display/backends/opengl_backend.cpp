@@ -23,9 +23,9 @@
 #include "opengl_backend.hpp"
 
 // project
+#include "gvs/display/magnum_conversions.hpp"
 #include "gvs/util/container_util.hpp"
 #include "gvs/util/result.hpp"
-#include "to_magnum.hpp"
 
 // external
 #include <Corrade/Containers/ArrayViewStl.h>

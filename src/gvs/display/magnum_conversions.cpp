@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "to_magnum.hpp"
+#include "magnum_conversions.hpp"
 
 // external
 #include <Magnum/Math/Color.h>

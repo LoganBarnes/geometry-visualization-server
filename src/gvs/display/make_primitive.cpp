@@ -23,7 +23,7 @@
 #include "make_primitive.hpp"
 
 // project
-#include "backends/to_magnum.hpp"
+#include "magnum_conversions.hpp"
 
 // external
 #include <Magnum/Math/Vector3.h>

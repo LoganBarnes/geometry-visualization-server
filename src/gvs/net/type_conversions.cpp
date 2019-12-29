@@ -158,22 +158,49 @@ auto to_proto(std::vector<SceneID> const& value) -> net::SceneIdList {
     return proto;
 }
 
-//auto to_proto(GeometryInfoSetter const& value) -> net::GeometryInfo3d {
-//    net::GeometryInfo3d proto = {};
-//    if (value.positions) {
-//        *proto.mutable_positions() = to_proto(*value.positions);
-//    }
-//    if (value.normals) {
-//        *proto.mutable_normals() = to_proto(*value.normals);
-//    }
-//    if (value.texture_coordinates) {
-//        *proto.mutable_texture_coordinates() = to_proto(*value.texture_coordinates);
-//    }
-//    if (value.vertex_colors) {
-//        *proto.mutable_vertex_colors() = to_proto(*value.vertex_colors);
-//    }
-//    return proto;
-//}
+auto to_proto(Primitive const& value) -> net::Primitive {
+    struct PrimitiveVisitor {
+        net::Primitive* primitive;
+
+        auto operator()(Cone const& cone) const -> void {
+            primitive->mutable_cone()->set_half_length(cone.half_length);
+            primitive->mutable_cone()->set_rings(cone.rings);
+            primitive->mutable_cone()->set_segments(cone.segments);
+        }
+        auto operator()(Cube const&) const -> void { primitive->mutable_cube(); }
+        auto operator()(Cylinder const& cylinder) const -> void {
+            primitive->mutable_cylinder()->set_half_length(cylinder.half_length);
+            primitive->mutable_cylinder()->set_rings(cylinder.rings);
+            primitive->mutable_cylinder()->set_segments(cylinder.segments);
+        }
+        auto operator()(Plane const&) const -> void { primitive->mutable_plane(); }
+        auto operator()(Sphere const& sphere) const -> void {
+            primitive->mutable_sphere()->set_rings(sphere.rings);
+            primitive->mutable_sphere()->set_segments(sphere.segments);
+        }
+    };
+
+    net::Primitive proto = {};
+    mapbox::util::apply_visitor(PrimitiveVisitor{&proto}, value);
+    return proto;
+}
+
+auto to_proto(GeometryInfoSetter const& value) -> net::GeometryInfo3d {
+    net::GeometryInfo3d proto = {};
+    if (value.positions) {
+        *proto.mutable_positions() = to_proto(*value.positions);
+    }
+    if (value.normals) {
+        *proto.mutable_normals() = to_proto(*value.normals);
+    }
+    if (value.texture_coordinates) {
+        *proto.mutable_texture_coordinates() = to_proto(*value.texture_coordinates);
+    }
+    if (value.vertex_colors) {
+        *proto.mutable_vertex_colors() = to_proto(*value.vertex_colors);
+    }
+    return proto;
+}
 
 auto to_proto(DisplayInfoSetter const& value) -> net::DisplayInfo {
     net::DisplayInfo proto = {};
@@ -203,6 +230,41 @@ auto to_proto(DisplayInfoSetter const& value) -> net::DisplayInfo {
     }
     if (value.wireframe_only) {
         *proto.mutable_wireframe_only() = to_proto(*value.wireframe_only);
+    }
+    return proto;
+}
+
+auto to_proto(Geometry const& value) -> net::Geometry {
+
+    struct GeometryVisitor {
+        auto operator()(GeometryInfoSetter const& info) -> net::Geometry {
+            net::Geometry proto   = {};
+            *proto.mutable_info() = to_proto(info);
+            return proto;
+        }
+        auto operator()(Primitive const& primitive) -> net::Geometry {
+            net::Geometry proto        = {};
+            *proto.mutable_primitive() = to_proto(primitive);
+            return proto;
+        }
+    };
+
+    return mapbox::util::apply_visitor(GeometryVisitor{}, value);
+}
+
+auto to_proto(SceneItemInfoSetter const& value) -> net::SceneItemInfo {
+    net::SceneItemInfo proto = {};
+    if (value.geometry) {
+        *proto.mutable_geometry() = to_proto(*value.geometry);
+    }
+    if (value.display_info) {
+        *proto.mutable_display_info() = to_proto(*value.display_info);
+    }
+    if (value.parent) {
+        *proto.mutable_parent() = to_proto(*value.parent);
+    }
+    if (value.children) {
+        *proto.mutable_children() = to_proto(*value.children);
     }
     return proto;
 }
@@ -337,6 +399,40 @@ auto from_proto(net::SceneIdList const& proto) -> std::vector<SceneID> {
     return scene_ids;
 }
 
+auto from_proto(net::Primitive const& proto) -> Primitive {
+    switch (proto.type_case()) {
+    case net::Primitive::kCone: {
+        Cone cone        = {};
+        cone.half_length = proto.cone().half_length();
+        cone.rings       = proto.cone().rings();
+        cone.segments    = proto.cone().segments();
+        return cone;
+    }
+    case net::Primitive::kCube: {
+        return Cube{};
+    }
+    case net::Primitive::kCylinder: {
+        Cylinder cylinder    = {};
+        cylinder.half_length = proto.cylinder().half_length();
+        cylinder.rings       = proto.cylinder().rings();
+        cylinder.segments    = proto.cylinder().segments();
+        return cylinder;
+    }
+    case net::Primitive::kPlane: {
+        return Plane{};
+    }
+    case net::Primitive::kSphere: {
+        Sphere sphere   = {};
+        sphere.rings    = proto.sphere().rings();
+        sphere.segments = proto.sphere().segments();
+        return sphere;
+    }
+    case net::Primitive::TYPE_NOT_SET:
+        break;
+    }
+    throw std::runtime_error("net::Primitive type not set properly");
+}
+
 auto from_proto(net::GeometryInfo3d const& proto) -> GeometryInfoSetter {
     GeometryInfoSetter value = {};
 
@@ -384,6 +480,37 @@ auto from_proto(net::DisplayInfo const& proto) -> DisplayInfoSetter {
     }
     if (proto.has_wireframe_only()) {
         value.wireframe_only = std::make_unique<bool>(from_proto(proto.wireframe_only()));
+    }
+    return value;
+}
+
+auto from_proto(net::Geometry const& proto) -> Geometry {
+    switch (proto.type_case()) {
+    case net::Geometry::kInfo:
+        return from_proto(proto.info());
+
+    case net::Geometry::kPrimitive:
+        return from_proto(proto.primitive());
+
+    case net::Geometry::TYPE_NOT_SET:
+        break;
+    }
+    throw std::runtime_error("net::Geometry type not set properly");
+}
+
+auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfoSetter {
+    SceneItemInfoSetter value = {};
+    if (proto.has_geometry()) {
+        value.geometry = std::make_unique<Geometry>(from_proto(proto.geometry()));
+    }
+    if (proto.has_display_info()) {
+        value.display_info = std::make_unique<DisplayInfoSetter>(from_proto(proto.display_info()));
+    }
+    if (proto.has_parent()) {
+        value.parent = std::make_unique<SceneID>(from_proto(proto.parent()));
+    }
+    if (proto.has_children()) {
+        value.children = std::make_unique<std::vector<SceneID>>(from_proto(proto.children()));
     }
     return value;
 }

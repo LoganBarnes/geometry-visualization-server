@@ -23,7 +23,7 @@
 #include "main_window.hpp"
 
 // project
-#include "gvs/display/backends/to_magnum.hpp"
+#include "gvs/display/magnum_conversions.hpp"
 #include "gvs/gui/scene_gui.hpp"
 #include "gvs/scene/log_params.hpp"
 
