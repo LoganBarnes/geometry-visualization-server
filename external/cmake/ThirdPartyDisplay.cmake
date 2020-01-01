@@ -73,6 +73,12 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 FetchContent_GetProperties(corrade_dl)
 if (NOT corrade_dl_POPULATED)
     FetchContent_Populate(corrade_dl)
+
+    if (MSVC_VERSION GREATER_EQUAL 1900)
+        set(CORRADE_MSVC2019_COMPATIBILITY ON CACHE BOOL "" FORCE)
+        set(MSVC2019_COMPATIBILITY ON CACHE BOOL "" FORCE)
+    endif ()
+
     add_subdirectory(${corrade_dl_SOURCE_DIR} ${corrade_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
 

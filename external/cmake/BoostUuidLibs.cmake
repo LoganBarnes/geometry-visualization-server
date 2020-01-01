@@ -21,8 +21,14 @@
 # SOFTWARE.
 ##########################################################################################
 function(add_boost_library name)
-    set(LIB_DL boost_${name}_dl)
-    set(LIB boost_${name})
+    if (${ARGC} GREATER 1)
+        set(alias ${ARG1})
+    else ()
+        set(alias ${name})
+    endif ()
+
+    set(LIB_DL boost_${alias}_dl)
+    set(LIB boost_${alias})
 
     FetchContent_Declare(
             ${LIB_DL}
@@ -55,7 +61,7 @@ add_boost_library(detail)
 add_boost_library(concept_check)
 add_boost_library(utility)
 add_boost_library(throw_exception)
-add_boost_library(numeric_conversion)
+add_boost_library(numeric_conversion num_conv)
 add_boost_library(integer)
 add_boost_library(array)
 add_boost_library(container)
@@ -84,7 +90,7 @@ target_link_libraries(boost_uuid INTERFACE
         boost_concept_check
         boost_utility
         boost_throw_exception
-        boost_numeric_conversion
+        boost_num_conv
         boost_integer
         boost_array
         boost_container
