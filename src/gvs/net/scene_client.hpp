@@ -56,8 +56,11 @@ public:
      * End `Scene` functions
      */
 
+private:
     std::shared_ptr<grpc::Channel>    channel_;
     std::unique_ptr<net::Scene::Stub> stub_;
+
+    mutable gvs::SceneItems most_recent_item_list_;
 };
 
 } // namespace net
