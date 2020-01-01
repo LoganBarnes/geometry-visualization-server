@@ -31,10 +31,7 @@ function(gvs_add_library target cxx_standard)
         set(test_target test_${target})
         add_executable(${test_target} ${ARGN})
 
-        target_link_libraries(${test_target}
-                PRIVATE doctest_with_main
-                PRIVATE ${target}
-                )
+        target_link_libraries(${test_target} PRIVATE doctest_with_main)
         target_compile_options(${test_target} PRIVATE ${GVS_COMPILE_FLAGS})
 
         add_test(NAME ${target}_tests COMMAND ${test_target})
@@ -64,4 +61,22 @@ function(gvs_add_library target cxx_standard)
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     )
+endfunction()
+
+function(gvs_link_libraries target)
+    target_link_libraries(${target} ${ARGN})
+
+    if (GVS_BUILD_TESTS) # BUILDING WITH TESTS
+        set(test_target test_${target})
+        target_link_libraries(${test_target} ${ARGN})
+    endif ()
+endfunction()
+
+function(gvs_include_directories target)
+    target_include_directories(${target} ${ARGN})
+
+    if (GVS_BUILD_TESTS) # BUILDING WITH TESTS
+        set(test_target test_${target})
+        target_include_directories(${test_target} ${ARGN})
+    endif ()
 endfunction()

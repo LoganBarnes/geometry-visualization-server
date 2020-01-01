@@ -20,17 +20,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ##########################################################################################
-include(FetchContent)
-
-# All GUI thirdparty libraries put into a single target
-add_library(gvs_gui_thirdparty INTERFACE)
-
-### GLFW ###
 FetchContent_Declare(glfw_dl
         GIT_REPOSITORY https://github.com/glfw/glfw.git
         GIT_TAG 3.3
         )
+FetchContent_Declare(imgui_dl
+        GIT_REPOSITORY https://github.com/ocornut/imgui.git
+        GIT_TAG v1.71
+        )
+FetchContent_Declare(corrade_dl
+        GIT_REPOSITORY https://github.com/mosra/corrade.git
+        GIT_TAG v2019.10
+        )
+FetchContent_Declare(magnum_dl
+        GIT_REPOSITORY https://github.com/mosra/magnum.git
+        GIT_TAG v2019.10
+        )
+FetchContent_Declare(magnum_integration_dl
+        GIT_REPOSITORY https://github.com/mosra/magnum-integration.git
+        GIT_TAG v2019.01
+        )
 
+if (MSVC)
+    set(GVS_TEST_GL_CONTEXT WglContext)
+    set(GVS_WINDOWLESS_APP WindowlessWglApplication)
+else ()
+    set(GVS_TEST_GL_CONTEXT EglContext)
+    set(GVS_WINDOWLESS_APP WindowlessEglApplication)
+endif ()
+
+### GLFW ###
 FetchContent_GetProperties(glfw_dl)
 if (NOT glfw_dl_POPULATED)
     FetchContent_Populate(glfw_dl)
@@ -43,11 +62,6 @@ if (NOT glfw_dl_POPULATED)
 endif ()
 
 ### ImGui ###
-FetchContent_Declare(imgui_dl
-        GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG v1.71
-        )
-
 FetchContent_GetProperties(imgui_dl)
 if (NOT imgui_dl_POPULATED)
     FetchContent_Populate(imgui_dl)
@@ -56,11 +70,6 @@ endif ()
 ### Corrade ###
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-FetchContent_Declare(corrade_dl
-        GIT_REPOSITORY https://github.com/mosra/corrade.git
-        GIT_TAG v2019.10
-        )
-
 FetchContent_GetProperties(corrade_dl)
 if (NOT corrade_dl_POPULATED)
     FetchContent_Populate(corrade_dl)
@@ -68,29 +77,25 @@ if (NOT corrade_dl_POPULATED)
 endif ()
 
 ### Magnum ###
-FetchContent_Declare(magnum_dl
-        GIT_REPOSITORY https://github.com/mosra/magnum.git
-        GIT_TAG v2019.10
-        )
-
 FetchContent_GetProperties(magnum_dl)
 if (NOT magnum_dl_POPULATED)
     FetchContent_Populate(magnum_dl)
 
     set(BUILD_DEPRECATED OFF CACHE BOOL "" FORCE)
-    set(WITH_EGLCONTEXT ON CACHE BOOL "" FORCE)
     set(WITH_GLFWAPPLICATION ON CACHE BOOL "" FORCE)
-    set(WITH_WINDOWLESSEGLAPPLICATION ON CACHE BOOL "" FORCE)
+
+    if (MSVC)
+        set(WITH_WGLCONTEXT ON CACHE BOOL "" FORCE)
+        set(WITH_WINDOWLESSWGLAPPLICATION ON CACHE BOOL "" FORCE)
+    else ()
+        set(WITH_EGLCONTEXT ON CACHE BOOL "" FORCE)
+        set(WITH_WINDOWLESSEGLAPPLICATION ON CACHE BOOL "" FORCE)
+    endif ()
 
     add_subdirectory(${magnum_dl_SOURCE_DIR} ${magnum_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
 
 ### Magnum Integration ###
-FetchContent_Declare(magnum_integration_dl
-        GIT_REPOSITORY https://github.com/mosra/magnum-integration.git
-        GIT_TAG v2019.01
-        )
-
 FetchContent_GetProperties(magnum_integration_dl)
 if (NOT magnum_integration_dl_POPULATED)
     FetchContent_Populate(magnum_integration_dl)
@@ -104,7 +109,15 @@ if (NOT magnum_integration_dl_POPULATED)
     list(APPEND CMAKE_MODULE_PATH ${magnum_integration_dl_SOURCE_DIR}/modules)
 endif ()
 
-find_package(Magnum REQUIRED EglContext GL GlfwApplication WindowlessEglApplication)
+# All GUI thirdparty libraries put into a single target
+add_library(gvs_gui_thirdparty INTERFACE)
+
+find_package(Magnum REQUIRED
+        GL
+        GlfwApplication
+        ${GVS_TEST_GL_CONTEXT}
+        ${GVS_WINDOWLESS_APP}
+        )
 find_package(MagnumIntegration REQUIRED ImGui)
 
 # Set the include directory as system headers to avoid compiler warnings
@@ -118,14 +131,14 @@ target_include_directories(gvs_gui_thirdparty
 target_link_libraries(gvs_gui_thirdparty INTERFACE
         Corrade::Utility
         Magnum::Application
-        Magnum::EglContext
         Magnum::Magnum
         Magnum::MeshTools
         Magnum::Primitives
         Magnum::SceneGraph
         Magnum::Shaders
         Magnum::Trade
-        Magnum::WindowlessEglApplication
         MagnumIntegration::ImGui
+        Magnum::${GVS_TEST_GL_CONTEXT}
+        Magnum::${GVS_WINDOWLESS_APP}
         )
 

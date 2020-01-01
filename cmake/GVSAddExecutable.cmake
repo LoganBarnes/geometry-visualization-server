@@ -38,10 +38,7 @@ function(gvs_add_executable target cxx_standard main_file)
         set(test_target test_${target})
         add_executable(${test_target} ${ARGN})
 
-        target_link_libraries(${test_target}
-                PRIVATE doctest_with_main
-                PRIVATE ${target}
-                )
+        target_link_libraries(${test_target} PRIVATE doctest_with_main)
         target_compile_options(${test_target} PRIVATE ${GVS_COMPILE_FLAGS})
 
         add_test(NAME ${target}_tests COMMAND ${test_target})

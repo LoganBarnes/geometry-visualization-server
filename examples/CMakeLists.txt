@@ -61,6 +61,15 @@ function(add_example _directory _cpp17_enabled)
 
 endfunction()
 
-add_example(cpp11_client FALSE)
-add_example(primitives TRUE)
-add_example(scene TRUE)
+if (GVS_ENABLE_NETWORKING)
+    add_example(cpp11_client FALSE)
+else ()
+    message("(GVS_ENABLE_NETWORKING=OFF) These examples will not be built: cpp11_client_example")
+endif ()
+
+if (GVS_ENABLE_DISPLAY)
+    add_example(primitives TRUE)
+    add_example(scene TRUE)
+else ()
+    message("(GVS_ENABLE_DISPLAY=OFF) These examples will not be built: primitives_example scene_example")
+endif ()

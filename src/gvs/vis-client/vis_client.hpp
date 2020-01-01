@@ -29,10 +29,10 @@
 #include "gvs/vis-client/app/imgui_magnum_application.hpp"
 
 // generated
-#include <scene.grpc.pb.h>
+//#include <scene.grpc.pb.h>
 
 // external
-#include <grpcw/forward_declarations.hpp>
+//#include <grpcw/forward_declarations.hpp>
 #include <gvs/gui/error_alert.hpp>
 
 namespace gvs::vis {
@@ -61,8 +61,8 @@ private:
     // Networking
     std::string server_address_input_ = "address:port";
 
-    using Service = net::Scene;
-    std::unique_ptr<grpcw::client::GrpcClient<Service>> grpc_client_;
+    //    using Service = net::Scene;
+    //    std::unique_ptr<grpcw::client::GrpcClient<Service>> grpc_client_;
 
     // Debugging
     bool run_as_fast_as_possible_ = false;

@@ -6,4 +6,5 @@ cmake --version
 
 # install deps
 apt update
-apt install -y xorg-dev libgl1-mesa-dev uuid-dev lcov
+#             | For runing GVS         | For GVS tests   | For coverage reports
+apt install -y xorg-dev libgl1-mesa-dev libgles2-mesa-dev lcov

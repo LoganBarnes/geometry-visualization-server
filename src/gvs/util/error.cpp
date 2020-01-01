@@ -41,8 +41,8 @@ auto get_relative_path_string(const std::string& path) -> std::string {
     auto abs_path_start = path.find(paths::project_root());
 
     // Remove the project path if it exists in `path`
-    if (abs_path_start != std::string::npos) {
-        return path.substr(abs_path_start + paths::project_root().size());
+    if (abs_path_start == 0) {
+        return path.substr(paths::project_root().size());
     }
 
     return path;
@@ -110,17 +110,29 @@ auto Error::operator!=(const Error& other) const -> bool {
 TEST_CASE("[util] check error helpers") {
     CHECK(MAKE_ERROR("Error message").error_message() == "Error message");
     CHECK(MAKE_ERROR("blarg") == MAKE_ERROR("blarg"));
-    auto error            = MAKE_ERROR("Error message");
-    auto expected_message = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
-    CHECK(error.debug_error_message() == expected_message);
+
+    INFO("project_root():" + gvs::paths::project_root());
+    INFO("__FILE__:      " + std::string(__FILE__));
+
+    auto error             = MAKE_ERROR("Error message");
+    auto expected_message1 = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
+    auto expected_message2 = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 2) + "] Error message";
+
+    CHECK((error.debug_error_message() == expected_message1 || error.debug_error_message() == expected_message2));
     CHECK(error.severity() == gvs::util::Error::Severity::Error);
 }
 
 TEST_CASE("[util] check warning helpers") {
     CHECK(MAKE_WARNING("Error message").error_message() == "Error message");
     CHECK(MAKE_WARNING("blarg") == MAKE_WARNING("blarg"));
-    auto warning          = MAKE_WARNING("Error message");
-    auto expected_message = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
-    CHECK(warning.debug_error_message() == expected_message);
+
+    INFO("project_root():" + gvs::paths::project_root());
+    INFO("__FILE__:      " + std::string(__FILE__));
+
+    auto warning           = MAKE_WARNING("Error message");
+    auto expected_message1 = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
+    auto expected_message2 = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 2) + "] Error message";
+
+    CHECK((warning.debug_error_message() == expected_message1 || warning.debug_error_message() == expected_message2));
     CHECK(warning.severity() == gvs::util::Error::Severity::Warning);
 }

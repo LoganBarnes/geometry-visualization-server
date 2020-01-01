@@ -20,31 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ##########################################################################################
-include(FetchContent)
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
-
-### gRPC Wrapper Library ###
-FetchContent_Declare(
-        grpcw_dl
-        GIT_REPOSITORY https://github.com/LoganBarnes/grpc-wrapper.git
-        GIT_TAG v1.0.0
-)
-
-FetchContent_GetProperties(grpcw_dl)
-if (NOT grpcw_dl_POPULATED)
-    FetchContent_Populate(grpcw_dl)
-
-    add_subdirectory(${grpcw_dl_SOURCE_DIR} ${grpcw_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif ()
-
-### Expected ###
 FetchContent_Declare(
         expected_dl
         GIT_REPOSITORY https://github.com/TartanLlama/expected.git
         GIT_TAG v1.0.0
 )
+FetchContent_Declare(
+        mapbox_dl
+        GIT_REPOSITORY https://github.com/mapbox/variant.git
+        GIT_TAG v1.1.6
+)
 
+### Boost UUID ###
+include(cmake/BoostUuidLibs.cmake)
+
+### Expected ###
 FetchContent_GetProperties(expected_dl)
 if (NOT expected_dl_POPULATED)
     FetchContent_Populate(expected_dl)
@@ -56,28 +46,7 @@ if (NOT expected_dl_POPULATED)
     add_subdirectory(${expected_dl_SOURCE_DIR} ${expected_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif (NOT expected_dl_POPULATED)
 
-### boost UUID ###
-FetchContent_Declare(
-        boost_uuid_dl
-        GIT_REPOSITORY https://github.com/boostorg/uuid.git
-        GIT_TAG boost-1.72.0
-)
-
-FetchContent_GetProperties(boost_uuid_dl)
-if (NOT boost_uuid_dl_POPULATED)
-    FetchContent_Populate(boost_uuid_dl)
-
-    add_library(boostuuid INTERFACE)
-    target_include_directories(boostuuid SYSTEM INTERFACE "$<BUILD_INTERFACE:${boost_uuid_dl_SOURCE_DIR}/include>")
-endif (NOT boost_uuid_dl_POPULATED)
-
 ### mapbox variant ###
-FetchContent_Declare(
-        mapbox_dl
-        GIT_REPOSITORY https://github.com/mapbox/variant.git
-        GIT_TAG v1.1.6
-)
-
 FetchContent_GetProperties(mapbox_dl)
 if (NOT mapbox_dl_POPULATED)
     FetchContent_Populate(mapbox_dl)

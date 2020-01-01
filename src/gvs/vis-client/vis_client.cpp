@@ -33,7 +33,7 @@
 
 // external
 #include <Magnum/GL/Context.h>
-#include <grpcw/client/grpc_client.hpp>
+//#include <grpcw/client/grpc_client.hpp>
 #include <imgui.h>
 
 // standard
@@ -45,33 +45,33 @@ namespace gvs::vis {
 
 namespace {
 
-std::string to_pretty_string(const grpcw::client::GrpcClientState& state) {
-    switch (state) {
-    case grpcw::client::GrpcClientState::not_connected:
-        return "Not Connected";
-
-    case grpcw::client::GrpcClientState::connected:
-        return "Connected";
-
-    case grpcw::client::GrpcClientState::attempting_to_connect:
-        return "Connecting...";
-    }
-    return "Unknown Enum value";
-}
-
-ImVec4 to_pretty_color(const grpcw::client::GrpcClientState& state) {
-    switch (state) {
-    case grpcw::client::GrpcClientState::not_connected:
-        return {1.f, 0.f, 0.f, 1.f}; // Red
-
-    case grpcw::client::GrpcClientState::connected:
-        return {0.f, 1.f, 0.f, 1.f}; // Green
-
-    case grpcw::client::GrpcClientState::attempting_to_connect:
-        return {1.f, 1.f, 0.f, 1.f}; // Yellow
-    }
-    return {1.f, 1.f, 1.f, 1.f}; // White
-}
+//std::string to_pretty_string(const grpcw::client::GrpcClientState& state) {
+//    switch (state) {
+//    case grpcw::client::GrpcClientState::not_connected:
+//        return "Not Connected";
+//
+//    case grpcw::client::GrpcClientState::connected:
+//        return "Connected";
+//
+//    case grpcw::client::GrpcClientState::attempting_to_connect:
+//        return "Connecting...";
+//    }
+//    return "Unknown Enum value";
+//}
+//
+//ImVec4 to_pretty_color(const grpcw::client::GrpcClientState& state) {
+//    switch (state) {
+//    case grpcw::client::GrpcClientState::not_connected:
+//        return {1.f, 0.f, 0.f, 1.f}; // Red
+//
+//    case grpcw::client::GrpcClientState::connected:
+//        return {0.f, 1.f, 0.f, 1.f}; // Green
+//
+//    case grpcw::client::GrpcClientState::attempting_to_connect:
+//        return {1.f, 1.f, 0.f, 1.f}; // Yellow
+//    }
+//    return {1.f, 1.f, 1.f, 1.f}; // White
+//}
 
 } // namespace
 
@@ -84,12 +84,13 @@ VisClient::VisClient(std::string initial_host_address, const Arguments& argument
       gl_version_str_(GL::Context::current().versionString()),
       gl_renderer_str_(GL::Context::current().rendererString()),
       error_alert_("Vis Client Errors"),
-      server_address_input_(std::move(initial_host_address)),
-      grpc_client_(std::make_unique<grpcw::client::GrpcClient<Service>>()) {
+      server_address_input_(std::move(initial_host_address)) /*,
+      grpc_client_(std::make_unique<grpcw::client::GrpcClient<Service>>())*/
+{
 
     scene_ = std::make_unique<display::LocalScene>();
 
-    grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
+    //    grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
 }
 
 vis::VisClient::~VisClient() = default;
@@ -129,43 +130,43 @@ void vis::VisClient::configure_gui() {
 
     add_three_line_separator();
 
-    ImGui::Text("Host Address: ");
-    ImGui::SameLine();
-    ImGui::TextColored({7.f, 0.3f, 0.05f, 1.f}, "%s\t", grpc_client_->get_server_address().c_str());
-
-    ImGui::Text("Server State: ");
-    ImGui::SameLine();
-
-    auto        state       = grpc_client_->get_state();
-    std::string state_text  = to_pretty_string(state);
-    ImVec4      state_color = to_pretty_color(state);
-
-    ImGui::TextColored(state_color, "%s\t", state_text.c_str());
-
-    if (ImGui::TreeNode("Server Settings")) {
-
-        bool value_changed = gui::configure_gui("Change Server", &server_address_input_);
-        {
-            gui::Disable::Guard disable(server_address_input_ == grpc_client_->get_server_address()
-                                        and state != grpcw::client::GrpcClientState::connected);
-            value_changed |= (ImGui::Button("Connect"));
-        }
-
-        if (value_changed) {
-            grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
-        }
-
-        if (state == grpcw::client::GrpcClientState::attempting_to_connect) {
-            ImGui::SameLine();
-            if (ImGui::Button("Stop Connecting")) {
-                grpc_client_->kill_streams_and_channel();
-            }
-        }
-
-        ImGui::TreePop();
-    }
-
-    add_three_line_separator();
+    //    ImGui::Text("Host Address: ");
+    //    ImGui::SameLine();
+    //    ImGui::TextColored({7.f, 0.3f, 0.05f, 1.f}, "%s\t", grpc_client_->get_server_address().c_str());
+    //
+    //    ImGui::Text("Server State: ");
+    //    ImGui::SameLine();
+    //
+    //    auto        state       = grpc_client_->get_state();
+    //    std::string state_text  = to_pretty_string(state);
+    //    ImVec4      state_color = to_pretty_color(state);
+    //
+    //    ImGui::TextColored(state_color, "%s\t", state_text.c_str());
+    //
+    //    if (ImGui::TreeNode("Server Settings")) {
+    //
+    //        bool value_changed = gui::configure_gui("Change Server", &server_address_input_);
+    //        {
+    //            gui::Disable::Guard disable(server_address_input_ == grpc_client_->get_server_address()
+    //                                        and state != grpcw::client::GrpcClientState::connected);
+    //            value_changed |= (ImGui::Button("Connect"));
+    //        }
+    //
+    //        if (value_changed) {
+    //            grpc_client_->change_server(server_address_input_, [this](const auto&) { this->on_state_change(); });
+    //        }
+    //
+    //        if (state == grpcw::client::GrpcClientState::attempting_to_connect) {
+    //            ImGui::SameLine();
+    //            if (ImGui::Button("Stop Connecting")) {
+    //                grpc_client_->kill_streams_and_channel();
+    //            }
+    //        }
+    //
+    //        ImGui::TreePop();
+    //    }
+    //
+    //    add_three_line_separator();
 
     ImGui::Checkbox("Run app as fast as possible", &run_as_fast_as_possible_);
 

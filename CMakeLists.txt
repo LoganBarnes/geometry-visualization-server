@@ -23,10 +23,16 @@
 cmake_minimum_required(VERSION 3.12)
 project(GeometryVisualizationServer LANGUAGES CXX)
 
-option(GVS_NO_DISPLAY "Only build the gvs_scene_client library and dependencies" OFF)
+option(GVS_ENABLE_DISPLAY "Build the GUI targets that display scenes" ON)
+option(GVS_ENABLE_NETWORKING "Build client and server scene clients" ON)
 option(GVS_BUILD_TESTS "Build unit tests" OFF)
 option(GVS_BUILD_EXAMPLES "Build example programs" OFF)
 option(GVS_USE_DEV_FLAGS "Compile with all the flags" OFF)
+
+################################
+### Third Party Dependencies ###
+################################
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external)
 
 #############################
 ### Project Configuration ###
@@ -65,10 +71,6 @@ endif ()
 
 include(cmake/CCache.cmake)
 include(cmake/ClangTidy.cmake)
-include(cmake/ThirdParty.cmake)
-if (NOT GVS_NO_DISPLAY)
-    include(cmake/ThirdPartyGui.cmake)
-endif ()
 include(cmake/GVSAddLibrary.cmake)
 include(cmake/GVSAddExecutable.cmake)
 
@@ -83,30 +85,9 @@ cmake_policy(SET CMP0009 NEW)
 set(AUTO_GENERATION_MESSAGE "***This file is auto generated. If you modify it the changes will be overwritten.***")
 configure_file(${CMAKE_CURRENT_LIST_DIR}/src/gvs_paths.hpp.in ${CMAKE_BINARY_DIR}/generated/gvs/gvs_paths.hpp)
 
-################################
-### gRPC/Protobuf Generation ###
-################################
-create_proto_library(gvs_protos
-        ${CMAKE_CURRENT_LIST_DIR}/protos/gvs
-        ${CMAKE_BINARY_DIR}/generated/protos
-        )
-target_compile_options(gvs_protos PRIVATE -w) # ignore warning on generated headers
-set_target_properties(
-        gvs_protos
-        PROPERTIES
-        # C++ flags
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-        CXX_EXTENSIONS OFF
-        POSITION_INDEPENDENT_CODE ON
-        # Binary locations
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-)
-
-####################
-### Scene Client ###
-####################
+#############
+### Scene ###
+#############
 file(GLOB_RECURSE GVS_SOURCE_FILES
         LIST_DIRECTORIES false
         CONFIGURE_DEPENDS
@@ -114,16 +95,54 @@ file(GLOB_RECURSE GVS_SOURCE_FILES
         )
 
 gvs_add_library(gvs_scene 11 ${GVS_SOURCE_FILES})
-target_link_libraries(gvs_scene
+gvs_link_libraries(gvs_scene
         PUBLIC
-        boostuuid
+        boost_uuid
         mapbox
         )
-target_include_directories(gvs_scene
+gvs_include_directories(gvs_scene
         PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"
         )
 
-if (NOT GVS_NO_DISPLAY)
+if (GVS_ENABLE_NETWORKING)
+    ################################
+    ### gRPC/Protobuf Generation ###
+    ################################
+    create_proto_library(gvs_protos
+            ${CMAKE_CURRENT_LIST_DIR}/protos/gvs
+            ${CMAKE_BINARY_DIR}/generated/protos
+            )
+    target_compile_options(gvs_protos PRIVATE -w) # ignore warning on generated headers
+    set_target_properties(
+            gvs_protos
+            PROPERTIES
+            # C++ flags
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED ON
+            CXX_EXTENSIONS OFF
+            POSITION_INDEPENDENT_CODE ON
+            # Binary locations
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    )
+
+    ####################
+    ### Scene Client ###
+    ####################
+    file(GLOB_RECURSE GVS_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/net/*
+            )
+
+    gvs_add_library(gvs_scene_client 11 ${GVS_SOURCE_FILES})
+    gvs_link_libraries(gvs_scene_client
+            PUBLIC gvs_protos
+            PUBLIC gvs_scene
+            )
+endif (GVS_ENABLE_NETWORKING)
+
+if (GVS_ENABLE_DISPLAY)
     ############
     ### Util ###
     ############
@@ -135,13 +154,12 @@ if (NOT GVS_NO_DISPLAY)
 
     gvs_add_library(gvs_util 17 ${GVS_SOURCE_FILES})
 
-    target_link_libraries(gvs_util
-            PUBLIC gvs_protos
-            PUBLIC boostuuid
+    gvs_link_libraries(gvs_util
+            PUBLIC boost_uuid
             PUBLIC expected
             PUBLIC doctest
             )
-    target_include_directories(gvs_util
+    gvs_include_directories(gvs_util
             PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
             PUBLIC ${CMAKE_BINARY_DIR}/generated
             )
@@ -157,18 +175,6 @@ if (NOT GVS_NO_DISPLAY)
     #############
     ### GVS 2 ###
     #############
-    ### Client ###
-    file(GLOB_RECURSE GVS_SOURCE_FILES
-            LIST_DIRECTORIES false
-            CONFIGURE_DEPENDS
-            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/net/*
-            )
-
-    gvs_add_library(gvs_scene_client 11 ${GVS_SOURCE_FILES})
-    target_link_libraries(gvs_scene_client
-            PUBLIC gvs_protos
-            PUBLIC gvs_scene
-            )
 
     ### Display ###
     file(GLOB_RECURSE GVS_SOURCE_FILES
@@ -180,12 +186,12 @@ if (NOT GVS_NO_DISPLAY)
             )
 
     gvs_add_library(gvs_scene_display 17 ${GVS_SOURCE_FILES})
-    target_link_libraries(gvs_scene_display
+    gvs_link_libraries(gvs_scene_display
             PUBLIC vis_client_resources
             PUBLIC gvs_util
             PUBLIC gvs_scene
             )
-endif (NOT GVS_NO_DISPLAY)
+endif (GVS_ENABLE_DISPLAY)
 
 if (GVS_BUILD_EXAMPLES)
     add_subdirectory(examples)
