@@ -193,6 +193,12 @@ if (GVS_ENABLE_DISPLAY)
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/display/*
             ${CMAKE_CURRENT_LIST_DIR}/src/gvs/vis-client/*
             )
+    file(GLOB_RECURSE GVS_NET_SOURCE_FILES
+            LIST_DIRECTORIES false
+            CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_LIST_DIR}/src/gvs/display/net/*
+            )
+    list(REMOVE_ITEM GVS_SOURCE_FILES ${GVS_NET_SOURCE_FILES})
 
     gvs_add_library(gvs_scene_display 17 ${GVS_SOURCE_FILES})
     gvs_link_libraries(gvs_scene_display
@@ -200,6 +206,17 @@ if (GVS_ENABLE_DISPLAY)
             PUBLIC gvs_util
             PUBLIC gvs_scene
             )
+
+    if (GVS_ENABLE_NETWORKING)
+        gvs_add_executable(gvs 17
+                ${CMAKE_CURRENT_LIST_DIR}/src/exec/run_gvs.cpp
+                ${GVS_NET_SOURCE_FILES}
+                )
+        gvs_link_libraries(gvs
+                PUBLIC gvs_scene_display
+                PUBLIC gvs_scene_client
+                )
+    endif ()
 endif (GVS_ENABLE_DISPLAY)
 
 if (GVS_BUILD_EXAMPLES)
