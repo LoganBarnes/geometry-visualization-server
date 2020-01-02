@@ -20,51 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "scene_core.hpp"
+#pragma once
 
 // project
-#include "scene_update_handler.hpp"
+#include "gvs/scene/forward_declarations.hpp"
+#include "gvs/scene/types.hpp"
+#include "gvs/util/result.hpp"
 
 namespace gvs {
-namespace scene {
+namespace display {
 
-SceneCore::SceneCore(SceneUpdateHandler& update_handler)
-    : update_handler_(update_handler), generator_(std::random_device{}()) {
-    clear();
-}
+class SceneCore {
+public:
+    explicit SceneCore(scene::SceneUpdateHandler& update_handler);
+    ~SceneCore();
 
-SceneCore::~SceneCore() = default;
+    /// \brief Adds the new item to the scene
+    auto add_item(SparseSceneItemInfo&& new_info) -> util::Result<SceneId>;
 
-auto SceneCore::add_item(SparseSceneItemInfo && /*info*/) -> util11::Result<SceneId> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
-}
+    /// \brief Updates the specified item by replacing existing fields with the new ones
+    auto update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util::Result<void>;
 
-auto SceneCore::update_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util11::Error {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
-}
+    /// \brief Updates the specified item by appending all new geometry
+    auto append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util::Result<void>;
 
-auto SceneCore::append_to_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util11::Error {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
-}
+    /// \brief Sets the seed used to generate SceneIds
+    auto set_seed(std::random_device::result_type seed) -> SceneCore&;
 
-auto SceneCore::set_seed(std::random_device::result_type seed) -> SceneCore& {
-    generator_ = std::mt19937(seed);
-    return *this;
-}
+    /// \brief Clears all items in the scene
+    auto clear() -> SceneCore&;
 
-auto SceneCore::clear() -> SceneCore& {
-    items_.clear();
-    {
-        SceneItemInfo root;
-        items_.emplace(nil_id(), std::move(root));
-    }
-    update_handler_.reset_items(items_);
-    return *this;
-}
+    /// \brief The map of all items in the scene
+    auto items() const -> SceneItems const&;
 
-auto SceneCore::items() const -> SceneItems const& {
-    return items_;
-}
+private:
+    scene::SceneUpdateHandler& update_handler_; ///< Handles scene updates in an implementation specific way
+    std::mt19937               generator_; ///< Used to generate SceneIDs
+    SceneItems                 items_; ///< The map of all the items in the scene
+};
 
-} // namespace scene
+} // namespace display
 } // namespace gvs
