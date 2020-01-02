@@ -20,7 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "gvs/scene/client_scene.hpp"
+#include "gvs/net/client_scene.hpp"
+#include <gvs/scene/nil_scene.hpp>
 
 // project
 #include "../common/test_scene.hpp"
@@ -32,9 +33,18 @@ int main(int argc, char* argv[]) {
         server_address = argv[1];
     }
 
-    gvs::scene::ClientScene scene(server_address, std::chrono::seconds(3));
+    std::unique_ptr<gvs::scene::Scene> scene;
 
-    example::build_test_scene(&scene);
+    {
+        auto client_scene = std::make_unique<gvs::net::ClientScene>(server_address);
+        if (client_scene->connected()) {
+            scene = std::move(client_scene);
+        } else {
+            scene = std::make_unique<gvs::scene::NilScene>();
+        }
+    }
+
+    example::build_test_scene(scene.get());
 
     return 0;
 }

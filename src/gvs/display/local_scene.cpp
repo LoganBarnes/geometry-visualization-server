@@ -46,13 +46,14 @@ auto LocalScene::resize(Magnum::Vector2i const& viewport) -> void {
     display_->resize(viewport);
 }
 
-auto LocalScene::set_seed(std::random_device::result_type seed) -> LocalScene& {
-    core_scene_->set_seed(seed);
+auto LocalScene::clear() -> LocalScene& {
+    core_scene_->clear();
     return *this;
 }
 
-auto LocalScene::clear() -> void {
-    core_scene_->clear();
+auto LocalScene::set_seed(std::random_device::result_type seed) -> LocalScene& {
+    core_scene_->set_seed(seed);
+    return *this;
 }
 
 auto LocalScene::actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId> {

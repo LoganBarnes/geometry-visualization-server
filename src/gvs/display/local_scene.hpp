@@ -23,8 +23,8 @@
 #pragma once
 
 // project
-#include "backends/backend_interface.hpp"
 #include "forward_declarations.hpp"
+#include "gvs/display/backends/display_backend.hpp"
 #include "gvs/scene/scene.hpp"
 
 namespace gvs::display {
@@ -46,8 +46,8 @@ public:
     /*
      * Start `Scene` functions
      */
+    auto clear() -> LocalScene& override;
     auto set_seed(std::random_device::result_type seed) -> LocalScene& override;
-    auto clear() -> void override;
 
 private:
     auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId> override;

@@ -20,46 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-syntax = "proto3";
+#pragma once
 
-package gvs.net;
+// project
+#include "gvs/scene/scene.hpp"
 
-import "google/protobuf/empty.proto";
-import "types.proto";
+namespace gvs {
+namespace scene {
 
-service Scene {
-    rpc AddItem (SparseSceneItemInfo) returns (SceneIdResult);
-    rpc UpdateItem (SparseSceneItemInfoWithId) returns (Result);
-    rpc AppendToItem (SparseSceneItemInfoWithId) returns (Result);
-    rpc GetItemInfo (SceneId) returns (SceneItemInfo);
+/// \brief An implementation of Scene that does nothing.
+///
+///        Calls to add_item will return a nil SceneId and no items will ever be added or updated.
+///
+///        This is useful as a placeholder class when you cannot connect to a server. Replacing a
+///        net::ClientScene instance will a NilScene instance will allow your code to remain the same
+///        but it will prevent errors from being thrown when the client cannot connect.
+class NilScene : public Scene {
+public:
+    explicit NilScene();
+    ~NilScene() override;
 
-    rpc Clear (google.protobuf.Empty) returns (google.protobuf.Empty);
-    rpc GetItems (google.protobuf.Empty) returns (stream SceneItemInfoWithId);
+    /*
+     * Start `Scene` functions
+     */
+    auto clear() -> NilScene& override;
+    auto set_seed(unsigned seed) -> NilScene& override;
 
-    rpc SetSeed (Seed) returns (google.protobuf.Empty);
-}
+private:
+    auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId> override;
+    auto actually_update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
+    auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
 
-message SceneIdResult {
-    oneof result {
-        SceneId value = 1;
-        Errors errors = 2;
-    }
-}
+    auto items() const -> SceneItems const& override;
+    /*
+     * End `Scene` functions
+     */
 
-message Success {
-}
+    SceneItems empty_item_list_;
+};
 
-message Result {
-    oneof result {
-        Success value = 1;
-        Errors errors = 2;
-    }
-}
-
-message Errors {
-    string error_msg = 1;
-}
-
-message Seed {
-    uint32 value = 1;
-}
+} // namespace scene
+} // namespace gvs

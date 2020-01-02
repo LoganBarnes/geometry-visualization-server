@@ -30,6 +30,8 @@
 
 // external
 #include <grpcpp/channel.h>
+#include <grpcpp/create_channel.h>
+#include <grpcpp/security/credentials.h>
 
 // standard
 #include <chrono>
@@ -53,11 +55,13 @@ public:
 
     ~ClientScene() override;
 
+    auto connected() const -> bool;
+
     /*
      * Start `Scene` functions
      */
-    auto set_seed(std::random_device::result_type seed) -> ClientScene& override;
-    auto clear() -> void override;
+    auto clear() -> ClientScene& override;
+    auto set_seed(unsigned seed) -> ClientScene& override;
 
 private:
     auto actually_add_item(gvs::SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> override;
@@ -70,33 +74,33 @@ private:
      * End `Scene` functions
      */
 
-    std::mt19937                      generator_; ///< Used to generate SceneIDs
-    gvs::SceneItems                   items_; ///< The map of all the items in the scene
     std::shared_ptr<grpc::Channel>    channel_;
     std::unique_ptr<net::Scene::Stub> stub_;
+
+    mutable gvs::SceneItems most_recent_item_list_;
 };
 
 template <typename Rep, typename Period>
-ClientScene::ClientScene(const std::string& server_address,
-                         const std::chrono::duration<Rep, Period>& /*max_connection_wait_duration*/)
-    : generator_(std::random_device{}()) {
+ClientScene::ClientScene(const std::string&                        server_address,
+                         const std::chrono::duration<Rep, Period>& max_connection_wait_duration) {
 
     if (server_address.empty()) {
         std::cout << "No server address provided. Ignoring scene updates." << std::endl;
 
     } else {
-        //        grpc::ChannelArguments channel_args;
-        //        channel_args.SetMaxReceiveMessageSize(std::numeric_limits<int>::max());
-        //
-        //        channel_ = grpc::CreateCustomChannel(server_address, grpc::InsecureChannelCredentials(), channel_args);
-        //
-        //        if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
-        //            stub_ = proto::Scene::NewStub(channel_);
-        //
-        //        } else {
-        //            channel_ = nullptr;
-        //            std::cerr << "Failed to connect to " << server_address << ". Scene updates will be ignored." << std::endl;
-        //        }
+        grpc::ChannelArguments channel_args;
+        channel_args.SetMaxReceiveMessageSize(std::numeric_limits<int>::max());
+
+        channel_ = grpc::CreateCustomChannel(server_address, grpc::InsecureChannelCredentials(), channel_args);
+
+        if (channel_->WaitForConnected(std::chrono::system_clock::now() + max_connection_wait_duration)) {
+            stub_ = net::Scene::NewStub(channel_);
+
+        } else {
+            channel_ = nullptr;
+            std::cerr << "Failed to connect to '" << server_address << "'. Future scene updates may cause errors."
+                      << std::endl;
+        }
     }
 }
 

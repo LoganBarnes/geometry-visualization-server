@@ -23,7 +23,7 @@
 #pragma once
 
 // gvs
-#include "backend_interface.hpp"
+#include "display_backend.hpp"
 #include "drawables.hpp"
 #include "general_shader_3d.hpp"
 

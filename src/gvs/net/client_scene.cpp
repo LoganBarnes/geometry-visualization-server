@@ -21,6 +21,7 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "client_scene.hpp"
+#include "type_conversions.hpp"
 
 namespace gvs {
 namespace net {
@@ -29,31 +30,136 @@ ClientScene::ClientScene(std::string const& server_address) : ClientScene(server
 
 ClientScene::~ClientScene() = default;
 
-auto ClientScene::set_seed(std::random_device::result_type seed) -> ClientScene& {
-    generator_ = std::mt19937(seed);
+bool ClientScene::connected() const {
+    return !!channel_;
+}
+
+auto ClientScene::clear() -> ClientScene& {
+    if (channel_) {
+        grpc::ClientContext     context;
+        google::protobuf::Empty empty;
+
+        auto status = stub_->Clear(&context, empty, &empty);
+        if (!status.ok()) {
+            throw std::runtime_error(status.error_message());
+        }
+    }
     return *this;
 }
 
-auto ClientScene::clear() -> void {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+auto ClientScene::set_seed(unsigned seed) -> ClientScene& {
+    if (channel_) {
+        grpc::ClientContext     context;
+        net::Seed               request  = {};
+        google::protobuf::Empty response = {};
+
+        request.set_value(seed);
+
+        auto status = stub_->SetSeed(&context, request, &response);
+        if (!status.ok()) {
+            throw std::runtime_error(status.error_message());
+        }
+    }
+    return *this;
 }
 
-auto ClientScene::actually_add_item(gvs::SparseSceneItemInfo && /*info*/) -> util11::Result<gvs::SceneId> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+auto ClientScene::actually_add_item(gvs::SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> {
+    if (!channel_) {
+        return util11::Error{"Client not connected"};
+    }
+    grpc::ClientContext      context;
+    net::SparseSceneItemInfo request  = to_proto(info);
+    net::SceneIdResult       response = {};
+
+    auto status = stub_->AddItem(&context, request, &response);
+    if (!status.ok()) {
+        return util11::Error{status.error_message()};
+    }
+
+    if (response.has_errors()) {
+        return util11::Error{response.errors().error_msg()};
+    }
+
+    return from_proto(response.value());
 }
 
-auto ClientScene::actually_update_item(gvs::SceneId const& /*item_id*/, gvs::SparseSceneItemInfo && /*info*/)
+auto ClientScene::actually_update_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info) -> util11::Error {
+    if (!channel_) {
+        return util11::Error{"Client not connected"};
+    }
+
+    grpc::ClientContext context;
+
+    net::SparseSceneItemInfoWithId request = {};
+    *request.mutable_id()                  = to_proto(item_id);
+    *request.mutable_info()                = to_proto(info);
+
+    net::Result response = {};
+
+    auto status = stub_->UpdateItem(&context, request, &response);
+    if (!status.ok()) {
+        return util11::Error{status.error_message()};
+    }
+
+    if (response.has_errors()) {
+        return util11::Error{response.errors().error_msg()};
+    }
+
+    return util11::success();
+}
+
+auto ClientScene::actually_append_to_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info)
     -> util11::Error {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
-}
 
-auto ClientScene::actually_append_to_item(gvs::SceneId const& /*item_id*/, gvs::SparseSceneItemInfo && /*info*/)
-    -> util11::Error {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+    if (!channel_) {
+        return util11::Error{"Client not connected"};
+    }
+
+    grpc::ClientContext context;
+
+    net::SparseSceneItemInfoWithId request = {};
+    *request.mutable_id()                  = to_proto(item_id);
+    *request.mutable_info()                = to_proto(info);
+
+    net::Result response = {};
+
+    auto status = stub_->AppendToItem(&context, request, &response);
+    if (!status.ok()) {
+        return util11::Error{status.error_message()};
+    }
+
+    if (response.has_errors()) {
+        return util11::Error{response.errors().error_msg()};
+    }
+
+    return util11::success();
 }
 
 auto ClientScene::items() const -> gvs::SceneItems const& {
-    return items_;
+    if (!channel_) {
+        return most_recent_item_list_;
+    }
+
+    grpc::ClientContext     context;
+    google::protobuf::Empty empty;
+
+    auto item_reader = stub_->GetItems(&context, empty);
+
+    most_recent_item_list_.clear();
+
+    net::SceneItemInfoWithId info_with_id = {};
+    while (item_reader->Read(&info_with_id)) {
+        auto&& id   = from_proto(info_with_id.id());
+        auto&& info = from_proto(info_with_id.info());
+        most_recent_item_list_.emplace(id, info);
+    }
+
+    auto status = item_reader->Finish();
+    if (!status.ok()) {
+        throw std::runtime_error(status.error_message());
+    }
+
+    return most_recent_item_list_;
 }
 
 } // namespace net

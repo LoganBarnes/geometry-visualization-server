@@ -102,8 +102,8 @@ public:
     auto begin() const -> SceneItems::const_iterator;
     auto end() const -> SceneItems::const_iterator;
 
-    virtual auto clear() -> void                                          = 0;
-    virtual auto set_seed(std::random_device::result_type seed) -> Scene& = 0;
+    virtual auto clear() -> Scene&                 = 0;
+    virtual auto set_seed(unsigned seed) -> Scene& = 0;
 
 private:
     /// \brief Adds the new item to the scene

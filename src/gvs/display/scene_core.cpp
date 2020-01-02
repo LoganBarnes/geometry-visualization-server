@@ -27,8 +27,7 @@
 #include "gvs/scene/scene_update_handler.hpp"
 #include "scene_info_helpers.hpp"
 
-namespace gvs {
-namespace display {
+namespace gvs::display {
 
 SceneCore::SceneCore(scene::SceneUpdateHandler& update_handler)
     : update_handler_(update_handler), generator_(std::random_device{}()) {
@@ -106,5 +105,4 @@ auto SceneCore::items() const -> SceneItems const& {
     return items_;
 }
 
-} // namespace display
-} // namespace gvs
+} // namespace gvs::display

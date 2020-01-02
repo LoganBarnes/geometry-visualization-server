@@ -20,39 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#include "client_scene.hpp"
+#include "nil_scene.hpp"
 
 namespace gvs {
 namespace scene {
 
-ClientScene::ClientScene(std::string const& server_address) : ClientScene(server_address, std::chrono::seconds(5)) {}
+NilScene::NilScene()  = default;
+NilScene::~NilScene() = default;
 
-ClientScene::~ClientScene() = default;
-
-auto ClientScene::set_seed(std::random_device::result_type seed) -> ClientScene& {
-    generator_ = std::mt19937(seed);
+auto NilScene::clear() -> NilScene& {
     return *this;
 }
 
-auto ClientScene::clear() -> void {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+auto NilScene::set_seed(unsigned /*seed*/) -> NilScene& {
+    return *this;
 }
 
-auto ClientScene::actually_add_item(SparseSceneItemInfo && /*info*/) -> util11::Result<SceneId> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+auto NilScene::actually_add_item(gvs::SparseSceneItemInfo && /*info*/) -> util11::Result<gvs::SceneId> {
+    return gvs::nil_id();
 }
 
-auto ClientScene::actually_update_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util11::Error {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
-}
-
-auto ClientScene::actually_append_to_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/)
+auto NilScene::actually_update_item(gvs::SceneId const& /*item_id*/, gvs::SparseSceneItemInfo && /*info*/)
     -> util11::Error {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+    return util11::success();
 }
 
-auto ClientScene::items() const -> SceneItems const& {
-    return items_;
+auto NilScene::actually_append_to_item(gvs::SceneId const& /*item_id*/, gvs::SparseSceneItemInfo && /*info*/)
+    -> util11::Error {
+    return util11::success();
+}
+
+auto NilScene::items() const -> gvs::SceneItems const& {
+    return empty_item_list_;
 }
 
 } // namespace scene

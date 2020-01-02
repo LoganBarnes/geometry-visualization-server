@@ -23,46 +23,16 @@
 #pragma once
 
 // project
-#include "gvs/scene/scene.hpp"
+#include "gvs/display/scene_display.hpp"
+#include "gvs/scene/scene_update_handler.hpp"
 
-// generated
-#include <scene.grpc.pb.h>
+namespace gvs::display::backends {
 
-// external
-#include <grpcpp/channel.h>
-
-// standard
-#include <chrono>
-
-namespace gvs {
-namespace net {
-
-class SceneClient : public scene::Scene {
+class DisplayBackend : public scene::SceneUpdateHandler, public SceneDisplay {
 public:
-    ~SceneClient() override;
-
-    /*
-     * Start `Scene` functions
-     */
-    auto set_seed(std::random_device::result_type seed) -> SceneClient& override;
-    auto clear() -> void override;
-
-    auto actually_add_item(gvs::SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> override;
-    auto actually_update_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info) -> util11::Error override;
-    auto actually_append_to_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info)
-        -> util11::Error override;
-
-    auto items() const -> gvs::SceneItems const& override;
-    /*
-     * End `Scene` functions
-     */
-
-private:
-    std::shared_ptr<grpc::Channel>    channel_;
-    std::unique_ptr<net::Scene::Stub> stub_;
-
-    mutable gvs::SceneItems most_recent_item_list_;
+    ~DisplayBackend() override = 0;
 };
 
-} // namespace net
-} // namespace gvs
+inline DisplayBackend::~DisplayBackend() = default;
+
+} // namespace gvs::display::backends
