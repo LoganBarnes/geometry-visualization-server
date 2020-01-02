@@ -60,9 +60,10 @@ public:
     auto clear() -> void override;
 
 private:
-    auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> override;
-    auto actually_update_item(gvs::SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
-    auto actually_append_to_item(gvs::SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
+    auto actually_add_item(gvs::SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> override;
+    auto actually_update_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info) -> util11::Error override;
+    auto actually_append_to_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info)
+        -> util11::Error override;
 
     auto items() const -> gvs::SceneItems const& override;
     /*

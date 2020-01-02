@@ -42,10 +42,10 @@ auto SceneClient::clear() -> void {
     }
 }
 
-auto SceneClient::actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> {
-    grpc::ClientContext context;
-    net::SceneItemInfo  request  = to_proto(info);
-    net::SceneIdResult  response = {};
+auto SceneClient::actually_add_item(gvs::SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> {
+    grpc::ClientContext      context;
+    net::SparseSceneItemInfo request  = to_proto(info);
+    net::SceneIdResult       response = {};
 
     auto status = stub_->AddItem(&context, request, &response);
     if (!status.ok()) {
@@ -59,12 +59,12 @@ auto SceneClient::actually_add_item(SparseSceneItemInfo&& info) -> util11::Resul
     return from_proto(response.value());
 }
 
-auto SceneClient::actually_update_item(gvs::SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error {
+auto SceneClient::actually_update_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info) -> util11::Error {
     grpc::ClientContext context;
 
-    net::SceneItemInfoWithId request = {};
-    *request.mutable_id()            = to_proto(item_id);
-    *request.mutable_info()          = to_proto(info);
+    net::SparseSceneItemInfoWithId request = {};
+    *request.mutable_id()                  = to_proto(item_id);
+    *request.mutable_info()                = to_proto(info);
 
     net::Result response = {};
 
@@ -80,12 +80,13 @@ auto SceneClient::actually_update_item(gvs::SceneId const& item_id, SparseSceneI
     return util11::success();
 }
 
-auto SceneClient::actually_append_to_item(gvs::SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error {
+auto SceneClient::actually_append_to_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info)
+    -> util11::Error {
     grpc::ClientContext context;
 
-    net::SceneItemInfoWithId request = {};
-    *request.mutable_id()            = to_proto(item_id);
-    *request.mutable_info()          = to_proto(info);
+    net::SparseSceneItemInfoWithId request = {};
+    *request.mutable_id()                  = to_proto(item_id);
+    *request.mutable_info()                = to_proto(info);
 
     net::Result response = {};
 
@@ -111,9 +112,9 @@ auto SceneClient::items() const -> gvs::SceneItems const& {
 
     net::SceneItemInfoWithId info_with_id = {};
     while (item_reader->Read(&info_with_id)) {
-        //        auto&& id   = from_proto(info_with_id.id());
-        //        auto&& info = from_proto(info_with_id.info());
-        //        most_recent_item_list_.emplace(id, info);
+        auto&& id   = from_proto(info_with_id.id());
+        auto&& info = from_proto(info_with_id.info());
+        most_recent_item_list_.emplace(id, info);
     }
 
     auto status = item_reader->Finish();

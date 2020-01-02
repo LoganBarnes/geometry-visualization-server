@@ -52,11 +52,17 @@ auto to_proto(std::vector<unsigned> const& value) -> net::UIntList;
 auto to_proto(std::vector<gvs::SceneId> const& value) -> net::SceneIdList;
 
 auto to_proto(Primitive const& value) -> net::Primitive;
-auto to_proto(SparseGeometryInfo const& value) -> net::GeometryInfo3d;
-auto to_proto(SparseDisplayInfo const& value) -> net::DisplayInfo;
+
+auto to_proto(SparseGeometryInfo const& value) -> net::SparseGeometryInfo;
+auto to_proto(SparseDisplayInfo const& value) -> net::SparseDisplayInfo;
 auto to_proto(Geometry const& value) -> net::Geometry;
 
-auto to_proto(SparseSceneItemInfo const& value) -> net::SceneItemInfo;
+auto to_proto(SparseSceneItemInfo const& value) -> net::SparseSceneItemInfo;
+
+auto to_proto(GeometryInfo const& value) -> net::GeometryInfo;
+auto to_proto(DisplayInfo const& value) -> net::DisplayInfo;
+
+auto to_proto(SceneItemInfo const& value) -> net::SceneItemInfo;
 
 /*
  * From proto
@@ -80,10 +86,16 @@ auto from_proto(net::UIntList const& proto) -> std::vector<unsigned>;
 auto from_proto(net::SceneIdList const& proto) -> std::vector<gvs::SceneId>;
 
 auto from_proto(net::Primitive const& proto) -> Primitive;
-auto from_proto(net::GeometryInfo3d const& proto) -> SparseGeometryInfo;
-auto from_proto(net::DisplayInfo const& proto) -> SparseDisplayInfo;
+
+auto from_proto(net::SparseGeometryInfo const& proto) -> SparseGeometryInfo;
+auto from_proto(net::SparseDisplayInfo const& proto) -> SparseDisplayInfo;
 auto from_proto(net::Geometry const& proto) -> Geometry;
 
-auto from_proto(net::SceneItemInfo const& proto) -> SparseSceneItemInfo;
+auto from_proto(net::SparseSceneItemInfo const& proto) -> SparseSceneItemInfo;
+
+auto from_proto(net::GeometryInfo const& proto) -> GeometryInfo;
+auto from_proto(net::DisplayInfo const& proto) -> DisplayInfo;
+
+auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfo;
 
 } // namespace gvs

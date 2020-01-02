@@ -185,8 +185,8 @@ auto to_proto(Primitive const& value) -> net::Primitive {
     return proto;
 }
 
-auto to_proto(SparseGeometryInfo const& value) -> net::GeometryInfo3d {
-    net::GeometryInfo3d proto = {};
+auto to_proto(SparseGeometryInfo const& value) -> net::SparseGeometryInfo {
+    net::SparseGeometryInfo proto = {};
     if (value.positions) {
         *proto.mutable_positions() = to_proto(*value.positions);
     }
@@ -202,8 +202,8 @@ auto to_proto(SparseGeometryInfo const& value) -> net::GeometryInfo3d {
     return proto;
 }
 
-auto to_proto(SparseDisplayInfo const& value) -> net::DisplayInfo {
-    net::DisplayInfo proto = {};
+auto to_proto(SparseDisplayInfo const& value) -> net::SparseDisplayInfo {
+    net::SparseDisplayInfo proto = {};
     if (value.readable_id) {
         *proto.mutable_readable_id() = to_proto(*value.readable_id);
     }
@@ -252,8 +252,8 @@ auto to_proto(Geometry const& value) -> net::Geometry {
     return mapbox::util::apply_visitor(GeometryVisitor{}, value);
 }
 
-auto to_proto(SparseSceneItemInfo const& value) -> net::SceneItemInfo {
-    net::SceneItemInfo proto = {};
+auto to_proto(SparseSceneItemInfo const& value) -> net::SparseSceneItemInfo {
+    net::SparseSceneItemInfo proto = {};
     if (value.geometry) {
         *proto.mutable_geometry() = to_proto(*value.geometry);
     }
@@ -266,6 +266,44 @@ auto to_proto(SparseSceneItemInfo const& value) -> net::SceneItemInfo {
     if (value.children) {
         *proto.mutable_children() = to_proto(*value.children);
     }
+    return proto;
+}
+
+auto to_proto(GeometryInfo const& value) -> net::GeometryInfo {
+    net::GeometryInfo proto = {};
+
+    *proto.mutable_positions()           = to_proto(value.positions);
+    *proto.mutable_normals()             = to_proto(value.normals);
+    *proto.mutable_texture_coordinates() = to_proto(value.texture_coordinates);
+    *proto.mutable_vertex_colors()       = to_proto(value.vertex_colors);
+
+    return proto;
+}
+
+auto to_proto(DisplayInfo const& value) -> net::DisplayInfo {
+    net::DisplayInfo proto = {};
+
+    *proto.mutable_readable_id()     = to_proto(value.readable_id);
+    *proto.mutable_geometry_format() = to_proto(value.geometry_format);
+    *proto.mutable_transformation()  = to_proto(value.transformation);
+    *proto.mutable_uniform_color()   = to_proto(value.uniform_color);
+    *proto.mutable_coloring()        = to_proto(value.coloring);
+    *proto.mutable_shading()         = to_proto(value.shading);
+    *proto.mutable_visible()         = to_proto(value.visible);
+    *proto.mutable_opacity()         = to_proto(value.opacity);
+    *proto.mutable_wireframe_only()  = to_proto(value.wireframe_only);
+
+    return proto;
+}
+
+auto to_proto(SceneItemInfo const& value) -> net::SceneItemInfo {
+    net::SceneItemInfo proto = {};
+
+    *proto.mutable_geometry_info() = to_proto(value.geometry_info);
+    *proto.mutable_display_info()  = to_proto(value.display_info);
+    *proto.mutable_parent()        = to_proto(value.parent);
+    *proto.mutable_children()      = to_proto(value.children);
+
     return proto;
 }
 
@@ -433,7 +471,7 @@ auto from_proto(net::Primitive const& proto) -> Primitive {
     throw std::runtime_error("net::Primitive type not set properly");
 }
 
-auto from_proto(net::GeometryInfo3d const& proto) -> SparseGeometryInfo {
+auto from_proto(net::SparseGeometryInfo const& proto) -> SparseGeometryInfo {
     SparseGeometryInfo value = {};
 
     if (proto.has_positions()) {
@@ -451,7 +489,7 @@ auto from_proto(net::GeometryInfo3d const& proto) -> SparseGeometryInfo {
     return value;
 }
 
-auto from_proto(net::DisplayInfo const& proto) -> SparseDisplayInfo {
+auto from_proto(net::SparseDisplayInfo const& proto) -> SparseDisplayInfo {
     SparseDisplayInfo value = {};
 
     if (proto.has_readable_id()) {
@@ -498,7 +536,7 @@ auto from_proto(net::Geometry const& proto) -> Geometry {
     throw std::runtime_error("net::Geometry type not set properly");
 }
 
-auto from_proto(net::SceneItemInfo const& proto) -> SparseSceneItemInfo {
+auto from_proto(net::SparseSceneItemInfo const& proto) -> SparseSceneItemInfo {
     SparseSceneItemInfo value = {};
     if (proto.has_geometry()) {
         value.geometry = std::make_unique<Geometry>(from_proto(proto.geometry()));
@@ -512,6 +550,44 @@ auto from_proto(net::SceneItemInfo const& proto) -> SparseSceneItemInfo {
     if (proto.has_children()) {
         value.children = std::make_unique<std::vector<gvs::SceneId>>(from_proto(proto.children()));
     }
+    return value;
+}
+
+auto from_proto(net::GeometryInfo const& proto) -> GeometryInfo {
+    GeometryInfo value = {};
+
+    value.positions           = from_proto<3>(proto.positions());
+    value.normals             = from_proto<3>(proto.normals());
+    value.texture_coordinates = from_proto<2>(proto.texture_coordinates());
+    value.vertex_colors       = from_proto<3>(proto.vertex_colors());
+
+    return value;
+}
+
+auto from_proto(net::DisplayInfo const& proto) -> DisplayInfo {
+    DisplayInfo value = {};
+
+    value.readable_id     = from_proto(proto.readable_id());
+    value.geometry_format = from_proto(proto.geometry_format());
+    value.transformation  = from_proto(proto.transformation());
+    value.uniform_color   = from_proto(proto.uniform_color());
+    value.coloring        = from_proto(proto.coloring());
+    value.shading         = from_proto(proto.shading());
+    value.visible         = from_proto(proto.visible());
+    value.opacity         = from_proto(proto.opacity());
+    value.wireframe_only  = from_proto(proto.wireframe_only());
+
+    return value;
+}
+
+auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfo {
+    SceneItemInfo value = {};
+
+    value.geometry_info = from_proto(proto.geometry_info());
+    value.display_info  = from_proto(proto.display_info());
+    value.parent        = from_proto(proto.parent());
+    value.children      = from_proto(proto.children());
+
     return value;
 }
 

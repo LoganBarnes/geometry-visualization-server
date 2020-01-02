@@ -28,13 +28,13 @@ import "google/protobuf/empty.proto";
 import "types.proto";
 
 service Scene {
-    rpc AddItem (SceneItemInfo) returns (SceneIdResult);
-    rpc UpdateItem (SceneItemInfoWithId) returns (Result);
-    rpc AppendToItem (SceneItemInfoWithId) returns (Result);
+    rpc AddItem (SparseSceneItemInfo) returns (SceneIdResult);
+    rpc UpdateItem (SparseSceneItemInfoWithId) returns (Result);
+    rpc AppendToItem (SparseSceneItemInfoWithId) returns (Result);
     rpc GetItemInfo (SceneId) returns (SceneItemInfo);
 
     rpc Clear (google.protobuf.Empty) returns (google.protobuf.Empty);
-    rpc GetItems(google.protobuf.Empty) returns (stream SceneItemInfoWithId);
+    rpc GetItems (google.protobuf.Empty) returns (stream SceneItemInfoWithId);
 }
 
 message SceneIdResult {
@@ -55,5 +55,5 @@ message Result {
 }
 
 message Errors {
-    string error_msg = 1; // empty if rpc was successful
+    string error_msg = 1;
 }

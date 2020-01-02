@@ -90,7 +90,46 @@ message SceneIdList {
     repeated SceneId value = 1;
 }
 
-message GeometryInfo3d {
+message SparseGeometryInfo {
+    FloatList positions = 1;
+    FloatList normals = 2;
+    FloatList texture_coordinates = 3;
+    FloatList vertex_colors = 4;
+    UIntList indices = 5;
+}
+
+message SparseDisplayInfo {
+    google.protobuf.StringValue readable_id = 1;
+    GeometryFormat geometry_format = 2;
+    Mat4 transformation = 3;
+    Vec3 uniform_color = 4;
+    Coloring coloring = 5;
+    Shading shading = 6;
+    google.protobuf.BoolValue visible = 7;
+    google.protobuf.FloatValue opacity = 8;
+    google.protobuf.BoolValue wireframe_only = 9;
+}
+
+message Geometry {
+    oneof type {
+        SparseGeometryInfo info = 1;
+        Primitive primitive = 2;
+    }
+}
+
+message SparseSceneItemInfo {
+    Geometry geometry = 1;
+    SparseDisplayInfo display_info = 2;
+    SceneId parent = 3;
+    SceneIdList children = 4;
+}
+
+message SparseSceneItemInfoWithId {
+    SceneId id = 1;
+    SparseSceneItemInfo info = 2;
+}
+
+message GeometryInfo {
     FloatList positions = 1;
     FloatList normals = 2;
     FloatList texture_coordinates = 3;
@@ -110,15 +149,8 @@ message DisplayInfo {
     google.protobuf.BoolValue wireframe_only = 9;
 }
 
-message Geometry {
-    oneof type {
-        GeometryInfo3d info = 1;
-        Primitive primitive = 2;
-    }
-}
-
 message SceneItemInfo {
-    Geometry geometry = 1;
+    GeometryInfo geometry_info = 1;
     DisplayInfo display_info = 2;
     SceneId parent = 3;
     SceneIdList children = 4;
