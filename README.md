@@ -10,7 +10,7 @@ Geometry Visualization Server
 ### TODO BEFORE MERGE WITH MASTER:
 * ~~Create setters and getter types `gvs::SetPositions`, `gvs::GetPositions`, `gvs::HasChildren`, etc.~~
 * ~~Use display interfaces in relevant parts of gvs~~
-* Add primitive setters `gvs::Cube()`, `gvs::Sphere`, etc.
+* ~~Add primitive setters `gvs::Cube()`, `gvs::Sphere`, etc.~~
 * Re-implement client/server scene interaction
 * Add global scene traits (like lights)
 * Clean up magnum scene class
