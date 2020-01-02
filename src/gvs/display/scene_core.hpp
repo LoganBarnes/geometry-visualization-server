@@ -27,8 +27,7 @@
 #include "gvs/scene/types.hpp"
 #include "gvs/util/result.hpp"
 
-namespace gvs {
-namespace display {
+namespace gvs::display {
 
 class SceneCore {
 public:
@@ -59,5 +58,4 @@ private:
     SceneItems                 items_; ///< The map of all the items in the scene
 };
 
-} // namespace display
-} // namespace gvs
+} // namespace gvs::display

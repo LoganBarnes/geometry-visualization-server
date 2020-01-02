@@ -67,6 +67,12 @@ auto UpdatedInfo::everything() -> UpdatedInfo {
     return info;
 }
 
+auto UpdatedInfo::children_only() -> UpdatedInfo {
+    UpdatedInfo info = {};
+    info.children    = true;
+    return info;
+}
+
 SceneUpdateHandler::~SceneUpdateHandler() = default;
 
 } // namespace scene

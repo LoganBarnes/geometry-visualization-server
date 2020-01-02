@@ -24,6 +24,7 @@
 
 // project
 #include "backends/backend_interface.hpp"
+#include "forward_declarations.hpp"
 #include "gvs/scene/scene.hpp"
 
 namespace gvs::display {
@@ -38,8 +39,6 @@ public:
      */
     auto render(CameraPackage const& camera_package) const -> void override;
     auto resize(Magnum::Vector2i const& viewport) -> void override;
-
-    //auto set_backend(std::unique_ptr<backends::BackendInterface> backend) -> LocalScene& override;
     /*
      * End `SceneDisplay` functions
      */
@@ -55,14 +54,13 @@ private:
     auto actually_update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
     auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
 
-    auto items() const -> SceneItems const& override;
+    [[nodiscard]] auto items() const -> SceneItems const& override;
     /*
      * End `Scene` functions
      */
 
-    std::mt19937                              generator_; ///< Used to generate SceneIDs
-    SceneItems                                items_; ///< The map of all the items in the scene
-    std::unique_ptr<backends::DisplayBackend> backend_; ///< Used to do the actual rendering of the scene
+    std::unique_ptr<SceneDisplay> display_; ///< Used to do the actual rendering of the scene
+    std::unique_ptr<SceneCore>    core_scene_; ///< Handles all the scene logic
 };
 
 } // namespace gvs::display

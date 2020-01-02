@@ -21,6 +21,7 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "scene_core.hpp"
+#include <gvs/util/container_util.hpp>
 
 // project
 #include "gvs/scene/scene_update_handler.hpp"
@@ -47,14 +48,39 @@ auto SceneCore::add_item(SparseSceneItemInfo&& new_info) -> util::Result<SceneId
     }
 
     items_.at(info.parent).children.emplace_back(item_id);
+    update_handler_.updated(info.parent, scene::UpdatedInfo::children_only(), items_.at(info.parent));
 
     items_.emplace(item_id, std::move(info));
     update_handler_.added(item_id, items_.at(item_id));
     return item_id;
 }
 
-auto SceneCore::update_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util::Result<void> {
-    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+auto SceneCore::update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util::Result<void> {
+    auto& item = items_.at(item_id);
+
+    if (info.parent && *info.parent != item.parent) {
+        // Remove item from the current parent's list of children
+        util::remove_all_by_value(items_.at(item.parent).children, item_id);
+        update_handler_.updated(item.parent, scene::UpdatedInfo::children_only(), items_.at(item.parent));
+
+        auto const& parent = *info.parent;
+
+        // Add the item to the new parent's list of children
+        items_.at(parent).children.emplace_back(item_id);
+        update_handler_.updated(parent, scene::UpdatedInfo::children_only(), items_.at(parent));
+    }
+
+    auto const& const_info = info;
+    auto        updated    = scene::UpdatedInfo(const_info); // info isn't changed here
+
+    auto result = replace_if_present(&item, std::move(info));
+    if (!result) {
+        return result;
+    }
+
+    update_handler_.updated(item_id, updated, items_.at(item_id));
+
+    return util::success();
 }
 
 auto SceneCore::append_to_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util::Result<void> {

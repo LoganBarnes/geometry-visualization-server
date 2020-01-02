@@ -26,5 +26,6 @@ namespace gvs::display {
 
 class LocalScene;
 class SceneDisplay;
+class SceneCore;
 
 } // namespace gvs::display
