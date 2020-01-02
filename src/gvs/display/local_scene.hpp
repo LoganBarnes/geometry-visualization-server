@@ -23,8 +23,8 @@
 #pragma once
 
 // project
+#include "backends/backend_interface.hpp"
 #include "gvs/scene/scene.hpp"
-#include "scene_display.hpp"
 
 namespace gvs::display {
 
@@ -60,9 +60,9 @@ private:
      * End `Scene` functions
      */
 
-    std::mt19937                                generator_; ///< Used to generate SceneIDs
-    SceneItems                                  items_; ///< The map of all the items in the scene
-    std::unique_ptr<backends::BackendInterface> backend_; ///< Used to do the actual rendering of the scene
+    std::mt19937                              generator_; ///< Used to generate SceneIDs
+    SceneItems                                items_; ///< The map of all the items in the scene
+    std::unique_ptr<backends::DisplayBackend> backend_; ///< Used to do the actual rendering of the scene
 };
 
 } // namespace gvs::display

@@ -45,20 +45,19 @@
 
 namespace gvs::display::backends {
 
-class OpenglBackend : public BackendInterface {
+class OpenglBackend : public DisplayBackend {
 public:
     explicit OpenglBackend();
     ~OpenglBackend() override;
 
-    auto render(CameraPackage const& camera_package) -> void override;
+    auto render(CameraPackage const& camera_package) const -> void override;
+    auto resize(Magnum::Vector2i const& viewport) -> void override;
 
-    auto after_add(SceneID const& item_id, SceneItems const& items) -> void override;
-    auto after_update(SceneID const& item_id, UpdatedInfo const& updated, SceneItems const& items) -> void override;
-    auto before_delete(SceneID const& item_id, SceneItems const& items) -> void override;
+    auto added(SceneID const& item_id, SceneItemInfo const& item) -> void override;
+    auto updated(SceneID const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item) -> void override;
+    auto removed(SceneID const& item_id) -> void override;
 
     auto reset_items(SceneItems const& items) -> void override;
-
-    auto resize(Magnum::Vector2i const& viewport) -> void override;
 
     using Scene3D  = Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D>;
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
@@ -81,11 +80,12 @@ private:
     GeneralShader3d                                                 shader_;
     std::unordered_map<SceneID, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 
-    Scene3D                             scene_;
-    Object3D*                           root_object_ = nullptr;
-    Object3D                            camera_object_;
-    Magnum::SceneGraph::Camera3D*       camera_;
-    Magnum::SceneGraph::DrawableGroup3D drawables_;
+    Scene3D   scene_;
+    Object3D* root_object_ = nullptr;
+
+    mutable Object3D                            camera_object_;
+    mutable Magnum::SceneGraph::Camera3D*       camera_;
+    mutable Magnum::SceneGraph::DrawableGroup3D drawables_;
 };
 
 } // namespace gvs::display::backends

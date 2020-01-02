@@ -23,13 +23,9 @@
 #pragma once
 
 // project
-#include "gvs/display/camera_package.hpp"
+#include "gvs/display/scene_display.hpp"
+#include "gvs/scene/scene_update_handler.hpp"
 #include "gvs/scene/types.hpp"
-
-// external
-#include <Magnum/Magnum.h>
-#include <Magnum/Math/Vector2.h>
-#include <Magnum/SceneGraph/Camera.h>
 
 namespace gvs::display::backends {
 
@@ -85,49 +81,11 @@ private:
     UpdatedInfo() = default;
 };
 
-class BackendInterface {
+class DisplayBackend : public scene::SceneUpdateHandler, public SceneDisplay {
 public:
-    virtual ~BackendInterface() = 0;
-
-    /**
-     * @brief Renders all the visible items in the scene.
-     */
-    virtual auto render(CameraPackage const& camera_package) -> void = 0;
-
-    /**
-     * @brief Called when a Scene has added a new item.
-     * @param item_id - The id of the added item.
-     * @param items - All items in the scene (including the added item).
-     */
-    virtual auto after_add(SceneID const& item_id, SceneItems const& items) -> void = 0;
-
-    /**
-     * @brief Called when a Scene is about to update an item.
-     * @param item_id - The id of the updated item.
-     * @param items - All items in the scene (including the item before it was updated).
-     */
-    virtual auto after_update(SceneID const& item_id, UpdatedInfo const& updated, SceneItems const& items) -> void = 0;
-
-    /**
-     * @brief Called when a scene is about to remove an item.
-     * @param item_id - The id of the item to be deleted.
-     * @param items - All items in the scene (including the item to be deleted).
-     */
-    virtual auto before_delete(SceneID const& item_id, SceneItems const& items) -> void = 0;
-
-    /**
-     * @brief Called when a Scene has replaced all its items.
-     * @param items - All the new items in the scene.
-     */
-    virtual auto reset_items(SceneItems const& items) -> void = 0;
-
-    /**
-     * @brief Called when a Scene's viewport has changed.
-     * @param viewport - The new viewport dimensions.
-     */
-    virtual auto resize(Magnum::Vector2i const& viewport) -> void = 0;
+    ~DisplayBackend() override = 0;
 };
 
-inline BackendInterface::~BackendInterface() = default;
+inline DisplayBackend::~DisplayBackend() = default;
 
 } // namespace gvs::display::backends

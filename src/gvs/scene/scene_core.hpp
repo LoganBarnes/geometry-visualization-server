@@ -23,29 +23,41 @@
 #pragma once
 
 // project
-#include "gvs/display/camera_package.hpp"
+#include "forward_declarations.hpp"
+#include "gvs/util/result_11.hpp"
+#include "types.hpp"
 
-// external
-#include <Magnum/Magnum.h>
-#include <Magnum/Math/Vector2.h>
+namespace gvs {
+namespace scene {
 
-// standard
-#include <memory>
-
-namespace gvs::display {
-
-class SceneDisplay {
+class SceneCore {
 public:
-    virtual ~SceneDisplay() = 0;
+    explicit SceneCore(SceneUpdateHandler& update_handler);
+    ~SceneCore();
 
-    /// \brief Renders all the visible items in the scene.
-    virtual auto render(CameraPackage const& camera_package) const -> void = 0;
+    /// \brief Adds the new item to the scene
+    auto add_item(SceneItemInfoSetter&& info) -> util11::Result<SceneID>;
 
-    /// \brief Called when a scene's viewport has changed.
-    /// \param viewport - The new viewport dimensions.
-    virtual auto resize(Magnum::Vector2i const& viewport) -> void = 0;
+    /// \brief Updates the specified item by replacing existing fields with the new ones
+    auto update_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error;
+
+    /// \brief Updates the specified item by appending all new geometry
+    auto append_to_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error;
+
+    /// \brief Sets the seed used to generate SceneIds
+    auto set_seed(std::random_device::result_type seed) -> SceneCore&;
+
+    /// \brief Clears all items in the scene
+    auto clear() -> SceneCore&;
+
+    /// \brief The map of all items in the scene
+    auto items() const -> SceneItems const&;
+
+private:
+    SceneUpdateHandler& update_handler_; ///< Handles scene updates in an implementation specific way
+    std::mt19937        generator_; ///< Used to generate SceneIDs
+    SceneItems          items_; ///< The map of all the items in the scene
 };
 
-inline SceneDisplay::~SceneDisplay() = default;
-
-} // namespace gvs::display
+} // namespace scene
+} // namespace gvs

@@ -117,20 +117,22 @@ OpenglBackend::OpenglBackend() {
 
 OpenglBackend::~OpenglBackend() = default;
 
-auto OpenglBackend::render(CameraPackage const& camera_package) -> void {
+auto OpenglBackend::render(CameraPackage const& camera_package) const -> void {
     camera_object_.setTransformation(camera_package.transformation);
     camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
     camera_->draw(drawables_);
 }
 
-auto OpenglBackend::after_add(SceneID const& item_id, SceneItems const& items) -> void {
+auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
+
+auto OpenglBackend::added(SceneID const& item_id, SceneItemInfo const& item) -> void {
     objects_.emplace(item_id, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
-    after_update(item_id, UpdatedInfo::everything(), items);
+    updated(item_id, scene::UpdatedInfo::everything(), item);
 }
 
-auto OpenglBackend::after_update(SceneID const& item_id, UpdatedInfo const& updated, SceneItems const& items) -> void {
+auto OpenglBackend::updated(SceneID const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item)
+    -> void {
     ObjectMeshPackage& mesh_package = *objects_.at(item_id);
-    auto const&        item         = items.at(item_id);
 
     if (updated.geometry) {
         auto const& geometry_info = item.geometry_info;
@@ -171,7 +173,7 @@ auto OpenglBackend::after_update(SceneID const& item_id, UpdatedInfo const& upda
     }
 }
 
-auto OpenglBackend::before_delete(SceneID const& /*item_id*/, SceneItems const & /*items*/) -> void {}
+auto OpenglBackend::removed(SceneID const & /*item_id*/) -> void {}
 
 auto OpenglBackend::reset_items(SceneItems const& items) -> void {
     // Remove all items from the scene
@@ -191,11 +193,8 @@ auto OpenglBackend::reset_items(SceneItems const& items) -> void {
 
     // Add new items to scene
     for (auto const& [item_id, item] : items) {
-        util::ignore(item);
-        after_update(item_id, UpdatedInfo::everything(), items);
+        updated(item_id, scene::UpdatedInfo::everything(), item);
     }
 }
-
-auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
 
 } // namespace gvs::display::backends

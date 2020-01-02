@@ -20,32 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "scene_core.hpp"
 
 // project
-#include "gvs/display/camera_package.hpp"
+#include "scene_update_handler.hpp"
 
-// external
-#include <Magnum/Magnum.h>
-#include <Magnum/Math/Vector2.h>
+namespace gvs {
+namespace scene {
 
-// standard
-#include <memory>
+SceneCore::SceneCore(SceneUpdateHandler& update_handler)
+    : update_handler_(update_handler), generator_(std::random_device{}()) {
+    clear();
+}
 
-namespace gvs::display {
+SceneCore::~SceneCore() = default;
 
-class SceneDisplay {
-public:
-    virtual ~SceneDisplay() = 0;
+auto SceneCore::add_item(SceneItemInfoSetter && /*info*/) -> util11::Result<SceneID> {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
 
-    /// \brief Renders all the visible items in the scene.
-    virtual auto render(CameraPackage const& camera_package) const -> void = 0;
+auto SceneCore::update_item(SceneID const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
 
-    /// \brief Called when a scene's viewport has changed.
-    /// \param viewport - The new viewport dimensions.
-    virtual auto resize(Magnum::Vector2i const& viewport) -> void = 0;
-};
+auto SceneCore::append_to_item(SceneID const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
+    throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
+}
 
-inline SceneDisplay::~SceneDisplay() = default;
+auto SceneCore::set_seed(std::random_device::result_type seed) -> SceneCore& {
+    generator_ = std::mt19937(seed);
+    return *this;
+}
 
-} // namespace gvs::display
+auto SceneCore::clear() -> SceneCore& {
+    items_.clear();
+    {
+        SceneItemInfo root;
+        items_.emplace(nil_id(), std::move(root));
+    }
+    update_handler_.reset_items(items_);
+    return *this;
+}
+
+auto SceneCore::items() const -> SceneItems const& {
+    return items_;
+}
+
+} // namespace scene
+} // namespace gvs
