@@ -111,7 +111,10 @@ auto Error::operator!=(const Error& other) const -> bool {
 
 namespace {
 
-auto build_expected_message(std::string const& file_prefix, int const& line_number, std::string const& error_message) {
+[[maybe_unused]] auto build_expected_message(std::string const& file_prefix,
+                                             int const&         line_number,
+                                             std::string const& error_message) -> std::string {
+
     // TODO: use std::filesystem when it is available on most compilers
     using namespace gvs::paths;
     auto prefix    = (file_prefix.empty() ? std::string() : file_prefix + slash());

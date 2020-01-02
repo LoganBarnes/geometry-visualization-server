@@ -26,8 +26,8 @@
 #include <mapbox/variant.hpp>
 
 // standard
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace gvs {
 namespace util11 {
