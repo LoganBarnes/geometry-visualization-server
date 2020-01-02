@@ -5,6 +5,6 @@ export PATH=/deps/cmake/bin:$PATH
 cmake --version
 
 # install deps
-apt update
+apt-get update
 #             | For runing GVS         | For GVS tests   | For coverage reports
-apt install -y xorg-dev libgl1-mesa-dev libgles2-mesa-dev lcov
+apt-get install -y xorg-dev libgl1-mesa-dev libgles2-mesa-dev lcov

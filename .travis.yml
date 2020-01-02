@@ -2,7 +2,7 @@ language: c++
 
 branches:
   only:
-    - dev/v2
+    - master
 
 dist: xenial
 
