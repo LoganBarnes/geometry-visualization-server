@@ -37,7 +37,7 @@ struct UpdatedInfo {
     bool parent                  = false;
     bool children                = false;
 
-    explicit UpdatedInfo(SceneItemInfoSetter const& info);
+    explicit UpdatedInfo(SparseSceneItemInfo const& info);
 
     static auto everything() -> UpdatedInfo;
 

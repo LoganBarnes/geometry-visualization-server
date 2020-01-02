@@ -36,13 +36,13 @@ public:
     ~SceneCore();
 
     /// \brief Adds the new item to the scene
-    auto add_item(SceneItemInfoSetter&& info) -> util11::Result<SceneId>;
+    auto add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId>;
 
     /// \brief Updates the specified item by replacing existing fields with the new ones
-    auto update_item(SceneId const& item_id, SceneItemInfoSetter&& info) -> util11::Error;
+    auto update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error;
 
     /// \brief Updates the specified item by appending all new geometry
-    auto append_to_item(SceneId const& item_id, SceneItemInfoSetter&& info) -> util11::Error;
+    auto append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error;
 
     /// \brief Sets the seed used to generate SceneIds
     auto set_seed(std::random_device::result_type seed) -> SceneCore&;

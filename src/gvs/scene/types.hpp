@@ -122,7 +122,7 @@ enum class Shading : int32_t {
     CookTorrance,
 };
 
-struct DisplayInfoSetter {
+struct SparseDisplayInfo {
     std::unique_ptr<std::string>    readable_id;
     std::unique_ptr<GeometryFormat> geometry_format;
     std::unique_ptr<mat4>           transformation;
@@ -134,7 +134,7 @@ struct DisplayInfoSetter {
     std::unique_ptr<bool>           wireframe_only;
 };
 
-struct GeometryInfoSetter {
+struct SparseGeometryInfo {
     std::unique_ptr<AttributeVector<3>>    positions;
     std::unique_ptr<AttributeVector<3>>    normals;
     std::unique_ptr<AttributeVector<2>>    texture_coordinates;
@@ -143,19 +143,19 @@ struct GeometryInfoSetter {
 };
 
 namespace detail {
-using GeometryBase = mapbox::util::variant<GeometryInfoSetter, Primitive>;
+using GeometryBase = mapbox::util::variant<SparseGeometryInfo, Primitive>;
 }
 
 struct Geometry : detail::GeometryBase {
     // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
-    Geometry(GeometryInfoSetter setter) : detail::GeometryBase(std::move(setter)) {}
+    Geometry(SparseGeometryInfo setter) : detail::GeometryBase(std::move(setter)) {}
     // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
     Geometry(Primitive primitive) : detail::GeometryBase(std::move(primitive)) {}
 };
 
-struct SceneItemInfoSetter {
+struct SparseSceneItemInfo {
     std::unique_ptr<Geometry>             geometry;
-    std::unique_ptr<DisplayInfoSetter>    display_info;
+    std::unique_ptr<SparseDisplayInfo>    display_info;
     std::unique_ptr<SceneId>              parent;
     std::unique_ptr<std::vector<SceneId>> children;
 };

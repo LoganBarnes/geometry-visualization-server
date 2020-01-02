@@ -37,7 +37,7 @@ struct UpdatedInfo {
     bool display_geometry_format = false;
     bool parent                  = false;
 
-    explicit UpdatedInfo(SceneItemInfoSetter const& info) {
+    explicit UpdatedInfo(SparseSceneItemInfo const& info) {
         if (info.geometry) {
             auto const& geom = *info.geometry;
 
@@ -49,8 +49,8 @@ struct UpdatedInfo {
                 display |= true;
                 display_geometry_format |= true;
             } else {
-                assert(geom.is<GeometryInfoSetter>());
-                auto const& geometry_info = geom.get<GeometryInfoSetter>();
+                assert(geom.is<SparseGeometryInfo>());
+                auto const& geometry_info = geom.get<SparseGeometryInfo>();
 
                 geometry_vertices |= (geometry_info.positions || geometry_info.normals
                                       || geometry_info.texture_coordinates || geometry_info.vertex_colors);

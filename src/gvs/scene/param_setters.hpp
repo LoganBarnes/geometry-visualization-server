@@ -56,11 +56,11 @@ namespace detail {
 ///
 /// \brief A "named parameter" wrapper used to set items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> SceneItemInfoSetter::*member>
+template <typename T, std::unique_ptr<T> SparseSceneItemInfo::*member>
 struct SceneSetter {
     explicit SceneSetter(T value = {}) : data_(std::move(value)) {}
 
-    auto operator()(SceneItemInfoSetter* info) -> std::string {
+    auto operator()(SparseSceneItemInfo* info) -> std::string {
         if (info->*member) {
             return "Scene parameter already set.";
         }
@@ -80,18 +80,18 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> GeometryInfoSetter::*member>
+template <typename T, std::unique_ptr<T> SparseGeometryInfo::*member>
 struct SceneGeometrySetter {
     explicit SceneGeometrySetter(T value = {}) : data_(std::move(value)) {}
 
-    auto operator()(SceneItemInfoSetter* info) -> std::string {
+    auto operator()(SparseSceneItemInfo* info) -> std::string {
         if (!info->geometry) {
-            info->geometry = std::make_unique<Geometry>(GeometryInfoSetter{});
+            info->geometry = std::make_unique<Geometry>(SparseGeometryInfo{});
         } else if (info->geometry->is<Primitive>()) {
             return "Scene Geometry already specified as a primitive";
         }
 
-        auto& geometry_info = info->geometry->get<GeometryInfoSetter>();
+        auto& geometry_info = info->geometry->get<SparseGeometryInfo>();
 
         if (geometry_info.*member) {
             return "Scene parameter already set.";
@@ -117,18 +117,18 @@ template <gvs::GeometryFormat Format>
 struct SceneIndicesSetter {
     explicit SceneIndicesSetter(std::vector<unsigned> value = {}) : data_(std::move(value)) {}
 
-    auto operator()(SceneItemInfoSetter* info) -> std::string {
+    auto operator()(SparseSceneItemInfo* info) -> std::string {
         if (!info->display_info) {
-            info->display_info = std::make_unique<DisplayInfoSetter>();
+            info->display_info = std::make_unique<SparseDisplayInfo>();
         }
         if (!info->geometry) {
-            info->geometry = std::make_unique<Geometry>(GeometryInfoSetter{});
+            info->geometry = std::make_unique<Geometry>(SparseGeometryInfo{});
         } else if (info->geometry->is<Primitive>()) {
             return "Scene Geometry already specified as a primitive";
         }
 
         auto& display_info  = *info->display_info;
-        auto& geometry_info = info->geometry->get<GeometryInfoSetter>();
+        auto& geometry_info = info->geometry->get<SparseGeometryInfo>();
 
         if (display_info.geometry_format) {
             return "geometry_format already set.";
@@ -156,13 +156,13 @@ private:
 ///
 /// \brief A "named parameter" wrapper used to set display info for items in a StaticScene
 ///
-template <typename T, std::unique_ptr<T> DisplayInfoSetter::*member>
+template <typename T, std::unique_ptr<T> SparseDisplayInfo::*member>
 struct SceneDisplaySetter {
     explicit SceneDisplaySetter(T value = {}) : data(std::move(value)) {}
 
-    auto operator()(SceneItemInfoSetter* info) -> std::string {
+    auto operator()(SparseSceneItemInfo* info) -> std::string {
         if (!info->display_info) {
-            info->display_info = std::make_unique<DisplayInfoSetter>();
+            info->display_info = std::make_unique<SparseDisplayInfo>();
         }
 
         auto& display_info = *info->display_info;
@@ -192,7 +192,7 @@ protected:
 struct SetPrimitive {
     explicit SetPrimitive(Primitive value) : data_(std::move(value)) {}
 
-    auto operator()(SceneItemInfoSetter* info) -> std::string {
+    auto operator()(SparseSceneItemInfo* info) -> std::string {
         if (info->geometry) {
             return "Geometry already specified";
         }
@@ -213,12 +213,12 @@ private:
 /*
  * Setters
  */
-using SetPositions3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfoSetter::positions>;
-using SetNormals3d   = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfoSetter::normals>;
+using SetPositions3d = detail::SceneGeometrySetter<AttributeVector<3>, &SparseGeometryInfo::positions>;
+using SetNormals3d   = detail::SceneGeometrySetter<AttributeVector<3>, &SparseGeometryInfo::normals>;
 using SetTextureCoordinates3d
-    = detail::SceneGeometrySetter<AttributeVector<2>, &GeometryInfoSetter::texture_coordinates>;
-using SetVertexColors3d = detail::SceneGeometrySetter<AttributeVector<3>, &GeometryInfoSetter::vertex_colors>;
-using SetIndices        = detail::SceneGeometrySetter<std::vector<unsigned>, &GeometryInfoSetter::indices>;
+    = detail::SceneGeometrySetter<AttributeVector<2>, &SparseGeometryInfo::texture_coordinates>;
+using SetVertexColors3d = detail::SceneGeometrySetter<AttributeVector<3>, &SparseGeometryInfo::vertex_colors>;
+using SetIndices        = detail::SceneGeometrySetter<std::vector<unsigned>, &SparseGeometryInfo::indices>;
 
 using SetPoints        = detail::SceneIndicesSetter<GeometryFormat::Points>;
 using SetLines         = detail::SceneIndicesSetter<GeometryFormat::Lines>;
@@ -227,16 +227,16 @@ using SetTriangles     = detail::SceneIndicesSetter<GeometryFormat::Triangles>;
 using SetTriangleStrip = detail::SceneIndicesSetter<GeometryFormat::TriangleStrip>;
 using SetTriangleFan   = detail::SceneIndicesSetter<GeometryFormat::TriangleFan>;
 
-using SetParent = detail::SceneSetter<SceneId, &SceneItemInfoSetter::parent>;
+using SetParent = detail::SceneSetter<SceneId, &SparseSceneItemInfo::parent>;
 
-using SetReadableId     = detail::SceneDisplaySetter<std::string, &DisplayInfoSetter::readable_id>;
-using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &DisplayInfoSetter::geometry_format>;
-using SetTransformation = detail::SceneDisplaySetter<mat4, &DisplayInfoSetter::transformation>;
-using SetUniformColor   = detail::SceneDisplaySetter<vec3, &DisplayInfoSetter::uniform_color>;
-using SetColoring       = detail::SceneDisplaySetter<Coloring, &DisplayInfoSetter::coloring>;
-using SetShading        = detail::SceneDisplaySetter<Shading, &DisplayInfoSetter::shading>;
-using SetVisible        = detail::SceneDisplaySetter<bool, &DisplayInfoSetter::visible>;
-using SetOpacity        = detail::SceneDisplaySetter<float, &DisplayInfoSetter::opacity>;
-using SetWireframeOnly  = detail::SceneDisplaySetter<bool, &DisplayInfoSetter::wireframe_only>;
+using SetReadableId     = detail::SceneDisplaySetter<std::string, &SparseDisplayInfo::readable_id>;
+using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &SparseDisplayInfo::geometry_format>;
+using SetTransformation = detail::SceneDisplaySetter<mat4, &SparseDisplayInfo::transformation>;
+using SetUniformColor   = detail::SceneDisplaySetter<vec3, &SparseDisplayInfo::uniform_color>;
+using SetColoring       = detail::SceneDisplaySetter<Coloring, &SparseDisplayInfo::coloring>;
+using SetShading        = detail::SceneDisplaySetter<Shading, &SparseDisplayInfo::shading>;
+using SetVisible        = detail::SceneDisplaySetter<bool, &SparseDisplayInfo::visible>;
+using SetOpacity        = detail::SceneDisplaySetter<float, &SparseDisplayInfo::opacity>;
+using SetWireframeOnly  = detail::SceneDisplaySetter<bool, &SparseDisplayInfo::wireframe_only>;
 
 } // namespace gvs

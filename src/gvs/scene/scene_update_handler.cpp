@@ -25,7 +25,7 @@
 namespace gvs {
 namespace scene {
 
-UpdatedInfo::UpdatedInfo(SceneItemInfoSetter const& info) {
+UpdatedInfo::UpdatedInfo(SparseSceneItemInfo const& info) {
     if (info.geometry) {
         auto const& geom = *info.geometry;
 
@@ -37,8 +37,8 @@ UpdatedInfo::UpdatedInfo(SceneItemInfoSetter const& info) {
             display |= true;
             display_geometry_format |= true;
         } else {
-            assert(geom.is<GeometryInfoSetter>());
-            auto const& geometry_info = geom.get<GeometryInfoSetter>();
+            assert(geom.is<SparseGeometryInfo>());
+            auto const& geometry_info = geom.get<SparseGeometryInfo>();
 
             geometry_vertices |= (geometry_info.positions || geometry_info.normals || geometry_info.texture_coordinates
                                   || geometry_info.vertex_colors);

@@ -47,9 +47,9 @@ public:
     auto set_seed(std::random_device::result_type seed) -> SceneClient& override;
     auto clear() -> void override;
 
-    auto actually_add_item(SceneItemInfoSetter&& info) -> util11::Result<gvs::SceneId> override;
-    auto actually_update_item(gvs::SceneId const& item_id, SceneItemInfoSetter&& info) -> util11::Error override;
-    auto actually_append_to_item(gvs::SceneId const& item_id, SceneItemInfoSetter&& info) -> util11::Error override;
+    auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<gvs::SceneId> override;
+    auto actually_update_item(gvs::SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
+    auto actually_append_to_item(gvs::SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
 
     auto items() const -> gvs::SceneItems const& override;
     /*

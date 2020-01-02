@@ -185,7 +185,7 @@ auto to_proto(Primitive const& value) -> net::Primitive {
     return proto;
 }
 
-auto to_proto(GeometryInfoSetter const& value) -> net::GeometryInfo3d {
+auto to_proto(SparseGeometryInfo const& value) -> net::GeometryInfo3d {
     net::GeometryInfo3d proto = {};
     if (value.positions) {
         *proto.mutable_positions() = to_proto(*value.positions);
@@ -202,7 +202,7 @@ auto to_proto(GeometryInfoSetter const& value) -> net::GeometryInfo3d {
     return proto;
 }
 
-auto to_proto(DisplayInfoSetter const& value) -> net::DisplayInfo {
+auto to_proto(SparseDisplayInfo const& value) -> net::DisplayInfo {
     net::DisplayInfo proto = {};
     if (value.readable_id) {
         *proto.mutable_readable_id() = to_proto(*value.readable_id);
@@ -237,7 +237,7 @@ auto to_proto(DisplayInfoSetter const& value) -> net::DisplayInfo {
 auto to_proto(Geometry const& value) -> net::Geometry {
 
     struct GeometryVisitor {
-        auto operator()(GeometryInfoSetter const& info) -> net::Geometry {
+        auto operator()(SparseGeometryInfo const& info) -> net::Geometry {
             net::Geometry proto   = {};
             *proto.mutable_info() = to_proto(info);
             return proto;
@@ -252,7 +252,7 @@ auto to_proto(Geometry const& value) -> net::Geometry {
     return mapbox::util::apply_visitor(GeometryVisitor{}, value);
 }
 
-auto to_proto(SceneItemInfoSetter const& value) -> net::SceneItemInfo {
+auto to_proto(SparseSceneItemInfo const& value) -> net::SceneItemInfo {
     net::SceneItemInfo proto = {};
     if (value.geometry) {
         *proto.mutable_geometry() = to_proto(*value.geometry);
@@ -433,8 +433,8 @@ auto from_proto(net::Primitive const& proto) -> Primitive {
     throw std::runtime_error("net::Primitive type not set properly");
 }
 
-auto from_proto(net::GeometryInfo3d const& proto) -> GeometryInfoSetter {
-    GeometryInfoSetter value = {};
+auto from_proto(net::GeometryInfo3d const& proto) -> SparseGeometryInfo {
+    SparseGeometryInfo value = {};
 
     if (proto.has_positions()) {
         value.positions = std::make_unique<AttributeVector<3>>(from_proto<3>(proto.positions()));
@@ -451,8 +451,8 @@ auto from_proto(net::GeometryInfo3d const& proto) -> GeometryInfoSetter {
     return value;
 }
 
-auto from_proto(net::DisplayInfo const& proto) -> DisplayInfoSetter {
-    DisplayInfoSetter value = {};
+auto from_proto(net::DisplayInfo const& proto) -> SparseDisplayInfo {
+    SparseDisplayInfo value = {};
 
     if (proto.has_readable_id()) {
         value.readable_id = std::make_unique<std::string>(from_proto(proto.readable_id()));
@@ -498,13 +498,13 @@ auto from_proto(net::Geometry const& proto) -> Geometry {
     throw std::runtime_error("net::Geometry type not set properly");
 }
 
-auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfoSetter {
-    SceneItemInfoSetter value = {};
+auto from_proto(net::SceneItemInfo const& proto) -> SparseSceneItemInfo {
+    SparseSceneItemInfo value = {};
     if (proto.has_geometry()) {
         value.geometry = std::make_unique<Geometry>(from_proto(proto.geometry()));
     }
     if (proto.has_display_info()) {
-        value.display_info = std::make_unique<DisplayInfoSetter>(from_proto(proto.display_info()));
+        value.display_info = std::make_unique<SparseDisplayInfo>(from_proto(proto.display_info()));
     }
     if (proto.has_parent()) {
         value.parent = std::make_unique<gvs::SceneId>(from_proto(proto.parent()));

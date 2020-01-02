@@ -35,15 +35,15 @@ SceneCore::SceneCore(SceneUpdateHandler& update_handler)
 
 SceneCore::~SceneCore() = default;
 
-auto SceneCore::add_item(SceneItemInfoSetter && /*info*/) -> util11::Result<SceneId> {
+auto SceneCore::add_item(SparseSceneItemInfo && /*info*/) -> util11::Result<SceneId> {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto SceneCore::update_item(SceneId const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
+auto SceneCore::update_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util11::Error {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto SceneCore::append_to_item(SceneId const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
+auto SceneCore::append_to_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util11::Error {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 

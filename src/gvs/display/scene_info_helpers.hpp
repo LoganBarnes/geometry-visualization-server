@@ -28,6 +28,6 @@
 
 namespace gvs {
 
-auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> util::Result<void>;
+auto replace_if_present(SceneItemInfo* info, SparseSceneItemInfo&& new_info) -> util::Result<void>;
 
 } // namespace gvs

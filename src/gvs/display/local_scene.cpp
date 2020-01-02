@@ -66,7 +66,7 @@ auto LocalScene::clear() -> void {
     backend_->reset_items(items_);
 }
 
-auto LocalScene::actually_add_item(SceneItemInfoSetter&& new_info) -> util11::Result<SceneId> {
+auto LocalScene::actually_add_item(SparseSceneItemInfo&& new_info) -> util11::Result<SceneId> {
     auto item_id = generate_scene_id(generator_);
 
     SceneItemInfo info;
@@ -83,7 +83,7 @@ auto LocalScene::actually_add_item(SceneItemInfoSetter&& new_info) -> util11::Re
     return item_id;
 }
 
-auto LocalScene::actually_update_item(SceneId const& item_id, SceneItemInfoSetter&& info) -> util11::Error {
+auto LocalScene::actually_update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error {
     scene::UpdatedInfo updated{info};
 
     auto& item = items_.at(item_id);
@@ -106,7 +106,7 @@ auto LocalScene::actually_update_item(SceneId const& item_id, SceneItemInfoSette
     return util11::success();
 }
 
-auto LocalScene::actually_append_to_item(SceneId const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
+auto LocalScene::actually_append_to_item(SceneId const& /*item_id*/, SparseSceneItemInfo && /*info*/) -> util11::Error {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 

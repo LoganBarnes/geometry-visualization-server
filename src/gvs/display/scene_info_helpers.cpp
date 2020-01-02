@@ -27,7 +27,7 @@
 
 namespace gvs {
 
-auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> util::Result<void> {
+auto replace_if_present(SceneItemInfo* info, SparseSceneItemInfo&& new_info) -> util::Result<void> {
 
     if (new_info.parent) {
         info->parent = *new_info.parent;
@@ -40,9 +40,9 @@ auto replace_if_present(SceneItemInfo* info, SceneItemInfoSetter&& new_info) -> 
             display::make_primitive(info, new_info.geometry->get<Primitive>());
 
         } else {
-            assert(new_info.geometry->is<GeometryInfoSetter>());
+            assert(new_info.geometry->is<SparseGeometryInfo>());
 
-            auto& new_geometry_info = new_info.geometry->get<GeometryInfoSetter>();
+            auto& new_geometry_info = new_info.geometry->get<SparseGeometryInfo>();
 
             if (new_geometry_info.positions) {
                 geometry_info.positions = std::move(*new_geometry_info.positions);
