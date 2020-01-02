@@ -227,7 +227,7 @@ using SetTriangles     = detail::SceneIndicesSetter<GeometryFormat::Triangles>;
 using SetTriangleStrip = detail::SceneIndicesSetter<GeometryFormat::TriangleStrip>;
 using SetTriangleFan   = detail::SceneIndicesSetter<GeometryFormat::TriangleFan>;
 
-using SetParent = detail::SceneSetter<SceneID, &SceneItemInfoSetter::parent>;
+using SetParent = detail::SceneSetter<SceneId, &SceneItemInfoSetter::parent>;
 
 using SetReadableId     = detail::SceneDisplaySetter<std::string, &DisplayInfoSetter::readable_id>;
 using SetGeometryFormat = detail::SceneDisplaySetter<GeometryFormat, &DisplayInfoSetter::geometry_format>;

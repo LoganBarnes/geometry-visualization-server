@@ -156,8 +156,8 @@ struct Geometry : detail::GeometryBase {
 struct SceneItemInfoSetter {
     std::unique_ptr<Geometry>             geometry;
     std::unique_ptr<DisplayInfoSetter>    display_info;
-    std::unique_ptr<SceneID>              parent;
-    std::unique_ptr<std::vector<SceneID>> children;
+    std::unique_ptr<SceneId>              parent;
+    std::unique_ptr<std::vector<SceneId>> children;
 };
 
 constexpr auto default_readable_id     = "Scene Item";
@@ -193,10 +193,10 @@ struct GeometryInfo {
 struct SceneItemInfo {
     GeometryInfo         geometry_info = {};
     DisplayInfo          display_info  = {};
-    SceneID              parent        = nil_id();
-    std::vector<SceneID> children      = {};
+    SceneId              parent        = nil_id();
+    std::vector<SceneId> children      = {};
 };
 
-using SceneItems = std::unordered_map<SceneID, SceneItemInfo>;
+using SceneItems = std::unordered_map<SceneId, SceneItemInfo>;
 
 } // namespace gvs

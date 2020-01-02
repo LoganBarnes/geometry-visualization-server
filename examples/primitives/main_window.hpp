@@ -47,12 +47,12 @@ private:
 
     // Axes
     struct {
-        gvs::SceneID scene_id    = gvs::nil_id();
+        gvs::SceneId scene_id    = gvs::nil_id();
     } axes_;
 
     // Cone
     struct {
-        gvs::SceneID scene_id    = gvs::nil_id();
+        gvs::SceneId scene_id    = gvs::nil_id();
         unsigned     rings       = 35u;
         unsigned     segments    = 35u;
         float        half_length = 1.f;
@@ -60,12 +60,12 @@ private:
 
     // Cube
     struct {
-        gvs::SceneID scene_id = gvs::nil_id();
+        gvs::SceneId scene_id = gvs::nil_id();
     } cube_;
 
     // Cylinder
     struct {
-        gvs::SceneID scene_id    = gvs::nil_id();
+        gvs::SceneId scene_id    = gvs::nil_id();
         unsigned     rings       = 35u;
         unsigned     segments    = 35u;
         float        half_length = 1.f;
@@ -73,12 +73,12 @@ private:
 
     // Plane
     struct {
-        gvs::SceneID scene_id = gvs::nil_id();
+        gvs::SceneId scene_id = gvs::nil_id();
     } plane_;
 
     // Sphere
     struct {
-        gvs::SceneID scene_id = gvs::nil_id();
+        gvs::SceneId scene_id = gvs::nil_id();
         unsigned     rings    = 35u;
         unsigned     segments = 35u;
     } sphere_;

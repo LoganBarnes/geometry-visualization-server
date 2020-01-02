@@ -109,8 +109,8 @@ using GetTextureCoordinates3d = detail::SceneGeometryGetter<AttributeVector<2>, 
 using GetVertexColors3d       = detail::SceneGeometryGetter<AttributeVector<3>, &GeometryInfo::vertex_colors>;
 using GetIndices              = detail::SceneGeometryGetter<std::vector<unsigned>, &GeometryInfo::indices>;
 
-using GetParent   = detail::SceneGetter<SceneID, &SceneItemInfo::parent>;
-using GetChildren = detail::SceneGetter<std::vector<SceneID>, &SceneItemInfo::children>;
+using GetParent   = detail::SceneGetter<SceneId, &SceneItemInfo::parent>;
+using GetChildren = detail::SceneGetter<std::vector<SceneId>, &SceneItemInfo::children>;
 
 using GetReadableId     = detail::SceneDisplayGetter<std::string, &DisplayInfo::readable_id>;
 using GetGeometryFormat = detail::SceneDisplayGetter<GeometryFormat, &DisplayInfo::geometry_format>;

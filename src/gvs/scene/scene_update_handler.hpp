@@ -54,7 +54,7 @@ public:
      * @param item_id - The id of the added item.
      * @param item - The data of the newly added item.
      */
-    virtual auto added(SceneID const& item_id, SceneItemInfo const& item) -> void = 0;
+    virtual auto added(SceneId const& item_id, SceneItemInfo const& item) -> void = 0;
 
     /**
      * @brief Called when a Scene has updated an item.
@@ -62,14 +62,14 @@ public:
      * @param updated - The fields that were updated.
      * @param item - The data of the newly updated item.
      */
-    virtual auto updated(SceneID const& item_id, UpdatedInfo const& updated, SceneItemInfo const& item) -> void = 0;
+    virtual auto updated(SceneId const& item_id, UpdatedInfo const& updated, SceneItemInfo const& item) -> void = 0;
 
     /**
      * @brief Called when a Scene has removed an item.
      * @param item_id - The id of the item to be deleted.
      * @param items - All items in the scene (including the item to be deleted).
      */
-    virtual auto removed(SceneID const& item_id) -> void = 0;
+    virtual auto removed(SceneId const& item_id) -> void = 0;
 
     /**
      * @brief Called when a Scene has replaced all its items.

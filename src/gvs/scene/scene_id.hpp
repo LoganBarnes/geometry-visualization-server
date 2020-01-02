@@ -31,25 +31,25 @@
 
 namespace gvs {
 
-using SceneID = boost::uuids::uuid;
+using SceneId = boost::uuids::uuid;
 
-auto nil_id() -> SceneID;
+auto nil_id() -> SceneId;
 
-auto generate_scene_id(std::mt19937& generator) -> SceneID;
+auto generate_scene_id(std::mt19937& generator) -> SceneId;
 
-auto to_string(SceneID const& id) -> std::string;
+auto to_string(SceneId const& id) -> std::string;
 
-auto from_string(std::string const& id) -> SceneID;
+auto from_string(std::string const& id) -> SceneId;
 
-std::ostream& operator<<(std::ostream& os, SceneID const& id);
+std::ostream& operator<<(std::ostream& os, SceneId const& id);
 
 } // namespace gvs
 
 namespace std {
 
 template <>
-struct hash<gvs::SceneID> {
-    size_t operator()(gvs::SceneID const& id) const { return boost::uuids::hash_value(id); }
+struct hash<gvs::SceneId> {
+    size_t operator()(gvs::SceneId const& id) const { return boost::uuids::hash_value(id); }
 };
 
 } // namespace std

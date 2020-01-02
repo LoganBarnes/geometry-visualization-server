@@ -42,7 +42,7 @@ auto SceneClient::clear() -> void {
     }
 }
 
-auto SceneClient::actually_add_item(SceneItemInfoSetter&& info) -> util11::Result<SceneID> {
+auto SceneClient::actually_add_item(SceneItemInfoSetter&& info) -> util11::Result<gvs::SceneId> {
     grpc::ClientContext context;
     net::SceneItemInfo  request  = to_proto(info);
     net::SceneIdResult  response = {};
@@ -59,7 +59,7 @@ auto SceneClient::actually_add_item(SceneItemInfoSetter&& info) -> util11::Resul
     return from_proto(response.value());
 }
 
-auto SceneClient::actually_update_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error {
+auto SceneClient::actually_update_item(gvs::SceneId const& item_id, SceneItemInfoSetter&& info) -> util11::Error {
     grpc::ClientContext context;
 
     net::SceneItemInfoWithId request = {};
@@ -80,7 +80,7 @@ auto SceneClient::actually_update_item(SceneID const& item_id, SceneItemInfoSett
     return util11::success();
 }
 
-auto SceneClient::actually_append_to_item(SceneID const& item_id, SceneItemInfoSetter&& info) -> util11::Error {
+auto SceneClient::actually_append_to_item(gvs::SceneId const& item_id, SceneItemInfoSetter&& info) -> util11::Error {
     grpc::ClientContext context;
 
     net::SceneItemInfoWithId request = {};

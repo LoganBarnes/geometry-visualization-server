@@ -33,7 +33,7 @@
 namespace gvs::gui {
 namespace {
 
-auto configure_scene_gui(SceneID const& item_id, scene::Scene* scene) -> bool {
+auto configure_scene_gui(SceneId const& item_id, scene::Scene* scene) -> bool {
     std::string    readable_id;
     GeometryFormat geometry_format;
     mat4           transformation;
@@ -131,7 +131,7 @@ auto configure_scene_gui(SceneID const& item_id, scene::Scene* scene) -> bool {
             }
 
             if (has_children) {
-                std::vector<SceneID> children;
+                std::vector<SceneId> children;
                 scene->get_item_info(item_id, GetChildren(&children));
 
                 for (auto const& child_id : children) {
@@ -173,7 +173,7 @@ auto configure_gui(scene::Scene* scene) -> bool {
         return false;
     }
 
-    std::vector<SceneID> children;
+    std::vector<SceneId> children;
     scene->get_item_info(nil_id(), GetChildren(&children));
 
     bool scene_changed = false;

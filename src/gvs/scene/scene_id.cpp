@@ -30,23 +30,23 @@
 
 namespace gvs {
 
-auto nil_id() -> SceneID {
+auto nil_id() -> SceneId {
     return boost::uuids::nil_uuid();
 }
 
-auto generate_scene_id(std::mt19937& generator) -> SceneID {
+auto generate_scene_id(std::mt19937& generator) -> SceneId {
     return boost::uuids::basic_random_generator<std::mt19937>{generator}();
 }
 
-auto to_string(SceneID const& id) -> std::string {
+auto to_string(SceneId const& id) -> std::string {
     return boost::uuids::to_string(id);
 }
 
-auto from_string(std::string const& id) -> SceneID {
-    return boost::lexical_cast<SceneID>(id);
+auto from_string(std::string const& id) -> SceneId {
+    return boost::lexical_cast<SceneId>(id);
 }
 
-std::ostream& operator<<(std::ostream& os, SceneID const& id) {
+std::ostream& operator<<(std::ostream& os, SceneId const& id) {
     return os << gvs::to_string(id);
 }
 

@@ -101,6 +101,6 @@ using HasTextureCoordinates3d = detail::SceneGeometryChecker<AttributeVector<2>,
 using HasVertexColors3d       = detail::SceneGeometryChecker<AttributeVector<3>, &GeometryInfo::vertex_colors>;
 using HasIndices              = detail::SceneGeometryChecker<std::vector<unsigned>, &GeometryInfo::indices>;
 
-using HasChildren = detail::SceneChecker<std::vector<SceneID>, &SceneItemInfo::children>;
+using HasChildren = detail::SceneChecker<std::vector<SceneId>, &SceneItemInfo::children>;
 
 } // namespace gvs

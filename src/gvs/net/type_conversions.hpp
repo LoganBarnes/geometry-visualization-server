@@ -37,7 +37,7 @@ auto to_proto(std::string const& value) -> google::protobuf::StringValue;
 auto to_proto(bool const& value) -> google::protobuf::BoolValue;
 auto to_proto(float const& value) -> google::protobuf::FloatValue;
 
-auto to_proto(SceneID const& value) -> net::SceneId;
+auto to_proto(gvs::SceneId const& value) -> net::SceneId;
 
 auto to_proto(vec3 const& value) -> net::Vec3;
 auto to_proto(mat4 const& value) -> net::Mat4;
@@ -49,7 +49,7 @@ auto to_proto(Shading const& value) -> net::Shading;
 template <std::size_t N>
 auto to_proto(AttributeVector<N> const& value) -> net::FloatList;
 auto to_proto(std::vector<unsigned> const& value) -> net::UIntList;
-auto to_proto(std::vector<SceneID> const& value) -> net::SceneIdList;
+auto to_proto(std::vector<gvs::SceneId> const& value) -> net::SceneIdList;
 
 auto to_proto(Primitive const& value) -> net::Primitive;
 auto to_proto(GeometryInfoSetter const& value) -> net::GeometryInfo3d;
@@ -65,7 +65,7 @@ auto from_proto(google::protobuf::StringValue const& proto) -> std::string;
 auto from_proto(google::protobuf::BoolValue const& proto) -> bool;
 auto from_proto(google::protobuf::FloatValue const& proto) -> float;
 
-auto from_proto(net::SceneId const& proto) -> SceneID;
+auto from_proto(net::SceneId const& proto) -> gvs::SceneId;
 
 auto from_proto(net::Vec3 const& proto) -> vec3;
 auto from_proto(net::Mat4 const& proto) -> mat4;
@@ -77,7 +77,7 @@ auto from_proto(net::Shading const& proto) -> Shading;
 template <std::size_t N>
 auto from_proto(net::FloatList const& proto) -> AttributeVector<N>;
 auto from_proto(net::UIntList const& proto) -> std::vector<unsigned>;
-auto from_proto(net::SceneIdList const& proto) -> std::vector<SceneID>;
+auto from_proto(net::SceneIdList const& proto) -> std::vector<gvs::SceneId>;
 
 auto from_proto(net::Primitive const& proto) -> Primitive;
 auto from_proto(net::GeometryInfo3d const& proto) -> GeometryInfoSetter;

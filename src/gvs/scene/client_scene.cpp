@@ -38,15 +38,15 @@ auto ClientScene::clear() -> void {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto ClientScene::actually_add_item(SceneItemInfoSetter && /*info*/) -> util11::Result<SceneID> {
+auto ClientScene::actually_add_item(SceneItemInfoSetter && /*info*/) -> util11::Result<SceneId> {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto ClientScene::actually_update_item(SceneID const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
+auto ClientScene::actually_update_item(SceneId const& /*item_id*/, SceneItemInfoSetter && /*info*/) -> util11::Error {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }
 
-auto ClientScene::actually_append_to_item(SceneID const& /*item_id*/, SceneItemInfoSetter && /*info*/)
+auto ClientScene::actually_append_to_item(SceneId const& /*item_id*/, SceneItemInfoSetter && /*info*/)
     -> util11::Error {
     throw std::runtime_error(__FUNCTION__ + std::string(" not yet implemented"));
 }

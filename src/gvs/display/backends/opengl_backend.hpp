@@ -53,9 +53,9 @@ public:
     auto render(CameraPackage const& camera_package) const -> void override;
     auto resize(Magnum::Vector2i const& viewport) -> void override;
 
-    auto added(SceneID const& item_id, SceneItemInfo const& item) -> void override;
-    auto updated(SceneID const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item) -> void override;
-    auto removed(SceneID const& item_id) -> void override;
+    auto added(SceneId const& item_id, SceneItemInfo const& item) -> void override;
+    auto updated(SceneId const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item) -> void override;
+    auto removed(SceneId const& item_id) -> void override;
 
     auto reset_items(SceneItems const& items) -> void override;
 
@@ -78,7 +78,7 @@ public:
 
 private:
     GeneralShader3d                                                 shader_;
-    std::unordered_map<SceneID, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
+    std::unordered_map<SceneId, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 
     Scene3D   scene_;
     Object3D* root_object_ = nullptr;

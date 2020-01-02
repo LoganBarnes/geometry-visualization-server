@@ -45,7 +45,7 @@ auto to_proto(float const& value) -> google::protobuf::FloatValue {
     return proto;
 }
 
-auto to_proto(SceneID const& value) -> net::SceneId {
+auto to_proto(gvs::SceneId const& value) -> net::SceneId {
     net::SceneId proto = {};
     proto.set_value(gvs::to_string(value));
     return proto;
@@ -150,7 +150,7 @@ auto to_proto(std::vector<unsigned> const& value) -> net::UIntList {
     return proto;
 }
 
-auto to_proto(std::vector<SceneID> const& value) -> net::SceneIdList {
+auto to_proto(std::vector<gvs::SceneId> const& value) -> net::SceneIdList {
     net::SceneIdList proto = {};
     for (auto const& scene_id : value) {
         *proto.add_value() = to_proto(scene_id);
@@ -287,7 +287,7 @@ auto from_proto(google::protobuf::FloatValue const& proto) -> float {
     return proto.value();
 }
 
-auto from_proto(net::SceneId const& proto) -> SceneID {
+auto from_proto(net::SceneId const& proto) -> gvs::SceneId {
     return gvs::from_string(proto.value());
 }
 
@@ -390,8 +390,8 @@ auto from_proto(net::UIntList const& proto) -> std::vector<unsigned> {
     return {proto.value().begin(), proto.value().end()};
 }
 
-auto from_proto(net::SceneIdList const& proto) -> std::vector<SceneID> {
-    std::vector<SceneID> scene_ids;
+auto from_proto(net::SceneIdList const& proto) -> std::vector<gvs::SceneId> {
+    std::vector<gvs::SceneId> scene_ids;
 
     for (auto const& scene_id : proto.value()) {
         scene_ids.emplace_back(from_proto(scene_id));
@@ -507,10 +507,10 @@ auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfoSetter {
         value.display_info = std::make_unique<DisplayInfoSetter>(from_proto(proto.display_info()));
     }
     if (proto.has_parent()) {
-        value.parent = std::make_unique<SceneID>(from_proto(proto.parent()));
+        value.parent = std::make_unique<gvs::SceneId>(from_proto(proto.parent()));
     }
     if (proto.has_children()) {
-        value.children = std::make_unique<std::vector<SceneID>>(from_proto(proto.children()));
+        value.children = std::make_unique<std::vector<gvs::SceneId>>(from_proto(proto.children()));
     }
     return value;
 }

@@ -32,7 +32,7 @@
 
 namespace example {
 
-auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneID const& root_id) -> void {
+auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id) -> void {
     {
         scene->add_item(gvs::SetReadableId("Axes"),
                         gvs::SetPositions3d({0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f}),

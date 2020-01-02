@@ -125,12 +125,12 @@ auto OpenglBackend::render(CameraPackage const& camera_package) const -> void {
 
 auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
 
-auto OpenglBackend::added(SceneID const& item_id, SceneItemInfo const& item) -> void {
+auto OpenglBackend::added(SceneId const& item_id, SceneItemInfo const& item) -> void {
     objects_.emplace(item_id, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
     updated(item_id, scene::UpdatedInfo::everything(), item);
 }
 
-auto OpenglBackend::updated(SceneID const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item)
+auto OpenglBackend::updated(SceneId const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item)
     -> void {
     ObjectMeshPackage& mesh_package = *objects_.at(item_id);
 
@@ -173,7 +173,7 @@ auto OpenglBackend::updated(SceneID const& item_id, scene::UpdatedInfo const& up
     }
 }
 
-auto OpenglBackend::removed(SceneID const & /*item_id*/) -> void {}
+auto OpenglBackend::removed(SceneId const & /*item_id*/) -> void {}
 
 auto OpenglBackend::reset_items(SceneItems const& items) -> void {
     // Remove all items from the scene
