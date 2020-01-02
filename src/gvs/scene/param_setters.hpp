@@ -190,7 +190,7 @@ protected:
 /// \brief A "named parameter" wrapper used to set geometry info for items in a StaticScene
 ///
 struct SetPrimitive {
-    explicit SetPrimitive(Primitive value = {}) : data_(std::move(value)) {}
+    explicit SetPrimitive(Primitive value) : data_(std::move(value)) {}
 
     auto operator()(SceneItemInfoSetter* info) -> std::string {
         if (info->geometry) {

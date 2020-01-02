@@ -31,16 +31,20 @@
 namespace gvs {
 namespace paths {
 
+inline std::string slash() {
+    return "@SLASH@";
+}
+
 inline std::string project_root() {
-    return "@PROJECT_SOURCE_DIR@/";
+    return "@NATIVE_PROJECT_SOURCE_DIR@" + slash();
 }
 
 inline std::string resources() {
-    return project_root() + "res/";
+    return project_root() + "res" + slash();
 }
 
 inline std::string shaders() {
-    return project_root() + "src/shaders/";
+    return project_root() + "src"  + slash() + "shaders" + slash();
 }
 
 inline std::string frag_shader_file() {

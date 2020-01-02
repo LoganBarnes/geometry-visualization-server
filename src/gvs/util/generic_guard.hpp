@@ -35,7 +35,7 @@ class GenericGuard;
  * @brief The only way to create a GenericGuard since it has a private constructor
  */
 template <typename Init, typename Destroy, typename... Args>
-auto make_guard(const Init& init_func, Destroy destroy_func, Args&&... args) -> GenericGuard<Init, Destroy, Args...>;
+auto make_guard(Init init_func, Destroy destroy_func, Args&&... args) -> GenericGuard<Init, Destroy, Args...>;
 
 /**
  * @brief Serves as a generic way to handle push/pop style calls using RAII
@@ -86,9 +86,9 @@ private:
     /*
      * GenericGuard() is private so this friend function is the only way to create a GenericGuard
      */
-    friend GenericGuard make_guard<Init, Destroy, Args...>(const Init& init_func, Destroy destroy_func, Args&&... args);
+    friend GenericGuard make_guard<Init, Destroy, Args...>(Init init_func, Destroy destroy_func, Args&&... args);
 
-    explicit GenericGuard(const Init& init_func, Destroy destroy_func, Args&&... args)
+    explicit GenericGuard(Init init_func, Destroy destroy_func, Args&&... args)
         : destroy_func_(destroy_func), arguments_(std::make_tuple(std::forward<Args>(args)...)) {
         call_func(0, init_func, std::make_index_sequence<sizeof...(Args)>());
     }
@@ -108,8 +108,10 @@ private:
 };
 
 template <typename Init, typename Destroy, typename... Args>
-auto make_guard(const Init& init_func, Destroy destroy_func, Args&&... args) -> GenericGuard<Init, Destroy, Args...> {
-    return GenericGuard<Init, Destroy, Args...>(init_func, destroy_func, std::forward<Args>(args)...);
+auto make_guard(Init init_func, Destroy destroy_func, Args&&... args) -> GenericGuard<Init, Destroy, Args...> {
+    return GenericGuard<Init, Destroy, Args...>(std::move(init_func),
+                                                std::move(destroy_func),
+                                                std::forward<Args>(args)...);
 }
 
 } // namespace gvs::util

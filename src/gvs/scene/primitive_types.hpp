@@ -60,7 +60,16 @@ using PrimitiveBase = mapbox::util::variant<Cone, Cube, Cylinder, Plane, Sphere>
 }
 
 struct Primitive : detail::PrimitiveBase {
-    using detail::PrimitiveBase::variant;
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Primitive(Cone shape) : detail::PrimitiveBase (shape) {}
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Primitive(Cube shape) : detail::PrimitiveBase (shape) {}
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Primitive(Cylinder shape) : detail::PrimitiveBase (shape) {}
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Primitive(Plane shape) : detail::PrimitiveBase (shape) {}
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Primitive(Sphere shape) : detail::PrimitiveBase (shape) {}
 };
 
 } // namespace gvs

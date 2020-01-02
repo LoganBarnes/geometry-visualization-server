@@ -42,7 +42,7 @@ public:
     virtual auto resize(Magnum::Vector2i const& viewport) -> void = 0;
 
     /// \brief Sets the backend used to display the rendering of the items
-    virtual auto set_backend(std::unique_ptr<display::backends::BackendInterface> backend) -> SceneDisplay& = 0;
+    //virtual auto set_backend(std::unique_ptr<backends::BackendInterface> backend) -> SceneDisplay& = 0;
 };
 
 inline SceneDisplay::~SceneDisplay() = default;

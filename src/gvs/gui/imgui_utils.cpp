@@ -25,6 +25,9 @@
 // external
 #include <imgui_internal.h>
 
+// standard
+#include <algorithm>
+
 namespace gvs::gui {
 
 Disable::Guard::Guard(bool disable) : disable_(disable) {

@@ -56,10 +56,6 @@ function(gvs_add_library target cxx_standard)
             COMPILER_LAUNCHER "${GVS_CCACHE_PROGRAM}"
             # Clang-Tidy
             CXX_CLANG_TIDY "${GVS_CLANG_TIDY}"
-            # Binary locations
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     )
 endfunction()
 

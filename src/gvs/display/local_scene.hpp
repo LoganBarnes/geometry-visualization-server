@@ -39,7 +39,7 @@ public:
     auto render(CameraPackage const& camera_package) const -> void override;
     auto resize(Magnum::Vector2i const& viewport) -> void override;
 
-    auto set_backend(std::unique_ptr<display::backends::BackendInterface> backend) -> LocalScene& override;
+    //auto set_backend(std::unique_ptr<backends::BackendInterface> backend) -> LocalScene& override;
     /*
      * End `SceneDisplay` functions
      */

@@ -25,12 +25,17 @@
 // external
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/nil_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 namespace gvs {
 
 auto nil_id() -> SceneID {
     return boost::uuids::nil_uuid();
+}
+
+auto generate_scene_id(std::mt19937& generator) -> SceneID {
+    return boost::uuids::basic_random_generator<std::mt19937>{generator}();
 }
 
 auto to_string(SceneID const& id) -> std::string {

@@ -25,6 +25,10 @@
 // external
 #include <mapbox/variant.hpp>
 
+// standard
+#include <string>
+#include <stdexcept>
+
 namespace gvs {
 namespace util11 {
 
@@ -49,7 +53,10 @@ inline auto success() -> Error {
  */
 template <typename T, typename E = Error, typename = typename std::enable_if<!std::is_same<T, E>::value>::type>
 struct Result : mapbox::util::variant<T, E> {
-    using mapbox::util::variant<T, E>::variant;
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Result(T v) : mapbox::util::variant<T, E>(std::move(v)) {}
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Result(E e) : mapbox::util::variant<T, E>(std::move(e)) {}
 
     struct HasValueVisitor {
         auto operator()(T const&) const -> bool { return true; }

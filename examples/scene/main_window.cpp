@@ -82,7 +82,7 @@ MainWindow::MainWindow(const Arguments& arguments)
     {
         std::mt19937                          gen{std::random_device{}()};
         std::uniform_real_distribution<float> u_dist(-1.f, 1.f);
-        std::uniform_real_distribution<float> theta_dist(0.f, 2.f * float(M_PI));
+        std::uniform_real_distribution<float> theta_dist(0.f, 2.f * pi);
 
         float u;
         float theta;

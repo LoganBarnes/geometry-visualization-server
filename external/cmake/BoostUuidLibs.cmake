@@ -22,7 +22,7 @@
 ##########################################################################################
 function(add_boost_library name)
     if (${ARGC} GREATER 1)
-        set(alias ${ARG1})
+        set(alias ${ARGV1})
     else ()
         set(alias ${name})
     endif ()
@@ -46,6 +46,7 @@ function(add_boost_library name)
 
 endfunction()
 
+message("-- Manually downloading Boost UUID libs (This might take a while)")
 # All the boost libs needed to use the boost uuid "header only" library
 add_boost_library(config)
 add_boost_library(type_traits)
@@ -102,3 +103,11 @@ target_link_libraries(boost_uuid INTERFACE
         boost_tti
         boost_function_types
         )
+
+if (MSVC)
+    add_boost_library(winapi)
+
+    target_link_libraries(boost_uuid INTERFACE
+            boost_winapi
+            )
+endif ()

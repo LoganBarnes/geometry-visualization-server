@@ -83,6 +83,18 @@ endif ()
 cmake_policy(SET CMP0009 NEW)
 
 set(AUTO_GENERATION_MESSAGE "***This file is auto generated. If you modify it the changes will be overwritten.***")
+
+# Fix path depending on platform
+# TODO: Use std::filesystem when it is available on most compilers so we don't have to deal with this
+file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}" NATIVE_PROJECT_SOURCE_DIR)
+string(REPLACE "\\" "\\\\" NATIVE_PROJECT_SOURCE_DIR ${NATIVE_PROJECT_SOURCE_DIR})
+
+if (MSVC)
+    set(SLASH "\\\\")
+else ()
+    set(SLASH "/")
+endif ()
+
 configure_file(${CMAKE_CURRENT_LIST_DIR}/src/gvs_paths.hpp.in ${CMAKE_BINARY_DIR}/generated/gvs/gvs_paths.hpp)
 
 #############
@@ -121,9 +133,6 @@ if (GVS_ENABLE_NETWORKING)
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             POSITION_INDEPENDENT_CODE ON
-            # Binary locations
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     )
 
     ####################

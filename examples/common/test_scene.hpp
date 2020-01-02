@@ -28,6 +28,8 @@
 
 namespace example {
 
+constexpr auto pi = 3.14159265358979323846264338327950288f;
+
 auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneID const& root_id = gvs::nil_id()) -> void;
 
 }

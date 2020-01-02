@@ -25,6 +25,9 @@
 // external
 #include <doctest/doctest.h>
 
+// standard
+#include <string>
+
 namespace {
 
 bool push_called = false;
@@ -69,61 +72,61 @@ TEST_CASE("[util] generic_guard") {
     SUBCASE("No lambdas") {
 
         SUBCASE("void push, void pop") {
-            auto guard = util::make_guard(&void_push, &void_pop);
+            auto guard = util::make_guard(void_push, void_pop);
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("float push, void pop") {
-            auto guard = util::make_guard(&float_push, &void_pop, 0.f);
+            auto guard = util::make_guard(float_push, void_pop, 0.f);
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("void push, float pop") {
-            auto guard = util::make_guard(&void_push, &float_pop, 0.f);
+            auto guard = util::make_guard(void_push, float_pop, 0.f);
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("float push, float pop") {
-            auto guard = util::make_guard(&float_push, &float_pop, 0.f);
+            auto guard = util::make_guard(float_push, float_pop, 0.f);
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("string push, void pop") {
-            auto guard = util::make_guard(&string_push, &void_pop, "Will this compile?");
+            auto guard = util::make_guard(string_push, void_pop, "Will this compile?");
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("void push, string pop") {
-            auto guard = util::make_guard(&void_push, &string_pop, "Of course it will compile!");
+            auto guard = util::make_guard(void_push, string_pop, "Of course it will compile!");
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("string push, string pop") {
-            auto guard = util::make_guard(&string_push, &string_pop, std::string("This will too!"));
+            auto guard = util::make_guard(string_push, string_pop, std::string("This will too!"));
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("int and string push, void pop") {
-            auto guard = util::make_guard(&int_and_string_push, &void_pop, 3, "Multi-arg?");
+            auto guard = util::make_guard(int_and_string_push, void_pop, 3, "Multi-arg?");
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("void push, int and string pop") {
-            auto guard = util::make_guard(&void_push, &int_and_string_pop, 7, "");
+            auto guard = util::make_guard(void_push, int_and_string_pop, 7, "");
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("int and string push, int and string pop") {
-            auto guard = util::make_guard(&int_and_string_push, &int_and_string_pop, 21, std::string());
+            auto guard = util::make_guard(int_and_string_push, int_and_string_pop, 21, std::string());
             CHECK(push_called);
             CHECK(!pop_called);
         }
@@ -132,26 +135,26 @@ TEST_CASE("[util] generic_guard") {
     SUBCASE("With lambdas") {
 
         SUBCASE("lambda push, void pop") {
-            auto guard = util::make_guard([] { void_push(); }, &void_pop);
+            auto guard = util::make_guard([] { void_push(); }, void_pop);
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("lambda push, float pop") {
-            auto guard = util::make_guard([] { float_push(0.f); }, &float_pop, 0.f);
+            auto guard = util::make_guard([] { float_push(0.f); }, float_pop, 0.f);
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("void push, lamda pop") {
-            auto guard = util::make_guard(&void_push, [] { float_pop(0.f); });
+            auto guard = util::make_guard(void_push, [] { float_pop(0.f); });
             CHECK(push_called);
             CHECK(!pop_called);
         }
 
         SUBCASE("float push, lambda pop") {
             auto guard = util::make_guard(
-                &float_push, [] { void_pop(); }, 0.f);
+                float_push, [] { void_pop(); }, 0.f);
             CHECK(push_called);
             CHECK(!pop_called);
         }

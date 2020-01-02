@@ -22,8 +22,10 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "imgui_magnum_application.hpp"
 
+// project
 #include "gvs/vis-client/app/imgui_theme.hpp"
 
+// external
 #include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/Context.h>
 #include <Magnum/GL/Renderer.h>
@@ -34,6 +36,9 @@
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <imgui.h>
+
+// standard
+#include <algorithm>
 
 static void initialize_resources() {
     CORRADE_RESOURCE_INITIALIZE(gvs_client_RESOURCES)

@@ -147,7 +147,10 @@ using GeometryBase = mapbox::util::variant<GeometryInfoSetter, Primitive>;
 }
 
 struct Geometry : detail::GeometryBase {
-    using detail::GeometryBase::variant;
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Geometry(GeometryInfoSetter setter) : detail::GeometryBase(std::move(setter)) {}
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Geometry(Primitive primitive) : detail::GeometryBase(std::move(primitive)) {}
 };
 
 struct SceneItemInfoSetter {

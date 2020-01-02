@@ -27,9 +27,6 @@
 #include "gvs/util/container_util.hpp"
 #include "scene_info_helpers.hpp"
 
-// external
-#include <boost/uuid/random_generator.hpp>
-
 namespace gvs::display {
 
 LocalScene::LocalScene() : generator_(std::random_device{}()), backend_(std::make_unique<backends::OpenglBackend>()) {
@@ -50,10 +47,10 @@ auto LocalScene::resize(Magnum::Vector2i const& viewport) -> void {
     backend_->resize(viewport);
 }
 
-auto LocalScene::set_backend(std::unique_ptr<backends::BackendInterface> backend) -> LocalScene& {
-    backend_ = std::move(backend);
-    return *this;
-}
+//auto LocalScene::set_backend(std::unique_ptr<backends::BackendInterface> backend) -> LocalScene& {
+//    backend_ = std::move(backend);
+//    return *this;
+//}
 
 auto LocalScene::set_seed(std::random_device::result_type seed) -> LocalScene& {
     generator_ = std::mt19937(seed);
@@ -70,7 +67,7 @@ auto LocalScene::clear() -> void {
 }
 
 auto LocalScene::actually_add_item(SceneItemInfoSetter&& new_info) -> util11::Result<SceneID> {
-    auto item_id = boost::uuids::basic_random_generator{generator_}();
+    auto item_id = generate_scene_id(generator_);
 
     SceneItemInfo info;
 

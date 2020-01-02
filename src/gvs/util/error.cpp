@@ -107,16 +107,32 @@ auto Error::operator!=(const Error& other) const -> bool {
 
 } // namespace gvs::util
 
+#include <iostream>
+
+namespace {
+
+auto build_expected_message(std::string const& file_prefix, int const& line_number, std::string const& error_message) {
+    // TODO: use std::filesystem when it is available on most compilers
+    using namespace gvs::paths;
+    auto prefix    = (file_prefix.empty() ? std::string() : file_prefix + slash());
+    auto this_file = "src" + slash() + "gvs" + slash() + "util" + slash() + "error.cpp";
+    return "[" + prefix + this_file + ":" + std::to_string(line_number) + "] " + error_message;
+}
+
+} // namespace
+
 TEST_CASE("[util] check error helpers") {
     CHECK(MAKE_ERROR("Error message").error_message() == "Error message");
     CHECK(MAKE_ERROR("blarg") == MAKE_ERROR("blarg"));
 
+#ifndef _MSC_VER
     INFO("project_root():" + gvs::paths::project_root());
     INFO("__FILE__:      " + std::string(__FILE__));
+#endif
 
     auto error             = MAKE_ERROR("Error message");
-    auto expected_message1 = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
-    auto expected_message2 = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 2) + "] Error message";
+    auto expected_message1 = build_expected_message("..", __LINE__ - 1, "Error message");
+    auto expected_message2 = build_expected_message("", __LINE__ - 2, "Error message");
 
     CHECK((error.debug_error_message() == expected_message1 || error.debug_error_message() == expected_message2));
     CHECK(error.severity() == gvs::util::Error::Severity::Error);
@@ -126,12 +142,14 @@ TEST_CASE("[util] check warning helpers") {
     CHECK(MAKE_WARNING("Error message").error_message() == "Error message");
     CHECK(MAKE_WARNING("blarg") == MAKE_WARNING("blarg"));
 
+#ifndef _MSC_VER
     INFO("project_root():" + gvs::paths::project_root());
     INFO("__FILE__:      " + std::string(__FILE__));
+#endif
 
     auto warning           = MAKE_WARNING("Error message");
-    auto expected_message1 = "[../src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 1) + "] Error message";
-    auto expected_message2 = "[src/gvs/util/error.cpp:" + std::to_string(__LINE__ - 2) + "] Error message";
+    auto expected_message1 = build_expected_message("..", __LINE__ - 1, "Error message");
+    auto expected_message2 = build_expected_message("", __LINE__ - 2, "Error message");
 
     CHECK((warning.debug_error_message() == expected_message1 || warning.debug_error_message() == expected_message2));
     CHECK(warning.severity() == gvs::util::Error::Severity::Warning);

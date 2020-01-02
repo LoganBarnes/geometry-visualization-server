@@ -27,12 +27,15 @@
 
 // standard
 #include <iostream>
+#include <random>
 
 namespace gvs {
 
 using SceneID = boost::uuids::uuid;
 
 auto nil_id() -> SceneID;
+
+auto generate_scene_id(std::mt19937& generator) -> SceneID;
 
 auto to_string(SceneID const& id) -> std::string;
 
