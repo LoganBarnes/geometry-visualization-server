@@ -26,7 +26,9 @@
 #include "magnum_conversions.hpp"
 
 // external
+#include <Magnum/Math/Color.h>
 #include <Magnum/Math/Vector3.h>
+#include <Magnum/Primitives/Axis.h>
 #include <Magnum/Primitives/Cone.h>
 #include <Magnum/Primitives/Cube.h>
 #include <Magnum/Primitives/Cylinder.h>
@@ -39,6 +41,26 @@ namespace {
 
 struct PrimitiveVisitor {
     SceneItemInfo* info;
+
+    auto operator()(Axes const&) const -> void {
+        auto axes_mesh = Magnum::Primitives::axis3D();
+
+        auto const& colors4 = axes_mesh.colors(0);
+
+        std::vector<Magnum::Color3> colors3;
+        colors3.reserve(colors4.size());
+        for (auto const& color4 : colors4) {
+            colors3.emplace_back(color4.r(), color4.g(), color4.b());
+        }
+
+        info->geometry_info                = {};
+        info->geometry_info.positions      = std::move(axes_mesh.positions(0));
+        info->geometry_info.vertex_colors  = std::move(colors3);
+        info->geometry_info.indices        = std::move(axes_mesh.indices());
+        info->display_info.geometry_format = from_magnum(axes_mesh.primitive());
+        info->display_info.coloring        = gvs::Coloring::VertexColors;
+        info->display_info.shading         = gvs::Shading::UniformColor;
+    }
 
     auto operator()(Cone const& cone) const -> void {
         auto cone_mesh = Magnum::Primitives::coneSolid(cone.rings, cone.segments, cone.half_length);

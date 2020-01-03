@@ -20,43 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-syntax = "proto3";
+#pragma once
 
-package gvs.net;
+// project
+#include "gvs/display/local_scene.hpp"
+#include "gvs/gui/error_alert.hpp"
+#include "gvs/vis-client/app/imgui_magnum_application.hpp"
 
-message Axes {
-}
+namespace example {
 
-message Cone {
-    float half_length = 1;
-    uint32 rings = 2;
-    uint32 segments = 3;
-}
+class MainWindow : public gvs::vis::ImGuiMagnumApplication {
+public:
+    explicit MainWindow(const Arguments& arguments);
+    ~MainWindow() override;
 
-message Cube {
-}
+private:
+    void update() override;
+    void render(const gvs::display::CameraPackage& camera_package) const override;
+    void configure_gui() override;
 
-message Cylinder {
-    float half_length = 1;
-    uint32 rings = 2;
-    uint32 segments = 3;
-}
+    void resize(const Magnum::Vector2i& viewport) override;
 
-message Plane {
-}
+    // General Info
+    std::string gl_version_str_;
+    std::string gl_renderer_str_;
 
-message Sphere {
-    uint32 rings = 1;
-    uint32 segments = 2;
-}
+    // Errors
+    gvs::gui::ErrorAlert error_alert_;
 
-message Primitive {
-    oneof type {
-        Axes axes = 1;
-        Cone cone = 2;
-        Cube cube = 3;
-        Cylinder cylinder = 4;
-        Plane plane = 5;
-        Sphere sphere = 6;
-    }
-}
+    // Scene
+    gvs::display::LocalScene scene_;
+
+    // Shapes
+    gvs::SceneId shapes_root_;
+    gvs::mat4    shapes_transform_ = gvs::identity_mat4;
+
+    //    gvs::SceneId intersect_point_;
+    //    gvs::SceneId intersected_item_ = gvs::nil_id();
+};
+
+} // namespace example

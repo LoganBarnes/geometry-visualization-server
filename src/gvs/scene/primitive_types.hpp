@@ -27,6 +27,10 @@
 
 namespace gvs {
 
+/// \brief A set of unit length axes at the origin.
+///        <R,G,B> corresponds to <X,Y,Z>
+struct Axes {};
+
 /// \brief A cone of with a base radius of 1.
 ///        The center is at the origin and the rotational axis is along Y.
 struct Cone {
@@ -56,10 +60,12 @@ struct Sphere {
 };
 
 namespace detail {
-using PrimitiveBase = mapbox::util::variant<Cone, Cube, Cylinder, Plane, Sphere>;
+using PrimitiveBase = mapbox::util::variant<Axes, Cone, Cube, Cylinder, Plane, Sphere>;
 }
 
 struct Primitive : detail::PrimitiveBase {
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+    Primitive(Axes shape) : detail::PrimitiveBase(shape) {}
     // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
     Primitive(Cone shape) : detail::PrimitiveBase(shape) {}
     // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)

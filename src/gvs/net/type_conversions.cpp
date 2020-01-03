@@ -163,6 +163,7 @@ auto to_proto(Primitive const& value) -> net::Primitive {
     struct PrimitiveVisitor {
         net::Primitive* primitive;
 
+        auto operator()(Axes const&) const -> void { primitive->mutable_axes(); }
         auto operator()(Cone const& cone) const -> void {
             primitive->mutable_cone()->set_half_length(cone.half_length);
             primitive->mutable_cone()->set_rings(cone.rings);
@@ -466,6 +467,10 @@ auto from_proto<std::unordered_set>(net::SceneIdList const& proto) -> std::unord
 
 auto from_proto(net::Primitive const& proto) -> Primitive {
     switch (proto.type_case()) {
+
+    case net::Primitive::kAxes: {
+        return Axes{};
+    }
     case net::Primitive::kCone: {
         Cone cone        = {};
         cone.half_length = proto.cone().half_length();
