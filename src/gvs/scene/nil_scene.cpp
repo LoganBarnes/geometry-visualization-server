@@ -28,6 +28,10 @@ namespace scene {
 NilScene::NilScene()  = default;
 NilScene::~NilScene() = default;
 
+auto NilScene::item_ids() const -> std::unordered_set<SceneId> {
+    return {};
+}
+
 auto NilScene::clear() -> NilScene& {
     return *this;
 }
@@ -50,9 +54,7 @@ auto NilScene::actually_append_to_item(gvs::SceneId const& /*item_id*/, gvs::Spa
     return util11::success();
 }
 
-auto NilScene::items() const -> gvs::SceneItems const& {
-    return empty_item_list_;
-}
+void NilScene::actually_get_item_info(SceneId const& /*item_id*/, InfoGetterFunc /*info_getter*/) const {}
 
 } // namespace scene
 } // namespace gvs

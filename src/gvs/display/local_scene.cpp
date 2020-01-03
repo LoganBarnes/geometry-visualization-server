@@ -28,6 +28,9 @@
 #include "scene_core.hpp"
 #include "scene_info_helpers.hpp"
 
+// standard
+#include <algorithm>
+
 namespace gvs::display {
 
 LocalScene::LocalScene() {
@@ -44,6 +47,10 @@ auto LocalScene::render(CameraPackage const& camera_package) const -> void {
 
 auto LocalScene::resize(Magnum::Vector2i const& viewport) -> void {
     display_->resize(viewport);
+}
+
+auto LocalScene::item_ids() const -> std::unordered_set<SceneId> {
+    return core_scene_->item_ids();
 }
 
 auto LocalScene::clear() -> LocalScene& {
@@ -80,8 +87,10 @@ auto LocalScene::actually_append_to_item(SceneId const& item_id, SparseSceneItem
     return util11::success();
 }
 
-auto LocalScene::items() const -> SceneItems const& {
-    return core_scene_->items();
+auto LocalScene::actually_get_item_info(const gvs::SceneId& item_id, gvs::scene::InfoGetterFunc info_getter) const
+    -> void {
+    auto const& item = core_scene_->items().at(item_id);
+    info_getter(item);
 }
 
 } // namespace gvs::display

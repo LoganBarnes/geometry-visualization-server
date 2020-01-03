@@ -27,6 +27,9 @@
 #include "gvs/scene/types.hpp"
 #include "gvs/util/result.hpp"
 
+// standard
+#include <unordered_set>
+
 namespace gvs::display {
 
 class SceneCore {
@@ -51,6 +54,9 @@ public:
 
     /// \brief The map of all items in the scene
     auto items() const -> SceneItems const&;
+
+    /// \brief The ids of all items in the scene
+    auto item_ids() const -> std::unordered_set<SceneId>;
 
 private:
     scene::SceneUpdateHandler& update_handler_; ///< Handles scene updates in an implementation specific way

@@ -27,6 +27,10 @@
 #include "gvs/scene/scene_update_handler.hpp"
 #include "scene_info_helpers.hpp"
 
+// standard
+#include <algorithm>
+#include <iterator>
+
 namespace gvs::display {
 
 SceneCore::SceneCore(scene::SceneUpdateHandler& update_handler)
@@ -103,6 +107,14 @@ auto SceneCore::clear() -> SceneCore& {
 
 auto SceneCore::items() const -> SceneItems const& {
     return items_;
+}
+
+auto SceneCore::item_ids() const -> std::unordered_set<SceneId> {
+    std::unordered_set<SceneId> ids;
+    std::transform(items_.begin(), items_.end(), std::inserter(ids, ids.end()), [](auto const& id_and_item) {
+        return id_and_item.first;
+    });
+    return ids;
 }
 
 } // namespace gvs::display

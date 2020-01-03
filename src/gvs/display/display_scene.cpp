@@ -46,6 +46,10 @@ DisplayScene::~DisplayScene() {
     display_thread_.join();
 }
 
+auto DisplayScene::item_ids() const -> std::unordered_set<SceneId> {
+    return core_scene_->use_safely([](auto const& core_scene) { return core_scene.item_ids(); });
+}
+
 auto DisplayScene::clear() -> DisplayScene& {
     core_scene_->use_safely([](auto& core_scene) mutable { core_scene.clear(); });
     return *this;
@@ -87,8 +91,10 @@ auto DisplayScene::actually_append_to_item(SceneId const& item_id, SparseSceneIt
     });
 }
 
-auto DisplayScene::items() const -> SceneItems const& {
-    return core_scene_->unsafe_data().items();
+void DisplayScene::actually_get_item_info(SceneId const& item_id, scene::InfoGetterFunc info_getter) const {
+    core_scene_->use_safely([item_id, info_getter = std::move(info_getter)](auto const& core_scene) {
+        info_getter(core_scene.items().at(item_id));
+    });
 }
 
 void DisplayScene::added(SceneId const& item_id, SceneItemInfo const& item) {

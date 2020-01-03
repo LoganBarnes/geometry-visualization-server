@@ -34,31 +34,58 @@ bool ClientScene::connected() const {
     return !!channel_;
 }
 
-auto ClientScene::clear() -> ClientScene& {
-    if (channel_) {
-        grpc::ClientContext     context;
-        google::protobuf::Empty empty;
+auto ClientScene::item_ids() const -> std::unordered_set<gvs::SceneId> {
+    if (!channel_) {
+        throw std::runtime_error("Client not connected");
+    }
 
-        auto status = stub_->Clear(&context, empty, &empty);
-        if (!status.ok()) {
-            throw std::runtime_error(status.error_message());
-        }
+    grpc::ClientContext     context;
+    google::protobuf::Empty request;
+    SceneIdList             response = {};
+
+    auto status = stub_->GetItemIds(&context, request, &response);
+    if (!status.ok()) {
+        throw std::runtime_error(status.error_message());
+    }
+
+    std::unordered_set<gvs::SceneId> ids;
+    std::transform(response.value().begin(),
+                   response.value().end(),
+                   std::inserter(ids, ids.end()),
+                   [](SceneId const& id) { return from_proto(id); });
+
+    return ids;
+}
+
+auto ClientScene::clear() -> ClientScene& {
+    if (!channel_) {
+        throw std::runtime_error("Client not connected");
+    }
+
+    grpc::ClientContext     context;
+    google::protobuf::Empty empty;
+
+    auto status = stub_->Clear(&context, empty, &empty);
+    if (!status.ok()) {
+        throw std::runtime_error(status.error_message());
     }
     return *this;
 }
 
 auto ClientScene::set_seed(unsigned seed) -> ClientScene& {
-    if (channel_) {
-        grpc::ClientContext     context;
-        net::Seed               request  = {};
-        google::protobuf::Empty response = {};
+    if (!channel_) {
+        throw std::runtime_error("Client not connected");
+    }
 
-        request.set_value(seed);
+    grpc::ClientContext     context;
+    net::Seed               request  = {};
+    google::protobuf::Empty response = {};
 
-        auto status = stub_->SetSeed(&context, request, &response);
-        if (!status.ok()) {
-            throw std::runtime_error(status.error_message());
-        }
+    request.set_value(seed);
+
+    auto status = stub_->SetSeed(&context, request, &response);
+    if (!status.ok()) {
+        throw std::runtime_error(status.error_message());
     }
     return *this;
 }
@@ -135,31 +162,26 @@ auto ClientScene::actually_append_to_item(gvs::SceneId const& item_id, gvs::Spar
     return util11::success();
 }
 
-auto ClientScene::items() const -> gvs::SceneItems const& {
+auto ClientScene::actually_get_item_info(gvs::SceneId const& item_id, scene::InfoGetterFunc info_getter) const -> void {
+
     if (!channel_) {
-        return most_recent_item_list_;
+        throw std::runtime_error("Client not connected");
     }
 
-    grpc::ClientContext     context;
-    google::protobuf::Empty empty;
+    grpc::ClientContext      context;
+    net::SceneId             request  = to_proto(item_id);
+    net::SceneItemInfoResult response = {};
 
-    auto item_reader = stub_->GetItems(&context, empty);
-
-    most_recent_item_list_.clear();
-
-    net::SceneItemInfoWithId info_with_id = {};
-    while (item_reader->Read(&info_with_id)) {
-        auto&& id   = from_proto(info_with_id.id());
-        auto&& info = from_proto(info_with_id.info());
-        most_recent_item_list_.emplace(id, info);
-    }
-
-    auto status = item_reader->Finish();
+    auto status = stub_->GetItemInfo(&context, request, &response);
     if (!status.ok()) {
         throw std::runtime_error(status.error_message());
     }
 
-    return most_recent_item_list_;
+    if (response.has_errors()) {
+        throw std::runtime_error(response.errors().error_msg());
+    }
+
+    info_getter(from_proto(response.value()));
 }
 
 } // namespace net

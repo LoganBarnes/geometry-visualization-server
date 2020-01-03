@@ -46,15 +46,16 @@ public:
     /*
      * Start `Scene` functions
      */
-    auto clear() -> LocalScene& override;
-    auto set_seed(unsigned seed) -> LocalScene& override;
+    [[nodiscard]] auto item_ids() const -> std::unordered_set<SceneId> override;
+    auto               clear() -> LocalScene& override;
+    auto               set_seed(unsigned seed) -> LocalScene& override;
 
 private:
     auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId> override;
     auto actually_update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
     auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
 
-    [[nodiscard]] auto items() const -> SceneItems const& override;
+    void actually_get_item_info(SceneId const& item_id, scene::InfoGetterFunc info_getter) const override;
     /*
      * End `Scene` functions
      */

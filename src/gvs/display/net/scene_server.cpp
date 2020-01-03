@@ -64,9 +64,9 @@ grpc::Status SceneServer::AppendToItem(grpc::ServerContext*                     
     return Service::AppendToItem(context, request, response);
 }
 
-grpc::Status SceneServer::GetItemInfo(grpc::ServerContext*     context,
-                                      const gvs::net::SceneId* request,
-                                      gvs::net::SceneItemInfo* response) {
+grpc::Status SceneServer::GetItemInfo(grpc::ServerContext*           context,
+                                      const gvs::net::SceneId*       request,
+                                      gvs::net::SceneItemInfoResult* response) {
     return Service::GetItemInfo(context, request, response);
 }
 
@@ -76,10 +76,10 @@ grpc::Status SceneServer::Clear(grpc::ServerContext*             context,
     return Service::Clear(context, request, response);
 }
 
-grpc::Status SceneServer::GetItems(grpc::ServerContext*                               context,
-                                   const ::google::protobuf::Empty*                   request,
-                                   grpc::ServerWriter<gvs::net::SceneItemInfoWithId>* writer) {
-    return Service::GetItems(context, request, writer);
+grpc::Status SceneServer::GetItemIds(grpc::ServerContext*             context,
+                                     const ::google::protobuf::Empty* request,
+                                     gvs::net::SceneIdList*           response) {
+    return Service::GetItemIds(context, request, response);
 }
 
 grpc::Status

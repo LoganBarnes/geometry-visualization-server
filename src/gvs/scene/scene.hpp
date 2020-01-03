@@ -28,9 +28,12 @@
 
 // standard
 #include <random>
+#include <unordered_set>
 
 namespace gvs {
 namespace scene {
+
+using InfoGetterFunc = std::function<void(const SceneItemInfo&)>;
 
 class Scene {
 public:
@@ -96,13 +99,13 @@ public:
     template <typename... Functors>
     auto safe_get_item_info(SceneId const& item_id, Functors&&... functors) -> util11::Error;
 
-    auto size() const -> std::size_t;
-    auto empty() const -> bool;
+    /// \brief The ids of all items in the scene
+    virtual auto item_ids() const -> std::unordered_set<SceneId> = 0;
 
-    auto begin() const -> SceneItems::const_iterator;
-    auto end() const -> SceneItems::const_iterator;
+    /// \brief Clear all items in the scene
+    virtual auto clear() -> Scene& = 0;
 
-    virtual auto clear() -> Scene&                 = 0;
+    /// \brief Set the seed used to generate SceneIds
     virtual auto set_seed(unsigned seed) -> Scene& = 0;
 
 private:
@@ -115,8 +118,8 @@ private:
     /// \brief Updates the specified item by appending all new geometry
     virtual auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error = 0;
 
-    /// \brief The map of all items in the scene
-    virtual auto items() const -> SceneItems const& = 0;
+    /// \brief Updates the specified item by appending all new geometry
+    virtual auto actually_get_item_info(SceneId const& item_id, InfoGetterFunc info_getter) const -> void = 0;
 };
 
 namespace detail {
@@ -186,9 +189,10 @@ auto Scene::safe_append_to_item(SceneId const& item_id, Functors&&... functors) 
 
 template <typename... Functors>
 auto Scene::safe_get_item_info(SceneId const& item_id, Functors&&... functors) -> util11::Error {
-    auto const& item    = items().at(item_id);
-    int         dummy[] = {(functors(item), 0)...};
-    (void)dummy;
+    actually_get_item_info(item_id, [&](SceneItemInfo const& item) {
+        int dummy[] = {(functors(item), 0)...};
+        (void)dummy;
+    });
 
     return util11::success();
 }

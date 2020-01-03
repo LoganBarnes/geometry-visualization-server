@@ -60,6 +60,7 @@ public:
     /*
      * Start `Scene` functions
      */
+    auto item_ids() const -> std::unordered_set<gvs::SceneId> override;
     auto clear() -> ClientScene& override;
     auto set_seed(unsigned seed) -> ClientScene& override;
 
@@ -69,15 +70,13 @@ private:
     auto actually_append_to_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info)
         -> util11::Error override;
 
-    auto items() const -> gvs::SceneItems const& override;
+    auto actually_get_item_info(gvs::SceneId const& item_id, scene::InfoGetterFunc info_getter) const -> void override;
     /*
      * End `Scene` functions
      */
 
     std::shared_ptr<grpc::Channel>    channel_;
     std::unique_ptr<net::Scene::Stub> stub_;
-
-    mutable gvs::SceneItems most_recent_item_list_;
 };
 
 template <typename Rep, typename Period>

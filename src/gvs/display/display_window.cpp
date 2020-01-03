@@ -56,7 +56,7 @@ DisplayWindow::DisplayWindow(DisplayScene& parent_scene)
                                       .setWindowFlags(Configuration::WindowFlag::Resizable)),
       gl_version_str_(GL::Context::current().versionString()),
       gl_renderer_str_(GL::Context::current().rendererString()),
-      parent_scene_(parent_scene), // Not exactly thread save :/
+      parent_scene_(parent_scene),
       scene_backend_(std::make_unique<backends::OpenglBackend>()) {}
 
 DisplayWindow::~DisplayWindow() = default;

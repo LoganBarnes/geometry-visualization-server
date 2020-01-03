@@ -43,6 +43,7 @@ public:
     /*
      * Start `Scene` functions
      */
+    auto item_ids() const -> std::unordered_set<SceneId> override;
     auto clear() -> NilScene& override;
     auto set_seed(unsigned seed) -> NilScene& override;
 
@@ -51,12 +52,10 @@ private:
     auto actually_update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
     auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
 
-    auto items() const -> SceneItems const& override;
+    void actually_get_item_info(SceneId const& item_id, InfoGetterFunc info_getter) const override;
     /*
      * End `Scene` functions
      */
-
-    SceneItems empty_item_list_;
 };
 
 } // namespace scene

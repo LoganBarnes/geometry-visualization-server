@@ -50,17 +50,17 @@ public:
                               const gvs::net::SparseSceneItemInfoWithId* request,
                               gvs::net::Result*                          response) override;
 
-    grpc::Status GetItemInfo(grpc::ServerContext*     context,
-                             const gvs::net::SceneId* request,
-                             gvs::net::SceneItemInfo* response) override;
+    grpc::Status GetItemInfo(grpc::ServerContext*           context,
+                             const gvs::net::SceneId*       request,
+                             gvs::net::SceneItemInfoResult* response) override;
 
     grpc::Status Clear(grpc::ServerContext*             context,
                        const ::google::protobuf::Empty* request,
                        ::google::protobuf::Empty*       response) override;
 
-    grpc::Status GetItems(grpc::ServerContext*                               context,
-                          const ::google::protobuf::Empty*                   request,
-                          grpc::ServerWriter<gvs::net::SceneItemInfoWithId>* writer) override;
+    grpc::Status GetItemIds(grpc::ServerContext*             context,
+                            const ::google::protobuf::Empty* request,
+                            gvs::net::SceneIdList*           response) override;
 
     grpc::Status
     SetSeed(grpc::ServerContext* context, const gvs::net::Seed* request, ::google::protobuf::Empty* response) override;

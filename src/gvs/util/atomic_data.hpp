@@ -105,9 +105,6 @@ public:
      */
     auto notify_all() -> void;
 
-    auto unsafe_data() -> T&;
-    auto unsafe_data() const -> T const&;
-
     [[nodiscard]] ScopedLock lock() const;
 
 private:
@@ -192,16 +189,6 @@ auto AtomicData<T>::notify_one() -> void {
 template <typename T>
 auto AtomicData<T>::notify_all() -> void {
     condition_->notify_all();
-}
-
-template <typename T>
-auto AtomicData<T>::unsafe_data() -> T& {
-    return data_;
-}
-
-template <typename T>
-auto AtomicData<T>::unsafe_data() const -> T const& {
-    return data_;
 }
 
 template <typename T>

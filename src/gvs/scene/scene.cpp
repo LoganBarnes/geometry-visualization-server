@@ -27,21 +27,5 @@ namespace scene {
 
 Scene::~Scene() = default;
 
-auto Scene::size() const -> std::size_t {
-    return items().size();
-}
-
-auto Scene::empty() const -> bool {
-    return size() == 1u;
-}
-
-auto Scene::begin() const -> SceneItems::const_iterator {
-    return items().begin();
-}
-
-auto Scene::end() const -> SceneItems::const_iterator {
-    return items().begin();
-}
-
 } // namespace scene
 } // namespace gvs

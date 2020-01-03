@@ -31,10 +31,10 @@ service Scene {
     rpc AddItem (SparseSceneItemInfo) returns (SceneIdResult);
     rpc UpdateItem (SparseSceneItemInfoWithId) returns (Result);
     rpc AppendToItem (SparseSceneItemInfoWithId) returns (Result);
-    rpc GetItemInfo (SceneId) returns (SceneItemInfo);
+    rpc GetItemInfo (SceneId) returns (SceneItemInfoResult);
 
     rpc Clear (google.protobuf.Empty) returns (google.protobuf.Empty);
-    rpc GetItems (google.protobuf.Empty) returns (stream SceneItemInfoWithId);
+    rpc GetItemIds (google.protobuf.Empty) returns (SceneIdList);
 
     rpc SetSeed (Seed) returns (google.protobuf.Empty);
 }
@@ -42,6 +42,13 @@ service Scene {
 message SceneIdResult {
     oneof result {
         SceneId value = 1;
+        Errors errors = 2;
+    }
+}
+
+message SceneItemInfoResult {
+    oneof result {
+        SceneItemInfo value = 1;
         Errors errors = 2;
     }
 }

@@ -165,16 +165,16 @@ auto configure_scene_gui(SceneId const& item_id, scene::Scene* scene) -> bool {
 } // namespace
 
 auto configure_gui(scene::Scene* scene) -> bool {
+    std::vector<SceneId> children;
+    scene->get_item_info(nil_id(), GetChildren(&children));
+
     ImGui::Text("Scene Items:");
 
-    if (scene->empty()) {
+    if (children.empty()) {
         ImGui::SameLine();
         ImGui::TextColored({0.5f, 0.5f, 0.5f, 1.f}, " (empty)");
         return false;
     }
-
-    std::vector<SceneId> children;
-    scene->get_item_info(nil_id(), GetChildren(&children));
 
     bool scene_changed = false;
 
