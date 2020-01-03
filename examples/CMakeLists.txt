@@ -71,3 +71,8 @@ if (GVS_ENABLE_DISPLAY)
 else ()
     message("-- (GVS_ENABLE_DISPLAY=OFF) Some examples will not be built: display_window intersection primitives scene")
 endif ()
+
+if (GVS_ENABLE_NETWORKING AND GVS_ENABLE_DISPLAY)
+    add_example(tmp_demo TRUE)
+    target_link_libraries(run_tmp_demo_example PUBLIC gvs_scene_client)
+endif ()

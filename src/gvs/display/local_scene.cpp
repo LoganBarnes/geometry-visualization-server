@@ -23,6 +23,7 @@
 #include "local_scene.hpp"
 
 // project
+#include "backends/empty_backend.hpp"
 #include "backends/opengl_backend.hpp"
 #include "gvs/util/container_util.hpp"
 #include "scene_core.hpp"
@@ -33,10 +34,24 @@
 
 namespace gvs::display {
 
-LocalScene::LocalScene() {
-    auto backend = std::make_unique<backends::OpenglBackend>();
-    core_scene_  = std::make_unique<SceneCore>(*backend);
-    display_     = std::move(backend);
+LocalScene::LocalScene(BackendType backend_type) {
+    switch (backend_type) {
+
+    case BackendType::Empty: {
+        auto backend = std::make_unique<backends::EmptyBackend>();
+        core_scene_  = std::make_unique<SceneCore>(*backend);
+        display_     = std::move(backend);
+        break;
+    }
+
+    case BackendType::OpenGL: {
+        auto backend = std::make_unique<backends::OpenglBackend>();
+        core_scene_  = std::make_unique<SceneCore>(*backend);
+        display_     = std::move(backend);
+        break;
+    }
+
+    } // end switch
 }
 
 LocalScene::~LocalScene() = default;

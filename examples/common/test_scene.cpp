@@ -31,6 +31,14 @@
 #include <random>
 
 namespace example {
+namespace {
+
+constexpr gvs::vec3 blueish  = {0.3f, 0.3f, 1.f};
+constexpr gvs::vec3 greenish = {0.3f, 1.f, 0.3f};
+constexpr gvs::vec3 redish   = {1.f, 0.3f, 0.3f};
+constexpr gvs::vec3 orange   = {1.f, 0.5f, 0.1f};
+
+} // namespace
 
 auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id) -> void {
     {
@@ -90,7 +98,6 @@ auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id) -> 
                     gvs::SetParent(root_id));
 
     std::vector<float> sphere;
-
     {
         float                                 u, theta, coeff;
         std::mt19937                          gen{std::random_device{}()};
@@ -116,6 +123,77 @@ auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id) -> 
                     gvs::SetShading(gvs::Shading::Lambertian),
                     gvs::SetColoring(gvs::Coloring::Normals),
                     gvs::SetParent(root_id));
+}
+
+auto build_primitive_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id) -> void {
+    scene->add_item(gvs::SetReadableId("Axes"), gvs::SetPrimitive(gvs::Axes{}), gvs::SetParent(root_id));
+
+    gvs::SceneId cube;
+    {
+        auto translation = gvs::identity_mat4;
+        translation[12]  = +4.0f; // x
+        translation[13]  = +0.0f; // y
+        translation[14]  = +0.0f; // z
+
+        cube = scene->add_item(gvs::SetReadableId("Cube"),
+                               gvs::SetPrimitive(gvs::Cube{}),
+                               gvs::SetTransformation(translation),
+                               gvs::SetUniformColor(blueish),
+                               gvs::SetParent(root_id));
+    }
+
+    gvs::SceneId sphere;
+    {
+        auto translation = gvs::identity_mat4;
+        translation[12]  = +2.0f; // x
+        translation[13]  = +2.0f; // y
+        translation[14]  = -2.0f; // z
+
+        sphere = scene->add_item(gvs::SetReadableId("Sphere"),
+                                 gvs::SetPrimitive(gvs::Sphere{}),
+                                 gvs::SetTransformation(translation),
+                                 gvs::SetUniformColor(greenish),
+                                 gvs::SetParent(cube));
+    }
+
+    {
+        auto translation = gvs::identity_mat4;
+        translation[12]  = -3.0f; // x
+        translation[13]  = -5.0f; // y
+        translation[14]  = +0.0f; // z
+
+        scene->add_item(gvs::SetReadableId("Cylinder"),
+                        gvs::SetPrimitive(gvs::Cylinder{}),
+                        gvs::SetTransformation(translation),
+                        gvs::SetUniformColor(redish),
+                        gvs::SetParent(sphere));
+    }
+
+    gvs::SceneId cone;
+    {
+        auto translation = gvs::identity_mat4;
+        translation[12]  = -2.0f; // x
+        translation[13]  = +1.0f; // y
+        translation[14]  = +0.0f; // z
+
+        cone = scene->add_item(gvs::SetReadableId("Cone"),
+                               gvs::SetPrimitive(gvs::Cone{}),
+                               gvs::SetTransformation(translation),
+                               gvs::SetParent(root_id));
+    }
+
+    {
+        auto translation = gvs::identity_mat4;
+        translation[12]  = +0.0f; // x
+        translation[13]  = +2.0f; // y
+        translation[14]  = +0.0f; // z
+
+        scene->add_item(gvs::SetReadableId("Plane"),
+                        gvs::SetPrimitive(gvs::Plane{}),
+                        gvs::SetTransformation(translation),
+                        gvs::SetUniformColor(orange),
+                        gvs::SetParent(cone));
+    }
 }
 
 } // namespace example

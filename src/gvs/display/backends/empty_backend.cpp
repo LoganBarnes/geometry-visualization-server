@@ -20,18 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "empty_backend.hpp"
 
-// project
-#include "gvs/scene/forward_declarations.hpp"
-#include "gvs/scene/scene_id.hpp"
+namespace gvs::display::backends {
 
-namespace example {
+EmptyBackend::EmptyBackend()  = default;
+EmptyBackend::~EmptyBackend() = default;
 
-constexpr auto pi = 3.14159265358979323846264338327950288f;
+auto EmptyBackend::render(CameraPackage const& /*camera_package*/) const -> void {}
 
-auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id = gvs::nil_id()) -> void;
+auto EmptyBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
 
-auto build_primitive_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id = gvs::nil_id()) -> void;
+auto EmptyBackend::added(SceneId const& /*item_id*/, SceneItemInfo const & /*item*/) -> void {}
 
-}
+auto EmptyBackend::updated(SceneId const& /*item_id*/,
+                           scene::UpdatedInfo const& /*updated*/,
+                           SceneItemInfo const & /*item*/) -> void {}
+
+auto EmptyBackend::removed(SceneId const & /*item_id*/) -> void {}
+
+auto EmptyBackend::reset_items(SceneItems const & /*items*/) -> void {}
+
+} // namespace gvs::display::backends

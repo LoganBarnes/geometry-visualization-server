@@ -22,52 +22,24 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// project
-#include "forward_declarations.hpp"
-#include "gvs/display/backends/display_backend.hpp"
-#include "gvs/scene/scene.hpp"
+// gvs
+#include "display_backend.hpp"
 
-namespace gvs::display {
+namespace gvs::display::backends {
 
-enum class BackendType {
-    Empty,
-    OpenGL,
-};
-
-class LocalScene : public scene::Scene, public SceneDisplay {
+class EmptyBackend : public DisplayBackend {
 public:
-    explicit LocalScene(BackendType backend_type = BackendType::OpenGL);
-    ~LocalScene() override;
+    explicit EmptyBackend();
+    ~EmptyBackend() override;
 
-    /*
-     * Start `SceneDisplay` functions
-     */
     auto render(CameraPackage const& camera_package) const -> void override;
     auto resize(Magnum::Vector2i const& viewport) -> void override;
-    /*
-     * End `SceneDisplay` functions
-     */
 
-    /*
-     * Start `Scene` functions
-     */
-    [[nodiscard]] auto item_ids() const -> std::unordered_set<SceneId> override;
-    auto               clear() -> LocalScene& override;
-    auto               set_seed(unsigned seed) -> LocalScene& override;
+    auto added(SceneId const& item_id, SceneItemInfo const& item) -> void override;
+    auto updated(SceneId const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item) -> void override;
+    auto removed(SceneId const& item_id) -> void override;
 
-private:
-    auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId> override;
-    auto actually_update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
-    auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
-
-    auto actually_get_item_info(SceneId const& item_id, scene::InfoGetterFunc info_getter) const
-        -> util11::Error override;
-    /*
-     * End `Scene` functions
-     */
-
-    std::unique_ptr<SceneDisplay> display_; ///< Used to do the actual rendering of the scene
-    std::unique_ptr<SceneCore>    core_scene_; ///< Handles all the scene logic
+    auto reset_items(SceneItems const& items) -> void override;
 };
 
-} // namespace gvs::display
+} // namespace gvs::display::backends
