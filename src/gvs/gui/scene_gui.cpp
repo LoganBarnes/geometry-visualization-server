@@ -34,6 +34,8 @@ namespace gvs::gui {
 namespace {
 
 auto configure_scene_gui(SceneId const& item_id, scene::Scene* scene) -> bool {
+    const ImVec4 gray = {0.5f, 0.5f, 0.5f, 1.f};
+
     std::string    readable_id;
     GeometryFormat geometry_format;
     mat4           transformation;
@@ -79,6 +81,8 @@ auto configure_scene_gui(SceneId const& item_id, scene::Scene* scene) -> bool {
 
         if (visible) {
             if (has_geometry) {
+                item_changed |= ImGui::Checkbox("Wireframe", &wireframe_only);
+
                 auto icoloring = std::underlying_type_t<Coloring>(coloring);
                 if (ImGui::Combo("Display Mode",
                                  &icoloring,
@@ -124,17 +128,14 @@ auto configure_scene_gui(SceneId const& item_id, scene::Scene* scene) -> bool {
                 }
 
                 {
-                    Disable::Guard disable_opacity(true);
+                    Disable::Guard disable_opacity(true /*wireframe_only*/);
                     item_changed |= ImGui::DragFloat("Opacity", &opacity, 0.01f, 0.f, 1.f);
-                }
-
-                {
-                    Disable::Guard disable_wireframe(true);
-                    item_changed |= ImGui::Checkbox("Wireframe", &wireframe_only);
                 }
             }
 
             if (has_children) {
+                ImGui::TextColored(gray, "Children:");
+
                 std::vector<SceneId> children;
                 scene->get_item_info(item_id, GetChildren(&children));
 

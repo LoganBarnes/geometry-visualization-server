@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 
     std::unique_ptr<gvs::scene::Scene> scene;
 
-#define SCENE 3
+#define SCENE 1
 
 #if SCENE == 0
     scene = std::make_unique<gvs::display::LocalScene>(gvs::display::BackendType::Empty);

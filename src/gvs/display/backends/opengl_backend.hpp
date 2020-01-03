@@ -41,6 +41,7 @@
 #include <Magnum/SceneGraph/SceneGraph.h>
 
 // standard
+#include <list>
 #include <memory>
 
 namespace gvs::display::backends {
@@ -63,6 +64,8 @@ public:
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
 
     struct ObjectMeshPackage {
+        SceneId scene_id = gvs::nil_id();
+
         Magnum::GL::Buffer vertex_buffer;
         int                vbo_count = 0;
 
@@ -73,23 +76,43 @@ public:
         Object3D*        object   = nullptr;
         OpaqueDrawable*  drawable = nullptr;
 
-        explicit ObjectMeshPackage(Object3D*                            obj,
-                                   Magnum::SceneGraph::DrawableGroup3D* drawables,
+        Magnum::SceneGraph::DrawableGroup3D* drawable_group_when_visible = nullptr;
+        bool                                 visible                     = true;
+
+        explicit ObjectMeshPackage(SceneId                              id,
+                                   Object3D*                            obj,
+                                   Magnum::SceneGraph::DrawableGroup3D* drawable_group,
                                    GeneralShader3d&                     shader);
     };
 
 private:
-    GeneralShader3d                                                 shader_;
-    std::unordered_map<SceneId, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
+    GeneralShader3d shader_;
+
+    using ObjectList = std::list<ObjectMeshPackage>;
+
+    ObjectList                                                packages_; // TODO: make items deletable
+    std::unordered_map<SceneId, ObjectList::iterator>         id_to_pkgs_;
+    std::unordered_map<Object3D const*, ObjectList::iterator> obj_to_pkgs_;
 
     Scene3D scene_;
 
-    mutable Object3D                            camera_object_;
-    mutable Magnum::SceneGraph::Camera3D*       camera_;
-    mutable Magnum::SceneGraph::DrawableGroup3D drawables_;
+    mutable Object3D                      camera_object_;
+    mutable Magnum::SceneGraph::Camera3D* camera_;
+
+    mutable Magnum::SceneGraph::DrawableGroup3D opaque_drawables_;
+    mutable Magnum::SceneGraph::DrawableGroup3D wireframe_drawables_;
+    mutable Magnum::SceneGraph::DrawableGroup3D transparent_drawables_;
+    mutable Magnum::SceneGraph::DrawableGroup3D non_visible_drawables_;
+
+    auto add_package(SceneId id, Object3D* obj, Magnum::SceneGraph::DrawableGroup3D* drawables, GeneralShader3d& shader)
+        -> void;
+    auto remove_package(SceneId const& item_id) -> void;
+    auto remove_package(Object3D const* obj) -> void;
 
     auto get_package(SceneId const& id) -> ObjectMeshPackage&;
     auto get_package(SceneId const& id) const -> ObjectMeshPackage const&;
+
+    auto update_drawable_group(ObjectMeshPackage* mesh_package, bool parent_visible) -> void;
 };
 
 } // namespace gvs::display::backends

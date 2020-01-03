@@ -101,7 +101,7 @@ void DisplayWindow::configure_gui() {
     auto height = static_cast<float>(this->windowSize().y());
     ImGui::SetNextWindowPos({0.f, 0.f});
     ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, height), ImVec2(std::numeric_limits<float>::infinity(), height));
-    ImGui::Begin("Settings", nullptr, ImVec2(350.f, height));
+    ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
     ImGui::Text("GL Version:   ");
     ImGui::SameLine();
