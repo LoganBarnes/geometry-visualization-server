@@ -15,9 +15,9 @@ Geometry Visualization Server
 * Add global scene traits (like lights)
 * Clean up magnum scene class
 * Create implicitly convertible vector and matrix classes for use with setters and getters
-* Move display namespace types to their proper location
+* ~~Move display namespace types to their proper location~~
 * Add Renderable interface
-* Implement DisplayScene (maybe)
+* ~~Implement DisplayScene (maybe)~~
 * Add tests after new architecture is finalized
 * Add documentation
 
