@@ -47,7 +47,9 @@ struct Disable {
     static void disable_pop();
 };
 
-bool configure_gui(const std::string& label, std::string* data);
+bool configure_gui(const std::string&          label,
+                   std::string*                data,
+                   ImGuiInputTextFlags_ const& flags = ImGuiInputTextFlags_None);
 
 class ScopedIndent {
 public:

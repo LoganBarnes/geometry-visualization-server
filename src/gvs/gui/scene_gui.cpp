@@ -69,9 +69,13 @@ auto configure_scene_gui(SceneId const& item_id, scene::Scene* scene) -> bool {
     item_changed |= ImGui::Checkbox("###visible", &visible);
     ImGui::SameLine();
 
-    if (ImGui::TreeNode(readable_id.c_str())) {
+    auto tree_label = readable_id + "###" + id_str;
+
+    if (ImGui::TreeNode(tree_label.c_str())) {
         ScopedIndent scoped_indent;
         ImGui::Separator();
+
+        item_changed |= configure_gui("###readable_id", &readable_id);
 
         if (visible) {
             if (has_geometry) {
