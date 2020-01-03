@@ -43,6 +43,10 @@ DisplayScene::DisplayScene() {
 }
 
 DisplayScene::~DisplayScene() {
+    block_until_window_is_closed();
+}
+
+auto DisplayScene::block_until_window_is_closed() -> void {
     display_thread_.join();
 }
 

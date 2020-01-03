@@ -40,6 +40,8 @@ public:
     explicit DisplayScene();
     ~DisplayScene() override;
 
+    auto block_until_window_is_closed() -> void;
+
     /*
      * Start `Scene` functions
      */

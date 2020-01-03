@@ -46,6 +46,8 @@ SceneServer::SceneServer(const std::string& host_address) {
     server_ = builder.BuildAndStart();
 }
 
+SceneServer::~SceneServer() = default; // shutdown server and wait?
+
 grpc::Status SceneServer::AddItem(grpc::ServerContext*                 context,
                                   const gvs::net::SparseSceneItemInfo* request,
                                   gvs::net::SceneIdResult*             response) {

@@ -37,10 +37,6 @@ int main(int argc, char** argv) {
     gvs::net::SceneServer server(host_address);
     std::cout << "Server running at '" << host_address << "'" << std::endl;
 
-    std::cout << "Press 'Enter' to quit..." << std::endl;
-
-    // Block the main thread until someone presses enter
-    std::cin.ignore();
-
+    // The server will block until the window is closed
     return 0;
 }

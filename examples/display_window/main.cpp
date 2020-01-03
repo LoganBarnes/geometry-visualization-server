@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
     example::build_test_scene(&scene);
 
     std::cout << "This process will block until the window is closed." << std::endl;
+    scene.block_until_window_is_closed();
 
     return 0;
 }

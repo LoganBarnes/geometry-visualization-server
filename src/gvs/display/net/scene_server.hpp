@@ -37,6 +37,11 @@ namespace gvs::net {
 class SceneServer : public Scene::Service {
 public:
     explicit SceneServer(std::string const& host_address = "");
+    ~SceneServer() override;
+
+private:
+    util::AtomicData<display::DisplayScene> display_scene_;
+    std::unique_ptr<grpc::Server>           server_;
 
     grpc::Status AddItem(grpc::ServerContext*                 context,
                          const gvs::net::SparseSceneItemInfo* request,
@@ -64,10 +69,6 @@ public:
 
     grpc::Status
     SetSeed(grpc::ServerContext* context, const gvs::net::Seed* request, ::google::protobuf::Empty* response) override;
-
-private:
-    util::AtomicData<display::DisplayScene> display_scene_;
-    std::unique_ptr<grpc::Server>           server_;
 };
 
 } // namespace gvs::net
