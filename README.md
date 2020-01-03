@@ -11,12 +11,12 @@ Geometry Visualization Server
 * ~~Create setters and getter types `gvs::SetPositions`, `gvs::GetPositions`, `gvs::HasChildren`, etc.~~
 * ~~Use display interfaces in relevant parts of gvs~~
 * ~~Add primitive setters `gvs::Cube()`, `gvs::Sphere`, etc.~~
-* Re-implement client/server scene interaction
+* ~~Re-implement client/server scene interaction~~
 * Add global scene traits (like lights)
 * Clean up magnum scene class
 * Create implicitly convertible vector and matrix classes for use with setters and getters
 * ~~Move display namespace types to their proper location~~
-* Add Renderable interface
+* Add Renderable interface (not required)
 * ~~Implement DisplayScene (maybe)~~
 * Add tests after new architecture is finalized
 * Add documentation
