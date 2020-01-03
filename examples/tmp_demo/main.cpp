@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 
     std::unique_ptr<gvs::scene::Scene> scene;
 
-#define SCENE 3
+#define SCENE 0
 
 #if SCENE == 0
     scene = std::make_unique<gvs::display::LocalScene>(gvs::display::BackendType::Empty);
@@ -48,8 +48,7 @@ int main(int argc, char* argv[]) {
 #elif SCENE == 2
     scene = std::make_unique<gvs::net::ClientScene>(server_address);
 #else
-    using namespace std::chrono_literals;
-    auto client_scene = std::make_unique<gvs::net::ClientScene>(server_address, 2s);
+    auto client_scene = std::make_unique<gvs::net::ClientScene>(server_address);
     if (client_scene->connected()) {
         scene = std::move(client_scene);
     } else {

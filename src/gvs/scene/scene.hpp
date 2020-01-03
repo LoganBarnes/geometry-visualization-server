@@ -39,50 +39,45 @@ class Scene {
 public:
     virtual ~Scene();
 
-    /// \brief Modifies and sends the contents of a stream, updating the server if the stream id does not exist
+    /// \brief Adds an item to the scene using named parameters.
+    ///        Requires: `gvs::SetPositions3d()` or `gvs::SetPrimitive()` to be specified.
     ///
+    ///     Example:
     ///     ```cpp
-    ///     // Create the scene
-    ///     std::unique_ptr<gvs::scene::Scene> scene = /*Some scene type*/;
-    ///
-    ///     // modify and send stream contents to the server
-    ///     scene->add_item(gvs::SetPositions3d(my_points), gvs::SetLineStrip(), gvs::ReadableID("My Points"));
+    ///     scene.add_item(gvs::SetPositions3d(my_points), gvs::SetLineStrip(), gvs::ReadableID("My Points"));
     ///     ```
     template <typename... Functors>
     auto add_item(Functors&&... functors) -> SceneId;
 
-    /// \brief Modifies and sends the contents of a stream, updating the server if the stream id does not exist
+    /// \brief Modifies an existing item in the scene using named parameters.
+    ///        All provided parameters will replace any existing info corresponding to this item.
     ///
+    ///     Example:
     ///     ```cpp
-    ///     // Create the scene
-    ///     std::unique_ptr<gvs::scene::Scene> scene = /*Some scene type*/;
-    ///
-    ///     // modify and send stream contents to the server
-    ///     scene->add_item(gvs::SetPositions3d(my_points), gvs::SetLineStrip(), gvs::ReadableID("My Points"));
+    ///     scene.update_item(my_id, gvs::SetUniformColor({1, 0, 0}), gvs::SetVisible(true));
     ///     ```
     template <typename... Functors>
     auto update_item(SceneId const& item_id, Functors&&... functors) -> void;
 
-    /// \brief Modifies and sends the contents of a stream, updating the server if the stream id does not exist
+    /// \brief Modifies an existing item in the scene using named parameters.
+    ///        Any geometry parameters will appended their data to the corresponding info for this item.
+    ///        Any non-geometry parameters will replace their corresponding info for this item.
     ///
+    ///     Example:
     ///     ```cpp
-    ///     // Create the scene
-    ///     std::unique_ptr<gvs::scene::Scene> scene = /*Some scene type*/;
-    ///
-    ///     // modify and send stream contents to the server
-    ///     scene->add_item(gvs::SetPositions3d(my_points), gvs::SetLineStrip(), gvs::ReadableID("My Points"));
+    ///     scene.append_to_item(my_id, gvs::SetPositions3d(more_points), gvs::SetVertexColors3d(more_colors));
     ///     ```
     template <typename... Functors>
     auto append_to_item(SceneId const& item_id, Functors&&... functors) -> void;
 
-    /// \brief Modifies and sends the contents of a stream, updating the server if the stream id does not exist
+    /// \brief Fetches information for an existing item in the scene using named parameters.
     ///
+    ///     Example:
     ///     ```cpp
-    ///     // Create the scene
-    ///     std::unique_ptr<gvs::scene::Scene> scene = /*Some scene type*/;
+    ///     std::vector<SceneId> children;
+    ///     bool visible;
     ///
-    ///     // modify and send stream contents to the server
-    ///     scene->add_item(gvs::SetPositions3d(my_points), gvs::SetLineStrip(), gvs::ReadableID("My Points"));
+    ///     scene.get_item_info(my_id, gvs::GetChildren(&children), gvs::IsVisible(&visible));
     ///     ```
     template <typename... Functors>
     auto get_item_info(SceneId const& item_id, Functors&&... functors) -> void;
