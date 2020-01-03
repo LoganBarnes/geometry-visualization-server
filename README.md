@@ -14,6 +14,7 @@ Geometry Visualization Server
 * ~~Re-implement client/server scene interaction~~
 * Add global scene traits (like lights)
 * Clean up magnum scene class
+* Make things intersectable
 * Create implicitly convertible vector and matrix classes for use with setters and getters
 * ~~Move display namespace types to their proper location~~
 * Add Renderable interface (not required)

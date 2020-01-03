@@ -74,8 +74,6 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package, GeometryInfo con
 
     mesh_package->vertex_buffer.setData(buffer_data, Magnum::GL::BufferUsage::StaticDraw);
     mesh_package->mesh.setCount(mesh_package->vbo_count);
-
-    //std::cout << "Added " << mesh_package->vbo_count << " verts" << std::endl;
 }
 
 auto update_ibo(OpenglBackend::ObjectMeshPackage* mesh_package, std::vector<unsigned> const& indices) {
@@ -91,6 +89,15 @@ auto update_ibo(OpenglBackend::ObjectMeshPackage* mesh_package, std::vector<unsi
         mesh_package->mesh.setCount(mesh_package->ibo_count)
             .setIndexBuffer(mesh_package->index_buffer, 0, index_type, index_start, index_end);
     }
+}
+
+using DrawableGroupUpdateFunc
+    = Magnum::SceneGraph::DrawableGroup3D& (Magnum::SceneGraph::DrawableGroup3D::*)(Magnum::SceneGraph::Drawable3D&);
+
+auto do_stuff(Magnum::SceneGraph::DrawableGroup3D* group,
+              DrawableGroupUpdateFunc              func,
+              OpenglBackend::ObjectMeshPackage&    obj) {
+    (group->*func)(*obj.drawable);
 }
 
 } // namespace
@@ -112,9 +119,6 @@ OpenglBackend::OpenglBackend() {
     Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::FaceCulling);
 
     shader_.set_uniform_color({1.f, 0.5f, 0.1f});
-
-    // Add root
-    root_object_ = &scene_.addChild<Object3D>();
 }
 
 OpenglBackend::~OpenglBackend() = default;
@@ -128,7 +132,14 @@ auto OpenglBackend::render(CameraPackage const& camera_package) const -> void {
 auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
 
 auto OpenglBackend::added(SceneId const& item_id, SceneItemInfo const& item) -> void {
-    objects_.emplace(item_id, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
+    if (item_id == gvs::nil_id()) {
+        objects_.emplace(item_id, std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), nullptr, shader_));
+    } else {
+        objects_.emplace(item_id,
+                         std::make_unique<ObjectMeshPackage>(&get_package(item.parent).object->addChild<Object3D>(),
+                                                             &drawables_,
+                                                             shader_));
+    }
     updated(item_id, scene::UpdatedInfo::everything(), item);
 }
 
@@ -146,8 +157,6 @@ auto OpenglBackend::updated(SceneId const& item_id, scene::UpdatedInfo const& up
         if (updated.geometry_indices) {
             update_ibo(&mesh_package, geometry_info.indices);
         }
-        //    } else {
-        //        std::cout << "No geometry added :{" << std::endl;
     }
 
     if (updated.display_geometry_format) {
@@ -159,21 +168,25 @@ auto OpenglBackend::updated(SceneId const& item_id, scene::UpdatedInfo const& up
     if (updated.parent) {
         auto const& parent = item.parent;
 
-        if (item.parent == nil_id()) {
-            mesh_package.object->setParent(root_object_);
-
-        } else {
-            if (!util::has_key(objects_, parent)) {
-                objects_.erase(item_id);
-                throw std::invalid_argument("Parent id '" + to_string(parent) + "' not found in scene");
-            }
-
-            mesh_package.object->setParent(objects_.at(parent)->object);
+        if (!util::has_key(objects_, parent)) {
+            objects_.erase(item_id);
+            throw std::invalid_argument("Parent id '" + to_string(parent) + "' not found in scene");
         }
+
+        mesh_package.object->setParent(objects_.at(parent)->object);
     }
 
     if (updated.display) {
         mesh_package.drawable->update_display_info(item.display_info);
+
+        if (updated.display_visible) {
+            if (item.display_info.visible) {
+                do_stuff(&drawables_, &Magnum::SceneGraph::DrawableGroup3D::add, mesh_package);
+
+            } else {
+                do_stuff(&drawables_, &Magnum::SceneGraph::DrawableGroup3D::remove, mesh_package);
+            }
+        }
     }
 }
 
@@ -181,24 +194,30 @@ auto OpenglBackend::removed(SceneId const & /*item_id*/) -> void {}
 
 auto OpenglBackend::reset_items(SceneItems const& items) -> void {
     // Remove all items from the scene
-    if (root_object_) {
-        scene_.children().erase(root_object_);
+    if (util::has_key(objects_, gvs::nil_id())) {
+        scene_.children().erase(get_package(gvs::nil_id()).object);
     }
     objects_.clear();
 
-    // Add root
-    root_object_ = &scene_.addChild<Object3D>();
+    while (objects_.size() < items.size()) {
+        for (auto const& [item_id, item] : items) {
+            if (util::has_key(objects_, item_id)) {
+                continue;
+            }
 
-    for (auto const& [item_id, item] : items) {
-        util::ignore(item);
-        objects_.emplace(item_id,
-                         std::make_unique<ObjectMeshPackage>(&scene_.addChild<Object3D>(), &drawables_, shader_));
+            if (util::has_key(objects_, item.parent) || item_id == gvs::nil_id()) {
+                added(item_id, item);
+            }
+        }
     }
+}
 
-    // Add new items to scene
-    for (auto const& [item_id, item] : items) {
-        updated(item_id, scene::UpdatedInfo::everything(), item);
-    }
+auto OpenglBackend::get_package(const gvs::SceneId& id) -> ObjectMeshPackage& {
+    return *objects_.at(id);
+}
+
+auto OpenglBackend::get_package(const gvs::SceneId& id) const -> ObjectMeshPackage const& {
+    return *objects_.at(id);
 }
 
 } // namespace gvs::display::backends

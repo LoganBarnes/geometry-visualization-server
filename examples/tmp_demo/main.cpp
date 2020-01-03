@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 
     std::unique_ptr<gvs::scene::Scene> scene;
 
-#define SCENE 0
+#define SCENE 3
 
 #if SCENE == 0
     scene = std::make_unique<gvs::display::LocalScene>(gvs::display::BackendType::Empty);
@@ -67,9 +67,9 @@ int main(int argc, char* argv[]) {
     auto test_root
         = scene->add_item(gvs::SetReadableId("Test Scene"), gvs::SetPositions3d(), gvs::SetTransformation(trans));
 
-    trans[12] = +0.0f; // X
-    trans[13] = +0.0f; // Y
-    trans[14] = +0.0f; // Z
+    trans[12] = -0.0f; // X
+    trans[13] = -0.0f; // Y
+    trans[14] = -0.0f; // Z
 
     auto primitives_root
         = scene->add_item(gvs::SetReadableId("Primitives"), gvs::SetPositions3d(), gvs::SetTransformation(trans));

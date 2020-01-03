@@ -55,7 +55,7 @@ auto OpaqueDrawable::update_display_info(DisplayInfo const& display_info) -> voi
 auto OpaqueDrawable::draw(Matrix4 const& transformation_matrix, SceneGraph::Camera3D& camera) -> void {
     // unnecessarily expensive doing the inverse every time.
     auto world_transform = camera.cameraMatrix().inverted() * transformation_matrix;
-    // TODO: figure out how to cache the variable since the camera won't changer during a render
+    // TODO: figure out how to cache the variable since the camera won't change during a render
     //  (OR) firgure out how to get the transformation_matrix without the camera transform part
 
     shader_.set_world_from_local_matrix(world_transform)

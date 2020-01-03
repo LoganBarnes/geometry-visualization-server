@@ -65,11 +65,13 @@ public:
     struct ObjectMeshPackage {
         Magnum::GL::Buffer vertex_buffer;
         int                vbo_count = 0;
+
         Magnum::GL::Buffer index_buffer;
         int                ibo_count = 0;
-        Magnum::GL::Mesh   mesh;
-        Object3D*          object   = nullptr;
-        OpaqueDrawable*    drawable = nullptr;
+
+        Magnum::GL::Mesh mesh;
+        Object3D*        object   = nullptr;
+        OpaqueDrawable*  drawable = nullptr;
 
         explicit ObjectMeshPackage(Object3D*                            obj,
                                    Magnum::SceneGraph::DrawableGroup3D* drawables,
@@ -80,12 +82,14 @@ private:
     GeneralShader3d                                                 shader_;
     std::unordered_map<SceneId, std::unique_ptr<ObjectMeshPackage>> objects_; // TODO: make items deletable
 
-    Scene3D   scene_;
-    Object3D* root_object_ = nullptr;
+    Scene3D scene_;
 
     mutable Object3D                            camera_object_;
     mutable Magnum::SceneGraph::Camera3D*       camera_;
     mutable Magnum::SceneGraph::DrawableGroup3D drawables_;
+
+    auto get_package(SceneId const& id) -> ObjectMeshPackage&;
+    auto get_package(SceneId const& id) const -> ObjectMeshPackage const&;
 };
 
 } // namespace gvs::display::backends

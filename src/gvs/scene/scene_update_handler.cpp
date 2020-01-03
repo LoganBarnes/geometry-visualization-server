@@ -49,6 +49,7 @@ UpdatedInfo::UpdatedInfo(SparseSceneItemInfo const& info) {
     if (info.display_info) {
         display |= true;
         display_geometry_format |= (!!info.display_info->geometry_format);
+        display_visible |= (!!info.display_info->visible);
     }
 
     parent   = (!!info.parent);
@@ -62,6 +63,7 @@ auto UpdatedInfo::everything() -> UpdatedInfo {
     info.geometry_indices        = true;
     info.display                 = true;
     info.display_geometry_format = true;
+    info.display_visible         = true;
     info.parent                  = true;
     info.children                = true;
     return info;

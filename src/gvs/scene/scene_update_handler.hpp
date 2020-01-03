@@ -34,6 +34,7 @@ struct UpdatedInfo {
     bool geometry_indices        = false;
     bool display                 = false;
     bool display_geometry_format = false;
+    bool display_visible         = false;
     bool parent                  = false;
     bool children                = false;
 
