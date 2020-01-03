@@ -22,11 +22,18 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+// standard
 #include <condition_variable>
+#include <iostream>
 #include <mutex>
+#include <thread>
 
-namespace gvs {
-namespace util {
+namespace gvs::util {
+
+struct ScopedLock {
+    std::shared_ptr<std::mutex>                  mutex;
+    std::shared_ptr<std::lock_guard<std::mutex>> lock;
+};
 
 /**
  * @brief Owns complex data that can be accessed in a thread safe way.
@@ -40,7 +47,7 @@ namespace util {
  *         OtherStruct complex_thing;
  *     };
  *
- *     carpet::AtomicData<MyComplexData> shared_data;
+ *     util::AtomicData<MyComplexData> shared_data;
  *
  *     ... Later, in different threads
  *
@@ -54,108 +61,110 @@ namespace util {
 template <typename T>
 class AtomicData {
 public:
-    explicit AtomicData(T data = {});
+    explicit AtomicData(T&& data);
+
+    template <typename... Args>
+    explicit AtomicData(Args&&... args);
 
     /**
      * @brief Use the data in a thread safe manner.
      */
     template <typename Func>
-    void use_safely(const Func& func);
+    auto use_safely(Func func);
 
     template <typename Func>
-    void use_safely(const Func& func) const;
+    auto use_safely(Func func) const;
 
     /**
      * @brief Wait for 'notify_one' or 'notify_all' to be called on this data
      *        structure before using the data in a thread safe manner.
      */
     template <typename Pred, typename Func>
-    void wait_to_use_safely(const Pred& predicate, const Func& func);
+    auto wait_to_use_safely(Pred predicate, Func func) -> void;
 
     template <typename Pred, typename Func>
-    void wait_to_use_safely(const Pred& predicate, const Func& func) const;
+    auto wait_to_use_safely(Pred predicate, Func func) const -> void;
 
     /**
      * @brief Same as 'wait_to_use_safely' except a maximum wait time can be set.
      */
-    template <typename Pred, typename Func>
-    bool wait_to_use_safely(unsigned max_wait_time_millis, const Pred& predicate, const Func& func);
+    template <typename Rep, typename Period, typename Pred, typename Func>
+    auto wait_to_use_safely(std::chrono::duration<Rep, Period> const& duration, Pred predicate, Func func) -> bool;
 
-    template <typename Pred, typename Func>
-    bool wait_to_use_safely(unsigned max_wait_time_millis, const Pred& predicate, const Func& func) const;
+    template <typename Rep, typename Period, typename Pred, typename Func>
+    auto wait_to_use_safely(std::chrono::duration<Rep, Period> const& duration, Pred predicate, Func func) const
+        -> bool;
 
     /**
      * @brief Allow one 'wait_to_use_safely' function to continue.
      */
-    void notify_one();
+    auto notify_one() -> void;
 
     /**
      * @brief Allow all 'wait_to_use_safely' functions to continue.
      */
-    void notify_all();
+    auto notify_all() -> void;
 
-    /**
-     * @brief Access the data directly in a non thread safe manner
-     */
-    T&       unsafe_data();
-    const T& unsafe_data() const;
+    auto unsafe_data() -> T&;
+    auto unsafe_data() const -> T const&;
+
+    [[nodiscard]] ScopedLock lock() const;
 
 private:
-    mutable std::mutex      lock_; // mutable so it can be used with const functions
-    std::condition_variable condition_;
-    T                       data_;
+    std::shared_ptr<std::mutex>              lock_;
+    std::shared_ptr<std::condition_variable> condition_;
+    T                                        data_;
 };
 
 template <typename T>
-AtomicData<T>::AtomicData(T data) : data_(std::move(data)) {}
+AtomicData<T>::AtomicData(T&& data)
+    : lock_(std::make_shared<std::mutex>()),
+      condition_(std::make_shared<std::condition_variable>()),
+      data_(std::forward<T>(data)) {}
 
 template <typename T>
-T& AtomicData<T>::unsafe_data() {
-    return data_;
-}
+template <typename... Args>
+AtomicData<T>::AtomicData(Args&&... args)
+    : lock_(std::make_shared<std::mutex>()),
+      condition_(std::make_shared<std::condition_variable>()),
+      data_(std::forward<Args>(args)...) {}
 
 template <typename T>
-const T& AtomicData<T>::unsafe_data() const {
-    return data_;
+template <typename Func>
+auto AtomicData<T>::use_safely(Func func) {
+    std::lock_guard<std::mutex> scoped_lock(*lock_);
+    return func(data_);
 }
 
 template <typename T>
 template <typename Func>
-void AtomicData<T>::use_safely(const Func& func) {
-    std::lock_guard<std::mutex> scoped_lock(lock_);
-    func(data_);
+auto AtomicData<T>::use_safely(Func func) const {
+    std::lock_guard<std::mutex> scoped_lock(*lock_);
+    return func(data_);
 }
 
 template <typename T>
-template <typename Func>
-void AtomicData<T>::use_safely(const Func& func) const {
-    std::lock_guard<std::mutex> scoped_lock(lock_);
+template <typename Pred, typename Func>
+auto AtomicData<T>::wait_to_use_safely(Pred predicate, Func func) -> void {
+    std::unique_lock<std::mutex> unlockable_lock(*lock_);
+    condition_->wait(unlockable_lock, [&] { return predicate(data_); });
     func(data_);
 }
 
 template <typename T>
 template <typename Pred, typename Func>
-void AtomicData<T>::wait_to_use_safely(const Pred& predicate, const Func& func) {
-    std::unique_lock<std::mutex> unlockable_lock(lock_);
-    condition_.wait(unlockable_lock, [&] { return predicate(data_); });
+auto AtomicData<T>::wait_to_use_safely(Pred predicate, Func func) const -> void {
+    std::unique_lock<std::mutex> unlockable_lock(*lock_);
+    condition_->wait(unlockable_lock, [&] { return predicate(data_); });
     func(data_);
 }
 
 template <typename T>
-template <typename Pred, typename Func>
-void AtomicData<T>::wait_to_use_safely(const Pred& predicate, const Func& func) const {
-    std::unique_lock<std::mutex> unlockable_lock(lock_);
-    condition_.wait(unlockable_lock, [&] { return predicate(data_); });
-    func(data_);
-}
-
-template <typename T>
-template <typename Pred, typename Func>
-bool AtomicData<T>::wait_to_use_safely(unsigned max_wait_time_millis, const Pred& predicate, const Func& func) {
-    std::unique_lock<std::mutex> unlockable_lock(lock_);
-    if (condition_.wait_for(unlockable_lock, std::chrono::milliseconds(max_wait_time_millis), [&] {
-            return predicate(data_);
-        })) {
+template <typename Rep, typename Period, typename Pred, typename Func>
+auto AtomicData<T>::wait_to_use_safely(std::chrono::duration<Rep, Period> const& duration, Pred predicate, Func func)
+    -> bool {
+    std::unique_lock<std::mutex> unlockable_lock(*lock_);
+    if (condition_->wait_for(unlockable_lock, duration, [&] { return predicate(data_); })) {
         func(data_);
         return true;
     }
@@ -163,12 +172,12 @@ bool AtomicData<T>::wait_to_use_safely(unsigned max_wait_time_millis, const Pred
 }
 
 template <typename T>
-template <typename Pred, typename Func>
-bool AtomicData<T>::wait_to_use_safely(unsigned max_wait_time_millis, const Pred& predicate, const Func& func) const {
-    std::unique_lock<std::mutex> unlockable_lock(lock_);
-    if (condition_.wait_for(unlockable_lock, std::chrono::milliseconds(max_wait_time_millis), [&] {
-            return predicate(data_);
-        })) {
+template <typename Rep, typename Period, typename Pred, typename Func>
+auto AtomicData<T>::wait_to_use_safely(std::chrono::duration<Rep, Period> const& duration,
+                                       Pred                                      predicate,
+                                       Func                                      func) const -> bool {
+    std::unique_lock<std::mutex> unlockable_lock(*lock_);
+    if (condition_->wait_for(unlockable_lock, duration, [&] { return predicate(data_); })) {
         func(data_);
         return true;
     }
@@ -176,14 +185,30 @@ bool AtomicData<T>::wait_to_use_safely(unsigned max_wait_time_millis, const Pred
 }
 
 template <typename T>
-void AtomicData<T>::notify_one() {
-    condition_.notify_one();
+auto AtomicData<T>::notify_one() -> void {
+    condition_->notify_one();
 }
 
 template <typename T>
-void AtomicData<T>::notify_all() {
-    condition_.notify_all();
+auto AtomicData<T>::notify_all() -> void {
+    condition_->notify_all();
 }
 
-} // namespace util
-} // namespace gvs
+template <typename T>
+auto AtomicData<T>::unsafe_data() -> T& {
+    return data_;
+}
+
+template <typename T>
+auto AtomicData<T>::unsafe_data() const -> T const& {
+    return data_;
+}
+
+template <typename T>
+ScopedLock AtomicData<T>::lock() const {
+    ScopedLock scoped_lock{lock_};
+    scoped_lock.lock = std::make_shared<std::lock_guard<std::mutex>>(*scoped_lock.mutex);
+    return scoped_lock;
+}
+
+} // namespace gvs::util

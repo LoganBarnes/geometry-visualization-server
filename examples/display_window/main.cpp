@@ -21,8 +21,7 @@
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 // project
-#include "gvs/net/client_scene.hpp"
-#include "gvs/scene/nil_scene.hpp"
+#include "gvs/display/display_scene.hpp"
 
 // examples
 #include "../common/test_scene.hpp"
@@ -34,18 +33,10 @@ int main(int argc, char* argv[]) {
         server_address = argv[1];
     }
 
-    std::unique_ptr<gvs::scene::Scene> scene;
+    auto scene = gvs::display::DisplayScene();
+    example::build_test_scene(&scene);
 
-    {
-        auto client_scene = std::make_unique<gvs::net::ClientScene>(server_address);
-        if (client_scene->connected()) {
-            scene = std::move(client_scene);
-        } else {
-            scene = std::make_unique<gvs::scene::NilScene>();
-        }
-    }
-
-    example::build_test_scene(scene.get());
+    std::cout << "This process will block until the window is closed." << std::endl;
 
     return 0;
 }

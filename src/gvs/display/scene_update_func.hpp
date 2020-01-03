@@ -20,32 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
+#pragma once
+
 // project
-#include "gvs/net/client_scene.hpp"
-#include "gvs/scene/nil_scene.hpp"
+#include "gvs/scene/forward_declarations.hpp"
 
-// examples
-#include "../common/test_scene.hpp"
+// standard
+#include <functional>
 
-int main(int argc, char* argv[]) {
-    std::string server_address = "0.0.0.0:50055";
+namespace gvs::display {
 
-    if (argc > 1) {
-        server_address = argv[1];
-    }
+using SceneUpdateFunc = std::function<void(scene::SceneUpdateHandler*)>;
 
-    std::unique_ptr<gvs::scene::Scene> scene;
-
-    {
-        auto client_scene = std::make_unique<gvs::net::ClientScene>(server_address);
-        if (client_scene->connected()) {
-            scene = std::move(client_scene);
-        } else {
-            scene = std::make_unique<gvs::scene::NilScene>();
-        }
-    }
-
-    example::build_test_scene(scene.get());
-
-    return 0;
-}
+} // namespace gvs::display

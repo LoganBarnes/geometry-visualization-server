@@ -71,6 +71,11 @@ if (NOT doctest_dl_POPULATED)
     # compile with current project
     add_subdirectory(${doctest_dl_SOURCE_DIR} ${doctest_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
 
+    # Threads #
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    target_link_libraries(doctest INTERFACE Threads::Threads)
+
     # add test coverage capabilities if available
     find_program(LCOV_EXE
             NAMES "lcov"

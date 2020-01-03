@@ -20,32 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
-// project
-#include "gvs/net/client_scene.hpp"
-#include "gvs/scene/nil_scene.hpp"
+#pragma once
 
-// examples
-#include "../common/test_scene.hpp"
+#include "gvs/display/forward_declarations.hpp"
+#include "gvs/display/scene_update_func.hpp"
+#include "gvs/util/blocking_queue.hpp"
+#include "gvs/vis-client/app/imgui_magnum_application.hpp"
 
-int main(int argc, char* argv[]) {
-    std::string server_address = "0.0.0.0:50055";
+// standard
+#include <thread>
 
-    if (argc > 1) {
-        server_address = argv[1];
-    }
+namespace gvs::display {
 
-    std::unique_ptr<gvs::scene::Scene> scene;
+class DisplayWindow : public vis::ImGuiMagnumApplication {
+public:
+    explicit DisplayWindow(DisplayScene& parent_scene);
+    ~DisplayWindow() override;
 
-    {
-        auto client_scene = std::make_unique<gvs::net::ClientScene>(server_address);
-        if (client_scene->connected()) {
-            scene = std::move(client_scene);
-        } else {
-            scene = std::make_unique<gvs::scene::NilScene>();
-        }
-    }
+    auto thread_safe_update(SceneUpdateFunc update_func) -> void;
 
-    example::build_test_scene(scene.get());
+private:
+    void update() override;
+    void render(CameraPackage const& camera_package) const override;
+    void configure_gui() override;
 
-    return 0;
-}
+    void resize(const Magnum::Vector2i& viewport) override;
+
+    // General Info
+    std::string gl_version_str_;
+    std::string gl_renderer_str_;
+    std::string error_message_;
+
+    // Scene
+    DisplayScene&                             parent_scene_;
+    std::unique_ptr<backends::DisplayBackend> scene_backend_; ///< Used to update and display the scene
+
+    // Data processing
+    std::mutex                  update_lock_;
+    std::deque<SceneUpdateFunc> update_functions_;
+};
+
+} // namespace gvs::display

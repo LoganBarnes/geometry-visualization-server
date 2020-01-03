@@ -23,31 +23,28 @@
 #pragma once
 
 // project
-#include "forward_declarations.hpp"
-#include "gvs/display/backends/display_backend.hpp"
+#include "display_window.hpp"
 #include "gvs/scene/scene.hpp"
+#include "gvs/scene/scene_update_handler.hpp"
+#include "gvs/util/atomic_data.hpp"
+#include "scene_core.hpp"
+
+// standard
+#include <mutex>
+#include <thread>
 
 namespace gvs::display {
 
-class LocalScene : public scene::Scene, public SceneDisplay {
+class DisplayScene : public scene::Scene, public scene::SceneUpdateHandler {
 public:
-    explicit LocalScene();
-    ~LocalScene() override;
-
-    /*
-     * Start `SceneDisplay` functions
-     */
-    auto render(CameraPackage const& camera_package) const -> void override;
-    auto resize(Magnum::Vector2i const& viewport) -> void override;
-    /*
-     * End `SceneDisplay` functions
-     */
+    explicit DisplayScene();
+    ~DisplayScene() override;
 
     /*
      * Start `Scene` functions
      */
-    auto clear() -> LocalScene& override;
-    auto set_seed(unsigned seed) -> LocalScene& override;
+    auto clear() -> DisplayScene& override;
+    auto set_seed(unsigned seed) -> DisplayScene& override;
 
 private:
     auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId> override;
@@ -59,8 +56,23 @@ private:
      * End `Scene` functions
      */
 
-    std::unique_ptr<SceneDisplay> display_; ///< Used to do the actual rendering of the scene
-    std::unique_ptr<SceneCore>    core_scene_; ///< Handles all the scene logic
+    /*
+     * Start `SceneUpdater` functions
+     */
+    void added(SceneId const& item_id, SceneItemInfo const& item) override;
+    void updated(SceneId const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item) override;
+    void removed(SceneId const& item_id) override;
+    void reset_items(SceneItems const& items) override;
+    /*
+     * End `SceneUpdater` functions
+     */
+
+    std::unique_ptr<gvs::display::DisplayWindow> display_window_; ///< Used to display the scene in a window
+
+    std::mutex core_scene_lock_; ///< Allows this scene to be updated in multiple threads
+    std::unique_ptr<util::AtomicData<SceneCore>> core_scene_; ///< Handles all the scene logic
+
+    std::thread display_thread_; ///< Runs the display window
 };
 
 } // namespace gvs::display

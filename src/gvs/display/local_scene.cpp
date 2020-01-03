@@ -51,7 +51,7 @@ auto LocalScene::clear() -> LocalScene& {
     return *this;
 }
 
-auto LocalScene::set_seed(std::random_device::result_type seed) -> LocalScene& {
+auto LocalScene::set_seed(unsigned seed) -> LocalScene& {
     core_scene_->set_seed(seed);
     return *this;
 }

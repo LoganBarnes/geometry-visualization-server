@@ -27,5 +27,12 @@ namespace gvs::display {
 class LocalScene;
 class SceneDisplay;
 class SceneCore;
+class DisplayScene;
+class DisplayWindow;
 
+namespace backends {
+
+class DisplayBackend;
+
+} // namespace backends
 } // namespace gvs::display
