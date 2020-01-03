@@ -41,7 +41,7 @@ SceneServer::SceneServer(const std::string& host_address) {
     }
 
     // Prevent multiple servers from running at the same address with the same port?
-    //    builder.AddChannelArgument("grpc.so_reuseport", 0);
+    builder.AddChannelArgument("grpc.so_reuseport", 0);
 
     server_ = builder.BuildAndStart();
 }
