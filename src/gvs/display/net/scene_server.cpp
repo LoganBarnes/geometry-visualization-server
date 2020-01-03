@@ -48,45 +48,98 @@ SceneServer::SceneServer(const std::string& host_address) {
 
 SceneServer::~SceneServer() = default; // shutdown server and wait?
 
-grpc::Status SceneServer::AddItem(grpc::ServerContext*                 context,
+grpc::Status SceneServer::AddItem(grpc::ServerContext* /*context*/,
                                   const gvs::net::SparseSceneItemInfo* request,
                                   gvs::net::SceneIdResult*             response) {
-    return Service::AddItem(context, request, response);
+    auto&& info = from_proto(*request);
+
+    auto result = display_scene_.use_safely([info = std::move(info)](display::DisplayScene& display_scene) mutable {
+        return display_scene.actually_add_item(std::move(info));
+    });
+    if (result) {
+        *response->mutable_value() = to_proto(result.value());
+    } else {
+        *response->mutable_error() = to_proto(result.error());
+    }
+    return grpc::Status::OK;
 }
 
-grpc::Status SceneServer::UpdateItem(grpc::ServerContext*                       context,
+grpc::Status SceneServer::UpdateItem(grpc::ServerContext* /*context*/,
                                      const gvs::net::SparseSceneItemInfoWithId* request,
                                      gvs::net::Result*                          response) {
-    return Service::UpdateItem(context, request, response);
+    auto   id   = from_proto(request->id());
+    auto&& info = from_proto(request->info());
+
+    auto error = display_scene_.use_safely([id, info = std::move(info)](display::DisplayScene& display_scene) mutable {
+        return display_scene.actually_update_item(id, std::move(info));
+    });
+
+    if (error) {
+        *response->mutable_error() = to_proto(error);
+    } else {
+        response->mutable_value(); // Success
+    }
+    return grpc::Status::OK;
 }
 
-grpc::Status SceneServer::AppendToItem(grpc::ServerContext*                       context,
+grpc::Status SceneServer::AppendToItem(grpc::ServerContext* /*context*/,
                                        const gvs::net::SparseSceneItemInfoWithId* request,
                                        gvs::net::Result*                          response) {
-    return Service::AppendToItem(context, request, response);
+    auto   id   = from_proto(request->id());
+    auto&& info = from_proto(request->info());
+
+    auto error = display_scene_.use_safely([id, info = std::move(info)](display::DisplayScene& display_scene) mutable {
+        return display_scene.actually_append_to_item(id, std::move(info));
+    });
+
+    if (error) {
+        *response->mutable_error() = to_proto(error);
+    } else {
+        response->mutable_value(); // Success
+    }
+    return grpc::Status::OK;
 }
 
-grpc::Status SceneServer::GetItemInfo(grpc::ServerContext*           context,
+grpc::Status SceneServer::GetItemInfo(grpc::ServerContext* /*context*/,
                                       const gvs::net::SceneId*       request,
                                       gvs::net::SceneItemInfoResult* response) {
-    return Service::GetItemInfo(context, request, response);
+    auto id = from_proto(*request);
+
+    auto error = display_scene_.use_safely([id, &response](display::DisplayScene& display_scene) {
+        return display_scene.actually_get_item_info(id, [&response](gvs::SceneItemInfo const& info) {
+            *response->mutable_value() = to_proto(info);
+        });
+    });
+
+    if (error) {
+        *response->mutable_error() = to_proto(error);
+    }
+
+    return grpc::Status::OK;
 }
 
-grpc::Status SceneServer::Clear(grpc::ServerContext*             context,
-                                const ::google::protobuf::Empty* request,
-                                ::google::protobuf::Empty*       response) {
-    return Service::Clear(context, request, response);
+grpc::Status SceneServer::Clear(grpc::ServerContext* /*context*/,
+                                const google::protobuf::Empty* /*request*/,
+                                google::protobuf::Empty* /*response*/) {
+
+    display_scene_.use_safely([](display::DisplayScene& display_scene) { display_scene.clear(); });
+    return grpc::Status::OK;
 }
 
-grpc::Status SceneServer::GetItemIds(grpc::ServerContext*             context,
-                                     const ::google::protobuf::Empty* request,
-                                     gvs::net::SceneIdList*           response) {
-    return Service::GetItemIds(context, request, response);
+grpc::Status SceneServer::GetItemIds(grpc::ServerContext* /*context*/,
+                                     const google::protobuf::Empty* /*request*/,
+                                     gvs::net::SceneIdList* response) {
+    auto ids = display_scene_.use_safely([](display::DisplayScene& display_scene) { return display_scene.item_ids(); });
+    *response = to_proto(ids);
+    return grpc::Status::OK;
 }
 
-grpc::Status
-SceneServer::SetSeed(grpc::ServerContext* context, const gvs::net::Seed* request, ::google::protobuf::Empty* response) {
-    return Service::SetSeed(context, request, response);
+grpc::Status SceneServer::SetSeed(grpc::ServerContext* /*context*/,
+                                  const gvs::net::Seed* request,
+                                  google::protobuf::Empty* /*response*/) {
+    display_scene_.use_safely(
+        [seed = request->value()](display::DisplayScene& display_scene) { display_scene.set_seed(seed); });
+    return grpc::Status::OK;
 }
 
 } // namespace gvs::net

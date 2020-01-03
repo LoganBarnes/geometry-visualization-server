@@ -46,19 +46,21 @@ public:
      * Start `Scene` functions
      */
     [[nodiscard]] auto item_ids() const -> std::unordered_set<SceneId> override;
-    auto               clear() -> DisplayScene& override;
-    auto               set_seed(unsigned seed) -> DisplayScene& override;
 
-private:
+    auto clear() -> DisplayScene& override;
+    auto set_seed(unsigned seed) -> DisplayScene& override;
+
     auto actually_add_item(SparseSceneItemInfo&& info) -> util11::Result<SceneId> override;
     auto actually_update_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
     auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error override;
 
-    void actually_get_item_info(SceneId const& item_id, scene::InfoGetterFunc info_getter) const override;
+    auto actually_get_item_info(SceneId const& item_id, scene::InfoGetterFunc info_getter) const
+        -> util11::Error override;
     /*
      * End `Scene` functions
      */
 
+private:
     /*
      * Start `SceneUpdater` functions
      */
@@ -71,8 +73,6 @@ private:
      */
 
     std::unique_ptr<gvs::display::DisplayWindow> display_window_; ///< Used to display the scene in a window
-
-    std::mutex core_scene_lock_; ///< Allows this scene to be updated in multiple threads
     std::unique_ptr<util::AtomicData<SceneCore>> core_scene_; ///< Handles all the scene logic
 
     std::thread display_thread_; ///< Runs the display window

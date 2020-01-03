@@ -33,7 +33,7 @@
 namespace gvs {
 namespace scene {
 
-using InfoGetterFunc = std::function<void(const SceneItemInfo&)>;
+using InfoGetterFunc = std::function<void(SceneItemInfo const&)>;
 
 class Scene {
 public:
@@ -119,7 +119,7 @@ private:
     virtual auto actually_append_to_item(SceneId const& item_id, SparseSceneItemInfo&& info) -> util11::Error = 0;
 
     /// \brief Updates the specified item by appending all new geometry
-    virtual auto actually_get_item_info(SceneId const& item_id, InfoGetterFunc info_getter) const -> void = 0;
+    virtual auto actually_get_item_info(SceneId const& item_id, InfoGetterFunc info_getter) const -> util11::Error = 0;
 };
 
 namespace detail {

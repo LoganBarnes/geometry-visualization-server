@@ -47,7 +47,9 @@ DisplayScene::~DisplayScene() {
 }
 
 auto DisplayScene::block_until_window_is_closed() -> void {
-    display_thread_.join();
+    if (display_thread_.joinable()) {
+        display_thread_.join();
+    }
 }
 
 auto DisplayScene::item_ids() const -> std::unordered_set<SceneId> {
@@ -95,27 +97,33 @@ auto DisplayScene::actually_append_to_item(SceneId const& item_id, SparseSceneIt
     });
 }
 
-void DisplayScene::actually_get_item_info(SceneId const& item_id, scene::InfoGetterFunc info_getter) const {
-    core_scene_->use_safely([item_id, info_getter = std::move(info_getter)](auto const& core_scene) {
+auto DisplayScene::actually_get_item_info(SceneId const& item_id, scene::InfoGetterFunc info_getter) const
+    -> util11::Error {
+    return core_scene_->use_safely([item_id, info_getter = std::move(info_getter)](auto const& core_scene) {
+        if (core_scene.items().find(item_id) == core_scene.items().end()) {
+            return util11::Error{"Item '" + gvs::to_string(item_id) + "' does not exist in the scene"};
+        }
         info_getter(core_scene.items().at(item_id));
+        return util11::success();
     });
 }
 
-void DisplayScene::added(SceneId const& item_id, SceneItemInfo const& item) {
+auto DisplayScene::added(SceneId const& item_id, SceneItemInfo const& item) -> void {
     display_window_->thread_safe_update(
         [item_id, item](scene::SceneUpdateHandler* handler) { handler->added(item_id, item); });
 }
 
-void DisplayScene::updated(SceneId const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item) {
+auto DisplayScene::updated(SceneId const& item_id, scene::UpdatedInfo const& updated, SceneItemInfo const& item)
+    -> void {
     display_window_->thread_safe_update(
         [item_id, updated, item](scene::SceneUpdateHandler* handler) { handler->updated(item_id, updated, item); });
 }
 
-void DisplayScene::removed(SceneId const& item_id) {
+auto DisplayScene::removed(SceneId const& item_id) -> void {
     display_window_->thread_safe_update([item_id](scene::SceneUpdateHandler* handler) { handler->removed(item_id); });
 }
 
-void DisplayScene::reset_items(SceneItems const& items) {
+auto DisplayScene::reset_items(SceneItems const& items) -> void {
     display_window_->thread_safe_update([items](scene::SceneUpdateHandler* handler) { handler->reset_items(items); });
 }
 

@@ -103,8 +103,8 @@ auto ClientScene::actually_add_item(gvs::SparseSceneItemInfo&& info) -> util11::
         return util11::Error{status.error_message()};
     }
 
-    if (response.has_errors()) {
-        return util11::Error{response.errors().error_msg()};
+    if (response.has_error()) {
+        return from_proto(response.error());
     }
 
     return from_proto(response.value());
@@ -128,8 +128,8 @@ auto ClientScene::actually_update_item(gvs::SceneId const& item_id, gvs::SparseS
         return util11::Error{status.error_message()};
     }
 
-    if (response.has_errors()) {
-        return util11::Error{response.errors().error_msg()};
+    if (response.has_error()) {
+        return from_proto(response.error());
     }
 
     return util11::success();
@@ -155,17 +155,18 @@ auto ClientScene::actually_append_to_item(gvs::SceneId const& item_id, gvs::Spar
         return util11::Error{status.error_message()};
     }
 
-    if (response.has_errors()) {
-        return util11::Error{response.errors().error_msg()};
+    if (response.has_error()) {
+        return from_proto(response.error());
     }
 
     return util11::success();
 }
 
-auto ClientScene::actually_get_item_info(gvs::SceneId const& item_id, scene::InfoGetterFunc info_getter) const -> void {
+auto ClientScene::actually_get_item_info(gvs::SceneId const& item_id, scene::InfoGetterFunc info_getter) const
+    -> util11::Error {
 
     if (!channel_) {
-        throw std::runtime_error("Client not connected");
+        return util11::Error{"Client not connected"};
     }
 
     grpc::ClientContext      context;
@@ -174,14 +175,16 @@ auto ClientScene::actually_get_item_info(gvs::SceneId const& item_id, scene::Inf
 
     auto status = stub_->GetItemInfo(&context, request, &response);
     if (!status.ok()) {
-        throw std::runtime_error(status.error_message());
+        return util11::Error{status.error_message()};
     }
 
-    if (response.has_errors()) {
-        throw std::runtime_error(response.errors().error_msg());
+    if (response.has_error()) {
+        return from_proto(response.error());
     }
 
     info_getter(from_proto(response.value()));
+
+    return util11::success();
 }
 
 } // namespace net

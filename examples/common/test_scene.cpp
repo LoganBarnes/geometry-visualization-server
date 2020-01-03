@@ -44,7 +44,8 @@ auto build_test_scene(gvs::scene::Scene* scene, gvs::SceneId const& root_id) -> 
     }
 
     std::vector<float> circle;
-    constexpr int      max_verts = 50;
+
+    constexpr int max_verts = 50;
     for (int i = 0; i <= max_verts; ++i) {
         float angle = pi * static_cast<float>(i) * 2.f / max_verts;
         circle.emplace_back(std::cos(angle));

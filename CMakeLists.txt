@@ -113,7 +113,8 @@ gvs_link_libraries(gvs_scene
         mapbox
         )
 gvs_include_directories(gvs_scene
-        PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"
         )
 
 if (GVS_ENABLE_NETWORKING)
@@ -146,8 +147,9 @@ if (GVS_ENABLE_NETWORKING)
 
     gvs_add_library(gvs_scene_client 11 ${GVS_SOURCE_FILES})
     gvs_link_libraries(gvs_scene_client
-            PUBLIC gvs_protos
-            PUBLIC gvs_scene
+            PUBLIC
+            gvs_protos
+            gvs_scene
             )
 endif (GVS_ENABLE_NETWORKING)
 
@@ -164,13 +166,16 @@ if (GVS_ENABLE_DISPLAY)
     gvs_add_library(gvs_util 17 ${GVS_SOURCE_FILES})
 
     gvs_link_libraries(gvs_util
-            PUBLIC boost_uuid
-            PUBLIC expected
-            PUBLIC doctest
+            PUBLIC
+            boost_uuid
+            expected
+            range-v3
+            doctest
             )
     gvs_include_directories(gvs_util
-            PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
-            PUBLIC ${CMAKE_BINARY_DIR}/generated
+            PUBLIC
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>"
+            "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated>"
             )
 
     ###########
@@ -202,9 +207,10 @@ if (GVS_ENABLE_DISPLAY)
 
     gvs_add_library(gvs_scene_display 17 ${GVS_SOURCE_FILES})
     gvs_link_libraries(gvs_scene_display
-            PUBLIC vis_client_resources
-            PUBLIC gvs_util
-            PUBLIC gvs_scene
+            PUBLIC
+            vis_client_resources
+            gvs_util
+            gvs_scene
             )
 
     if (GVS_ENABLE_NETWORKING)
@@ -213,8 +219,9 @@ if (GVS_ENABLE_DISPLAY)
                 ${GVS_NET_SOURCE_FILES}
                 )
         gvs_link_libraries(gvs
-                PUBLIC gvs_scene_display
-                PUBLIC gvs_scene_client
+                PUBLIC
+                gvs_scene_display
+                gvs_scene_client
                 )
     endif ()
 endif (GVS_ENABLE_DISPLAY)

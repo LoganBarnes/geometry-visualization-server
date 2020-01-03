@@ -160,3 +160,7 @@ message SceneItemInfoWithId {
     SceneId id = 1;
     SceneItemInfo info = 2;
 }
+
+message Seed {
+    uint32 value = 1;
+}

@@ -38,5 +38,6 @@ int main(int argc, char** argv) {
     std::cout << "Server running at '" << host_address << "'" << std::endl;
 
     // The server will block until the window is closed
+
     return 0;
 }

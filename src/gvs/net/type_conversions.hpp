@@ -26,6 +26,7 @@
 #include "gvs/scene/scene.hpp"
 
 // generated
+#include <result.pb.h>
 #include <types.pb.h>
 
 namespace gvs {
@@ -49,7 +50,9 @@ auto to_proto(Shading const& value) -> net::Shading;
 template <std::size_t N>
 auto to_proto(AttributeVector<N> const& value) -> net::FloatList;
 auto to_proto(std::vector<unsigned> const& value) -> net::UIntList;
-auto to_proto(std::vector<gvs::SceneId> const& value) -> net::SceneIdList;
+
+template <template <typename...> class V = std::vector>
+auto to_proto(V<gvs::SceneId> const& value) -> net::SceneIdList;
 
 auto to_proto(Primitive const& value) -> net::Primitive;
 
@@ -63,6 +66,8 @@ auto to_proto(GeometryInfo const& value) -> net::GeometryInfo;
 auto to_proto(DisplayInfo const& value) -> net::DisplayInfo;
 
 auto to_proto(SceneItemInfo const& value) -> net::SceneItemInfo;
+
+auto to_proto(util11::Error const& value) -> net::Error;
 
 /*
  * From proto
@@ -83,7 +88,9 @@ auto from_proto(net::Shading const& proto) -> Shading;
 template <std::size_t N>
 auto from_proto(net::FloatList const& proto) -> AttributeVector<N>;
 auto from_proto(net::UIntList const& proto) -> std::vector<unsigned>;
-auto from_proto(net::SceneIdList const& proto) -> std::vector<gvs::SceneId>;
+
+template <template <typename...> class V = std::vector>
+auto from_proto(net::SceneIdList const& proto) -> V<gvs::SceneId>;
 
 auto from_proto(net::Primitive const& proto) -> Primitive;
 
@@ -97,5 +104,7 @@ auto from_proto(net::GeometryInfo const& proto) -> GeometryInfo;
 auto from_proto(net::DisplayInfo const& proto) -> DisplayInfo;
 
 auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfo;
+
+auto from_proto(net::Error const& proto) -> util11::Error;
 
 } // namespace gvs

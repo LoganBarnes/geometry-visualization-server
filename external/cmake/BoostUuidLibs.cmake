@@ -111,3 +111,5 @@ if (MSVC)
             boost_winapi
             )
 endif ()
+
+message("-- Done downloading Boost UUID libs")

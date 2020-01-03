@@ -74,6 +74,8 @@ auto update_vbo(OpenglBackend::ObjectMeshPackage* mesh_package, GeometryInfo con
 
     mesh_package->vertex_buffer.setData(buffer_data, Magnum::GL::BufferUsage::StaticDraw);
     mesh_package->mesh.setCount(mesh_package->vbo_count);
+
+    //std::cout << "Added " << mesh_package->vbo_count << " verts" << std::endl;
 }
 
 auto update_ibo(OpenglBackend::ObjectMeshPackage* mesh_package, std::vector<unsigned> const& indices) {
@@ -118,9 +120,6 @@ OpenglBackend::OpenglBackend() {
 OpenglBackend::~OpenglBackend() = default;
 
 auto OpenglBackend::render(CameraPackage const& camera_package) const -> void {
-    if (objects_.empty()) {
-        return;
-    }
     camera_object_.setTransformation(camera_package.transformation);
     camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
     camera_->draw(drawables_);
@@ -147,6 +146,8 @@ auto OpenglBackend::updated(SceneId const& item_id, scene::UpdatedInfo const& up
         if (updated.geometry_indices) {
             update_ibo(&mesh_package, geometry_info.indices);
         }
+        //    } else {
+        //        std::cout << "No geometry added :{" << std::endl;
     }
 
     if (updated.display_geometry_format) {

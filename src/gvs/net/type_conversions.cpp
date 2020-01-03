@@ -150,7 +150,8 @@ auto to_proto(std::vector<unsigned> const& value) -> net::UIntList {
     return proto;
 }
 
-auto to_proto(std::vector<gvs::SceneId> const& value) -> net::SceneIdList {
+template <template <typename...> class V>
+auto to_proto(V<gvs::SceneId> const& value) -> net::SceneIdList {
     net::SceneIdList proto = {};
     for (auto const& scene_id : value) {
         *proto.add_value() = to_proto(scene_id);
@@ -198,6 +199,9 @@ auto to_proto(SparseGeometryInfo const& value) -> net::SparseGeometryInfo {
     }
     if (value.vertex_colors) {
         *proto.mutable_vertex_colors() = to_proto(*value.vertex_colors);
+    }
+    if (value.indices) {
+        *proto.mutable_indices() = to_proto(*value.indices);
     }
     return proto;
 }
@@ -276,6 +280,7 @@ auto to_proto(GeometryInfo const& value) -> net::GeometryInfo {
     *proto.mutable_normals()             = to_proto(value.normals);
     *proto.mutable_texture_coordinates() = to_proto(value.texture_coordinates);
     *proto.mutable_vertex_colors()       = to_proto(value.vertex_colors);
+    *proto.mutable_indices()             = to_proto(value.indices);
 
     return proto;
 }
@@ -307,6 +312,15 @@ auto to_proto(SceneItemInfo const& value) -> net::SceneItemInfo {
     return proto;
 }
 
+auto to_proto(util11::Error const& value) -> net::Error {
+    net::Error proto = {};
+    proto.set_error_msg(value.error_message);
+    return proto;
+}
+
+// specializations
+template auto to_proto(std::vector<gvs::SceneId> const& value) -> net::SceneIdList;
+template auto to_proto(std::unordered_set<gvs::SceneId> const& value) -> net::SceneIdList;
 template auto to_proto(AttributeVector<3> const& value) -> net::FloatList;
 template auto to_proto(AttributeVector<2> const& value) -> net::FloatList;
 
@@ -421,20 +435,33 @@ auto from_proto(net::Shading const& proto) -> Shading {
 
 template <std::size_t N>
 auto from_proto(net::FloatList const& proto) -> AttributeVector<N> {
-    return {proto.value().begin(), proto.value().end()};
+    return std::vector<float>{proto.value().begin(), proto.value().end()};
 }
 
 auto from_proto(net::UIntList const& proto) -> std::vector<unsigned> {
     return {proto.value().begin(), proto.value().end()};
 }
 
-auto from_proto(net::SceneIdList const& proto) -> std::vector<gvs::SceneId> {
-    std::vector<gvs::SceneId> scene_ids;
+template <typename Inserter>
+auto transform(net::SceneIdList const& proto, Inserter&& inserter) -> void {
+    std::transform(proto.value().begin(),
+                   proto.value().end(),
+                   std::forward<Inserter>(inserter),
+                   [](net::SceneId const& id) { return from_proto(id); });
+}
 
-    for (auto const& scene_id : proto.value()) {
-        scene_ids.emplace_back(from_proto(scene_id));
-    }
-    return scene_ids;
+template <>
+auto from_proto<std::vector>(net::SceneIdList const& proto) -> std::vector<gvs::SceneId> {
+    std::vector<gvs::SceneId> ids;
+    transform(proto, std::back_inserter(ids));
+    return ids;
+}
+
+template <>
+auto from_proto<std::unordered_set>(net::SceneIdList const& proto) -> std::unordered_set<gvs::SceneId> {
+    std::unordered_set<gvs::SceneId> ids;
+    transform(proto, std::inserter(ids, ids.end()));
+    return ids;
 }
 
 auto from_proto(net::Primitive const& proto) -> Primitive {
@@ -485,6 +512,9 @@ auto from_proto(net::SparseGeometryInfo const& proto) -> SparseGeometryInfo {
     }
     if (proto.has_vertex_colors()) {
         value.vertex_colors = std::make_unique<AttributeVector<3>>(from_proto<3>(proto.vertex_colors()));
+    }
+    if (proto.has_indices()) {
+        value.indices = std::make_unique<std::vector<unsigned>>(from_proto(proto.indices()));
     }
     return value;
 }
@@ -560,6 +590,7 @@ auto from_proto(net::GeometryInfo const& proto) -> GeometryInfo {
     value.normals             = from_proto<3>(proto.normals());
     value.texture_coordinates = from_proto<2>(proto.texture_coordinates());
     value.vertex_colors       = from_proto<3>(proto.vertex_colors());
+    value.indices             = from_proto(proto.indices());
 
     return value;
 }
@@ -591,6 +622,11 @@ auto from_proto(net::SceneItemInfo const& proto) -> SceneItemInfo {
     return value;
 }
 
+auto from_proto(net::Error const& proto) -> util11::Error {
+    return {proto.error_msg()};
+}
+
+// specializations
 template auto from_proto(net::FloatList const& proto) -> AttributeVector<3>;
 template auto from_proto(net::FloatList const& proto) -> AttributeVector<2>;
 

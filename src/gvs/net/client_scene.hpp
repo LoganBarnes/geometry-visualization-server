@@ -70,7 +70,8 @@ private:
     auto actually_append_to_item(gvs::SceneId const& item_id, gvs::SparseSceneItemInfo&& info)
         -> util11::Error override;
 
-    auto actually_get_item_info(gvs::SceneId const& item_id, scene::InfoGetterFunc info_getter) const -> void override;
+    auto actually_get_item_info(gvs::SceneId const& item_id, scene::InfoGetterFunc info_getter) const
+        -> util11::Error override;
     /*
      * End `Scene` functions
      */

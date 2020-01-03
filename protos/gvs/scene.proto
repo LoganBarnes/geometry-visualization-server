@@ -26,6 +26,7 @@ package gvs.net;
 
 import "google/protobuf/empty.proto";
 import "types.proto";
+import "result.proto";
 
 service Scene {
     rpc AddItem (SparseSceneItemInfo) returns (SceneIdResult);
@@ -37,36 +38,4 @@ service Scene {
     rpc GetItemIds (google.protobuf.Empty) returns (SceneIdList);
 
     rpc SetSeed (Seed) returns (google.protobuf.Empty);
-}
-
-message SceneIdResult {
-    oneof result {
-        SceneId value = 1;
-        Errors errors = 2;
-    }
-}
-
-message SceneItemInfoResult {
-    oneof result {
-        SceneItemInfo value = 1;
-        Errors errors = 2;
-    }
-}
-
-message Success {
-}
-
-message Result {
-    oneof result {
-        Success value = 1;
-        Errors errors = 2;
-    }
-}
-
-message Errors {
-    string error_msg = 1;
-}
-
-message Seed {
-    uint32 value = 1;
 }

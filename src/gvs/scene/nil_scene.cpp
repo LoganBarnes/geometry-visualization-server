@@ -54,7 +54,10 @@ auto NilScene::actually_append_to_item(gvs::SceneId const& /*item_id*/, gvs::Spa
     return util11::success();
 }
 
-void NilScene::actually_get_item_info(SceneId const& /*item_id*/, InfoGetterFunc /*info_getter*/) const {}
+auto NilScene::actually_get_item_info(SceneId const& /*item_id*/, InfoGetterFunc /*info_getter*/) const
+    -> util11::Error {
+    return util11::success();
+}
 
 } // namespace scene
 } // namespace gvs

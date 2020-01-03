@@ -35,6 +35,11 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/onqtam/doctest.git
         GIT_TAG 2.3.6
 )
+FetchContent_Declare(
+        range_v3_dl
+        GIT_REPOSITORY https://github.com/ericniebler/range-v3.git
+        GIT_TAG 0.9.1
+)
 
 ### Boost UUID ###
 include(cmake/BoostUuidLibs.cmake)
@@ -59,6 +64,18 @@ if (NOT mapbox_dl_POPULATED)
     add_library(mapbox INTERFACE)
     target_include_directories(mapbox SYSTEM INTERFACE "$<BUILD_INTERFACE:${mapbox_dl_SOURCE_DIR}/include>")
 endif (NOT mapbox_dl_POPULATED)
+
+### Range-v3 ###
+FetchContent_GetProperties(range_v3_dl)
+if (NOT range_v3_dl_POPULATED)
+    FetchContent_Populate(range_v3_dl)
+
+    set(RANGES_CXX_STD 17 CACHE INTERNAL "C++ standard version")
+
+    # compile with current project
+    add_subdirectory(${range_v3_dl_SOURCE_DIR} ${range_v3_dl_BINARY_DIR} EXCLUDE_FROM_ALL)
+    target_include_directories(range-v3 SYSTEM INTERFACE $<BUILD_INTERFACE:${range_v3_dl_SOURCE_DIR}/include/>)
+endif (NOT range_v3_dl_POPULATED)
 
 ### DocTest ###
 FetchContent_GetProperties(doctest_dl)

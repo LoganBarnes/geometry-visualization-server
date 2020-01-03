@@ -88,9 +88,12 @@ auto LocalScene::actually_append_to_item(SceneId const& item_id, SparseSceneItem
 }
 
 auto LocalScene::actually_get_item_info(const gvs::SceneId& item_id, gvs::scene::InfoGetterFunc info_getter) const
-    -> void {
-    auto const& item = core_scene_->items().at(item_id);
-    info_getter(item);
+    -> util11::Error {
+    if (core_scene_->items().find(item_id) == core_scene_->items().end()) {
+        return util11::Error{"Item '" + gvs::to_string(item_id) + "' does not exist in the scene"};
+    }
+    info_getter(core_scene_->items().at(item_id));
+    return util11::success();
 }
 
 } // namespace gvs::display

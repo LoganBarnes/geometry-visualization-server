@@ -36,12 +36,14 @@ namespace gvs::net {
 
 class SceneServer : public Scene::Service {
 public:
-    explicit SceneServer(std::string const& host_address = "");
+    explicit SceneServer(std::string const& host_address);
     ~SceneServer() override;
 
+    auto server() -> grpc::Server& { return *server_; }
+
 private:
-    util::AtomicData<display::DisplayScene> display_scene_;
     std::unique_ptr<grpc::Server>           server_;
+    util::AtomicData<display::DisplayScene> display_scene_;
 
     grpc::Status AddItem(grpc::ServerContext*                 context,
                          const gvs::net::SparseSceneItemInfo* request,
@@ -59,16 +61,16 @@ private:
                              const gvs::net::SceneId*       request,
                              gvs::net::SceneItemInfoResult* response) override;
 
-    grpc::Status Clear(grpc::ServerContext*             context,
-                       const ::google::protobuf::Empty* request,
-                       ::google::protobuf::Empty*       response) override;
+    grpc::Status Clear(grpc::ServerContext*           context,
+                       const google::protobuf::Empty* request,
+                       google::protobuf::Empty*       response) override;
 
-    grpc::Status GetItemIds(grpc::ServerContext*             context,
-                            const ::google::protobuf::Empty* request,
-                            gvs::net::SceneIdList*           response) override;
+    grpc::Status GetItemIds(grpc::ServerContext*           context,
+                            const google::protobuf::Empty* request,
+                            gvs::net::SceneIdList*         response) override;
 
     grpc::Status
-    SetSeed(grpc::ServerContext* context, const gvs::net::Seed* request, ::google::protobuf::Empty* response) override;
+    SetSeed(grpc::ServerContext* context, const gvs::net::Seed* request, google::protobuf::Empty* response) override;
 };
 
 } // namespace gvs::net
