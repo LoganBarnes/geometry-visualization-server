@@ -15,6 +15,8 @@ Geometry Visualization Server
 * Add global scene traits (like lights)
 * ~~Clean up magnum scene class~~
 * Make things intersectable
+* Implement an arcball-like camera rotation:
+    * https://doc.magnum.graphics/magnum/examples-viewer.html
 * Create implicitly convertible vector and matrix classes for use with setters and getters
 * ~~Move display namespace types to their proper location~~
 * ~~Implement DisplayScene (maybe)~~

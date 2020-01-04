@@ -135,7 +135,7 @@ OpenglBackend::~OpenglBackend() = default;
 auto OpenglBackend::render(CameraPackage const& camera_package) const -> void {
     using namespace Magnum;
 
-    camera_object_.setTransformation(camera_package.transformation);
+    camera_object_.setTransformation(camera_package.object.transformation());
     camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
 
     if (!opaque_drawables_.isEmpty()) {

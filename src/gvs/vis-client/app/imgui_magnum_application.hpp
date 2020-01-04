@@ -47,30 +47,31 @@ protected:
 
     // Ensures the application renders at least 5 more times after all events are
     // finished to give ImGui a chance to update and render correctly.
-    void reset_draw_counter();
+    auto reset_draw_counter() -> void;
 
 private:
-    virtual void update()                                                   = 0;
-    virtual void render(const display::CameraPackage& camera_package) const = 0;
-    virtual void configure_gui()                                            = 0;
+    virtual auto update() -> void                                                   = 0;
+    virtual auto render(const display::CameraPackage& camera_package) const -> void = 0;
+    virtual auto configure_gui() -> void                                            = 0;
 
-    virtual void resize(const Magnum::Vector2i& viewport) = 0;
+    virtual auto resize(const Magnum::Vector2i& viewport) -> void = 0;
 
-    void drawEvent() override;
-    void viewportEvent(ViewportEvent& event) override;
+    auto drawEvent() -> void override;
+    auto viewportEvent(ViewportEvent& event) -> void override;
 
     // keyboard
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
+    auto keyPressEvent(KeyEvent& event) -> void override;
+    auto keyReleaseEvent(KeyEvent& event) -> void override;
+    auto textInputEvent(TextInputEvent& event) -> void override;
 
     // mouse
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
+    auto mousePressEvent(MouseEvent& event) -> void override;
+    auto mouseReleaseEvent(MouseEvent& event) -> void override;
+    auto mouseMoveEvent(MouseMoveEvent& event) -> void override;
+    auto mouseScrollEvent(MouseScrollEvent& event) -> void override;
 
-    void update_camera();
+    [[nodiscard]] auto position_on_arcball(Magnum::Vector2i const& position) const -> Magnum::Vector3;
+    auto               update_camera() -> void;
 
     Magnum::ImGuiIntegration::Context imgui_{Magnum::NoCreate};
     int                               draw_counter_ = 1; // continue drawing until this counter is zero
@@ -79,10 +80,9 @@ private:
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
     display::CameraPackage                                                camera_package_;
 
-    Magnum::Vector2 previous_position_     = {};
-    Magnum::Vector2 camera_yaw_and_pitch_  = {};
-    float           camera_orbit_distance_ = 15.f;
-    Magnum::Vector3 camera_orbit_point_    = {};
+    Magnum::Matrix4 previous_arcball_transform_ = {};
+    Magnum::Vector3 previous_arcball_position_  = {};
+    Magnum::Vector3 camera_orbit_point_         = {};
 };
 
 } // namespace gvs::vis
