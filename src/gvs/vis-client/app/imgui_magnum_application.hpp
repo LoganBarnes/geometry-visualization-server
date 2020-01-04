@@ -41,14 +41,6 @@ public:
     explicit ImGuiMagnumApplication(const Arguments& arguments);
     virtual ~ImGuiMagnumApplication();
 
-protected:
-    // forward declaration
-    std::unique_ptr<detail::Theme> theme_;
-
-    // Ensures the application renders at least 5 more times after all events are
-    // finished to give ImGui a chance to update and render correctly.
-    auto reset_draw_counter() -> void;
-
 private:
     virtual auto update() -> void                                                   = 0;
     virtual auto render(const display::CameraPackage& camera_package) const -> void = 0;
@@ -71,18 +63,27 @@ private:
     auto mouseScrollEvent(MouseScrollEvent& event) -> void override;
 
     [[nodiscard]] auto position_on_arcball(Magnum::Vector2i const& position) const -> Magnum::Vector3;
-    auto               update_camera() -> void;
 
     Magnum::ImGuiIntegration::Context imgui_{Magnum::NoCreate};
     int                               draw_counter_ = 1; // continue drawing until this counter is zero
 
     // Camera
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
-    display::CameraPackage                                                camera_package_;
 
     Magnum::Matrix4 previous_arcball_transform_ = {};
     Magnum::Vector3 previous_arcball_position_  = {};
     Magnum::Vector3 camera_orbit_point_         = {};
+
+protected:
+    // forward declaration
+    std::unique_ptr<detail::Theme> theme_;
+
+    // Camera
+    display::CameraPackage camera_package_;
+
+    // Ensures the application renders at least 5 more times after all events are
+    // finished to give ImGui a chance to update and render correctly.
+    auto reset_draw_counter() -> void;
 };
 
 } // namespace gvs::vis
