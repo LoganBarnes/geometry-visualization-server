@@ -56,46 +56,55 @@ GeneralShader3d::GeneralShader3d() {
 
     CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 
-    world_from_local_uniform_         = uniformLocation("world_from_local");
-    world_from_local_normals_uniform_ = uniformLocation("world_from_local_normals");
-    projection_from_local_uniform_    = uniformLocation("projection_from_local");
+    world_from_local_uniform_location_         = uniformLocation("world_from_local");
+    world_from_local_normals_uniform_location_ = uniformLocation("world_from_local_normals");
+    projection_from_local_uniform_location_    = uniformLocation("projection_from_local");
 
-    coloring_uniform_      = uniformLocation("coloring");
-    uniform_color_uniform_ = uniformLocation("uniform_color");
+    coloring_uniform_location_      = uniformLocation("coloring");
+    uniform_color_uniform_location_ = uniformLocation("uniform_color");
 
-    shading_uniform_         = uniformLocation("shading");
-    light_direction_uniform_ = uniformLocation("light_direction");
-    light_color_uniform_     = uniformLocation("light_color");
-    ambient_scale_uniform_   = uniformLocation("ambient_scale");
+    shading_uniform_location_         = uniformLocation("shading");
+    light_direction_uniform_location_ = uniformLocation("light_direction");
+    light_color_uniform_location_     = uniformLocation("light_color");
+    ambient_scale_uniform_location_   = uniformLocation("ambient_scale");
+
+    id_uniform_location_ = uniformLocation("id");
 }
 
-GeneralShader3d& GeneralShader3d::set_world_from_local_matrix(const Magnum::Matrix4& world_from_local) {
-    setUniform(world_from_local_uniform_, world_from_local);
+auto GeneralShader3d::set_world_from_local_matrix(Magnum::Matrix4 const& world_from_local) -> GeneralShader3d& {
+    setUniform(world_from_local_uniform_location_, world_from_local);
     return *this;
 }
 
-GeneralShader3d& GeneralShader3d::set_world_from_local_normal_matrix(const Magnum::Matrix3& world_from_local_normals) {
-    setUniform(world_from_local_normals_uniform_, world_from_local_normals);
+auto GeneralShader3d::set_world_from_local_normal_matrix(Magnum::Matrix3 const& world_from_local_normals)
+    -> GeneralShader3d& {
+    setUniform(world_from_local_normals_uniform_location_, world_from_local_normals);
     return *this;
 }
 
-GeneralShader3d& GeneralShader3d::set_projection_from_local_matrix(const Magnum::Matrix4& projection_from_local) {
-    setUniform(projection_from_local_uniform_, projection_from_local);
+auto GeneralShader3d::set_projection_from_local_matrix(Magnum::Matrix4 const& projection_from_local)
+    -> GeneralShader3d& {
+    setUniform(projection_from_local_uniform_location_, projection_from_local);
     return *this;
 }
 
-GeneralShader3d& GeneralShader3d::set_coloring(const Coloring& coloring) {
-    setUniform(coloring_uniform_, std::underlying_type_t<Coloring>(coloring));
+auto GeneralShader3d::set_coloring(Coloring const& coloring) -> GeneralShader3d& {
+    setUniform(coloring_uniform_location_, std::underlying_type_t<Coloring>(coloring));
     return *this;
 }
 
-GeneralShader3d& GeneralShader3d::set_uniform_color(const Magnum::Color3& color) {
-    setUniform(uniform_color_uniform_, color);
+auto GeneralShader3d::set_uniform_color(Magnum::Color3 const& color) -> GeneralShader3d& {
+    setUniform(uniform_color_uniform_location_, color);
     return *this;
 }
 
-GeneralShader3d& GeneralShader3d::set_shading(const Shading& shading) {
-    setUniform(shading_uniform_, std::underlying_type_t<Shading>(shading));
+auto GeneralShader3d::set_shading(Shading const& shading) -> GeneralShader3d& {
+    setUniform(shading_uniform_location_, std::underlying_type_t<Shading>(shading));
+    return *this;
+}
+
+auto GeneralShader3d::set_id(unsigned const& id) -> GeneralShader3d& {
+    setUniform(id_uniform_location_, id);
     return *this;
 }
 

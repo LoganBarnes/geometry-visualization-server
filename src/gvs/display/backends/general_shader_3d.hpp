@@ -38,29 +38,34 @@ public:
     typedef Magnum::GL::Attribute<2, Magnum::Vector2> TextureCoordinate;
     typedef Magnum::GL::Attribute<3, Magnum::Vector3> VertexColor;
 
+    enum : Magnum::UnsignedInt { ColorOutput = 0, IdOutput = 1 };
+
     explicit GeneralShader3d();
 
-    GeneralShader3d& set_world_from_local_matrix(const Magnum::Matrix4& view_from_local);
-    GeneralShader3d& set_world_from_local_normal_matrix(const Magnum::Matrix3& view_from_local_normal);
-    GeneralShader3d& set_projection_from_local_matrix(const Magnum::Matrix4& projection_from_local);
+    auto set_world_from_local_matrix(Magnum::Matrix4 const& view_from_local) -> GeneralShader3d&;
+    auto set_world_from_local_normal_matrix(Magnum::Matrix3 const& view_from_local_normal) -> GeneralShader3d&;
+    auto set_projection_from_local_matrix(Magnum::Matrix4 const& projection_from_local) -> GeneralShader3d&;
 
-    GeneralShader3d& set_coloring(const Coloring& coloring);
-    GeneralShader3d& set_uniform_color(const Magnum::Color3& color);
+    auto set_coloring(Coloring const& coloring) -> GeneralShader3d&;
+    auto set_uniform_color(Magnum::Color3 const& color) -> GeneralShader3d&;
 
-    GeneralShader3d& set_shading(const Shading& shading);
+    auto set_shading(Shading const& shading) -> GeneralShader3d&;
+    auto set_id(unsigned const& id) -> GeneralShader3d&;
 
 private:
-    int projection_from_local_uniform_;
-    int world_from_local_uniform_;
-    int world_from_local_normals_uniform_;
+    int projection_from_local_uniform_location_    = -1;
+    int world_from_local_uniform_location_         = -1;
+    int world_from_local_normals_uniform_location_ = -1;
 
-    int coloring_uniform_;
-    int uniform_color_uniform_;
+    int coloring_uniform_location_      = -1;
+    int uniform_color_uniform_location_ = -1;
 
-    int shading_uniform_;
-    int light_direction_uniform_;
-    int light_color_uniform_;
-    int ambient_scale_uniform_;
+    int shading_uniform_location_         = -1;
+    int light_direction_uniform_location_ = -1;
+    int light_color_uniform_location_     = -1;
+    int ambient_scale_uniform_location_   = -1;
+
+    int id_uniform_location_ = -1;
 };
 
 } // namespace gvs::display::backends

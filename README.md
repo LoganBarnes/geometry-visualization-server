@@ -13,14 +13,14 @@ Geometry Visualization Server
 * ~~Add primitive setters `gvs::Cube()`, `gvs::Sphere`, etc.~~
 * ~~Re-implement client/server scene interaction~~
 * Add global scene traits (like lights)
-* Clean up magnum scene class
+* ~~Clean up magnum scene class~~
 * Make things intersectable
 * Create implicitly convertible vector and matrix classes for use with setters and getters
 * ~~Move display namespace types to their proper location~~
-* Add Renderable interface (not required)
 * ~~Implement DisplayScene (maybe)~~
 * Add tests after new architecture is finalized
 * Add documentation
+* ~~Add Renderable interface (naaa. for later)~~
 
 A tool for visually debugging geometric applications. Built on a 
 [Protobuf][protobuf-link]/[gRPC][grpc-link] service and a 

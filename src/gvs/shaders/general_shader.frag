@@ -61,10 +61,14 @@ uniform vec3  light_direction = { -1.f, -2.f, -3.f };
 uniform vec3  light_color     = { +1.f, +1.f, +1.f };
 uniform float ambient_scale   = 0.15f;
 
+uniform uint id = 0;
+
 layout(location = 0) out vec4 out_color;
+layout(location = 1) out uint out_id;
 
 void main()
 {
+    out_id = id;
     vec3 shape_color = { 1.f, 1.f, 1.f };
 
     switch (coloring) {

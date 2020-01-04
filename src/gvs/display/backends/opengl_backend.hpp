@@ -31,7 +31,9 @@
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Containers/Optional.h>
 #include <Magnum/GL/Buffer.h>
+#include <Magnum/GL/Framebuffer.h>
 #include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/Renderbuffer.h>
 #include <Magnum/Math/Vector3.h>
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/FeatureGroup.h>
@@ -64,7 +66,8 @@ public:
     using Object3D = Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>;
 
     struct ObjectMeshPackage {
-        SceneId scene_id = gvs::nil_id();
+        SceneId  scene_id     = gvs::nil_id();
+        unsigned intersect_id = 0u;
 
         Magnum::GL::Buffer vertex_buffer;
         int                vbo_count = 0;
@@ -82,6 +85,7 @@ public:
         explicit ObjectMeshPackage(SceneId                              id,
                                    Object3D*                            obj,
                                    Magnum::SceneGraph::DrawableGroup3D* drawable_group,
+                                   unsigned                             id_for_intersect,
                                    GeneralShader3d&                     shader);
     };
 
@@ -94,6 +98,9 @@ private:
     std::unordered_map<SceneId, ObjectList::iterator>         id_to_pkgs_;
     std::unordered_map<Object3D const*, ObjectList::iterator> obj_to_pkgs_;
 
+    std::unordered_map<unsigned, SceneId> intersect_id_to_scene_id_;
+    unsigned                              next_intersect_id_ = 1u;
+
     Scene3D scene_;
 
     mutable Object3D                      camera_object_;
@@ -104,8 +111,13 @@ private:
     mutable Magnum::SceneGraph::DrawableGroup3D transparent_drawables_;
     mutable Magnum::SceneGraph::DrawableGroup3D non_visible_drawables_;
 
+    mutable Magnum::GL::Framebuffer framebuffer_;
+    Magnum::GL::Renderbuffer        id_rbo_;
+    Magnum::GL::Renderbuffer        depth_rbo_;
+
     auto add_package(SceneId id, Object3D* obj, Magnum::SceneGraph::DrawableGroup3D* drawables, GeneralShader3d& shader)
         -> void;
+
     auto remove_package(SceneId const& item_id) -> void;
     auto remove_package(Object3D const* obj) -> void;
 

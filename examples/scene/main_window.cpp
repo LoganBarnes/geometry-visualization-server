@@ -51,14 +51,7 @@ MainWindow::MainWindow(const Arguments& arguments)
       gl_renderer_str_(GL::Context::current().rendererString()),
       error_alert_("Error Popup") {
 
-    {
-        scene_.add_item(gvs::SetReadableId("Axes"),
-                        gvs::SetPositions3d({{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
-                        gvs::SetVertexColors3d({{1.f, 1.f, 1.f}, {1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}}),
-                        gvs::SetColoring(gvs::Coloring::VertexColors),
-                        gvs::SetShading(gvs::Shading::UniformColor),
-                        gvs::SetLines({0, 1, 0, 2, 0, 3}));
-    }
+    scene_.add_item(gvs::SetReadableId("Axes"), gvs::SetPrimitive(gvs::Axes{}));
 
     {
         Trade::MeshData3D const cube = Primitives::cubeSolid();

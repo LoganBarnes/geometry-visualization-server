@@ -41,11 +41,15 @@ namespace gvs::display::backends {
 OpaqueDrawable::OpaqueDrawable(SceneGraph::Object<SceneGraph::MatrixTransformation3D>& object,
                                SceneGraph::DrawableGroup3D*                            group,
                                GL::Mesh&                                               mesh,
+                               unsigned                                                intersect_id,
                                GeneralShader3d&                                        shader)
-    : SceneGraph::Drawable3D{object, group}, object_(object), mesh_(mesh), shader_(shader) {}
+    : SceneGraph::Drawable3D{object, group},
+      object_(object),
+      mesh_(mesh),
+      intersect_id_(intersect_id),
+      shader_(shader) {}
 
 auto OpaqueDrawable::update_display_info(DisplayInfo const& display_info) -> void {
-
     object_.setTransformation(to_magnum(display_info.transformation));
     coloring_      = display_info.coloring;
     uniform_color_ = to_magnum<Magnum::Color3>(display_info.uniform_color);
@@ -63,7 +67,8 @@ auto OpaqueDrawable::draw(Matrix4 const& transformation_matrix, SceneGraph::Came
         .set_projection_from_local_matrix(camera.projectionMatrix() * transformation_matrix)
         .set_coloring(coloring_)
         .set_uniform_color(uniform_color_)
-        .set_shading(shading_);
+        .set_shading(shading_)
+        .set_id(intersect_id_);
 
     mesh_.draw(shader_);
 }

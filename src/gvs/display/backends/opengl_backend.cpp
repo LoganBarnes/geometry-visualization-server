@@ -29,6 +29,8 @@
 
 // external
 #include <Corrade/Containers/ArrayViewStl.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/RenderbufferFormat.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/Mesh.h>
 #include <Magnum/MeshTools/CompressIndices.h>
@@ -96,26 +98,43 @@ auto update_ibo(OpenglBackend::ObjectMeshPackage* mesh_package, std::vector<unsi
 OpenglBackend::ObjectMeshPackage::ObjectMeshPackage(SceneId                              id,
                                                     Object3D*                            obj,
                                                     Magnum::SceneGraph::DrawableGroup3D* drawables,
+                                                    unsigned                             id_for_intersect,
                                                     GeneralShader3d&                     shader)
-    : scene_id(id), object(obj) {
+    : scene_id(id), intersect_id(id_for_intersect), object(obj) {
     mesh.setCount(0).setPrimitive(to_magnum(default_geometry_format));
-    drawable = new OpaqueDrawable(*object, drawables, mesh, shader);
+    drawable = new OpaqueDrawable(*object, drawables, mesh, intersect_id, shader);
 }
 
-OpenglBackend::OpenglBackend() {
+OpenglBackend::OpenglBackend() : framebuffer_(Magnum::GL::defaultFramebuffer.viewport()) {
+    using namespace Magnum;
+
     camera_object_.setParent(&scene_);
     camera_ = new Magnum::SceneGraph::Camera3D(camera_object_); // Memory control is handled elsewhere
 
     /* Setup renderer and shader defaults */
-    Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::DepthTest);
-    Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::FaceCulling);
+    GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
+    GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
     shader_.set_uniform_color({1.f, 0.5f, 0.1f});
+
+    /*
+     * Set up the framebuffer for intersection tests
+     */
+    id_rbo_.setStorage(GL::RenderbufferFormat::R32UI, GL::defaultFramebuffer.viewport().size());
+    depth_rbo_.setStorage(GL::RenderbufferFormat::DepthComponent24, GL::defaultFramebuffer.viewport().size());
+
+    framebuffer_.attachRenderbuffer(GL::Framebuffer::ColorAttachment{1}, id_rbo_)
+        .attachRenderbuffer(GL::Framebuffer::BufferAttachment::Depth, depth_rbo_)
+        .mapForDraw({{GeneralShader3d::IdOutput, GL::Framebuffer::ColorAttachment{1}}});
+
+    CORRADE_INTERNAL_ASSERT(framebuffer_.checkStatus(GL::FramebufferTarget::Draw) == GL::Framebuffer::Status::Complete);
 }
 
 OpenglBackend::~OpenglBackend() = default;
 
 auto OpenglBackend::render(CameraPackage const& camera_package) const -> void {
+    using namespace Magnum;
+
     camera_object_.setTransformation(camera_package.transformation);
     camera_->setProjectionMatrix(camera_package.camera->projectionMatrix());
 
@@ -130,15 +149,30 @@ auto OpenglBackend::render(CameraPackage const& camera_package) const -> void {
     }
 
     if (!transparent_drawables_.isEmpty()) {
-        Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::Blending);
+        GL::Renderer::enable(GL::Renderer::Feature::Blending);
         camera_->draw(transparent_drawables_);
-        Magnum::GL::Renderer::disable(Magnum::GL::Renderer::Feature::Blending);
+        GL::Renderer::disable(GL::Renderer::Feature::Blending);
     }
 
     // Don't draw the "non_visible_drawables_" obvs.
+
+    // Draw to custom framebuffer
+    framebuffer_.clearColor(GeneralShader3d::ColorOutput, Color3{0.125f})
+        .clearColor(GeneralShader3d::IdOutput, Vector4ui{})
+        .clearDepth(1.0f)
+        .bind();
+
+    if (!opaque_drawables_.isEmpty()) {
+        camera_->draw(opaque_drawables_);
+    }
+
+    // Bind the main buffer back
+    GL::defaultFramebuffer.bind();
 }
 
-auto OpenglBackend::resize(Magnum::Vector2i const & /*viewport*/) -> void {}
+auto OpenglBackend::resize(Magnum::Vector2i const& viewport) -> void {
+    framebuffer_.setViewport({{0u, 0u}, viewport});
+}
 
 auto OpenglBackend::added(SceneId const& item_id, SceneItemInfo const& item) -> void {
     if (item_id == gvs::nil_id()) {
@@ -231,10 +265,11 @@ auto OpenglBackend::add_package(SceneId                              id,
                                 Object3D*                            obj,
                                 Magnum::SceneGraph::DrawableGroup3D* drawables,
                                 GeneralShader3d&                     shader) -> void {
-    packages_.emplace_back(id, obj, drawables, shader);
+    packages_.emplace_back(id, obj, drawables, next_intersect_id_++, shader);
     auto iter = std::prev(packages_.end());
     id_to_pkgs_.emplace(iter->scene_id, iter);
     obj_to_pkgs_.emplace(iter->object, iter);
+    intersect_id_to_scene_id_.emplace(iter->intersect_id, iter->scene_id);
 }
 
 auto OpenglBackend::remove_package(gvs::SceneId const& item_id) -> void {

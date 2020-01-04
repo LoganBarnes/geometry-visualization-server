@@ -36,6 +36,7 @@ public:
     explicit OpaqueDrawable(Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D>& object,
                             Magnum::SceneGraph::DrawableGroup3D*                                    group,
                             Magnum::GL::Mesh&                                                       mesh,
+                            unsigned                                                                intersect_id,
                             GeneralShader3d&                                                        shader);
 
     ~OpaqueDrawable() override = default;
@@ -51,6 +52,7 @@ private:
     Coloring       coloring_      = default_coloring;
     Magnum::Color3 uniform_color_ = {default_uniform_color[0], default_uniform_color[1], default_uniform_color[2]};
     Shading        shading_       = default_shading;
+    unsigned       intersect_id_  = 0u;
 
     GeneralShader3d& shader_;
 };
