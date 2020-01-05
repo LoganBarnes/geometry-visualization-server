@@ -36,7 +36,8 @@ struct Ray {
 
 struct CameraPackage {
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> object;
-    Magnum::SceneGraph::Camera3D*                                          camera = nullptr;
+    Magnum::SceneGraph::Camera3D*                                          camera             = nullptr;
+    Magnum::Vector3                                                        camera_orbit_point = {};
 
     void set_camera(Magnum::SceneGraph::Camera3D* cam, const Magnum::Vector2i& viewport);
 

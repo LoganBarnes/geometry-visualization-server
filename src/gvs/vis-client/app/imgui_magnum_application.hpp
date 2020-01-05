@@ -64,15 +64,18 @@ private:
 
     [[nodiscard]] auto position_on_arcball(Magnum::Vector2i const& position) const -> Magnum::Vector3;
 
+    auto zoom(float amount) -> void;
+
     Magnum::ImGuiIntegration::Context imgui_{Magnum::NoCreate};
     int                               draw_counter_ = 1; // continue drawing until this counter is zero
 
     // Camera
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
 
-    Magnum::Matrix4 previous_arcball_transform_ = {};
-    Magnum::Vector3 previous_arcball_position_  = {};
-    Magnum::Vector3 camera_orbit_point_         = {};
+    Magnum::Vector2 previous_mouse_position_     = {};
+    Magnum::Matrix4 previous_arcball_transform_  = {};
+    Magnum::Vector3 previous_arcball_position_   = {};
+    Magnum::Vector3 previous_camera_orbit_point_ = {};
 
 protected:
     // forward declaration
