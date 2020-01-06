@@ -51,11 +51,11 @@ MainWindow::MainWindow(const Arguments& arguments)
       gl_renderer_str_(GL::Context::current().rendererString()),
       error_alert_("Error Popup") {
 
-    auto transformation = Matrix4::rotation(Math::Deg<float>(/*yaw*/ 30), {0.f, 1.f, 0.f})
-                          * Matrix4::rotation(Math::Deg<float>(/*pitch*/ -15), {1.f, 0.f, 0.f})
-                          * Matrix4::translation({0.f, 0.f, /*orbit radius*/ 20.f});
+    camera_package_.zoom_object.translate({0.f, 0.f, 20.f});
+    camera_package_.rotation_object.rotateX(Math::Deg<float>(/*pitch*/ -15));
+    camera_package_.rotation_object.rotateY(Math::Deg<float>(/*yaw*/ 30));
 
-    camera_package_.object.setTransformation(transformation);
+    camera_package_.update_object();
 
     scene_.add_item(gvs::SetReadableId("Axes"), gvs::SetPrimitive(gvs::Axes{}));
 

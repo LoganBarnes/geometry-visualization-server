@@ -45,7 +45,7 @@ public:
 
 private:
     virtual auto update() -> void                                                   = 0;
-    virtual auto render(const display::CameraPackage& camera_package) const -> void = 0;
+    virtual auto render(display::CameraPackage const& camera_package) const -> void = 0;
     virtual auto configure_gui() -> void                                            = 0;
 
     virtual auto resize(const Magnum::Vector2i& viewport) -> void = 0;
@@ -66,13 +66,12 @@ private:
 
     struct ArcballData {
         Magnum::Vector2 screen_space_mouse_position = {};
-        Magnum::Matrix4 camera_transform            = {};
         Magnum::Vector3 view_space_position         = {};
         Magnum::Vector3 world_space_position        = {};
     };
 
     [[nodiscard]] auto arcball_info(Magnum::Vector2 const& screen_space_mouse_position,
-                                    Magnum::Matrix4 const& camera_transform) const -> ArcballData;
+                                    Magnum::Matrix4 const& rotation_transform) const -> ArcballData;
 
     [[nodiscard]] auto world_position(Magnum::Vector2 const& screen_space_mouse_position,
                                       Magnum::Matrix4 const& camera_transform,
@@ -87,8 +86,10 @@ private:
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
 
     struct {
-        Magnum::Vector3 camera_orbit_point = {};
-        ArcballData     arcball            = {};
+        Magnum::Matrix4 zoom_transform        = {};
+        Magnum::Matrix4 rotation_transform    = {};
+        Magnum::Matrix4 translation_transform = {};
+        ArcballData     arcball               = {};
     } previous_mouse_data_;
 
     Magnum::Vector3 pan_pos_ = {};
@@ -98,7 +99,7 @@ protected:
     std::unique_ptr<detail::Theme> theme_;
 
     // Camera
-    display::CameraPackage camera_package_;
+    display::OrbitCameraPackage camera_package_;
 
     // Ensures the application renders at least 5 more times after all events are
     // finished to give ImGui a chance to update and render correctly.

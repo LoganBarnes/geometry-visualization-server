@@ -59,11 +59,11 @@ DisplayWindow::DisplayWindow(DisplayScene& parent_scene)
       parent_scene_(parent_scene),
       scene_backend_(std::make_unique<backends::OpenglBackend>()) {
 
-    auto transformation = Matrix4::rotation(Math::Deg<float>(/*yaw*/ 30), {0.f, 1.f, 0.f})
-        * Matrix4::rotation(Math::Deg<float>(/*pitch*/ -15), {1.f, 0.f, 0.f})
-        * Matrix4::translation({0.f, 0.f, /*orbit radius*/ 20.f});
+    camera_package_.zoom_object.translate({0.f, 0.f, 20.f});
+    camera_package_.rotation_object.rotateX(Math::Deg<float>(/*pitch*/ -15));
+    camera_package_.rotation_object.rotateY(Math::Deg<float>(/*yaw*/ 30));
 
-    camera_package_.object.setTransformation(transformation);
+    camera_package_.update_object();
 }
 
 DisplayWindow::~DisplayWindow() = default;
