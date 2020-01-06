@@ -65,5 +65,9 @@ Ray CameraPackage::get_camera_ray_from_window_pos(const Vector2& mouse_position)
 
     return {eye_point, direction};
 }
+void CameraPackage::update_object() {
+    object.setTransformation(translation_object.transformation() * rotation_object.transformation()
+                             * zoom_object.transformation());
+}
 
 } // namespace gvs::display

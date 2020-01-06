@@ -51,18 +51,18 @@ using namespace Magnum;
 namespace {
 
 // 'p' is a point on a plane
-float intersect_plane(display::Ray const& ray, Vector3 p, const Vector3& plane_normal) {
-    // plane ray intersection
-    float const denom = Math::dot(ray.direction, plane_normal);
-
-    p -= ray.origin;
-    float const t = Math::dot(p, plane_normal) / denom;
-
-    if (t >= 0.f && t != std::numeric_limits<float>::infinity()) {
-        return t;
-    }
-    return std::numeric_limits<float>::infinity();
-}
+//float intersect_plane(display::Ray const& ray, Vector3 p, const Vector3& plane_normal) {
+//    // plane ray intersection
+//    float const denom = Math::dot(ray.direction, plane_normal);
+//
+//    p -= ray.origin;
+//    float const t = Math::dot(p, plane_normal) / denom;
+//
+//    if (t >= 0.f && t != std::numeric_limits<float>::infinity()) {
+//        return t;
+//    }
+//    return std::numeric_limits<float>::infinity();
+//}
 
 } // namespace
 
@@ -188,8 +188,8 @@ auto ImGuiMagnumApplication::keyReleaseEvent(KeyEvent& event) -> void {
     switch (event.key()) {
 
     case KE::Key::R: {
-        camera_package_.object.translate(-camera_package_.camera_orbit_point);
-        camera_package_.camera_orbit_point = {0.f, 0.f, 0.f};
+        //        camera_package_.object.translate(-camera_package_.camera_orbit_point);
+        //        camera_package_.camera_orbit_point = {0.f, 0.f, 0.f};
     } break;
 
     default:
@@ -212,10 +212,11 @@ auto ImGuiMagnumApplication::mousePressEvent(MouseEvent& event) -> void {
     }
     event.setAccepted(true);
 
-    previous_arcball_transform_  = camera_package_.object.transformation();
-    previous_arcball_position_   = position_on_arcball(event.position());
-    previous_mouse_position_     = Vector2(event.position());
-    previous_camera_orbit_point_ = camera_package_.camera_orbit_point;
+    previous_mouse_data_.camera_orbit_point = camera_package_.camera_orbit_point;
+    previous_mouse_data_.arcball
+        = arcball_info(Vector2(event.position()), camera_package_.rotation_object.transformation());
+
+    pan_pos_ = world_position(Vector2(event.position()), camera_package_.rotation_object.transformation(), 0.f);
 }
 
 auto ImGuiMagnumApplication::mouseReleaseEvent(MouseEvent& event) -> void {
@@ -242,47 +243,62 @@ auto ImGuiMagnumApplication::mouseMoveEvent(MouseMoveEvent& event) -> void {
         return;
     }
 
-    auto const current_arcball_position = position_on_arcball(event.position());
-    auto const current_mouse_position   = Vector2(event.position());
-
     if (orbiting) {
-        Vector3 const axis = Math::cross(previous_arcball_position_, current_arcball_position);
+
+        auto const current_arcball
+            = arcball_info(Vector2(event.position()), previous_mouse_data_.arcball.camera_transform);
+
+        Vector3 const& previous_arcball_position = previous_mouse_data_.arcball.world_space_position;
+        Vector3 const& current_arcball_position  = current_arcball.world_space_position;
+
+        Vector3 const axis = Math::cross(previous_arcball_position, current_arcball_position);
 
         if (axis.length() < 0.001f) {
             return;
         }
 
         constexpr auto scale = 4.f; // make this a setting
-        auto           angle = -scale * Math::angle(previous_arcball_position_, current_arcball_position);
+        auto           angle = -scale * Math::angle(previous_arcball_position, current_arcball_position);
 
-        camera_package_.object.setTransformation(previous_arcball_transform_);
-
-        camera_package_.object.translate(-previous_camera_orbit_point_);
-        camera_package_.object.rotate(angle, axis.normalized());
-        camera_package_.object.translate(previous_camera_orbit_point_);
+        camera_package_.rotation_object.setTransformation(previous_mouse_data_.arcball.camera_transform);
+        camera_package_.rotation_object.rotate(angle, axis.normalized());
+        camera_package_.update_object();
 
     } else if (panning) {
 
-        auto world_from_mouse_pos = [&](const auto& mouse_pos, float* dist_to_plane) {
-            auto ray          = camera_package_.get_camera_ray_from_window_pos(mouse_pos);
-            auto plane_normal = (ray.origin - previous_camera_orbit_point_).normalized();
+        auto const& new_position = world_position(Vector2(event.position()),
+                                                  // previous_mouse_data_.arcball.camera_transform,
+                                                  camera_package_.object.transformation(),
+                                                  0.f);
 
-            *dist_to_plane = intersect_plane(ray, previous_camera_orbit_point_, plane_normal);
-            return ray.origin + ray.direction * (*dist_to_plane);
-        };
+        constexpr auto pan_scale = 5.f;
 
-        float should_not_be_inf1, should_not_be_inf2;
+        auto const translation = (pan_pos_ - new_position) * pan_scale;
 
-        auto previous_world_pos = world_from_mouse_pos(previous_mouse_position_, &should_not_be_inf1);
-        auto current_world_pos  = world_from_mouse_pos(current_mouse_position, &should_not_be_inf2);
+        camera_package_.object.setTransformation(previous_mouse_data_.arcball.camera_transform);
+        camera_package_.object.translate(translation);
+        camera_package_.camera_orbit_point = previous_mouse_data_.camera_orbit_point + translation;
 
-        if (not std::isinf(should_not_be_inf1) and not std::isinf(should_not_be_inf2)) {
-            auto diff = previous_world_pos - current_world_pos;
-
-            camera_package_.object.setTransformation(previous_arcball_transform_);
-            camera_package_.object.translate(diff);
-            camera_package_.camera_orbit_point = previous_camera_orbit_point_ + diff;
-        }
+        //        auto world_from_mouse_pos = [&](const auto& mouse_pos, float* dist_to_plane) {
+        //            auto ray          = camera_package_.get_camera_ray_from_window_pos(Vector2(mouse_pos));
+        //            auto plane_normal = (ray.origin - camera_orbit_point_).normalized();
+        //
+        //            *dist_to_plane = intersect_plane(ray, camera_orbit_point_, plane_normal);
+        //            return ray.origin + ray.direction * (*dist_to_plane);
+        //        };
+        //
+        //        float should_not_be_inf1, should_not_be_inf2;
+        //
+        //        auto previous_world_pos = world_from_mouse_pos(previous_mouse_position_, &should_not_be_inf1);
+        //        auto current_world_pos  = world_from_mouse_pos(current_mouse_position, &should_not_be_inf2);
+        //
+        //        if (not std::isinf(should_not_be_inf1) and not std::isinf(should_not_be_inf2)) {
+        //            auto diff = previous_world_pos - current_world_pos;
+        //
+        //            camera_package_.object.setTransformation(previous_arcball_transform_);
+        //            camera_package_.object.translate(diff);
+        //            camera_package_.camera_orbit_point = camera_orbit_point_ + diff;
+        //        }
 
     } else if (zooming) {
         constexpr auto drag_zoom_scale = 0.5f; // make this an editable setting
@@ -307,41 +323,66 @@ auto ImGuiMagnumApplication::mouseScrollEvent(MouseScrollEvent& event) -> void {
     zoom(event.offset().y() * wheel_zoom_scale);
 }
 
-#define BIG_CIRCLE
-auto ImGuiMagnumApplication::position_on_arcball(Vector2i const& position) const -> Vector3 {
+auto ImGuiMagnumApplication::arcball_info(Magnum::Vector2 const& screen_space_mouse_position,
+                                          Magnum::Matrix4 const& camera_transform) const -> ArcballData {
     constexpr auto sphere_radius         = 2.f;
     constexpr auto sphere_radius_squared = sphere_radius * sphere_radius;
 
-    Vector2 const normalized_pos = Vector2{position} / Vector2{camera_package_.camera->viewport()};
+    Vector2 const normalized_pos = screen_space_mouse_position / Vector2{camera_package_.camera->viewport()};
     Vector2 const clipspace_pos  = (normalized_pos * 2.f) - Vector2{1.f}; // [-1, 1]
     float const   length_squared = dot(clipspace_pos, clipspace_pos);
 
     float z = (length_squared > sphere_radius_squared ? 0.f : std::sqrt(sphere_radius_squared - length_squared));
 
-    auto const view_space  = Vector3(clipspace_pos.x(), -clipspace_pos.y(), z).normalized();
-    auto const world_space = previous_arcball_transform_.transformVector(view_space).normalized();
+    auto const view_space_position  = Vector3(clipspace_pos.x(), -clipspace_pos.y(), z).normalized();
+    auto const world_space_position = camera_transform.transformVector(view_space_position).normalized();
 
-    return world_space;
+    return {
+        screen_space_mouse_position,
+        camera_transform,
+        view_space_position,
+        world_space_position,
+    };
+}
+
+auto ImGuiMagnumApplication::world_position(Magnum::Vector2 const& screen_space_mouse_position,
+                                            Magnum::Matrix4 const& camera_transform,
+                                            float                  clip_space_z) const -> Vector3 {
+
+    Vector2 const normalized_pos = screen_space_mouse_position / Vector2{camera_package_.camera->viewport()};
+    Vector2 const clipspace_pos  = (normalized_pos * 2.f) - Vector2{1.f}; // [-1, 1]
+
+    auto const view_space_position  = Vector3(clipspace_pos.x(), -clipspace_pos.y(), clip_space_z);
+    auto const world_space_position = camera_transform.transformVector(view_space_position);
+
+    return world_space_position;
 }
 
 auto ImGuiMagnumApplication::zoom(float amount) -> void {
-    auto const camera_pos = camera_package_.object.transformation().transformPoint(Magnum::Vector3{0.f});
+    auto const camera_pos = camera_package_.zoom_object.transformation().transformPoint(Magnum::Vector3{0.f});
     auto const length     = camera_pos.length();
 
     // if camera pos is too small use look
     auto direction = -camera_pos;
     if (length < 0.5f) {
-        direction = camera_package_.object.transformation().transformPoint(Magnum::Vector3{0.f, 0.f, -1.f});
+        direction = camera_package_.zoom_object.transformation().transformPoint(Magnum::Vector3{0.f, 0.f, -1.f});
     }
 
     if (length < 0.001f && amount > 0.f) {
         return;
     }
 
-    auto const move_dist = std::max(length, 0.001f) * amount * 0.01f;
-
+    auto const move_dist   = std::max(length, 0.001f) * amount * 0.01f;
     auto const translation = direction.normalized() * std::min(move_dist, length);
-    camera_package_.object.translate(translation);
+
+    Debug() << "START:";
+    Debug() << '\t' << direction;
+    Debug() << '\t' << move_dist;
+    //    Debug() << '\t' << std::min(move_dist, length);
+    Debug() << '\t' << translation;
+
+    camera_package_.zoom_object.translate(translation);
+    camera_package_.update_object();
 }
 
 } // namespace gvs::vis

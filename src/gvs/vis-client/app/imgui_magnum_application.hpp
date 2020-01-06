@@ -25,12 +25,14 @@
 #include "gvs/display/camera_package.hpp"
 #include "gvs/forward_declarations.hpp"
 
+// external
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/GlfwApplication.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/SceneGraph.h>
 
+// system
 #include <memory>
 
 namespace gvs::vis {
@@ -62,7 +64,19 @@ private:
     auto mouseMoveEvent(MouseMoveEvent& event) -> void override;
     auto mouseScrollEvent(MouseScrollEvent& event) -> void override;
 
-    [[nodiscard]] auto position_on_arcball(Magnum::Vector2i const& position) const -> Magnum::Vector3;
+    struct ArcballData {
+        Magnum::Vector2 screen_space_mouse_position = {};
+        Magnum::Matrix4 camera_transform            = {};
+        Magnum::Vector3 view_space_position         = {};
+        Magnum::Vector3 world_space_position        = {};
+    };
+
+    [[nodiscard]] auto arcball_info(Magnum::Vector2 const& screen_space_mouse_position,
+                                    Magnum::Matrix4 const& camera_transform) const -> ArcballData;
+
+    [[nodiscard]] auto world_position(Magnum::Vector2 const& screen_space_mouse_position,
+                                      Magnum::Matrix4 const& camera_transform,
+                                      float                  clip_space_z) const -> Magnum::Vector3;
 
     auto zoom(float amount) -> void;
 
@@ -72,10 +86,12 @@ private:
     // Camera
     Magnum::SceneGraph::Scene<Magnum::SceneGraph::MatrixTransformation3D> camera_scene_;
 
-    Magnum::Vector2 previous_mouse_position_     = {};
-    Magnum::Matrix4 previous_arcball_transform_  = {};
-    Magnum::Vector3 previous_arcball_position_   = {};
-    Magnum::Vector3 previous_camera_orbit_point_ = {};
+    struct {
+        Magnum::Vector3 camera_orbit_point = {};
+        ArcballData     arcball            = {};
+    } previous_mouse_data_;
+
+    Magnum::Vector3 pan_pos_ = {};
 
 protected:
     // forward declaration

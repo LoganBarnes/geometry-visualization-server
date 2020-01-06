@@ -35,6 +35,9 @@ struct Ray {
 };
 
 struct CameraPackage {
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> zoom_object;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> rotation_object;
+    Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> translation_object;
     Magnum::SceneGraph::Object<Magnum::SceneGraph::MatrixTransformation3D> object;
     Magnum::SceneGraph::Camera3D*                                          camera             = nullptr;
     Magnum::Vector3                                                        camera_orbit_point = {};
@@ -42,6 +45,8 @@ struct CameraPackage {
     void set_camera(Magnum::SceneGraph::Camera3D* cam, const Magnum::Vector2i& viewport);
 
     void update_viewport(const Magnum::Vector2i& viewport);
+
+    void update_object();
 
     Ray get_camera_ray_from_window_pos(const Magnum::Vector2& mouse_position);
 };
