@@ -1,18 +1,24 @@
 // ///////////////////////////////////////////////////////////////////////////////////////
-//                                                                           |________|
-//  Copyright (c) 2019 CloudNC Ltd - All Rights Reserved                        |  |
-//                                                                              |__|
-//        ____                                                                .  ||
-//       / __ \                                                               .`~||$$$$
-//      | /  \ \         /$$$$$$  /$$                           /$$ /$$   /$$  /$$$$$$$
-//      \ \ \ \ \       /$$__  $$| $$                          | $$| $$$ | $$ /$$__  $$
-//    / / /  \ \ \     | $$  \__/| $$  /$$$$$$  /$$   /$$  /$$$$$$$| $$$$| $$| $$  \__/
-//   / / /    \ \__    | $$      | $$ /$$__  $$| $$  | $$ /$$__  $$| $$ $$ $$| $$
-//  / / /      \__ \   | $$      | $$| $$  \ $$| $$  | $$| $$  | $$| $$  $$$$| $$
-// | | / ________ \ \  | $$    $$| $$| $$  | $$| $$  | $$| $$  | $$| $$\  $$$| $$    $$
-//  \ \_/ ________/ /  |  $$$$$$/| $$|  $$$$$$/|  $$$$$$/|  $$$$$$$| $$ \  $$|  $$$$$$/
-//   \___/ ________/    \______/ |__/ \______/  \______/  \_______/|__/  \__/ \______/
+// Geometry Visualization Server
+// Copyright (c) 2019 Logan Barnes - All Rights Reserved
 //
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 // ///////////////////////////////////////////////////////////////////////////////////////
 #include "opengl_scene.hpp"
 
@@ -21,6 +27,7 @@
 
 #include <gvs/gvs_paths.hpp>
 
+#include <Corrade/Containers/ArrayViewStl.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/MeshTools/CompressIndices.h>
@@ -166,7 +173,7 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
             mesh_package.mesh.addVertexBuffer(mesh_package.vertex_buffer, offset, GeneralShader3D::VertexColor{});
         }
 
-        mesh_package.vertex_buffer.setData(buffer_data);
+        mesh_package.vertex_buffer.setData(buffer_data, GL::BufferUsage::StaticDraw);
 
         if (info.geometry_info().has_indices() and info.geometry_info().indices().value_size() > 0) {
             std::vector<unsigned> indices{info.geometry_info().indices().value().begin(),
@@ -176,7 +183,7 @@ void OpenGLScene::update_item(const proto::SceneItemInfo& info) {
             MeshIndexType index_type;
             UnsignedInt index_start, index_end;
             std::tie(index_data, index_type, index_start, index_end) = MeshTools::compressIndices(indices);
-            mesh_package.index_buffer.setData(index_data);
+            mesh_package.index_buffer.setData(index_data, GL::BufferUsage::StaticDraw);
 
             mesh_package.mesh.setCount(static_cast<int>(indices.size()))
                 .setIndexBuffer(mesh_package.index_buffer, 0, index_type, index_start, index_end);

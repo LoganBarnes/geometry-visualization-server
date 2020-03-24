@@ -26,7 +26,8 @@
 
 #include <types.pb.h>
 
-#include <cstdint>
+// standard
+#include <functional>
 #include <type_traits>
 #include <vector>
 
@@ -45,15 +46,15 @@ public:
     static constexpr bool value = type::value;
 };
 
-template <typename T, typename = std::enable_if_t<has_data<T>::value>>
+template <typename T, typename = typename std::enable_if<has_data<T>::value>::type>
 const float* data_ptr(const T& t) {
     return t.data();
 }
 
 namespace gvs {
 
-inline auto positions_3d(std::vector<float> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto positions_3d(const std::vector<float>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_positions()) {
             return "positions_3d";
         }
@@ -62,8 +63,8 @@ inline auto positions_3d(std::vector<float> data) {
     };
 }
 
-inline auto normals_3d(std::vector<float> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto normals_3d(const std::vector<float>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_normals()) {
             return "normals_3d";
         }
@@ -72,8 +73,8 @@ inline auto normals_3d(std::vector<float> data) {
     };
 }
 
-inline auto tex_coords_3d(std::vector<float> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto tex_coords_3d(const std::vector<float>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_tex_coords()) {
             return "tex_coords_3d";
         }
@@ -82,8 +83,8 @@ inline auto tex_coords_3d(std::vector<float> data) {
     };
 }
 
-inline auto vertex_colors_3d(std::vector<float> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto vertex_colors_3d(const std::vector<float>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_vertex_colors()) {
             return "vertex_colors_3d";
         }
@@ -93,8 +94,8 @@ inline auto vertex_colors_3d(std::vector<float> data) {
 }
 
 template <proto::GeometryFormat format>
-auto indices(std::vector<unsigned> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+auto indices(const std::vector<unsigned>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_indices()) {
             return "indices";
         }
@@ -111,7 +112,7 @@ constexpr auto triangles = indices<proto::GeometryFormat::TRIANGLES>;
 constexpr auto triangle_strip = indices<proto::GeometryFormat::TRIANGLE_STRIP>;
 constexpr auto triangle_fan = indices<proto::GeometryFormat::TRIANGLE_FAN>;
 
-inline auto geometry_format(proto::GeometryFormat data) {
+inline auto geometry_format(const proto::GeometryFormat& data) -> std::function<std::string(proto::SceneItemInfo*)> {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_geometry_format()) {
             return "geometry_format";
@@ -121,7 +122,7 @@ inline auto geometry_format(proto::GeometryFormat data) {
     };
 }
 
-inline auto coloring(proto::Coloring data) {
+inline auto coloring(const proto::Coloring& data) -> std::function<std::string(proto::SceneItemInfo*)> {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_coloring()) {
             return "coloring";
@@ -131,8 +132,8 @@ inline auto coloring(proto::Coloring data) {
     };
 }
 
-inline auto parent(std::string data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto parent(const std::string& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->has_parent()) {
             return "parent";
         }
@@ -156,7 +157,7 @@ struct LambertianShading {
         : light_direction(light_dir), light_color(light_colour), ambient_color(ambient_colour) {}
 };
 
-inline auto shading(const UniformColorShading&) {
+inline auto shading(const UniformColorShading&) -> std::function<std::string(proto::SceneItemInfo*)> {
     return [](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_shading()) {
             return "shading";
@@ -166,7 +167,7 @@ inline auto shading(const UniformColorShading&) {
     };
 }
 
-inline auto shading(LambertianShading data) {
+inline auto shading(const LambertianShading& data) -> std::function<std::string(proto::SceneItemInfo*)> {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_shading()) {
             return "shading";
@@ -188,8 +189,8 @@ inline auto shading(LambertianShading data) {
 }
 
 template <typename Vec3 = std::array<float, 3>>
-inline auto positions_3d(std::vector<Vec3> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto positions_3d(const std::vector<Vec3>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_positions()) {
             return "positions_3d";
         }
@@ -203,8 +204,8 @@ inline auto positions_3d(std::vector<Vec3> data) {
 }
 
 template <typename Vec3 = std::array<float, 3>>
-inline auto normals_3d(std::vector<Vec3> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto normals_3d(const std::vector<Vec3>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_normals()) {
             return "normals_3d";
         }
@@ -218,8 +219,8 @@ inline auto normals_3d(std::vector<Vec3> data) {
 }
 
 template <typename Vec2 = std::array<float, 2>>
-inline auto tex_coords_3d(std::vector<Vec2> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto tex_coords_3d(const std::vector<Vec2>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_tex_coords()) {
             return "tex_coords_3d";
         }
@@ -233,8 +234,8 @@ inline auto tex_coords_3d(std::vector<Vec2> data) {
 }
 
 template <typename Vec3 = std::array<float, 3>>
-inline auto vertex_colors_3d(std::vector<Vec3> data) {
-    return [data{std::move(data)}](proto::SceneItemInfo* info) {
+inline auto vertex_colors_3d(const std::vector<Vec3>& data) -> std::function<std::string(proto::SceneItemInfo*)> {
+    return [data](proto::SceneItemInfo* info) {
         if (info->mutable_geometry_info()->has_vertex_colors()) {
             return "vertex_colors_3d";
         }
@@ -248,7 +249,7 @@ inline auto vertex_colors_3d(std::vector<Vec3> data) {
 }
 
 template <typename Mat4 = std::array<float, 16>>
-auto transformation(Mat4 data) {
+auto transformation(const Mat4& data) -> std::function<std::string(proto::SceneItemInfo*)> {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_transformation()) {
             return "transformation";
@@ -260,7 +261,7 @@ auto transformation(Mat4 data) {
 }
 
 template <typename Vec3 = std::array<float, 3>>
-auto uniform_color(Vec3 data) {
+auto uniform_color(const Vec3& data) -> std::function<std::string(proto::SceneItemInfo*)> {
     return [data](proto::SceneItemInfo* info) {
         if (info->mutable_display_info()->has_uniform_color()) {
             return "uniform_color";

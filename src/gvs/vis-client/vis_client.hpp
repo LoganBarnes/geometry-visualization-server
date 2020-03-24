@@ -60,7 +60,8 @@ private:
 
     // Networking
     std::string server_address_input_ = "address:port";
-    std::unique_ptr<grpcw::client::GrpcClient<proto::Scene>> grpc_client_;
+    using Service = proto::Scene;
+    std::unique_ptr<grpcw::client::GrpcClient<Service>> grpc_client_;
 
     // Debugging
     bool run_as_fast_as_possible_ = false;
