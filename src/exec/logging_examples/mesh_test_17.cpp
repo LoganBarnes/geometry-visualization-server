@@ -32,7 +32,7 @@ struct Vec3 {
     std::array<float, 3> data_;
 };
 
-const float* data_ptr(const Vec3& vec) {
+[[maybe_unused]] const float* data_ptr(const Vec3& vec) {
     return vec.data_.data();
 }
 
@@ -42,7 +42,7 @@ struct Mat4 {
     std::array<float, 16> data_;
 };
 
-const float* data_ptr(const Mat4& mat) {
+[[maybe_unused]] const float* data_ptr(const Mat4& mat) {
     return mat.data_.data();
 }
 

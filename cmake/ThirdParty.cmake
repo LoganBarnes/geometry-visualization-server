@@ -57,8 +57,8 @@ endif (NOT expected_dl_POPULATED)
 
 ### crossguid ###
 FetchContent_Declare(crossguid_dl
-        GIT_REPOSITORY https://github.com/graeme-hill/crossguid.git
-        GIT_TAG 0f2753174c914bc561504b14c963d179283fe829
+        GIT_REPOSITORY https://github.com/LoganBarnes/crossguid.git
+        GIT_TAG 7f5977edab18b47bc76a536bc6d79078b437a77c
         )
 
 FetchContent_GetProperties(crossguid_dl)
