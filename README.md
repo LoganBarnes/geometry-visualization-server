@@ -68,12 +68,12 @@ Logging
 
 | Name                  | Index type                                     |
 | --------------------- | ---------------------------------------------- |
-| `gvs::points`         | `gvs::incices<GeometryFormat::POINTS>`         |
-| `gvs::lines`          | `gvs::incices<GeometryFormat::LINES>`          |
-| `gvs::line_strip`     | `gvs::incices<GeometryFormat::LINE_STRIP>`     |
-| `gvs::triangles`      | `gvs::incices<GeometryFormat::TRIANGLES>`      |
-| `gvs::triangle_strip` | `gvs::incices<GeometryFormat::TRIANGLE_STRIP>` |
-| `gvs::triangle_fan`   | `gvs::incices<GeometryFormat::TRIANGLE_FAN>`   |
+| `gvs::points`         | `gvs::indices<GeometryFormat::POINTS>`         |
+| `gvs::lines`          | `gvs::indices<GeometryFormat::LINES>`          |
+| `gvs::line_strip`     | `gvs::indices<GeometryFormat::LINE_STRIP>`     |
+| `gvs::triangles`      | `gvs::indices<GeometryFormat::TRIANGLES>`      |
+| `gvs::triangle_strip` | `gvs::indices<GeometryFormat::TRIANGLE_STRIP>` |
+| `gvs::triangle_fan`   | `gvs::indices<GeometryFormat::TRIANGLE_FAN>`   |
 
 #### Display
 
